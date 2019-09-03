@@ -1,0 +1,51 @@
+    column_name                               description                              unit   ... datatype utype
+------------------- ---------------------------------------------------------------- -------- ... -------- -----
+            rvz_err                                 Radial velocity / redshift error   km.s-1 ...     REAL      
+          pmra_prec                                    Proper motion in RA precision          ... SMALLINT      
+     coo_wavelength Wavelength class for the origin of the coordinates (R,I,V,U,X,G)          ...     CHAR      
+    rvz_radvel_prec                                        Radial velocity precision          ... SMALLINT      
+          otype_txt                                                      Object type          ...  VARCHAR      
+              nbref                                             number of references          ...  INTEGER      
+     galdim_majaxis                                          Angular size major axis   arcmin ...     REAL      
+  rvz_redshift_prec                                               redshift precision          ... SMALLINT      
+            plx_err                                                   Parallax error      mas ...     REAL      
+         pm_err_min                                   Proper motion error minor axis mas.yr-1 ...     REAL      
+              coord                                                       ADQL POINT      deg ...    POINT      
+               vlsr               velocity in Local Standard of Rest reference frame          ...     REAL      
+       plx_err_prec                                         Parallax error precision          ... SMALLINT      
+            sp_qual                                            Spectral type quality          ...     CHAR      
+          plx_value                                                         Parallax      mas ...   DOUBLE      
+        coo_err_maj                                      Coordinate error major axis      mas ...     REAL      
+                 ra                                                  Right ascension      deg ...   DOUBLE      
+    pm_err_min_prec                         Proper motion error minor axis precision          ... SMALLINT      
+     galdim_bibcode                                       Galaxy dimension reference          ...     CHAR      
+            pm_qual                                            Proper motion quality          ...     CHAR      
+       rvz_err_prec                       Radial velocity / redshift error precision          ... SMALLINT      
+           coo_qual                                               Coordinate quality          ...     CHAR      
+        update_date                                        Date of last modification          ...     date      
+                ...                                                              ...      ... ...      ...   ...
+           rvz_type                                  Radial velocity / redshift type          ...     CHAR      
+galdim_minaxis_prec                                Angular size minor axis precision          ... SMALLINT      
+         morph_type                                               Morphological type          ...  VARCHAR      
+       pm_err_angle                                        Proper motion error angle      deg ... SMALLINT      
+         pmdec_prec                                   Proper motion in DEC precision          ... SMALLINT      
+galdim_majaxis_prec                                Angular size major axis precision          ... SMALLINT      
+            sp_type                                                 MK spectral type          ...  VARCHAR      
+              pmdec                                             Proper motion in DEC mas.yr-1 ...   DOUBLE      
+        rvz_bibcode                             Radial velocity / redshift reference          ...     CHAR      
+                oid                                       Object internal identifier          ...   BIGINT      
+        coo_bibcode                                             Coordinate reference          ...     CHAR      
+      morph_bibcode                                     morphological type reference          ...     CHAR      
+            main_id                                    Main identifier for an object          ...  VARCHAR      
+           plx_qual                                                 Parallax quality          ...     CHAR      
+   coo_err_maj_prec                            Coordinate error major axis precision          ... SMALLINT      
+            ra_prec                                        Right ascension precision          ... SMALLINT      
+         sp_bibcode                                          spectral type reference          ...     CHAR      
+         pm_bibcode                                          Proper motion reference          ...     CHAR      
+        coo_err_min                                      Coordinate error minor axis      mas ...     REAL      
+        galdim_qual                                         Galaxy dimension quality          ...     CHAR      
+           rvz_qual                               Radial velocity / redshift quality          ...     CHAR      
+         pm_err_maj                                   Proper motion error major axis mas.yr-1 ...     REAL      
+         rvz_radvel                                                  Radial Velocity   km.s-1 ...   DOUBLE      
+           plx_prec                                               Parallax precision          ... SMALLINT      
+
