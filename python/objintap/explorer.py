@@ -50,7 +50,6 @@ class Explorer():
         for v in GraphControl.tables.values():
             table_defs.append(v.to_json_schema_definition("    "))
         t=0
-        tlist=[]
         tlist=self.master_table.set_otargets()
         tmax=len(tlist)
         print(tlist)

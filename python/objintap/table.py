@@ -85,7 +85,7 @@ class Table():
         return retour
     
     def to_json_schema_add(self, indent, follow):
-        retour  = "\n"+indent + '"{}": {}\n'.format(self.name, '{1')
+        retour  = "\n"+indent + '"{}": {}\n'.format(self.name, '{')
         #retour += indent + '    "type": "object",\n'
         retour += indent + '    "key_id": "{}",\n'.format(self.key)
         retour += indent + '    "from_column":"{}",\n'.format(self.fColumn)
@@ -116,7 +116,7 @@ class Table():
         else :
             retour += '\n'
         #retour += indent + '9}'
-        retour += indent + '7}'
+        retour += indent + '}'
         #print(retour)
         return retour
     
@@ -264,7 +264,7 @@ class Table():
                             #let's go deeper in the hierarchy if join keys are given by the TAP schema
                         else:
                             break
-                            print(self.name)
+                            #print(self.name)
                     t=t+1
                     if t==4:
                         break
@@ -282,7 +282,7 @@ class Table():
                 self.joined[tname] = new_table
          
     def get_joined_tables(self):
-        print("** get join tables for {}".format(self.name))
+        #print("** get join tables for {}".format(self.name))
         query = KEY_QUERY.format(self.name, self.name)#trouver des données qui associent avec tt=self.name ou ft=self.name
         #(query)
         time.sleep(0.2)
@@ -292,7 +292,7 @@ class Table():
         return r
     
     def get_ojoined_tables(self):
-        print("** get join tables for {}".format(self.name))
+        #print("** get join tables for {}".format(self.name))
         query = o_KEY_QUERY.format(self.name, self.name)#trouver des données qui associent avec tt=self.name ou ft=self.name
         #(query)
         time.sleep(0.2)

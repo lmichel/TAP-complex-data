@@ -16,7 +16,7 @@ class GraphControl:
         
     @staticmethod
     def get_limit_table(limit):
-        print(limit)
+        #print(limit)
         if GraphControl.limit_table == []:
             return True
         else :
