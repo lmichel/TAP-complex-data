@@ -1,6 +1,4 @@
 from builtins import staticmethod
-from _testbuffer import staticarray
-from abc import abstractstaticmethod
 
 
 class GraphControl:
@@ -24,7 +22,6 @@ class GraphControl:
     
     @staticmethod
     def get_real_table(tname):#return appointed table
-        from objintap.table import Table
         return GraphControl.tables[tname]
 
     

@@ -1,5 +1,4 @@
 from astroquery.utils.tap.core import TapPlus
-from objintap.table import Table
 from objintap.graph_control import GraphControl
 import json
 

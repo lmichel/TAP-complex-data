@@ -1,10 +1,6 @@
 from objintap.graph_control import GraphControl
-
 import time
-from _operator import or_
-from asn1crypto._ffi import null
 import re
-from orca.scripts import self_voicing
 
 KEY_QUERY = "SELECT  TOP 100  tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column \n\
 FROM tap_schema.keys \n\
@@ -15,12 +11,6 @@ OKEY_QUERY = "SELECT DISTINCT TOP 100  tap_schema.columns.column_name, tap_schem
 FROM tap_schema.tables \n\
 JOIN tap_schema.columns ON tap_schema.tables.table_name = tap_schema.columns.table_name \n\
 WHERE tap_schema.tables.schema_name = '{}' AND tap_schema.tables.table_name = '{}' "
-
-o_KEY_QUERY = "SELECT  TOP 100  tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table, tap_schema.key_columns.from_column, tap_schema.key_columns.target_column \n\
-FROM tap_schema.keys \n\
-JOIN  tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id  \n\
-WHERE target_table = '{}' OR form_table = '{}'"
-#chercher all table
 
 NATURAL_QUERY = "SELECT DISTINCT TOP 100  tap_schema.tables.table_name \n\
 FROM tap_schema.tables \n\
@@ -38,14 +28,12 @@ FROM tap_schema.tables \n\
 WHERE table_name NOT LIKE 'T%'"
 
 
-
 class Table():
     def __init__(self, service, schema, name, from_Column, target_Column, natural_join=None):
         self.service = service
         self.schema = schema
         self.name = name;
         self.natural_join = natural_join
-
         self.fields = dict()      
 
     def __repr__(self):
@@ -128,6 +116,13 @@ class Table():
                 now_table = GraphControl.get_table(self.service, self.schema, list_Table[t], None, None, self.natural_join)
                 targets=now_table.get_joined_tables()
                 if targets :
+                    try :
+                        for ki, fc, tc in targets['key_id', 'from_column', 'target_column']:
+                            for kii, fcc, tcc in targets['key_id', 'from_column', 'target_column']: 
+                                if ki==kii and (fcc!=fc or tcc!=tc):
+                                    raise BaseException('It has the same key value but different column values!!')
+                    except BaseException as e:
+                        print(e)
                     for ft, tt, fc, tc in targets['from_table','target_table', 'from_column', 'target_column']:
                         if list_Table[t]==ft.decode("utf-8") :
                             fname = list_Table[t]
