@@ -1,0 +1,182 @@
+{
+  "rr.capability": [
+    {
+      "joint_tables": [
+        {
+          "rr.resource": [
+            {
+              "keys_joint": [
+                "ivoid"
+              ],
+              "keys_root": [
+                "ivoid"
+              ],
+              "joint_tables": [
+                {
+                  "rr.registries": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "harvested_from"
+                      ],
+                      "joint_tables": [
+                        {
+                          "rr.authorities": [
+                            {
+                              "keys_joint": [
+                                "ivoid"
+                              ],
+                              "keys_root": [
+                                "ivoid"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "rr.res_detail": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.res_table": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ],
+                      "joint_tables": [
+                        {
+                          "rr.table_column": [
+                            {
+                              "keys_joint": [
+                                "ivoid"
+                              ],
+                              "keys_root": [
+                                "ivoid"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "rr.res_schema": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.res_subject": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.res_role": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.stc_spatial": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.stc_spectral": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.stc_temporal": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.validation": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.alt_identifier": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.res_date": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ],
+                  "rr.relationship": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

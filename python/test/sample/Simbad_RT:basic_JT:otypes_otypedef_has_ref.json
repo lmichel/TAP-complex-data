@@ -1,0 +1,92 @@
+{
+  "basic": [
+    {
+      "joint_tables": [
+        {
+          "otypes": [
+            {
+              "keys_joint": [
+                "oidref"
+              ],
+              "keys_root": [
+                "oid"
+              ],
+              "joint_tables": [
+                {
+                  "otypedef": [
+                    {
+                      "keys_joint": [
+                        "otype"
+                      ],
+                      "keys_root": [
+                        "otype"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "otypedef": [
+            {
+              "keys_joint": [
+                "otype"
+              ],
+              "keys_root": [
+                "otype"
+              ]
+            }
+          ],
+          "has_ref": [
+            {
+              "keys_joint": [
+                "oidref"
+              ],
+              "keys_root": [
+                "oid"
+              ],
+              "joint_tables": [
+                {
+                  "ref": [
+                    {
+                      "keys_joint": [
+                        "oidbib"
+                      ],
+                      "keys_root": [
+                        "oidbibref"
+                      ],
+                      "joint_tables": [
+                        {
+                          "author": [
+                            {
+                              "keys_joint": [
+                                "oidbibref"
+                              ],
+                              "keys_root": [
+                                "oidbib"
+                              ]
+                            }
+                          ],
+                          "keywords": [
+                            {
+                              "keys_joint": [
+                                "oidbibref"
+                              ],
+                              "keys_root": [
+                                "oidbib"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

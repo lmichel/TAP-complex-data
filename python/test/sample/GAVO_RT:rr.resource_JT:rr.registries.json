@@ -1,0 +1,34 @@
+{
+  "rr.resource": [
+    {
+      "joint_tables": [
+        {
+          "rr.registries": [
+            {
+              "keys_joint": [
+                "ivoid"
+              ],
+              "keys_root": [
+                "harvested_from"
+              ],
+              "joint_tables": [
+                {
+                  "rr.authorities": [
+                    {
+                      "keys_joint": [
+                        "ivoid"
+                      ],
+                      "keys_root": [
+                        "ivoid"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

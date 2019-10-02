@@ -1,7 +1,6 @@
 from astroquery.utils.tap.core import TapPlus
 from objintap.graph_control import GraphControl
 import json
-from orca.scripts import self_voicing
 
 
 class Explorer():
@@ -14,9 +13,9 @@ class Explorer():
         
     def ajout_joint(self,*a):
         value=self.master_table.set_targets(*a)
-        store_json=json.dumps(value, indent = 4, sort_keys = True)
-        #with open('./TAP_simbad.json', 'w') as f:
-            #json.dump(value, f)
+        store_json=json.dumps(value, indent = 2, sort_keys = True)
+        with open('./TAP_simbad.json', 'w') as f:
+            json.dump(value, f,indent=2,ensure_ascii=False)
         print(store_json)
 
             
