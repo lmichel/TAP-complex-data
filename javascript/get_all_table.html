@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>test</title>
+
+<script type="text/javascript" src= "jquery-3.4.1.js" ></script>
+<script type="text/javascript" src= "jointTable.js" ></script>
+<script type="text/javascript">
+    window.onload=function(){
+        $("#b01").click(function(){
+            $("#load").html(jointTable("basic","otypes","otypedef","has_ref"));
+        })
+    }
+</script>
+</head>
+<body>
+<div id="load"></div>
+<div id="load1"></div>
+<div id="load2"></div>
+<div id="load3"></div>
+<div id="load4"></div>
+<div id="load5"></div>
+<button id="b01">load</button>
+</body>
+</html>
