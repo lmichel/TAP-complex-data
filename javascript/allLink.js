@@ -6,7 +6,7 @@ var allLink = function (site, rootTable){
     var allLink=[];
     reTableRe = allLinkObject.responseText;
     var method = reTableRe.indexOf("base64");
-    if(method!=-1){
+    if(method!=-1){//The coding mode is "base64".
     reTableRe = reTableRe.replace(/<STREAM encoding="base64">/g, "haha");
     reTableRe = reTableRe.replace(/<STREAM encoding='base64'>\n/g, "haha");
     reTableRe = reTableRe.replace(/\n<\/STREAM>/g, "xixi").replace(/\s+/g,"");
@@ -27,7 +27,7 @@ var allLink = function (site, rootTable){
       everyLink=[];
     }
     }
-    if(method==-1){
+    if(method==-1){//The coding mode is normal.
       reTableRe=reTableRe.replace(/\s+/g,"");
       reTableRe= reTableRe.match(/<TABLEDATA>(\S*)<\/TABLEDATA>/)[1];
       var donnee = reTableRe.replace(/<TR><TD>/g, "@");
@@ -56,6 +56,5 @@ var allLink = function (site, rootTable){
       everyLink=[];
     }
     }
-    console.log(allLink)
     return allLink;
 }

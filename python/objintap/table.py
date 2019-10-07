@@ -134,7 +134,6 @@ class Table():
             key = self.name
             value =  {}
             retour={}
-            
             jsonRoot = {}
             key_joint_table="joint_tables"
             targets = self.get_joined_tables()
@@ -142,7 +141,6 @@ class Table():
                 list_exist = []
                 for ft, tt, fc, tc in targets['from_table','target_table', 'from_column', 'target_column']:
                     if self.name == ft.decode("utf-8") and limit_table == tt.decode("utf-8"):
-                        
                         value_joint_table = {}
                         key_joint='keys_joint'
                         key_root='keys_root'
