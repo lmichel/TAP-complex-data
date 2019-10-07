@@ -1,6 +1,7 @@
 document.write("<script type='text/javascript' src= 'allTableQuery.js'></script>");
 var allTable = function (site){
     var allTableObject = allTableQuery(site); //Get all the tables
+    console.log(allTableObject)
     var reTable;
     var allTable=[];
     reTable = allTableObject.responseText;
@@ -17,35 +18,17 @@ var allTable = function (site){
             allTable.push(donnee[i]);
         }
     }
-    /*
     if(method==-1){//The coding mode is normal.
-      console.log(reTable)
       reTable=reTable.replace(/\s+/g,"");
       reTable= reTable.match(/<TABLEDATA>(\S*)<\/TABLEDATA>/)[1];
       var donnee = reTable.replace(/<TR><TD>/g, "@");
       donnee = donnee.replace(/<\/TD><\/TR>/g, "");
       donnee = donnee.replace(/<\/TD><TD>/g, "|")
       donnee = donnee.split('@')
-      var a = [];
-      var b =[];
       for(var k = 1;k<donnee.length;k++)
       {
-        a = donnee[k].split('|');
-        b.push(a);
+        allTable.push(donnee[i]);
       }
-      for(var i=0;i<b.length;i=i+1)
-    {
-      var tt= b[i][1];
-      var tc= b[i][4];
-      var ft= b[i][0];
-      var fc= b[i][3];
-      var k=0;
-      everyLink[k]=tt+'|'+tc;
-      k=1;
-      everyLink[k]=ft+'|'+fc;
-      allLink.push(everyLink);
-      everyLink=[];
     }
-    }*/
     return allTable; //Return an array containing the names of the tables
 }

@@ -31,7 +31,7 @@
             );
         })*/
         $("#b04").click(function(){
-            var data = jsonResultAll("http://dc.zah.uni-heidelberg.de/tap/sync", "rr.resource")
+            var data = jsonResultAll("http://dc.zah.uni-heidelberg.de/tap/sync")
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
@@ -43,13 +43,19 @@
                 JSON.stringify(data, undefined, 6)
             );
         })
+        */
         $("#b07").click(function(){
-            var data = jsonResultAll("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync", "metaviz.METAcat","metaviz.METAtab")
+            var data = jsonResultAll("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync")
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
         })
-        */
+        $("#b10").click(function(){
+            var data = jsonResultAll("https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/sync")
+            $("#load1").html(
+                JSON.stringify(data, undefined, 6)
+            );
+        })
     }
 </script>
 </head>
@@ -61,7 +67,7 @@
         <small>Obas</small>
     </h1>
 </div>
-<div class="btn-group" style="padding-right:200px; padding-left:400px">
+<div class="btn-group" style="padding-right:10px; padding-left:400px">
     <button type="button" class="btn btn-primary" >Simbad</button>
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" >
         <span class="caret"></span>
@@ -75,13 +81,15 @@
         <li><a href="http://simbad.u-strasbg.fr/simbad/sim-tap">TAP Simbad</a></li>
     </ul>
 </div>
-<div class="btn-group" style="padding-right:200px">
+<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
+
+<div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">GAVO</button>
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
         <span class="sr-only"></span>
     </button>
-    <ul class="dropdown-menu" role="menu" >
+    <ul class="dropdown-menu" role="menu" style="margin-left:50px">
         <li><a href="#" id="b04">Show All</a></li>
         <li><a href="#" id="b05"></a></li>
         <li><a href="#" id="b06"></a></li>
@@ -89,13 +97,15 @@
         <li><a href="http://dc.zah.uni-heidelberg.de/__system__/adql/query">TAP GAVO</a></li>
     </ul>
 </div>
-<div class="btn-group" style="padding-right:200px">
+<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
+
+<div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">VizieR</button>
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
         <span class="sr-only"></span>
     </button>
-    <ul class="dropdown-menu" role="menu" >
+    <ul class="dropdown-menu" role="menu" style="margin-left:50px">
         <li><a href="#" id="b07">Show All</a></li>
         <li><a href="#" id="b08"></a></li>
         <li><a href="#" id="b09"></a></li>
@@ -103,20 +113,23 @@
         <li><a href="http://tapvizier.u-strasbg.fr/TAPVizieR/">TAP VizieR</a></li>
     </ul>
 </div>
-<div class="btn-group" style="padding-right:200px">
+<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
+
+<div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">CAOM</button>
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
         <span class="sr-only"></span>
     </button>
-    <ul class="dropdown-menu" role="menu" >
-        <li><a href="#" id="b10"></a>Show All</li>
+    <ul class="dropdown-menu" role="menu" style="margin-left:50px">
+        <li><a href="#" id="b10">Show All</a></li>
         <li><a href="#" id="b11"></a></li>
         <li><a href="#" id="b12"></a></li>
         <li class="divider"></li>
-        <li><a href="https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap">TAP CAOM</a></li>
+        <li><a href="https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/sync">TAP CAOM</a></li>
     </ul>
 </div>
+<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
 <br></br>
 <pre id="load1" style= "background-color:white; overflow:scroll; width:1000px; height:800px; margin-left: 400px; margin-right: 600px"></pre>
 </body>

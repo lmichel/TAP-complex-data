@@ -29,32 +29,13 @@ var allLink = function (site, rootTable){
     }
     if(method==-1){//The coding mode is normal.
       reTableRe=reTableRe.replace(/\s+/g,"");
+      console.log(reTableRe)
       reTableRe= reTableRe.match(/<TABLEDATA>(\S*)<\/TABLEDATA>/)[1];
       var donnee = reTableRe.replace(/<TR><TD>/g, "@");
       donnee = donnee.replace(/<\/TD><\/TR>/g, "");
       donnee = donnee.replace(/<\/TD><TD>/g, "|")
       donnee = donnee.split('@')
-      var a = [];
-      var b =[];
-      for(var k = 1;k<donnee.length;k++)
-      {
-        a = donnee[k].split('|');
-        b.push(a);
-      }
-      console.log(b)
-      for(var i=0;i<b.length;i=i+1)
-    {
-      var tt= b[i][1];
-      var tc= b[i][4];
-      var ft= b[i][0];
-      var fc= b[i][3];
-      var k=0;
-      everyLink[k]=tt+'|'+tc;
-      k=1;
-      everyLink[k]=ft+'|'+fc;
-      allLink.push(everyLink);
-      everyLink=[];
     }
-    }
+
     return allLink;
 }
