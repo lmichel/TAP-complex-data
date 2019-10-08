@@ -1,17 +1,17 @@
 document.write("<script type='text/javascript' src= 'allLink.js'></script>");
 document.write("<script type='text/javascript' src= 'allTable.js'></script>");
-var jsonResultAll = function (site){
+var jsonResultAll = function (site,checkstatus){
     var allTtable=[];
     var jsonAll = {};
     columns = [];
     constraints = "";
-    allTtable = allTable(site);//Get the array containing the names of the tables
+    allTtable = allTable(site,checkstatus);//Get the array containing the names of the tables
     for(var k=0;k<allTtable.length;k++){
         var arrLink={};
         var arrLinkJoint = {};
         var alllink=[];
         var arrJoint = {};
-        alllink = allLink(site, allTtable[k]); 
+        alllink = allLink(site, allTtable[k],checkstatus); 
         for(var i = 0; i < alllink.length;i++){
             var tt = alllink[i][0].split("|");
             var ft = alllink[i][1].split("|");

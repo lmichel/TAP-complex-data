@@ -1,6 +1,6 @@
 document.write("<script type='text/javascript' src= 'allTableQuery.js'></script>");
-var allTable = function (site){
-    var allTableObject = allTableQuery(site); //Get all the tables
+var allTable = function (site,checkstatus){
+    var allTableObject = allTableQuery(site,checkstatus); //Get all the tables
     console.log(allTableObject)
     var reTable;
     var allTable=[];

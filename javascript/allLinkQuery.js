@@ -1,9 +1,13 @@
-var allLinkQuery = function (site, rootTable){
+var allLinkQuery = function (site, rootTable,checkstatus){
     var reLink;
+    var checkvalue = 'SELECT tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id WHERE target_table = \''+rootTable+'\' OR from_table = \''+rootTable+'\'';
+      if(checkstatus==true){
+        checkvalue = 'SELECT TOP 100 tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id WHERE target_table = \''+rootTable+'\' OR from_table = \''+rootTable+'\'';
+      }
     reLink = $.ajax({
         url: `${site}`,
         type: "GET",
-        data: {query: 'SELECT  TOP 100  tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id WHERE target_table = \''+rootTable+'\' OR from_table = \''+rootTable+'\'', format: 'votable', lang: 'ADQL', request :'doQuery'},
+        data: {query: `${checkvalue}`, format: 'votable', lang: 'ADQL', request :'doQuery'},
         async:false
         })
       .done(function(result){

@@ -11,8 +11,18 @@
 <script type="text/javascript" src= "jsonResultAll.js" ></script>
 <script type="text/javascript">
     window.onload=function(){
+        var $checkbox01 = $(".ck01");//Simbad
+        var $checkbox02 = $(".ck02");//GAVO
+        var $checkbox03 = $(".ck03");//VizieR
+        var $checkbox04 = $(".ck04");//CAOM
+
         $("#b01").click(function(){
-            var data = jsonResultAll("http://simbad.u-strasbg.fr/simbad/sim-tap/sync")
+            var checkstatus01 = false;
+            if($checkbox01.prop("checked"))
+            {
+                checkstatus01 = true;
+            }
+            var data = jsonResultAll("http://simbad.u-strasbg.fr/simbad/sim-tap/sync",checkstatus01)
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
@@ -31,7 +41,12 @@
             );
         })*/
         $("#b04").click(function(){
-            var data = jsonResultAll("http://dc.zah.uni-heidelberg.de/tap/sync")
+            var checkstatus02 = false;
+            if($checkbox02.prop("checked"))
+            {
+                checkstatus02 = true;
+            }
+            var data = jsonResultAll("http://dc.zah.uni-heidelberg.de/tap/sync",checkstatus02)
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
@@ -45,17 +60,31 @@
         })
         */
         $("#b07").click(function(){
-            var data = jsonResultAll("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync")
+            var checkstatus03 = false;
+            if($checkbox03.prop("checked"))
+            {
+                checkstatus03 = true;
+            }
+            var data = jsonResultAll("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",checkstatus03)
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
         })
         $("#b10").click(function(){
-            var data = jsonResultAll("https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/sync")
+            var checkstatus04 = false;
+            if($checkbox04.prop("checked"))
+            {
+                checkstatus04 = true;
+            }
+            var data = jsonResultAll("https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/sync",checkstatus04)
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
         })
+        
+        
+
+    
     }
 </script>
 </head>
@@ -81,7 +110,7 @@
         <li><a href="http://simbad.u-strasbg.fr/simbad/sim-tap">TAP Simbad</a></li>
     </ul>
 </div>
-<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
+<input type="checkbox" class = "ck01" >TOP 100
 
 <div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">GAVO</button>
@@ -97,7 +126,7 @@
         <li><a href="http://dc.zah.uni-heidelberg.de/__system__/adql/query">TAP GAVO</a></li>
     </ul>
 </div>
-<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
+<input type="checkbox" class = "ck02" >TOP 100
 
 <div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">VizieR</button>
@@ -113,7 +142,7 @@
         <li><a href="http://tapvizier.u-strasbg.fr/TAPVizieR/">TAP VizieR</a></li>
     </ul>
 </div>
-<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
+<input type="checkbox" class = "ck03" >TOP 100
 
 <div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">CAOM</button>
@@ -129,8 +158,14 @@
         <li><a href="https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/sync">TAP CAOM</a></li>
     </ul>
 </div>
-<input type="checkbox" name="checkbox01" value="TOP 100" onclick="choseTop()">TOP 100
+<input type="checkbox" class = "ck04" >TOP 100
 <br></br>
 <pre id="load1" style= "background-color:white; overflow:scroll; width:1000px; height:800px; margin-left: 400px; margin-right: 600px"></pre>
+<script src="jquery-3.4.1.js"></script>
+<script>
+    
+
+</script>
+
 </body>
 </html>
