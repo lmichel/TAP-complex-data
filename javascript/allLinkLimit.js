@@ -1,6 +1,6 @@
-document.write("<script type='text/javascript' src= 'allLinkQuery.js'></script>");
-var allLink = function (site){
-    var allLinkObject = allLinkQuery(site);
+document.write("<script type='text/javascript' src= 'allLinkLimitQuery.js'></script>");
+var allLinkLimit = function (site, rootTable,checkstatus){
+    var allLinkObject = allLinkLimitQuery(site, rootTable,checkstatus);
     var reTableRe;
     var everyLink=[];
     var allLink=[];

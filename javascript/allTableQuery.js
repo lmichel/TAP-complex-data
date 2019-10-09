@@ -26,7 +26,6 @@ var allTableQuery = function (site,checkstatus){//Get the names of all the table
       if(checkstatus==true){
         checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name FROM tap_schema.tables as T WHERE T.schema_name = \'public\' OR T.schema_name =\'rr\' OR T.schema_name LIKE \'viz%\'';
       }
-      console.log(checkstatus);
       reTable = $.ajax({
         url: `${site}`,
         type: "GET",
