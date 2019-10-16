@@ -1,16 +1,15 @@
 "use strict"
-type dic={
-  [key:string]:string|string[]|dic;
+type dic={//No dictionary in typescript
+  [key:string]:string|string[]|dic|number;
 }
 
-function changeString (allstr:string,start:number,end:number,str:string,changeStr:string){ //allstr:原始字符串，start,开始位置,end：结束位  置,str：要改变的字，changeStr:改变后的字
+function changeString (allstr:string,start:number,end:number,str:string,changeStr:string){ //allstr:Original string/原始字符串，start:tarting position/开始位置,end：End position/结束位置,str：The string to be changed/要改变的字，changeStr:Changed string改变后的字
   if(allstr.substring(start,end) == str){
        return allstr.substring(0,start)+changeStr+allstr.substring(end+1,allstr.length+2); 
   }else{
        allstr; 
     }
  }
-
 
 function allTableQuery (site:string,checkstatus:boolean){//Get the names of all the tables.
   var reTable;
@@ -62,7 +61,7 @@ function allTableQuery (site:string,checkstatus:boolean){//Get the names of all 
   }
   return reTable;
 }
-
+/*
 function allLinkQuery(site:string, checkStatus:boolean):object{//Get the from_table, target_table, from_column, target_column
   let reLink:any;
   let checkvalue:string = 'SELECT tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
@@ -89,7 +88,7 @@ function allLinkQuery(site:string, checkStatus:boolean):object{//Get the from_ta
         }
   })
   return reLink;
-}
+}*/
 
 function allLinkLimitQuery (site:string, rootTable:string,checkstatus:boolean){//Get the from_table, target_table, from_column, target_column related to rootTable.
   let reLink:any;
@@ -117,7 +116,7 @@ function allLinkLimitQuery (site:string, rootTable:string,checkstatus:boolean){/
   })
   return reLink;
 }
-
+/*
 function allLink(site:string, checkStatus:boolean){
   let allLinkObject:any = allLinkQuery(site, checkStatus);
   let reTableRe:string;
@@ -176,8 +175,16 @@ function allLink(site:string, checkStatus:boolean){
     for(let i:number=0;i<donnee3.length;i=i+4)
     {
       let tt:string= donnee3[i+1];
+      if(tt.indexOf("metaviz")!=-1){
+        tt=tt.replace(/metaviz./g,"");
+      }
+      console.log("#")
+      console.log(tt)
       let tc:string= donnee3[i+3];
       let ft:string= donnee3[i];
+      if(ft.indexOf("metaviz")!=-1){
+        ft=ft.replace(/metaviz./g,"");
+      }
       let fc:string= donnee3[i+2];
       let k:number=0;
       everyLink[k]=tt+'|'+tc;
@@ -196,9 +203,17 @@ function allLink(site:string, checkStatus:boolean){
   }
   return allLinkRe;
 }
-
-function allLinkLimit (site:string, rootTable:string,checkstatus:boolean){
-  let allLinkObject:any = allLinkLimitQuery(site, rootTable,checkstatus);
+*/
+function allLinkLimit (site:string, rootTable:string,checkstatus:boolean):string[][]{//Get 2-dimensional array. The array returns all the information related to the rootTable.
+                                                                          //PARAMETER: site: website as astring; checkstatus: true(TOP 100), false(all)
+                                                                          //RETURN: A 2-dimensional array. The array returns all the information related to the rootTable.
+  let allLinkObject:any;
+  if(site == "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync"){
+    allLinkObject= allLinkLimitQuery(site, 'metaviz.'+rootTable,checkstatus);
+  }
+  else{
+    allLinkObject= allLinkLimitQuery(site, rootTable,checkstatus);
+  }
   let reTableRe:string;
   let everyLink:string[]=['a','b'];
   let allLink:string[][]=[[]];
@@ -233,15 +248,39 @@ function allLinkLimit (site:string, rootTable:string,checkstatus:boolean){
       everyLink=[];
     }
   }
-  if(method==-1){//The coding mode is normal.
-    reTableRe=reTableRe.replace(/\s+/g,"");
+  if(method==-1){//The coding mode is normal. VizieR
+    reTableRe=reTableRe.replace(/\s+/g,"#");
     reTableRe= reTableRe.match(/<TABLEDATA>(\S*)<\/TABLEDATA>/)[1];
     let donnee:string;
     let donnee2:string[];
-    donnee = reTableRe.replace(/<TR><TD>/g, "@");
+    let donnee3:string[]=[];
+    donnee = reTableRe.replace(/<TR><TD>/g, "|");
     donnee = donnee.replace(/<\/TD><\/TR>/g, "");
     donnee = donnee.replace(/<\/TD><TD>/g, "|")
-    donnee2 = donnee.split('@')
+    donnee = donnee.replace(/#/g,"")
+    donnee2 = donnee.split('|')
+    for(let j:number = 0;j<donnee2.length;j++){
+      donnee3[j]=donnee2[j+1];
+    }
+    for(let h:number=0;h<donnee3.length-1;h=h+5)
+    {
+      let tt:string= donnee3[h+1];
+      if(tt.indexOf("metaviz")!=-1){
+        tt=tt.replace(/metaviz./g,"");
+      }
+      let tc:string= donnee3[h+4];
+      let ft:string= donnee3[h];
+      if(ft.indexOf("metaviz")!=-1){
+        ft=ft.replace(/metaviz./g,"");
+      }
+      let fc:string= donnee3[h+3];
+      let k:number=0;
+      everyLink[k]=tt+'|'+tc;
+      k=1;
+      everyLink[k]=ft+'|'+fc;
+      allLink.push(everyLink);
+      everyLink=[];
+    }
   }
   let allLinkRe:string[][]=[[]];
   let k:number=0;
@@ -253,7 +292,9 @@ function allLinkLimit (site:string, rootTable:string,checkstatus:boolean){
   return allLinkRe;
 }
 
-function allTable(site:string,checkstatus:boolean){
+function allTable(site:string,checkstatus:boolean):string[]{//Get all the table's name.
+                                                          //PARAMETER: site: website as astring; checkstatus: true(TOP 100), false(all)
+                                                          //RETURN: all the table's name.
   var allTableObject = allTableQuery(site,checkstatus); //Get all the tables
   var reTable;
   let allTable:string[]=[];
@@ -282,14 +323,15 @@ function allTable(site:string,checkstatus:boolean){
           allTable.push(donnee2[i]);
       }
   }
-  if(method==-1){//The coding mode is normal.
-    reTable=reTable.replace(/\s+/g,"");
+  if(method==-1){//The coding mode is normal. VizieR
+    reTable=reTable.replace(/\s+/g,"#");
     reTable= reTable.match(/<TABLEDATA>(\S*)<\/TABLEDATA>/)[1];
-    let donnee:string;
+    reTable=reTable.replace(/#/g," ")
+    let donnee:string;  
     let donnee2:string[];
     donnee = reTable.replace(/<TR><TD>/g, "@");
     donnee = donnee.replace(/<\/TD><\/TR>/g, "");
-    donnee = donnee.replace(/<\/TD><TD>/g, "|")
+    donnee = donnee.replace(/<\/TD><TD>/g, "@");
     donnee2 = donnee.split('@')
     for(var k = 1;k<donnee2.length;k++)
     {
@@ -299,12 +341,14 @@ function allTable(site:string,checkstatus:boolean){
   return allTable; //Return an array containing the names of the tables
 }
 
-function jsonResultAll (site:string,checkstatus:boolean){
+function jsonResultAll (site:string,checkstatus:boolean):dic{//return all tables with the name of the join table.
+                                                            //PARAMETER: site: website as astring; checkstatus: true(TOP 100), false(all)
+                                                            //RETURN: json object.
   let allTtable:string[]=[];
   var jsonAll:dic = {};
   let columns:string[] = [];
   let constraints:string = "";
-  if(site == "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync")
+  /*if(site == "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync")
   {
     let allTheLink:string[][]=allLink(site,checkstatus);
     let list_exist:string[] = [];
@@ -321,7 +365,7 @@ function jsonResultAll (site:string,checkstatus:boolean){
         }
     }
   }
-  else{
+  else{*/
       allTtable = allTable(site,checkstatus);//Get the array containing the names of the tables.//Even number is the table name.
       for(let k:number=0;k<allTtable.length;k=k+2){
           let arrLink:dic={};
@@ -333,7 +377,7 @@ function jsonResultAll (site:string,checkstatus:boolean){
             continue
           }
           else{
-            let nowTable:string = allTtable[k].replace(/rr./g,"");
+            let nowTable:string = allTtable[k].replace(/rr./g,"");//delete the schema name of GAVO
             for(var i = 0; i < alllink.length;i++){
                 var tt = alllink[i][0].split("|");
                 var ft = alllink[i][1].split("|");
@@ -357,10 +401,9 @@ function jsonResultAll (site:string,checkstatus:boolean){
             jsonAll[nowTable] = arrJoint;
           }
         }
-  }
   return jsonAll;
 }
-
+/*
 function VizieRJoin (allTheLink:string[][],rootTable:string){
   let arrLink:dic={};
   let arrLinkJoint:dic = {};
@@ -388,8 +431,10 @@ function VizieRJoin (allTheLink:string[][],rootTable:string){
   arrJoint["join_tables"]=arrLink;
   return arrJoint;
 }
-
-function readJson (jsonAll:dic){
+*/
+function readJson (jsonAll:dic):string[]{//This function reads the json object and gets all the table names
+                                        //PARAMETER: jsonAll: json object
+                                        //RETURN: all the table's name.
   let rootTable:string[] = [];
   for(let key:string in jsonAll)
   {
@@ -398,8 +443,10 @@ function readJson (jsonAll:dic){
   return rootTable
 }
 
-var readJsonJoinAll = function (jsonAll:dic,root:string){
-  var joinTable = [];
+function readJsonJoinAll (jsonAll:dic,root:string):string[]{//This function reads the json object and gets all the join table's names
+                                                            //PARAMETER: jsonAll: json object; root: the main table.
+                                                            //RETURN: all the join table's name.
+  let joinTable:string[] = [];
   for(var key in jsonAll[root].join_tables)
   {
       joinTable.push(key);
@@ -407,44 +454,117 @@ var readJsonJoinAll = function (jsonAll:dic,root:string){
   return joinTable;
 }
 
-function readJsonJoin (jsonAll:dic,root:string){
+function readJsonJoin (jsonAll:dic,root:string):string{//This function reads the json object and get a string containing the html code.
+                                                //PARAMETER: jsonAll: json object, root: the main(root) table
+                                                //RETURN: a string containing the html code
   let joinTable:string="";
   let list_exist:string[] = [];
   list_exist.push(root);
+  joinTable += "<B>"+ root +"</B>"+ "<br/>";
   for(var key in jsonAll[root].join_tables)
   {
-    joinTable += root + "<br/>";
+    //joinTable += "<B>"+ root +"</B>"+ "<br/>";
     joinTable += "    " + key + "<br/>";
-    if(list_exist.indexOf(key)==-1){
+    if(list_exist.indexOf(key)==-1){//return the table which are joined with the key.
       list_exist.push(key);
-      joinTable += "  "+readJsonJoinTable(jsonAll,key,list_exist)+"<br/>";
+      joinTable +=  "<font color = \"#545454\">"+ readJsonJoinTable(jsonAll,key,list_exist,0)+"</font>";
     }
+    //joinTable += "<br/>";
   }
   return joinTable;
 }
 
-function readJsonJoinTable(jsonAll:dic,root:string,list_exist:string[]){
+function readJsonJoinTable(jsonAll:dic,root:string,list_exist:string[],flag:number):string{//This is a recursive function. In order to get all the join table of root table
+                                                                                    //PARAMETER: jsonAll: json object; root: the main(root) table; list_exist: store the recorded table name; flag: record the number of recursions and format the output.
+                                                                                    //RETURN: a string containing the html code
   let joinTable:string="";
+  let flag2:number
+  flag2 = flag + 1;
+  let space :string =  "    ";
   for(var key in jsonAll[root].join_tables){
     if(list_exist.indexOf(key)==-1){
-      joinTable += "      3" + key + "<br/>";
+      for(let i:number = 0; i<=flag2;i++)
+      {
+        joinTable += space;
+      }
+      joinTable += key + "<br/>";
       list_exist.push(key);
       let table :string;
-      let tableCut : string;
-      table = readJsonJoinTable(jsonAll,key,list_exist);
-      console.log(table)
+      let tableCut : string; 
+      table = readJsonJoinTable(jsonAll,key,list_exist,flag2);//question!!!
       tableCut = table.replace(/ /g,"");
       if(tableCut.length != 0)
       {
-        joinTable += "    4" + table + "<br/>";
+        joinTable += table;
       }
     }
   }
   return joinTable;
 }
 
-function getDescription(jsonAll:dic,root:string){
+function getDescription(jsonAll:dic,root:string):string{//This function reads the json object and get a string containing the html code.
+                                                //PARAMETER: jsonAll: json object, root: the main(root) table
+                                                //RETURN: return the root table's description
   let description:string;
   description=jsonAll[root].description;
   return description
+}
+
+function showAll(data:dic):string{//This function reads the json object and get a string containing the html code.
+                                  //PARAMETER: data: json object
+                                  //RETURN: a string containing the html code
+  let rootTable:string[] = readJson(data);
+  let joinTable:string[]=[];
+  let output:string="";
+  for(var i = 0;i<rootTable.length;i++){
+      joinTable = readJsonJoinAll(data,rootTable[i]);
+      output +="<B>"+rootTable[i] + "</B>" +" : "+ "<font color = \"#545454\">"+getDescription(data,rootTable[i])+"</font>"+ "<br/>";
+      for(var j = 0;j<joinTable.length;j++)
+      {
+          output+= "    " +"<B>"+ joinTable[j] +"</B>"+" : "+ "<font color = \"#545454\">"+ getDescription(data,joinTable[j])+"</font>"+ "<br/>";
+      }
+      output += "<br/>";
+  }
+  return output;
+}
+
+function mostUsed(data:dic):string[]{//This function reads the json object and get the most used table's name.
+                            //PARAMETER: jsonAll: json object
+                            //RETURN: an array containing table's name.
+  let mostUsedDic:dic={};
+  let rootTable:string[] = readJson(data);
+  let mostUsedTable:string[]=[];//the higher the front, the larger the number of jointable.
+  for(var i = 0;i<rootTable.length;i++){
+    let count:number = 0;
+    for(var key in data[rootTable[i]].join_tables)
+    {
+      count +=1;
+    }
+    mostUsedDic[rootTable[i]]=count;
+  }
+  if(mostUsedDic[rootTable[0]]<mostUsedDic[rootTable[1]])
+  {
+    mostUsedTable[0]=rootTable[1];
+    mostUsedTable[1]=rootTable[0];
+  }
+  else{
+    mostUsedTable[0]=rootTable[0];
+    mostUsedTable[1]=rootTable[1];
+  }
+  for(let h:number=2;h<rootTable.length;h++){
+    mostUsedTable[h]=rootTable[h];
+      for(let j:number=h-1;j>=0;j--){
+        let tempi:number = mostUsedDic[mostUsedTable[j+1]];
+        let tempj:number = mostUsedDic[mostUsedTable[j]];
+        if(tempj>=tempi){
+          break;
+        }
+        else{
+          let temp:string = mostUsedTable[j+1]
+          mostUsedTable[j+1]=mostUsedTable[j];
+          mostUsedTable[j]=temp;
+        }
+      }
+  }
+  return mostUsedTable;
 }

@@ -17,40 +17,56 @@
         var $checkbox04 = $(".ck04");//CAOM
 
         $("#b01").click(function(){
+            $("#showRoot").empty();//Clear the contents of menu.
             var checkstatus01 = false;
-            if($checkbox01.prop("checked"))
+            if($checkbox01.prop("checked"))//To check if choose the TOP 100. By default, it's false.
             {
                 checkstatus01 = true;
             }
-            var data = jsonResultAll("http://simbad.u-strasbg.fr/simbad/sim-tap/sync",checkstatus01);
+            var data = jsonResultAll("http://simbad.u-strasbg.fr/simbad/sim-tap/sync",checkstatus01);//return the json
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
-            /*
-            var list_exist=[];
-            var rootTable = readJson(data);
+            var rootTable = readJson(data);//read json, return all the rootTable as array
             var output = "";
-            output += readJsonJoin(data,rootTable[0]);*/
-
-            var rootTable = readJson(data);
-            var output = /*"<h5>"+*/rootTable[0] /*+"</h5>"*/+" : "+ getDescription(data,rootTable[0])+"<br/>";
-            var joinTable = readJsonJoinAll(data,rootTable[0]);
-                for(var j = 0;j<joinTable.length;j++)
-                {
-                    output+= "  " + joinTable[j] +" : "+ getDescription(data,joinTable[j])+ "<br/>";
-                }
-                output += "<br/>";
-            for(var i = 1;i<rootTable.length;i++){
-                var joinTable = readJsonJoinAll(data,rootTable[i]);
-                output +=/*"<h5>"+*/rootTable[i] /*+"</h5>"*/+" : "+ getDescription(data,rootTable[i])+ "<br/>";
-                for(var j = 0;j<joinTable.length;j++)
-                {
-                    output+= "  " + joinTable[j] +" : "+ getDescription(data,joinTable[j])+ "<br/>";
-                }
-                output += "<br/>";
+            output += showAll(data)
+            $("#load2").html(output);//show all the informations of rootTable and it's join tables
+            var mostUsedTable = mostUsed(data);//read json, return all the most used table ([0] is the most used) as array
+            var add ="" 
+            for(var i = 0;i<5;i++){//add five bouton of the most used table
+                add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
+                $("#showRoot").append(add);
             }
-            $("#load2").html(output);
+            $("#r00").click(function(){//add the click event
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[0]);
+                $("#load2").html(output);
+            })
+            $("#r01").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[1]);
+                $("#load2").html(output);
+            })
+            $("#r02").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[2]);
+                $("#load2").html(output);
+            })
+            $("#r03").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[3]);
+                $("#load2").html(output);
+            })
+            $("#r04").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[4]);
+                $("#load2").html(output);
+            })
+            
         })
+
+
+
         /*
         $("#b02").click(function(){
             var data = jsonResultAll("http://simbad.u-strasbg.fr/simbad/sim-tap/sync", "otypes")
@@ -66,6 +82,7 @@
         })*/
 
         $("#b04").click(function(){
+            $("#showRoot").empty();//Clear the contents of menu.
             var checkstatus02 = false;
             if($checkbox02.prop("checked"))
             {
@@ -75,24 +92,41 @@
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
-            var rootTable = readJson(data);
-            var output = rootTable[0] +"<br/>";
-            var joinTable = readJsonJoin(data,rootTable[0]);
-                for(var j = 0;j<joinTable.length;j++)
-                {
-                    output+= "  " + joinTable[j] + "<br/>";
-                }
-                output += "<br/>";
-            for(var i = 1;i<rootTable.length;i++){
-                var joinTable = readJsonJoin(data,rootTable[i]);
-                output +=rootTable[i] + "<br/>";
-                for(var j = 0;j<joinTable.length;j++)
-                {
-                    output+= "  " + joinTable[j] + "<br/>";
-                }
-                output += "<br/>";
+            var rootTable = readJson(data);//read json, return all the rootTable as array
+            var output = "";
+            output += showAll(data)
+            $("#load2").html(output);//show all the informations of rootTable and it's join tables
+            var mostUsedTable = mostUsed(data);//read json, return all the most used table ([0] is the most used) as array
+            var add ="" 
+            for(var i = 0;i<5;i++){//add five bouton of the most used table
+                add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
+                $("#showRoot").append(add);
             }
-            $("#load2").html(output);
+            $("#r00").click(function(){//add the click event
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[0]);
+                $("#load2").html(output);
+            })
+            $("#r01").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[1]);
+                $("#load2").html(output);
+            })
+            $("#r02").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[2]);
+                $("#load2").html(output);
+            })
+            $("#r03").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[3]);
+                $("#load2").html(output);
+            })
+            $("#r04").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[4]);
+                $("#load2").html(output);
+            })
         })
         /*
         $("#b05").click(function(){
@@ -104,36 +138,53 @@
         */
 
         $("#b07").click(function(){
+            $("#showRoot").empty();//Clear the contents of menu.
             var checkstatus03 = false;
             if($checkbox03.prop("checked"))
             {
                 checkstatus03 = true;
             }
             var data = jsonResultAll("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",checkstatus03)
+            console.log(data)
             $("#load1").html(
                 JSON.stringify(data, undefined, 6)
             );
-            var rootTable = readJson(data);
-            var output = rootTable[0] +"<br/>";
-            var joinTable = readJsonJoin(data,rootTable[0]);
-                for(var j = 0;j<joinTable.length;j++)
-                {
-                    output+= "  " + joinTable[j] + "<br/>";
-                }
-                output += "<br/>";
-            for(var i = 1;i<rootTable.length;i++){
-                var joinTable = readJsonJoin(data,rootTable[i]);
-                output +=rootTable[i] + "<br/>";
-                for(var j = 0;j<joinTable.length;j++)
-                {
-                    output+= "  " + joinTable[j] + "<br/>";
-                }
-                output += "<br/>";
+            var rootTable = readJson(data);//read json, return all the rootTable as array
+            var output = "";
+            output += showAll(data)
+            $("#load2").html(output);//show all the informations of rootTable and it's join tables
+            var mostUsedTable = mostUsed(data);//read json, return all the most used table ([0] is the most used) as array
+            var add ="" 
+            for(var i = 0;i<5;i++){//add five bouton of the most used table
+                add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
+                $("#showRoot").append(add);
             }
-            $("#load2").html(output);
+            $("#r00").click(function(){//add the click event
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[0]);
+                $("#load2").html(output);
+            })
+            $("#r01").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[1]);
+                $("#load2").html(output);
+            })
+            $("#r02").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[2]);
+                $("#load2").html(output);
+            })
+            $("#r03").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[3]);
+                $("#load2").html(output);
+            })
+            $("#r04").click(function(){
+                $("#load2").empty();
+                output = readJsonJoin(data,mostUsedTable[4]);
+                $("#load2").html(output);
+            })
         })
-
-
 
         $("#b10").click(function(){
             var checkstatus04 = false;
@@ -229,15 +280,11 @@
         <span class="caret"></span>
         <span class="sr-only"></span>
     </button>
-    <ul class="dropdown-menu" role="menu" style="margin-left:750px">
-        <li><a href="#" id="b13"></a></li>
-        <li><a href="#" id="b14"></a></li>
-        <li><a href="#" id="b15"></a></li>
-        <li class="divider"></li>
-        <li><a href="http://dc.zah.uni-heidelberg.de/__system__/adql/query"></a></li>
+    <ul class="dropdown-menu" id = "showRoot" role="menu" style="margin-left:750px">
+
     </ul>
 </div>
 <br></br>
-<pre id="load2" style= "background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px"></pre>
+<pre id="load2" style= "background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px;font-size: 15px "></pre>
 </body>
 </html>
