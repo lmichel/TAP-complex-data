@@ -13,9 +13,12 @@ We are working on a client module addressing this issue  for TAP Web interfaces 
 This mechanism  is being implemented in Javascript to be proposed as a new overlay for both Simbad and TAPHandle interfaces.
 
 ############################
-In the "javascript" folder, you can call the "get_all_table.html" locally in your browser.
+In the "javascript" folder, you can call the "TestTs.html"(which is use in typescript) locally in your browser.
 
 The main function is "jointTable("root_table","joint_table", ... )". On the page, when you click the load button, the json data will be displayed on the console.
    
+fonction:1.show json.(bouton Show All)
+         2.select TOP 100
+         3.show the table's name and the join table's name.(automatic)
 
 
