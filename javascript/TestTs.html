@@ -125,30 +125,63 @@
                 add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
                 $("#showRoot").append(add);
             }
+            var flag = 0;
             $("#r00").click(function(){//add the click event
                 $("#load2").empty();
                 output = gj.readJsonJoin(mostUsedTable[0]);
                 $("#load2").html(output);
+                flag= 1;
             })
             $("#r01").click(function(){
                 $("#load2").empty();
                 output = gj.readJsonJoin(mostUsedTable[1]);
                 $("#load2").html(output);
+                flag= 2;
             })
             $("#r02").click(function(){
                 $("#load2").empty();
                 output = gj.readJsonJoin(mostUsedTable[2]);
                 $("#load2").html(output);
+                flag= 3;
             })
             $("#r03").click(function(){
                 $("#load2").empty();
                 output = gj.readJsonJoin(mostUsedTable[3]);
                 $("#load2").html(output);
+                flag= 4;
             })
             $("#r04").click(function(){
                 $("#load2").empty();
                 output = gj.readJsonJoin(mostUsedTable[4]);
                 $("#load2").html(output);
+                flag= 5;
+            })
+            $("#c00").click(function(){
+                switch(flag){
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        $("#load2").empty();
+                        output = g.createNewJson(data,mostUsedTable[flag-1]);
+                        console.log(output)
+                        $("#load2").html(
+                            JSON.stringify(output, undefined, 4)
+                        );
+                        flag=flag+5;
+                        break;
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                        $("#load2").empty();
+                        output = gj.readJsonJoin(mostUsedTable[flag-6]);
+                        $("#load2").html(output);
+                        flag = flag-5;
+                        break;
+                }
             })
         })
  
@@ -176,30 +209,63 @@
                 add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
                 $("#showRoot").append(add);
             }
+            var flag = 0;
             $("#r00").click(function(){//add the click event
                 $("#load2").empty();
                 output = vj.readJsonJoin(mostUsedTable[0]);
                 $("#load2").html(output);
+                flag= 1;
             })
             $("#r01").click(function(){
                 $("#load2").empty();
                 output = vj.readJsonJoin(mostUsedTable[1]);
                 $("#load2").html(output);
+                flag= 2;
             })
             $("#r02").click(function(){
                 $("#load2").empty();
                 output = vj.readJsonJoin(mostUsedTable[2]);
                 $("#load2").html(output);
+                flag= 3;
             })
             $("#r03").click(function(){
                 $("#load2").empty();
                 output = vj.readJsonJoin(mostUsedTable[3]);
                 $("#load2").html(output);
+                flag= 4;
             })
             $("#r04").click(function(){
                 $("#load2").empty();
                 output = vj.readJsonJoin(mostUsedTable[4]);
                 $("#load2").html(output);
+                flag= 5;
+            })
+            $("#c00").click(function(){
+                switch(flag){
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        $("#load2").empty();
+                        output = v.createNewJson(data,mostUsedTable[flag-1]);
+                        console.log(output)
+                        $("#load2").html(
+                            JSON.stringify(output, undefined, 4)
+                        );
+                        flag=flag+5;
+                        break;
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                        $("#load2").empty();
+                        output = vj.readJsonJoin(mostUsedTable[flag-6]);
+                        $("#load2").html(output);
+                        flag = flag-5;
+                        break;
+                }
             })
         })
 
@@ -226,30 +292,63 @@
                 add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
                 $("#showRoot").append(add);
             }
+            var flag = 0;
             $("#r00").click(function(){//add the click event
                 $("#load2").empty();
                 output = cj.readJsonJoin(mostUsedTable[0]);
                 $("#load2").html(output);
+                flag= 1;
             })
             $("#r01").click(function(){
                 $("#load2").empty();
                 output = cj.readJsonJoin(mostUsedTable[1]);
                 $("#load2").html(output);
+                flag= 2;
             })
             $("#r02").click(function(){
                 $("#load2").empty();
                 output = cj.readJsonJoin(mostUsedTable[2]);
                 $("#load2").html(output);
+                flag= 3;
             })
             $("#r03").click(function(){
                 $("#load2").empty();
                 output = cj.readJsonJoin(mostUsedTable[3]);
                 $("#load2").html(output);
+                flag= 4;
             })
             $("#r04").click(function(){
                 $("#load2").empty();
                 output = cj.readJsonJoin(mostUsedTable[4]);
                 $("#load2").html(output);
+                flag= 5;
+            })
+            $("#c00").click(function(){
+                switch(flag){
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                        $("#load2").empty();
+                        output = c.createNewJson(data,mostUsedTable[flag-1]);
+                        console.log(output)
+                        $("#load2").html(
+                            JSON.stringify(output, undefined, 4)
+                        );
+                        flag=flag+5;
+                        break;
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                        $("#load2").empty();
+                        output = cj.readJsonJoin(mostUsedTable[flag-6]);
+                        $("#load2").html(output);
+                        flag = flag-5;
+                        break;
+                }
             })
         })
 
