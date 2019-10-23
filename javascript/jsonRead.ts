@@ -6,6 +6,7 @@ type dic={//No dictionary in typescript
 class jsonRead{
 
   json:dic;
+  
   constructor(json:dic){
     this.json = json;
   }
