@@ -79,7 +79,7 @@ var TapService = /** @class */ (function () {
         var reTableRe;
         var everyLink = [];
         var allLink = [[]];
-        reTableRe = VOTableTools.votableToJson(allLinkLimitObject);
+        reTableRe = VOTableTools.votable2Rows(allLinkLimitObject);
         for (var i = 0; i < reTableRe.length; i = i + 5) {
             var tt = reTableRe[i + 1];
             tt = this.getRightName(tt);
@@ -109,7 +109,7 @@ var TapService = /** @class */ (function () {
     TapService.prototype.allTable = function () {
         var allTableObject = this.allTableQuery(); //Get all the tables
         var allTable = [];
-        allTable = VOTableTools.votableToJson(allTableObject);
+        allTable = VOTableTools.votable2Rows(allTableObject);
         return allTable; //Return an array containing the names of the tables
     };
     /**
@@ -183,6 +183,9 @@ var TapService = /** @class */ (function () {
                 for (var join in data[key].join_tables) {
                     var joinJsonJoin1 = {};
                     list_exist.push(join);
+                    joinJsonJoin1["description"] = data[join].description;
+                    joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
+                    joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
                     joinJsonJoin1["from"] = data[key].join_tables[join].from;
                     joinJsonJoin1["target"] = data[key].join_tables[join].target;
                     var a = this.ifJoin(data, list_exist, join);
@@ -206,6 +209,9 @@ var TapService = /** @class */ (function () {
                     if (list_exist.indexOf(join) == -1) {
                         list_exist.push(join);
                         var joinJsonJoin1 = {};
+                        joinJsonJoin1["description"] = data[join].description;
+                        joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
+                        joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
                         joinJsonJoin1["from"] = data[key].join_tables[join].from;
                         joinJsonJoin1["target"] = data[key].join_tables[join].target;
                         var a = this.ifJoin(data, list_exist, join);

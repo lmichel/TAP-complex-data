@@ -89,7 +89,7 @@ class TapService{
     let reTableRe:string[];
     let everyLink:string[]=[];
     let allLink:string[][]=[[]];
-    reTableRe = VOTableTools.votableToJson(allLinkLimitObject);
+    reTableRe = VOTableTools.votable2Rows(allLinkLimitObject);
     for(let i:number=0;i<reTableRe.length;i=i+5)
     {
       let tt:string= reTableRe[i+1];
@@ -122,7 +122,7 @@ class TapService{
   allTable():string[]{
   var allTableObject = this.allTableQuery(); //Get all the tables
   let allTable:string[]=[];
-  allTable = VOTableTools.votableToJson(allTableObject);
+  allTable = VOTableTools.votable2Rows(allTableObject);
   return allTable; //Return an array containing the names of the tables
   }
 
@@ -198,7 +198,10 @@ class TapService{
         { 
           let joinJsonJoin1:dic={};
           list_exist.push(join);
-          joinJsonJoin1["from"]=data[key].join_tables[join].from
+          joinJsonJoin1["description"]=data[join].description;
+          joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
+          joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
+          joinJsonJoin1["from"]=data[key].join_tables[join].from;
           joinJsonJoin1["target"]=data[key].join_tables[join].target;
           let a:dic = this.ifJoin(data,list_exist,join)
             if(JSON.stringify(a)!='{}'){
@@ -222,7 +225,10 @@ class TapService{
           if(list_exist.indexOf(join) == -1){
             list_exist.push(join);
             let joinJsonJoin1:dic={};
-            joinJsonJoin1["from"]=data[key].join_tables[join].from
+            joinJsonJoin1["description"]=data[join].description;
+            joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
+            joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
+            joinJsonJoin1["from"]=data[key].join_tables[join].from;
             joinJsonJoin1["target"]=data[key].join_tables[join].target;
             let a:dic = this.ifJoin(data,list_exist,join)
             if(JSON.stringify(a)!='{}'){

@@ -11,350 +11,13 @@
 <script type="text/javascript" src= "./js/jsonRead.js" ></script>
 <script type="text/javascript" src= "./js/VOTableTools.js" ></script>
 <script type="text/javascript" src= "./js/TapService.js" ></script>
+<script type="text/javascript" src= "./main.js" ></script>
 <script type="text/javascript">
+    /*window.onload=function(){
+        TrouveUnMeilleurNom.initAppli();
+    }*/
     window.onload=function(){
-        var $checkbox01 = $(".ck01");//Simbad
-        var $checkbox02 = $(".ck02");//GAVO
-        var $checkbox03 = $(".ck03");//VizieR
-        var $checkbox04 = $(".ck04");//CAOM
-        
-        $("#b01").click(function(){
-            $("#showRoot").empty();//Clear the contents of menu.
-            var checkstatus01 = false;
-            if($checkbox01.prop("checked"))//To check if choose the TOP 100. By default, it's false.
-            {
-                checkstatus01 = true;
-            }
-            var s = new TapService("http://simbad.u-strasbg.fr/simbad/sim-tap/sync","public","Simbad",checkstatus01);
-            var data = s.createJson();
-            $("#load1").html(
-                JSON.stringify(data, undefined, 6)
-            );
-            var sj=new jsonRead(data); 
-            s.createJson(data,"basic");
-            var rootTable = sj.rootTable();//read json, return all the rootTable as array
-            var output = "";
-            output += sj.showAll(data);
-            $("#load2").html(output);//show all the informations of rootTable and it's join tables
-            var mostUsedTable = sj.mostUsed();//read json, return all the most used table ([0] is the most used) as array
-            var add ="" 
-            for(var i = 0;i<5;i++){//add five bouton of the most used table
-                add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
-                $("#showRoot").append(add);
-            }
-            var flag = 0;
-            $("#r00").click(function(){//add the click event
-                $("#load2").empty();
-                output = sj.readJsonJoin(mostUsedTable[0]);
-                $("#load2").html(output);
-                flag= 1;
-            })
-            $("#r01").click(function(){
-                $("#load2").empty();
-                output = sj.readJsonJoin(mostUsedTable[1]);
-                $("#load2").html(output);
-                flag= 2;
-            })
-            $("#r02").click(function(){
-                $("#load2").empty();
-                output = sj.readJsonJoin(mostUsedTable[2]);
-                $("#load2").html(output);
-                flag= 3;
-            })
-            $("#r03").click(function(){
-                $("#load2").empty();
-                output = sj.readJsonJoin(mostUsedTable[3]);
-                $("#load2").html(output);
-                flag= 4;
-            })
-            $("#r04").click(function(){
-                $("#load2").empty();
-                output = sj.readJsonJoin(mostUsedTable[4]);
-                $("#load2").html(output);
-                flag= 5;
-            })
-            $("#c00").click(function(){
-                switch(flag){
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        $("#load2").empty();
-                        output = s.createNewJson(data,mostUsedTable[flag-1]);
-                        console.log(output)
-                        $("#load2").html(
-                            JSON.stringify(output, undefined, 4)
-                        );
-                        flag=flag+5;
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 10:
-                        $("#load2").empty();
-                        output = sj.readJsonJoin(mostUsedTable[flag-6]);
-                        $("#load2").html(output);
-                        flag = flag-5;
-                        break;
-                }
-            })
-        })
-
-        $("#b04").click(function(){
-            $("#showRoot").empty();//Clear the contents of menu.
-            var checkstatus02 = false;
-            if($checkbox02.prop("checked"))
-            {
-                checkstatus02 = true;
-            }
-            var g = new TapService("http://dc.zah.uni-heidelberg.de/tap/sync","rr","GAVO",checkstatus02);
-            var data = g.createJson();
-            $("#load1").html(
-                JSON.stringify(data, undefined, 6)
-            );
-            var gj=new jsonRead(data);
-            var rootTable = gj.rootTable();//read json, return all the rootTable as array
-            var output = "";
-            output += gj.showAll(data);
-            $("#load2").html(output);//show all the informations of rootTable and it's join tables
-            var mostUsedTable = gj.mostUsed(data);//read json, return all the most used table ([0] is the most used) as array
-            var add ="" 
-            for(var i = 0;i<5;i++){//add five bouton of the most used table
-                add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
-                $("#showRoot").append(add);
-            }
-            var flag = 0;
-            $("#r00").click(function(){//add the click event
-                $("#load2").empty();
-                output = gj.readJsonJoin(mostUsedTable[0]);
-                $("#load2").html(output);
-                flag= 1;
-            })
-            $("#r01").click(function(){
-                $("#load2").empty();
-                output = gj.readJsonJoin(mostUsedTable[1]);
-                $("#load2").html(output);
-                flag= 2;
-            })
-            $("#r02").click(function(){
-                $("#load2").empty();
-                output = gj.readJsonJoin(mostUsedTable[2]);
-                $("#load2").html(output);
-                flag= 3;
-            })
-            $("#r03").click(function(){
-                $("#load2").empty();
-                output = gj.readJsonJoin(mostUsedTable[3]);
-                $("#load2").html(output);
-                flag= 4;
-            })
-            $("#r04").click(function(){
-                $("#load2").empty();
-                output = gj.readJsonJoin(mostUsedTable[4]);
-                $("#load2").html(output);
-                flag= 5;
-            })
-            $("#c00").click(function(){
-                switch(flag){
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        $("#load2").empty();
-                        output = g.createNewJson(data,mostUsedTable[flag-1]);
-                        console.log(output)
-                        $("#load2").html(
-                            JSON.stringify(output, undefined, 4)
-                        );
-                        flag=flag+5;
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 10:
-                        $("#load2").empty();
-                        output = gj.readJsonJoin(mostUsedTable[flag-6]);
-                        $("#load2").html(output);
-                        flag = flag-5;
-                        break;
-                }
-            })
-        })
- 
-
-        $("#b07").click(function(){
-            $("#showRoot").empty();//Clear the contents of menu.
-            var checkstatus03 = false;
-            if($checkbox03.prop("checked"))
-            {
-                checkstatus03 = true;
-            }
-            var v = new TapService("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync","metaviz","Vizier",checkstatus03);
-            var data = v.createJson();
-            $("#load1").html(
-                JSON.stringify(data, undefined, 6)
-            );
-            var vj=new jsonRead(data);
-            var rootTable = vj.rootTable();//read json, return all the rootTable as array
-            var output = "";
-            output += vj.showAll(data)
-            $("#load2").html(output);//show all the informations of rootTable and it's join tables
-            var mostUsedTable = vj.mostUsed(data);//read json, return all the most used table ([0] is the most used) as array
-            var add ="" 
-            for(var i = 0;i<5;i++){//add five bouton of the most used table
-                add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
-                $("#showRoot").append(add);
-            }
-            var flag = 0;
-            $("#r00").click(function(){//add the click event
-                $("#load2").empty();
-                output = vj.readJsonJoin(mostUsedTable[0]);
-                $("#load2").html(output);
-                flag= 1;
-            })
-            $("#r01").click(function(){
-                $("#load2").empty();
-                output = vj.readJsonJoin(mostUsedTable[1]);
-                $("#load2").html(output);
-                flag= 2;
-            })
-            $("#r02").click(function(){
-                $("#load2").empty();
-                output = vj.readJsonJoin(mostUsedTable[2]);
-                $("#load2").html(output);
-                flag= 3;
-            })
-            $("#r03").click(function(){
-                $("#load2").empty();
-                output = vj.readJsonJoin(mostUsedTable[3]);
-                $("#load2").html(output);
-                flag= 4;
-            })
-            $("#r04").click(function(){
-                $("#load2").empty();
-                output = vj.readJsonJoin(mostUsedTable[4]);
-                $("#load2").html(output);
-                flag= 5;
-            })
-            $("#c00").click(function(){
-                switch(flag){
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        $("#load2").empty();
-                        output = v.createNewJson(data,mostUsedTable[flag-1]);
-                        console.log(output)
-                        $("#load2").html(
-                            JSON.stringify(output, undefined, 4)
-                        );
-                        flag=flag+5;
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 10:
-                        $("#load2").empty();
-                        output = vj.readJsonJoin(mostUsedTable[flag-6]);
-                        $("#load2").html(output);
-                        flag = flag-5;
-                        break;
-                }
-            })
-        })
-
-        $("#b10").click(function(){
-            $("#showRoot").empty();//Clear the contents of menu
-            var checkstatus04 = false;
-            if($checkbox04.prop("checked"))
-            {
-                checkstatus04 = true;
-            }
-            var c = new TapService("http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync","dbo","CAOM",checkstatus04);
-            var data = c.createJson();
-            $("#load1").html(
-                JSON.stringify(data, undefined, 6)
-            );
-            var cj=new jsonRead(data);
-            var rootTable = cj.rootTable();//read json, return all the rootTable as array
-            var output = "";
-            output += cj.showAll(data)
-            $("#load2").html(output);//show all the informations of rootTable and it's join tables
-            var mostUsedTable = cj.mostUsed(data);//read json, return all the most used table ([0] is the most used) as array
-            var add ="" 
-            for(var i = 0;i<5;i++){//add five bouton of the most used table
-                add ="<li><a href='#' id="+"\'"+'r0'+i+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
-                $("#showRoot").append(add);
-            }
-            var flag = 0;
-            $("#r00").click(function(){//add the click event
-                $("#load2").empty();
-                output = cj.readJsonJoin(mostUsedTable[0]);
-                $("#load2").html(output);
-                flag= 1;
-            })
-            $("#r01").click(function(){
-                $("#load2").empty();
-                output = cj.readJsonJoin(mostUsedTable[1]);
-                $("#load2").html(output);
-                flag= 2;
-            })
-            $("#r02").click(function(){
-                $("#load2").empty();
-                output = cj.readJsonJoin(mostUsedTable[2]);
-                $("#load2").html(output);
-                flag= 3;
-            })
-            $("#r03").click(function(){
-                $("#load2").empty();
-                output = cj.readJsonJoin(mostUsedTable[3]);
-                $("#load2").html(output);
-                flag= 4;
-            })
-            $("#r04").click(function(){
-                $("#load2").empty();
-                output = cj.readJsonJoin(mostUsedTable[4]);
-                $("#load2").html(output);
-                flag= 5;
-            })
-            $("#c00").click(function(){
-                switch(flag){
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        $("#load2").empty();
-                        output = c.createNewJson(data,mostUsedTable[flag-1]);
-                        console.log(output)
-                        $("#load2").html(
-                            JSON.stringify(output, undefined, 4)
-                        );
-                        flag=flag+5;
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    case 10:
-                        $("#load2").empty();
-                        output = cj.readJsonJoin(mostUsedTable[flag-6]);
-                        $("#load2").html(output);
-                        flag = flag-5;
-                        break;
-                }
-            })
-        })
-
-
-
-        
+       main();
     }
 </script>
 </head>
@@ -373,14 +36,12 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:400px">
-        <li><a href="#" id="b01">Show All</a></li>
-        <li><a href="#" id="b02"></a></li>
-        <li><a href="#" id="b03"></a></li>
+        <li><a href="#" id="simbad">Show All</a></li>
         <li class="divider"></li>
         <li><a href="http://simbad.u-strasbg.fr/simbad/sim-tap">TAP Simbad</a></li>
     </ul>
 </div>
-<input type="checkbox" class = "ck01" >TOP 100
+<input type="checkbox" id = "top_simbad" >TOP 100
 
 <div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">GAVO</button>
@@ -389,14 +50,12 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="b04">Show All</a></li>
-        <li><a href="#" id="b05"></a></li>
-        <li><a href="#" id="b06"></a></li>
+        <li><a href="#" id="gavo">Show All</a></li>
         <li class="divider"></li>
         <li><a href="http://dc.zah.uni-heidelberg.de/__system__/adql/query">TAP GAVO</a></li>
     </ul>
 </div>
-<input type="checkbox" class = "ck02" >TOP 100
+<input type="checkbox" id = "top_gavo" >TOP 100
 
 <div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">VizieR</button>
@@ -405,14 +64,12 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="b07">Show All</a></li>
-        <li><a href="#" id="b08"></a></li>
-        <li><a href="#" id="b09"></a></li>
+        <li><a href="#" id="vizier">Show All</a></li>
         <li class="divider"></li>
         <li><a href="http://tapvizier.u-strasbg.fr/TAPVizieR/">TAP VizieR</a></li>
     </ul>
 </div>
-<input type="checkbox" class = "ck03" >TOP 100
+<input type="checkbox" id = "top_vizier" >TOP 100
 
 <div class="btn-group" style="padding-right:10px; padding-left:50px">
     <button type="button" class="btn btn-primary">CAOM</button>
@@ -421,14 +78,12 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="b10">Show All</a></li>
-        <li><a href="#" id="b11"></a></li>
-        <li><a href="#" id="b12"></a></li>
+        <li><a href="#" id="caom">Show All</a></li>
         <li class="divider"></li>
         <li><a href="http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/">TAP CAOM</a></li>
     </ul>
 </div>
-<input type="checkbox" class = "ck04" >TOP 100
+<input type="checkbox" id = "top_caom" >TOP 100
 <br></br>
 <pre id="load1" style= "background-color:white; overflow:scroll; width:800px; height:300px;margin-left:400px"></pre>
 

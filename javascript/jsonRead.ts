@@ -71,14 +71,14 @@ class jsonRead{
   }
 
   /**
-   * This function reads the json object and gets all the join table's names
-   * @param root the main table.
+   * Returns the join_table element of table "table"
+   * @param table the main table.
    * @return all the join table's name.
    */
-  joinTable (root:string):string[]{
+  joinTable (table:string):string[]{
     let jsonAll:dic = this.json;
     let joinTable:string[] = [];
-    for(var key in jsonAll[root].join_tables)
+    for(var key in jsonAll[table].join_tables)
     {
       joinTable.push(key);
     }
@@ -86,19 +86,19 @@ class jsonRead{
   }
 
   /**
-   * This is a recursive function. In order to get all the join table of root table
-   * @param root the main(root) table
+   * This is a recursive function. In order to get all the join table of table "table"
+   * @param table the main(root) table
    * @param list_exist store the recorded table name
    * @param flag record the number of recursions and format the output.
    * @return a string containing the html code
    */
-  readJsonJoinTable(root:string,list_exist:string[],flag:number):string{
+  json2HtmlJoin(table:string,list_exist:string[],flag:number):string{
     let jsonAll:dic = this.json;
     let joinTable:string="";
     let flag2:number
     flag2 = flag + 1;
     let space :string =  "    ";
-    for(var key in jsonAll[root].join_tables){
+    for(var key in jsonAll[table].join_tables){
       if(list_exist.indexOf(key)==-1){
         for(let i:number = 0; i<=flag2;i++)
         {
@@ -108,7 +108,7 @@ class jsonRead{
         list_exist.push(key);
         let table :string;
         let tableCut : string; 
-        table = this.readJsonJoinTable(key,list_exist,flag2);
+        table = this.json2HtmlJoin(key,list_exist,flag2);
         tableCut = table.replace(/ /g,"");
         if(tableCut.length != 0)
         {
@@ -121,21 +121,22 @@ class jsonRead{
 
   /**
    * This function reads the json object and get a string containing the html code.
-   * @param root the main(root) table
+   * The same logic of TapService.ts-"createNewJson()"
+   * @param table the main(table) table
    * @return a string containing the html code
    */
-  readJsonJoin (root:string):string{
+  json2Html (table:string):string{
     let jsonAll:dic = this.json
     let joinTable:string="";
     let list_exist:string[] = [];
-    list_exist.push(root);
-    joinTable += "<B>"+ root +"</B>"+ ": "+"<font color = \"#545454\">"+ this.getDescription(root)+"</font>"+ "<br/>";
-    for(var key in jsonAll[root].join_tables)
+    list_exist.push(table);
+    joinTable += "<B>"+ table +"</B>"+ ": "+"<font color = \"#545454\">"+ this.getDescription(table)+"</font>"+ "<br/>";
+    for(var key in jsonAll[table].join_tables)
     {
       joinTable += "    " + "<B>"+key + "</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>";
       if(list_exist.indexOf(key)==-1){//return the table which are joined with the key.
         list_exist.push(key);
-        joinTable +=  this.readJsonJoinTable(key,list_exist,0);
+        joinTable +=  this.json2HtmlJoin(key,list_exist,0);
       }
     }
     return joinTable;
@@ -143,13 +144,13 @@ class jsonRead{
 
   /**
    * This function reads the json object and get a string containing the html code.
-   * @param root  the main(root) table
-   * @return the root table's description
+   * @param table  the main(table) table
+   * @return the table table's description
    */
-  getDescription(root:string):string{
+  getDescription(table:string):string{
     let jsonAll:dic = this.json
     let description:string;
-    description=jsonAll[root].description;
+    description=jsonAll[table].description;
     return description;
   }
 

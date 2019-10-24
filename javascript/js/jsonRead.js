@@ -58,44 +58,44 @@ var jsonRead = /** @class */ (function () {
         return rootTable;
     };
     /**
-     * This function reads the json object and gets all the join table's names
-     * @param root the main table.
+     * Returns the join_table element of table "table"
+     * @param table the main table.
      * @return all the join table's name.
      */
-    jsonRead.prototype.joinTable = function (root) {
+    jsonRead.prototype.joinTable = function (table) {
         var jsonAll = this.json;
         var joinTable = [];
-        for (var key in jsonAll[root].join_tables) {
+        for (var key in jsonAll[table].join_tables) {
             joinTable.push(key);
         }
         return joinTable;
     };
     /**
-     * This is a recursive function. In order to get all the join table of root table
-     * @param root the main(root) table
+     * This is a recursive function. In order to get all the join table of table "table"
+     * @param table the main(root) table
      * @param list_exist store the recorded table name
      * @param flag record the number of recursions and format the output.
      * @return a string containing the html code
      */
-    jsonRead.prototype.readJsonJoinTable = function (root, list_exist, flag) {
+    jsonRead.prototype.json2HtmlJoin = function (table, list_exist, flag) {
         var jsonAll = this.json;
         var joinTable = "";
         var flag2;
         flag2 = flag + 1;
         var space = "    ";
-        for (var key in jsonAll[root].join_tables) {
+        for (var key in jsonAll[table].join_tables) {
             if (list_exist.indexOf(key) == -1) {
                 for (var i = 0; i <= flag2; i++) {
                     joinTable += space;
                 }
                 joinTable += "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
                 list_exist.push(key);
-                var table = void 0;
+                var table_1 = void 0;
                 var tableCut = void 0;
-                table = this.readJsonJoinTable(key, list_exist, flag2);
-                tableCut = table.replace(/ /g, "");
+                table_1 = this.json2HtmlJoin(key, list_exist, flag2);
+                tableCut = table_1.replace(/ /g, "");
                 if (tableCut.length != 0) {
-                    joinTable += table;
+                    joinTable += table_1;
                 }
             }
         }
@@ -103,33 +103,34 @@ var jsonRead = /** @class */ (function () {
     };
     /**
      * This function reads the json object and get a string containing the html code.
-     * @param root the main(root) table
+     * The same logic of TapService.ts-"createNewJson()"
+     * @param table the main(table) table
      * @return a string containing the html code
      */
-    jsonRead.prototype.readJsonJoin = function (root) {
+    jsonRead.prototype.json2Html = function (table) {
         var jsonAll = this.json;
         var joinTable = "";
         var list_exist = [];
-        list_exist.push(root);
-        joinTable += "<B>" + root + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(root) + "</font>" + "<br/>";
-        for (var key in jsonAll[root].join_tables) {
+        list_exist.push(table);
+        joinTable += "<B>" + table + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(table) + "</font>" + "<br/>";
+        for (var key in jsonAll[table].join_tables) {
             joinTable += "    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
             if (list_exist.indexOf(key) == -1) {
                 list_exist.push(key);
-                joinTable += this.readJsonJoinTable(key, list_exist, 0);
+                joinTable += this.json2HtmlJoin(key, list_exist, 0);
             }
         }
         return joinTable;
     };
     /**
      * This function reads the json object and get a string containing the html code.
-     * @param root  the main(root) table
-     * @return the root table's description
+     * @param table  the main(table) table
+     * @return the table table's description
      */
-    jsonRead.prototype.getDescription = function (root) {
+    jsonRead.prototype.getDescription = function (table) {
         var jsonAll = this.json;
         var description;
-        description = jsonAll[root].description;
+        description = jsonAll[table].description;
         return description;
     };
     /**

@@ -1,14 +1,21 @@
+document.write("<script type='text/javascript' src= 'votable.js'></script>");
+
 "use strict"
+
 class VOTableTools{
 
   /**
    * 
    * @param vObject : votable object.
    */
-  static votableToJson(vObject: any):string[]{
+  static votable2Rows(vObject: any):string[]{
     let contentText:string = vObject.responseText;
     let reData:string[]=[];
     var method = contentText.indexOf("base64");
+    /*
+    This methode only works if the data is a string.
+    @TODO It should be rewritten to find a method that works for all types. e.g. double, long ...
+    */
     if(method!=-1){//The coding mode is "base64". e.g. Simbad, GAVO
       let content:string = $(contentText).find("STREAM").eq(0).text();
       //a means base64
@@ -24,7 +31,6 @@ class VOTableTools{
           }
         }
       }
-      
       let data2:string[]=data.split("&");
       for(var i=1;i<data2.length;i=i+1)//Store the name of the table in an array
       {
@@ -32,20 +38,14 @@ class VOTableTools{
       }
     }
     else{//The coding mode is normal. e.g. VizieR, CAOM
-      let content:string = contentText.replace(/\s+/g,"#");
-      content = content.match(/<TABLEDATA>(\S*)<\/TABLEDATA>/)[1];
-      content = content.replace(/#/g," ");
-      let data:string;  
-      let data2:string[];
-      data = content.replace(/<TR><TD>/g, "@");
-      data = data.replace(/<\/TD><\/TR>/g, "");
-      data = data.replace(/<\/TD><TD>/g, "@");
-      data2 = data.split('@')
-      for(var k = 1;k<data2.length;k++)
-      {
-        reData.push(data2[k]);
-      }
-    }
+			$(contentText).find('RESOURCE[type="results"]').each(function(){
+				$(this).find("TR").each(function(){
+          for(let i:number=0; i<this.childNodes.length; i++){
+            reData.push(this.childNodes[i].textContent);
+          }
+				});
+    })
+  }
     return reData;
   }
 

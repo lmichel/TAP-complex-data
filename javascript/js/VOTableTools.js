@@ -1,4 +1,6 @@
 "use strict";
+document.write("<script type='text/javascript' src= 'votable.js'></script>");
+"use strict";
 var VOTableTools = /** @class */ (function () {
     function VOTableTools() {
     }
@@ -6,10 +8,14 @@ var VOTableTools = /** @class */ (function () {
      *
      * @param vObject : votable object.
      */
-    VOTableTools.votableToJson = function (vObject) {
+    VOTableTools.votable2Rows = function (vObject) {
         var contentText = vObject.responseText;
         var reData = [];
         var method = contentText.indexOf("base64");
+        /*
+        This methode only works if the data is a string.
+        @TODO It should be rewritten to find a method that works for all types. e.g. double, long ...
+        */
         if (method != -1) {
             var content = $(contentText).find("STREAM").eq(0).text();
             //a means base64
@@ -31,18 +37,13 @@ var VOTableTools = /** @class */ (function () {
             }
         }
         else {
-            var content = contentText.replace(/\s+/g, "#");
-            content = content.match(/<TABLEDATA>(\S*)<\/TABLEDATA>/)[1];
-            content = content.replace(/#/g, " ");
-            var data = void 0;
-            var data2 = void 0;
-            data = content.replace(/<TR><TD>/g, "@");
-            data = data.replace(/<\/TD><\/TR>/g, "");
-            data = data.replace(/<\/TD><TD>/g, "@");
-            data2 = data.split('@');
-            for (var k = 1; k < data2.length; k++) {
-                reData.push(data2[k]);
-            }
+            $(contentText).find('RESOURCE[type="results"]').each(function () {
+                $(this).find("TR").each(function () {
+                    for (var i_1 = 0; i_1 < this.childNodes.length; i_1++) {
+                        reData.push(this.childNodes[i_1].textContent);
+                    }
+                });
+            });
         }
         return reData;
     };
