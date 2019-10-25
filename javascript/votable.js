@@ -81,41 +81,40 @@ function VOTableParser() {
    *
    * @param {string} url - can be either an url or a local path
    */
-  this.loadFile = function (url) {
+  this.loadFile = function (content) {
+    /*
     var processError = function() {
       debug('Unable to load VOTable file. Check the path of VOTable file');
       vot.loadingState = 'fail';
       if (errCallbackFunction !== undefined) {
         errCallbackFunction(thisParser);
       }
-    };
-
+    };*/
     thisParser.cleanMemory();
-    var start = new Date().getTime(),
-        data;
-    thisParser.xhr = new XMLHttpRequest();
+    //var start = new Date().getTime(),
+    //    data;
+    //thisParser.xhr = new XMLHttpRequest();
 
-    thisParser.xhr.open('GET', url, false);
-    thisParser.xhr.onreadystatechange = function () {
-      if (thisParser.xhr.readyState === XMLHttpRequest.DONE && thisParser.xhr.status==200) {
-        data = thisParser.xhr.responseText;
-        thisParser.loadBufferedFile(data, false, url);
-        initialize(data, url);
-        parseB64CurrentTableData();
-        
-        thisParser.loadingTime = new Date().getTime() - start;
-        debug('loading time : ' + thisParser.loadingTime + ' ms.');
-      }
-      else {
-        processError();
-      }
-    };
-
-    try {
-      this.xhr.send();
-    } catch (e) {
-      processError();
-    }
+    //thisParser.xhr.open('GET', url, false);
+    //thisParser.xhr.onreadystatechange = function () {
+    //  if (thisParser.xhr.readyState === XMLHttpRequest.DONE && thisParser.xhr.status==200) {
+    //thisParser.xhr = content
+    //    data = thisParser.xhr.responseText;
+    thisParser.loadBufferedFile(content, false);//@modifier delete the  third parameter url
+    //    thisParser.loadingTime = new Date().getTime() - start;
+    //    debug('loading time : ' + thisParser.loadingTime + ' ms.');
+    //  }
+    //  else {
+    //    processError();
+    //  }
+    //};
+    //try {
+    //  this.xhr.send();
+    //} catch (e) {
+    //  processError();
+    //}
+    var a = parseB64CurrentTableData();
+    return a;
   };
   
   /**
@@ -174,7 +173,7 @@ function VOTableParser() {
    * @param {string|xmlTree} buffer
    * @param {boolean} isXml - true if buffer is an xmlTree
    */
-  this.loadBufferedFile = function (buffer, isXml, filename) {
+  this.loadBufferedFile = function (buffer, isXml) {//@modifier delete the third parameter name
     
     thisParser.cleanMemory();
     var start = new Date().getTime(),
@@ -183,13 +182,11 @@ function VOTableParser() {
       // conversion String => XML
       var parseXml;
       if (window.DOMParser) {
-        console.log("4")
         parseXml = function (xmlStr) {
           return (new window.DOMParser()).parseFromString(xmlStr, 'text/xml');
         };
       } else if (typeof window.ActiveXObject !== 'undefined'
                  && new window.ActiveXObject('Microsoft.XMLDOM')) {
-                  console.log("5")
         parseXml = function (xmlStr) {
           var xmlDoc = new window.ActiveXObject('Microsoft.XMLDOM');
           xmlDoc.async = 'false';
@@ -199,11 +196,10 @@ function VOTableParser() {
       }
       data = parseXml(buffer);
     } else {
-      console.log("6")
       data = buffer;
     }
 
-    initialize(data, filename || 'VOTableBufferedFile');
+    initialize(data);//@modifier delete the second parameter name
 
     thisParser.loadingTime = new Date().getTime() - start;
     debug('loading time : ' + thisParser.loadingTime + ' ms.');
@@ -215,11 +211,10 @@ function VOTableParser() {
    * @param {xmlTree} data
    * @param {string} name
    */
-  function initialize(data, name) {
+  function initialize(data) {//@modifier delete the second parameter name
     // error
-    console.log("1"+!data);
-// || data.getElementsByTagName("parsererror").length !data.documentElement ||
-    if (!data ) {
+
+    if (!data|| data.getElementsByTagName("parsererror").length || !data.documentElement ) {
       debug('Error: loaded file does not contains VOTable information, or is not in xml format');
       vot.loadingState = 'fail';
       if (errCallbackFunction !== undefined)
@@ -227,13 +222,12 @@ function VOTableParser() {
     }
     else {
       xmlData = data;
-      console.log("#")
-      console.log(xmlData)
       selected.resource.i = 0;
       selected.resource.xml = null;
       selected.resource.tables = null;
       selected.table.i = 0;
-      selected.table.xml = null;
+      selected.table.xml = xmlData;
+
       vot.nbTables = 0;
 
       // checks if document is VOTable
@@ -255,7 +249,7 @@ function VOTableParser() {
 
 
       vot.loadingState = 'success';
-      vot.name = name;
+      vot.name = "";//@modifier =name
       vot.resource = xmlData.getElementsByTagName(prefix + 'RESOURCE');
       vot.nbResources = vot.resource.length;
       tablesData = [];
@@ -485,6 +479,7 @@ function VOTableParser() {
    * @return {Array}
    */
   this.getCurrentTableFields = function () {
+    currentTableFields=parseCurrentTableFields();//@modifier: call the fonction parseCurrentTableFields();
     return currentTableFields;
   };
 
@@ -798,6 +793,16 @@ function VOTableParser() {
 
     return res;
   };
+  //-----------------------------------------------------------------------------
+  // New Functions related to B64 parsing @modifier 
+  function content2Rows(content){
+    var dataB64;
+    dataB64 = content;
+  }
+
+
+
+
 
   //-----------------------------------------------------------------------------
   // Functions related to B64 parsing
@@ -857,14 +862,12 @@ function VOTableParser() {
     endParsingB64 = false;
 
     dataB64 = selected.table.xml.getElementsByTagName(prefix + 'STREAM')[0].childNodes[0].nodeValue;
-    //"AAAAC21lc0RpYW1ldGVyAAAAIENvbGxlY3Rpb24gb2Ygc3RlbGxhciBkaWFtZXRlcnMuAAAABW1lc1BNAAAAHUNvbGxlY3Rpb24gb2YgcHJvcGVyIG1vdGlvbnMuAAAACGtleXdvcmRzAAAAG0xpc3Qgb2Yga2V5d29yZHMgaW4gYSBwYXBlcgAAAAZhdXRob3IAAAAjQXV0aG9yIG9mIGEgYmlibGlvZ3JhcGhpYyByZWZlcmVuY2UAAAAGbWVzSVNPAAAAL0luZnJhcmVkIFNwYWNlIE9ic2VydmF0b3J5IChJU08pIG9ic2VydmluZyBsb2cuAAAABW1lc01LAAAAHUNvbGxlY3Rpb24gb2Ygc3BlY3RyYWwgdHlwZXMuAAAAA3JlZgAAABdCaWJsaW9ncmFwaGljIHJlZmVyZW5jZQAAAAlhbGxmbHV4ZXMAAAAwYWxsIGZsdXgvbWFnbml0dWRlcyBVLEIsVixJLEosSCxLLHVfLGdfLHJfLGlfLHpfAAAABWlkZW50AAAAJUlkZW50aWZpZXJzIG9mIGFuIGFzdHJvbm9taWNhbCBvYmplY3QAAAAEZmx1eAAAADdNYWduaXR1ZGUvRmx1eCBpbmZvcm1hdGlvbiBhYm91dCBhbiBhc3Ryb25vbWljYWwgb2JqZWN0AAAABm1lc1BMWAAAACdDb2xsZWN0aW9uIG9mIHRyaWdvbm9tZXRyaWMgcGFyYWxsYXhlcy4AAAAGaF9saW5rAAAAH2hpZXJhcmNoeSBvZiBtZW1iZXJzaGlwIG1lYXN1cmUAAAAGZmlsdGVyAAAAHERlc2NyaXB0aW9uIG9mIGEgZmx1eCBmaWx0ZXIAAAAIb3R5cGVkZWYAAAAuYWxsIG5hbWVzIGFuZCBkZWZpbml0aW9ucyBmb3IgdGhlIG9iamVjdCB0eXBlcwAAAAttZXNEaXN0YW5jZQAAADpDb2xsZWN0aW9uIG9mIGRpc3RhbmNlcyAocGMsIGtwYyBvciBNcGMpIGJ5IHNldmVyYWwgbWVhbnMuAAAABm1lc1ZhcgAAADRDb2xsZWN0aW9uIG9mIHN0ZWxsYXIgdmFyaWFiaWxpdHkgdHlwZXMgYW5kIHBlcmlvZHMuAAAABm90eXBlcwAAADJMaXN0IG9mIGFsbCBvYmplY3QgdHlwZXMgYXNzb2NpYXRlZCB3aXRoIGFuIG9iamVjdAAAAA1tZXNWZWxvY2l0aWVzAAAAKkNvbGxlY3Rpb24gb2YgSFJWLCBWbHNyLCBjeiBhbmQgcmVkc2hpZnRzLgAAAAZtZXNYbW0AAAASWE1NIG9ic2VydmluZyBsb2cuAAAAB2hhc19yZWYAAABMQXNzb2NpYXRpb25zIGJldHdlZW4gYXN0cm9ub21pY2FsIG9iamVjdHMgYW5kIHRoZWlyIGJpYmxpb2dyYXBoaWMgcmVmZXJlbmNlcwAAAAZtZXNSb3QAAAAeU3RlbGxhciBSb3RhdGlvbmFsIFZlbG9jaXRpZXMuAAAABmJpYmxpbwAAAAxCaWJsaW9ncmFwaHkAAAADaWRzAAAAIGFsbCBuYW1lcyBjb25jYXRlbmF0ZWQgd2l0aCBwaXBlAAAABm1lc0lVRQAAADFJbnRlcm5hdGlvbmFsIFVsdHJhdmlvbGV0IEV4cGxvcmVyIG9ic2VydmluZyBsb2cuAAAAC21lc0hlcnNjaGVsAAAAGlRoZSBIZXJzY2hlbCBvYnNlcnZpbmcgTG9nAAAAB21lc0ZlX2gAAAA7Q29sbGVjdGlvbiBvZiBtZXRhbGxpY2l0eSwgYXMgd2VsbCBhcyBUZWZmLCBsb2dnIGZvciBzdGFycy4AAAADY2F0AAAAD0NhdGFsb2d1ZXMgbmFtZQAAAAhhbGx0eXBlcwAAACdhbGwgb2JqZWN0IHR5cGVzIGNvbmNhdGVuYXRlZCB3aXRoIHBpcGUAAAAFYmFzaWMAAAApR2VuZXJhbCBkYXRhIGFib3V0IGFuIGFzdHJvbm9taWNhbCBvYmplY3Q=";
-    //
-        console.log("3")
-        console.log(dataB64)
+    
     // We must clean the B64 data from all the spaces and tabs it could contains
     dataB64 = dataB64.replace(/[ \t\r]+/g, '');
 
     dataB64Length = dataB64.length;
+  
     fields = thisParser.getCurrentTableFields();
     nbFields = fields.length;
 
@@ -1006,7 +1009,7 @@ function VOTableParser() {
       }
 
       columns[ptrCurrentField] = value;
-
+      
       if (ptrCurrentField === (nbFields - 1)) {
         ptrCurrentField = 0;
         rows[i] = columns;
@@ -1025,6 +1028,7 @@ function VOTableParser() {
 
     thisParser.parsingTime = new Date().getTime() - start;
     debug('Performance parsing B64: ' + thisParser.parsingTime + ' ms.');
+    return rows;//tableData also store the data
   };
 
   /**

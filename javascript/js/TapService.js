@@ -167,10 +167,10 @@ var TapService = /** @class */ (function () {
         return jsonAll;
     };
     /**
-     * In order to create the json with all join table
-     * @param data :json
-     * @param root :the main table
-     */
+   * In order to create the json with all join table
+   * @param data :json
+   * @param root :the main table
+   */
     TapService.prototype.createNewJson = function (data, root) {
         var reJson = {};
         for (var key in data) {
