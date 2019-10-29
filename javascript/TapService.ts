@@ -67,6 +67,19 @@ class TapService{
   }
 
   /**
+   * Add the schema name
+   * @param table 
+   */
+  getQualifiedName(table:string){
+    if(table.indexOf(this.schema)!=-1){
+      return table;
+    }
+    else{
+      return this.schema+"."+table;
+    }
+  }
+
+  /**
    * Delete the schema name
    * @param table 
    */
@@ -207,11 +220,13 @@ class TapService{
             if(JSON.stringify(a)!='{}'){
               joinJsonJoin1["join_tables"]=a;
             }
-          joinJsonJoin[join]=joinJsonJoin1;
+          let joinRight:string = this.getQualifiedName(join)
+          console.log(joinRight)
+          joinJsonJoin[joinRight]=joinJsonJoin1;
           joinJson["join_tables"]=joinJsonJoin;
-
         }
-        reJson[key]=joinJson;
+        let keyRight:string = this.getQualifiedName(key)
+        reJson[keyRight]=joinJson;
         break;
       }
     }
@@ -234,7 +249,8 @@ class TapService{
             if(JSON.stringify(a)!='{}'){
               joinJsonJoin1["join_tables"]=a;
             }
-            joinJsonJoin[join]=joinJsonJoin1;
+            let joinRight:string = this.getQualifiedName(join)
+            joinJsonJoin[joinRight]=joinJsonJoin1;
           }
         }
         break;
@@ -242,9 +258,6 @@ class TapService{
     }
   return joinJsonJoin
   }
-
-
-
 
 }
 

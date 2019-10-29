@@ -58,6 +58,18 @@ var TapService = /** @class */ (function () {
         return reLink;
     };
     /**
+     * Add the schema name
+     * @param table
+     */
+    TapService.prototype.getQualifiedName = function (table) {
+        if (table.indexOf(this.schema) != -1) {
+            return table;
+        }
+        else {
+            return this.schema + "." + table;
+        }
+    };
+    /**
      * Delete the schema name
      * @param table
      */
@@ -192,10 +204,13 @@ var TapService = /** @class */ (function () {
                     if (JSON.stringify(a) != '{}') {
                         joinJsonJoin1["join_tables"] = a;
                     }
-                    joinJsonJoin[join] = joinJsonJoin1;
+                    var joinRight = this.getQualifiedName(join);
+                    console.log(joinRight);
+                    joinJsonJoin[joinRight] = joinJsonJoin1;
                     joinJson["join_tables"] = joinJsonJoin;
                 }
-                reJson[key] = joinJson;
+                var keyRight = this.getQualifiedName(key);
+                reJson[keyRight] = joinJson;
                 break;
             }
         }
@@ -218,7 +233,8 @@ var TapService = /** @class */ (function () {
                         if (JSON.stringify(a) != '{}') {
                             joinJsonJoin1["join_tables"] = a;
                         }
-                        joinJsonJoin[join] = joinJsonJoin1;
+                        var joinRight = this.getQualifiedName(join);
+                        joinJsonJoin[joinRight] = joinJsonJoin1;
                     }
                 }
                 break;
