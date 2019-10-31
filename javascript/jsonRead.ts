@@ -80,7 +80,13 @@ class jsonRead{
     let joinTable:string[] = [];
     for(var key in jsonAll[table].join_tables)
     {
-      joinTable.push(key);
+      if(key.indexOf("2")!=-1){
+        continue;//same rootTable and join_table, I made the second name of the repeat followed by a number 2//@TODO 
+      }
+      else{
+        joinTable.push(key);
+      }
+      
     }
     return joinTable;
   }
@@ -99,20 +105,25 @@ class jsonRead{
     flag2 = flag + 1;
     let space :string =  "    ";
     for(var key in jsonAll[table].join_tables){
-      if(list_exist.indexOf(key)==-1){
-        for(let i:number = 0; i<=flag2;i++)
-        {
-          joinTable += space;
-        }
-        joinTable +="<B>"+ key +"</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>";
-        list_exist.push(key);
-        let table :string;
-        let tableCut : string; 
-        table = this.json2HtmlJoin(key,list_exist,flag2);
-        tableCut = table.replace(/ /g,"");
-        if(tableCut.length != 0)
-        {
-          joinTable += table;
+      if(key.indexOf("2")!=-1){
+        continue;
+      }
+      else{
+        if(list_exist.indexOf(key)==-1){
+          for(let i:number = 0; i<=flag2;i++)
+          {
+            joinTable += space;
+          }
+          joinTable +="<B>"+ key +"</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>";
+          list_exist.push(key);
+          let table :string;
+          let tableCut : string; 
+          table = this.json2HtmlJoin(key,list_exist,flag2);
+          tableCut = table.replace(/ /g,"");
+          if(tableCut.length != 0)
+          {
+            joinTable += table;
+          }
         }
       }
     }
@@ -133,11 +144,16 @@ class jsonRead{
     joinTable += "<B>"+ table +"</B>"+ ": "+"<font color = \"#545454\">"+ this.getDescription(table)+"</font>"+ "<br/>";
     for(var key in jsonAll[table].join_tables)
     {
-      joinTable += "    " + "<B>"+key + "</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>";
-      if(list_exist.indexOf(key)==-1){//return the table which are joined with the key.
-        list_exist.push(key);
-        joinTable +=  this.json2HtmlJoin(key,list_exist,0);
+      if(key.indexOf("2")!=-1){
+        continue;
+      }else{
+        joinTable += "    " + "<B>"+key + "</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>";
+        if(list_exist.indexOf(key)==-1){//return the table which are joined with the key.
+          list_exist.push(key);
+          joinTable +=  this.json2HtmlJoin(key,list_exist,0);
+        }
       }
+      
     }
     return joinTable;
   }

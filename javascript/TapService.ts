@@ -155,12 +155,12 @@ class TapService{
     allTtable = this.allTable();//Get the array containing the names of the tables.//Even number is the table name.
     for(let k:number=0;k<allTtable.length;k=k+2){
       let arrLink:dic={};
-      let arrLinkJoint:dic = {};
       let arrJoint:dic = {};
       let flag:number = 0;
       let nowTable:string = allTtable[k]
       nowTable = this.getRightName(nowTable);
       for(var i = 0; i < alllink.length;i++){
+        let arrLinkJoint:dic = {};
         var tt = alllink[i][0].split("|");
         var ft = alllink[i][1].split("|");
         if(tt[0]== nowTable){
@@ -169,7 +169,13 @@ class TapService{
           arrLinkJoint["constraints"] =constraints;
           arrLinkJoint["from"]=ft[1];
           arrLinkJoint["target"]=tt[1];
-          arrLink[ft[0]]=arrLinkJoint;
+          var temp = ft[0]
+          for(var key in arrLink){
+            if(ft[0]==key){
+              temp = ft[0]+"2";
+            }
+          }
+          arrLink[temp]=arrLinkJoint;
         };
         if(ft[0] == nowTable){
           flag = flag +1;
@@ -177,7 +183,13 @@ class TapService{
           arrLinkJoint["constraints"] =constraints;
           arrLinkJoint["from"]=tt[1];
           arrLinkJoint["target"]=ft[1];
-          arrLink[tt[0]]=arrLinkJoint;
+          var temp = tt[0]
+          for(var key in arrLink){
+            if(tt[0]==key){
+              temp = tt[0]+"2";
+            }
+          }
+          arrLink[temp]=arrLinkJoint;
         };
       }
       if(flag == 0){
@@ -206,27 +218,31 @@ class TapService{
       let joinJson:dic = {};
       if(root == key){
         joinJson["description"]=data[key].description;
+        joinJson["columns"]=[];
         let joinJsonJoin:dic={};
         for(var join in data[key].join_tables)
         { 
-          let joinJsonJoin1:dic={};
-          list_exist.push(join);
-          joinJsonJoin1["description"]=data[join].description;
-          joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
-          joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
-          joinJsonJoin1["from"]=data[key].join_tables[join].from;
-          joinJsonJoin1["target"]=data[key].join_tables[join].target;
-          let a:dic = this.ifJoin(data,list_exist,join)
-            if(JSON.stringify(a)!='{}'){
-              joinJsonJoin1["join_tables"]=a;
-            }
-          let joinRight:string = this.getQualifiedName(join)
-          console.log(joinRight)
-          joinJsonJoin[joinRight]=joinJsonJoin1;
-          joinJson["join_tables"]=joinJsonJoin;
+          if(join.indexOf("2")!=-1){
+            continue;
+          }
+          else{
+            let joinJsonJoin1:dic={};
+            list_exist.push(join);
+            joinJsonJoin1["description"]=data[join].description;
+            joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
+            joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
+            joinJsonJoin1["from"]=data[key].join_tables[join].from;
+            joinJsonJoin1["target"]=data[key].join_tables[join].target;
+            let a:dic = this.ifJoin(data,list_exist,join)
+              if(JSON.stringify(a)!='{}'){
+                joinJsonJoin1["join_tables"]=a;
+              }
+            joinJsonJoin[join]=joinJsonJoin1;
+            joinJson["join_tables"]=joinJsonJoin;
+          }
+          
         }
-        let keyRight:string = this.getQualifiedName(key)
-        reJson[keyRight]=joinJson;
+        reJson[key]=joinJson;
         break;
       }
     }
@@ -237,21 +253,26 @@ class TapService{
     for(var key in data){
       if(key==root ){
         for(var join in data[key].join_tables){
-          if(list_exist.indexOf(join) == -1){
-            list_exist.push(join);
-            let joinJsonJoin1:dic={};
-            joinJsonJoin1["description"]=data[join].description;
-            joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
-            joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
-            joinJsonJoin1["from"]=data[key].join_tables[join].from;
-            joinJsonJoin1["target"]=data[key].join_tables[join].target;
-            let a:dic = this.ifJoin(data,list_exist,join)
-            if(JSON.stringify(a)!='{}'){
-              joinJsonJoin1["join_tables"]=a;
-            }
-            let joinRight:string = this.getQualifiedName(join)
-            joinJsonJoin[joinRight]=joinJsonJoin1;
+          if(join.indexOf("2")!=-1){
+            continue;
           }
+          else{
+            if(list_exist.indexOf(join) == -1){
+              list_exist.push(join);
+              let joinJsonJoin1:dic={};
+              joinJsonJoin1["description"]=data[join].description;
+              joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
+              joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
+              joinJsonJoin1["from"]=data[key].join_tables[join].from;
+              joinJsonJoin1["target"]=data[key].join_tables[join].target;
+              let a:dic = this.ifJoin(data,list_exist,join)
+              if(JSON.stringify(a)!='{}'){
+                joinJsonJoin1["join_tables"]=a;
+              }
+              joinJsonJoin[join]=joinJsonJoin1;
+            }
+          }
+          
         }
         break;
       }

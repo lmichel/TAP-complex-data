@@ -12,10 +12,10 @@
 
 <script type="text/javascript">
     window.onload=function(){
-        //console.log(" Page || '-' || Last_Page AS \"Pages\",")
+
         $("#c00").click(function(){
             var content = $("#textId").val();
-            var show = getAdql(content);
+            var show = getAdql(content,"dbo");
             $("#load2").html(show);
 
         })
@@ -31,9 +31,8 @@
     </h1>
 </div>
 
-<input type="text" value="" id="textId" name="textName" style= " width:800px; height:300px;margin-left:400px">
 
-
+<textarea rows="100" col="100" value="" id="textId" style= " width:800px; height:300px;margin-left:400px"></textarea>
 <div class="btn-group" style="text-align: center; padding-left:600px">
     <button type="button" id = "c00" class="btn btn-primary">Change</button>
 </div>

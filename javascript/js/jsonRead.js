@@ -66,7 +66,12 @@ var jsonRead = /** @class */ (function () {
         var jsonAll = this.json;
         var joinTable = [];
         for (var key in jsonAll[table].join_tables) {
-            joinTable.push(key);
+            if (key.indexOf("2") != -1) {
+                continue; //same rootTable and join_table, I made the second name of the repeat followed by a number 2//@TODO 
+            }
+            else {
+                joinTable.push(key);
+            }
         }
         return joinTable;
     };
@@ -84,18 +89,23 @@ var jsonRead = /** @class */ (function () {
         flag2 = flag + 1;
         var space = "    ";
         for (var key in jsonAll[table].join_tables) {
-            if (list_exist.indexOf(key) == -1) {
-                for (var i = 0; i <= flag2; i++) {
-                    joinTable += space;
-                }
-                joinTable += "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
-                list_exist.push(key);
-                var table_1 = void 0;
-                var tableCut = void 0;
-                table_1 = this.json2HtmlJoin(key, list_exist, flag2);
-                tableCut = table_1.replace(/ /g, "");
-                if (tableCut.length != 0) {
-                    joinTable += table_1;
+            if (key.indexOf("2") != -1) {
+                continue;
+            }
+            else {
+                if (list_exist.indexOf(key) == -1) {
+                    for (var i = 0; i <= flag2; i++) {
+                        joinTable += space;
+                    }
+                    joinTable += "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
+                    list_exist.push(key);
+                    var table_1 = void 0;
+                    var tableCut = void 0;
+                    table_1 = this.json2HtmlJoin(key, list_exist, flag2);
+                    tableCut = table_1.replace(/ /g, "");
+                    if (tableCut.length != 0) {
+                        joinTable += table_1;
+                    }
                 }
             }
         }
@@ -114,10 +124,15 @@ var jsonRead = /** @class */ (function () {
         list_exist.push(table);
         joinTable += "<B>" + table + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(table) + "</font>" + "<br/>";
         for (var key in jsonAll[table].join_tables) {
-            joinTable += "    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
-            if (list_exist.indexOf(key) == -1) {
-                list_exist.push(key);
-                joinTable += this.json2HtmlJoin(key, list_exist, 0);
+            if (key.indexOf("2") != -1) {
+                continue;
+            }
+            else {
+                joinTable += "    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
+                if (list_exist.indexOf(key) == -1) {
+                    list_exist.push(key);
+                    joinTable += this.json2HtmlJoin(key, list_exist, 0);
+                }
             }
         }
         return joinTable;
