@@ -157,6 +157,7 @@ class TapService{
       let arrLink:dic={};
       let arrJoint:dic = {};
       let flag:number = 0;
+      let ifSame:number = 0;
       let nowTable:string = allTtable[k]
       nowTable = this.getRightName(nowTable);
       for(var i = 0; i < alllink.length;i++){
@@ -164,38 +165,77 @@ class TapService{
         var tt = alllink[i][0].split("|");
         var ft = alllink[i][1].split("|");
         if(tt[0]== nowTable){
-          flag = flag +1;
-          arrLinkJoint["columns"]=columns;
-          arrLinkJoint["constraints"] =constraints;
-          arrLinkJoint["from"]=ft[1];
-          arrLinkJoint["target"]=tt[1];
-          var temp = ft[0]
+          loop:
           for(var key in arrLink){
             if(ft[0]==key){
-              temp = ft[0]+"2";
+              ifSame=1;
+              arrLinkJoint["schema"]=this.schema;
+              arrLinkJoint["columns"]=columns;
+              arrLinkJoint["constraints"] =constraints;
+              var temp1 = [];
+              temp1.push(arrLink[ft[0]].from);
+              temp1.push(ft[1]);
+              arrLinkJoint["from"]=temp1;
+              temp1= [];
+              temp1.push(arrLink[ft[0]].target);
+              temp1.push(tt[1]);
+              arrLinkJoint["target"]=temp1;
+              arrLink[ft[0]]=arrLinkJoint;
+              break loop;
+            }
+            else{
+              ifSame=0
             }
           }
-          arrLink[temp]=arrLinkJoint;
+          if(ifSame==0){
+            flag = flag +1;
+            arrLinkJoint["schema"]=this.schema;
+            arrLinkJoint["columns"]=columns;
+            arrLinkJoint["constraints"] =constraints;
+            arrLinkJoint["from"]=ft[1];
+            arrLinkJoint["target"]=tt[1];
+            arrLink[ft[0]]=arrLinkJoint;
+          }
         };
         if(ft[0] == nowTable){
+          loop:
+          for(var key in arrLink){
+            if(tt[0]==key){
+              ifSame=1;
+              arrLinkJoint["schema"]=this.schema;
+              arrLinkJoint["columns"]=columns;
+              arrLinkJoint["constraints"] =constraints;
+              var temp1 = [];
+              temp1.push(arrLink[tt[0]].from);
+              temp1.push(tt[1]);
+              arrLinkJoint["from"]=temp1;
+              temp1= [];
+              temp1.push(arrLink[tt[0]].target);
+              temp1.push(ft[1]);
+              arrLinkJoint["target"]=temp1;
+              arrLink[tt[0]]=arrLinkJoint;
+              break loop;
+            }
+            else{
+              ifSame=0
+            }
+        };
+        if(ifSame==0){
           flag = flag +1;
+          arrLinkJoint["schema"]=this.schema;
           arrLinkJoint["columns"]=columns;
           arrLinkJoint["constraints"] =constraints;
           arrLinkJoint["from"]=tt[1];
           arrLinkJoint["target"]=ft[1];
-          var temp = tt[0]
-          for(var key in arrLink){
-            if(tt[0]==key){
-              temp = tt[0]+"2";
-            }
-          }
-          arrLink[temp]=arrLinkJoint;
-        };
+          arrLink[tt[0]]=arrLinkJoint;
+        }
       }
+    }
       if(flag == 0){
         continue;
       }
       else{
+        arrJoint["schema"]=this.schema;
         arrJoint["description"]=allTtable[k+1];
         arrJoint["join_tables"]=arrLink;
         jsonAll[nowTable] = arrJoint;
@@ -203,6 +243,7 @@ class TapService{
     }
     return jsonAll;
   }
+
 
   /**
  * In order to create the json with all join table
@@ -217,17 +258,16 @@ class TapService{
       list_exist.push(key);
       let joinJson:dic = {};
       if(root == key){
+        joinJson["schema"]=data[key].schema;
         joinJson["description"]=data[key].description;
         joinJson["columns"]=[];
+        joinJson["constraints"]="";
         let joinJsonJoin:dic={};
         for(var join in data[key].join_tables)
-        { 
-          if(join.indexOf("2")!=-1){
-            continue;
-          }
-          else{
+        {
             let joinJsonJoin1:dic={};
             list_exist.push(join);
+            joinJsonJoin1["schema"]=data[join].schema;
             joinJsonJoin1["description"]=data[join].description;
             joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
             joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
@@ -239,8 +279,6 @@ class TapService{
               }
             joinJsonJoin[join]=joinJsonJoin1;
             joinJson["join_tables"]=joinJsonJoin;
-          }
-          
         }
         reJson[key]=joinJson;
         break;
@@ -248,18 +286,16 @@ class TapService{
     }
     return reJson;
   }
+
   ifJoin(data:dic,list_exist:string[],root:string):dic{
     let joinJsonJoin:dic={};
     for(var key in data){
       if(key==root ){
         for(var join in data[key].join_tables){
-          if(join.indexOf("2")!=-1){
-            continue;
-          }
-          else{
             if(list_exist.indexOf(join) == -1){
               list_exist.push(join);
               let joinJsonJoin1:dic={};
+              joinJsonJoin1["schema"]=data[join].schema;
               joinJsonJoin1["description"]=data[join].description;
               joinJsonJoin1["columns"]=data[key].join_tables[join].columns;
               joinJsonJoin1["constraints"]=data[key].join_tables[join].constraints;
@@ -271,15 +307,12 @@ class TapService{
               }
               joinJsonJoin[join]=joinJsonJoin1;
             }
-          }
-          
         }
         break;
       }
     }
   return joinJsonJoin
   }
-
 }
 
 

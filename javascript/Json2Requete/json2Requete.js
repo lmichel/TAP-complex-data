@@ -1,18 +1,26 @@
-
-function getAdql(json,schema){
+function getAdql(json){
     var jsonAll = JSON.parse(json);
     var adql = "";
     var column=[];
     var constraint="";
+    
     for(var key in jsonAll)
     {
+      if(jsonAll[key].schema=="public")//when schema_name = public, it needs to be double quoted.
+      {
+        var schema="\"public\"";
+        console.log(schema)
+      }
+      else{
+        var schema = jsonAll[key].schema
+      }
       if(jsonAll[key].columns!=[]){
         for(var columnkey in jsonAll[key].columns){
-          if( jsonAll[key].columns[columnkey].indexOf("*")!=-1){//jsonAll[key].columns[columnkey].indexOf("TOP")!=-1 ||
+          if( jsonAll[key].columns[columnkey].indexOf("*")!=-1){
             column.push(jsonAll[key].columns[columnkey]);
           }
           else{
-            column.push("\""+schema+"\""+"."+key+"."+jsonAll[key].columns[columnkey]);
+            column.push(schema+"."+key+"."+jsonAll[key].columns[columnkey]);
           }
           
         }
@@ -20,7 +28,11 @@ function getAdql(json,schema){
       if(jsonAll[key].join_tables!=undefined){
         var columnJoin =getColumn(jsonAll[key].join_tables,schema);
         column.push(...columnJoin);
-        constraint = getConstraint(jsonAll[key].join_tables,0);
+        if(jsonAll[key].constraints!=""){
+          constraint = jsonAll[key].constraints;
+          constraint += "\n AND \n";
+        }
+        constraint += getConstraint(jsonAll[key].join_tables,0);
       }
     }
     adql +="SELECT "+"\n"+"TOP 100"+"\n";
@@ -38,7 +50,7 @@ function getAdql(json,schema){
     adql += "FROM ";
     for(var key in jsonAll)
     {
-      adql += "\""+schema+"\""+"."+key + " "+"\n";
+      adql += schema+"."+key + " "+"\n";
       adql += getJoin(jsonAll[key].join_tables,key,schema);
     }
     if(constraint!=""){
@@ -51,14 +63,13 @@ function getColumn(json,schema){
   var column=[];
   for(var key in json)
     {
-      console.log(key)
       for(var columnkey in json[key].columns){
         
-        if( json[key].columns[columnkey].indexOf("*")!=-1){//json[key].columns[columnkey].indexOf("TOP")!=-1 ||
+        if( json[key].columns[columnkey].indexOf("*")!=-1){
           column.push(json[key].columns[columnkey]);
       }
       else{
-        column.push("\""+schema+"\""+"."+key+"."+json[key].columns[columnkey]);
+        column.push(schema+"."+key+"."+json[key].columns[columnkey]);
       }
       
     }
@@ -89,14 +100,34 @@ function getConstraint(json,flag){
     return constraint;
 }
 
+function isString(s){
+  return typeof s === 'string';
+}
+
+
 function getJoin(json,table,schema){
   var retour="";
   for(var key in json)
   {
-    retour += "JOIN "+"\""+schema+"\""+"."+key+" "+"\n";
-    retour += "ON " + "\""+schema+"\""+"."+table + "." + json[key].target + "=" + "\""+schema+"\""+"."+key + "." + json[key].from + " "+"\n";
-    if(getJoin(json[key].join_tables)!=""){
-      retour += getJoin(json[key].join_tables,key,schema);
+    console.log(json[key].target)
+    console.log(isString(json[key].target))
+    retour += "JOIN "+schema+"."+key+" "+"\n";
+    if(isString(json[key].target)){
+      retour += "ON " + schema+"."+table + "." + json[key].target + "=" + schema+"."+key + "." + json[key].from + " "+"\n";
+      if(getJoin(json[key].join_tables)!=""){
+        retour += getJoin(json[key].join_tables,key,schema);
+      }
+    }
+    else{
+      var n = json[key].target.length;
+      retour += "ON " + schema+"."+table + "." + json[key].target[0] + "=" + schema+"."+key + "." + json[key].from[0] + " "+"\n";
+      for(i=1;i<n;i++){
+        retour += "AND ";
+        retour += schema+"."+table + "." + json[key].target[i] + "=" + schema+"."+key + "." + json[key].from[i] + " "+"\n";
+      }
+      if(getJoin(json[key].join_tables)!=""){
+        retour += getJoin(json[key].join_tables,key,schema);
+      }
     }
   }
   return retour;

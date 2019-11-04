@@ -142,6 +142,7 @@ var TapService = /** @class */ (function () {
             var arrLink = {};
             var arrJoint = {};
             var flag = 0;
+            var ifSame = 0;
             var nowTable = allTtable[k];
             nowTable = this.getRightName(nowTable);
             for (var i = 0; i < alllink.length; i++) {
@@ -149,40 +150,77 @@ var TapService = /** @class */ (function () {
                 var tt = alllink[i][0].split("|");
                 var ft = alllink[i][1].split("|");
                 if (tt[0] == nowTable) {
-                    flag = flag + 1;
-                    arrLinkJoint["columns"] = columns;
-                    arrLinkJoint["constraints"] = constraints;
-                    arrLinkJoint["from"] = ft[1];
-                    arrLinkJoint["target"] = tt[1];
-                    var temp = ft[0];
-                    for (var key in arrLink) {
+                    loop: for (var key in arrLink) {
                         if (ft[0] == key) {
-                            temp = ft[0] + "2";
+                            ifSame = 1;
+                            arrLinkJoint["schema"] = this.schema;
+                            arrLinkJoint["columns"] = columns;
+                            arrLinkJoint["constraints"] = constraints;
+                            var temp1 = [];
+                            temp1.push(arrLink[ft[0]].from);
+                            temp1.push(ft[1]);
+                            arrLinkJoint["from"] = temp1;
+                            temp1 = [];
+                            temp1.push(arrLink[ft[0]].target);
+                            temp1.push(tt[1]);
+                            arrLinkJoint["target"] = temp1;
+                            arrLink[ft[0]] = arrLinkJoint;
+                            break loop;
+                        }
+                        else {
+                            ifSame = 0;
                         }
                     }
-                    arrLink[temp] = arrLinkJoint;
+                    if (ifSame == 0) {
+                        flag = flag + 1;
+                        arrLinkJoint["schema"] = this.schema;
+                        arrLinkJoint["columns"] = columns;
+                        arrLinkJoint["constraints"] = constraints;
+                        arrLinkJoint["from"] = ft[1];
+                        arrLinkJoint["target"] = tt[1];
+                        arrLink[ft[0]] = arrLinkJoint;
+                    }
                 }
                 ;
                 if (ft[0] == nowTable) {
-                    flag = flag + 1;
-                    arrLinkJoint["columns"] = columns;
-                    arrLinkJoint["constraints"] = constraints;
-                    arrLinkJoint["from"] = tt[1];
-                    arrLinkJoint["target"] = ft[1];
-                    var temp = tt[0];
-                    for (var key in arrLink) {
+                    loop: for (var key in arrLink) {
                         if (tt[0] == key) {
-                            temp = tt[0] + "2";
+                            ifSame = 1;
+                            arrLinkJoint["schema"] = this.schema;
+                            arrLinkJoint["columns"] = columns;
+                            arrLinkJoint["constraints"] = constraints;
+                            var temp1 = [];
+                            temp1.push(arrLink[tt[0]].from);
+                            temp1.push(tt[1]);
+                            arrLinkJoint["from"] = temp1;
+                            temp1 = [];
+                            temp1.push(arrLink[tt[0]].target);
+                            temp1.push(ft[1]);
+                            arrLinkJoint["target"] = temp1;
+                            arrLink[tt[0]] = arrLinkJoint;
+                            break loop;
+                        }
+                        else {
+                            ifSame = 0;
                         }
                     }
-                    arrLink[temp] = arrLinkJoint;
+                    ;
+                    if (ifSame == 0) {
+                        flag = flag + 1;
+                        arrLinkJoint["schema"] = this.schema;
+                        arrLinkJoint["columns"] = columns;
+                        arrLinkJoint["constraints"] = constraints;
+                        arrLinkJoint["from"] = tt[1];
+                        arrLinkJoint["target"] = ft[1];
+                        arrLink[tt[0]] = arrLinkJoint;
+                    }
                 }
-                ;
             }
             if (flag == 0) {
                 continue;
             }
             else {
+                arrJoint["schema"] = this.schema;
                 arrJoint["description"] = allTtable[k + 1];
                 arrJoint["join_tables"] = arrLink;
                 jsonAll[nowTable] = arrJoint;
@@ -202,28 +240,26 @@ var TapService = /** @class */ (function () {
             list_exist.push(key);
             var joinJson = {};
             if (root == key) {
+                joinJson["schema"] = data[key].schema;
                 joinJson["description"] = data[key].description;
                 joinJson["columns"] = [];
+                joinJson["constraints"] = "";
                 var joinJsonJoin = {};
                 for (var join in data[key].join_tables) {
-                    if (join.indexOf("2") != -1) {
-                        continue;
+                    var joinJsonJoin1 = {};
+                    list_exist.push(join);
+                    joinJsonJoin1["schema"] = data[join].schema;
+                    joinJsonJoin1["description"] = data[join].description;
+                    joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
+                    joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
+                    joinJsonJoin1["from"] = data[key].join_tables[join].from;
+                    joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                    var a = this.ifJoin(data, list_exist, join);
+                    if (JSON.stringify(a) != '{}') {
+                        joinJsonJoin1["join_tables"] = a;
                     }
-                    else {
-                        var joinJsonJoin1 = {};
-                        list_exist.push(join);
-                        joinJsonJoin1["description"] = data[join].description;
-                        joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
-                        joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
-                        joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                        joinJsonJoin1["target"] = data[key].join_tables[join].target;
-                        var a = this.ifJoin(data, list_exist, join);
-                        if (JSON.stringify(a) != '{}') {
-                            joinJsonJoin1["join_tables"] = a;
-                        }
-                        joinJsonJoin[join] = joinJsonJoin1;
-                        joinJson["join_tables"] = joinJsonJoin;
-                    }
+                    joinJsonJoin[join] = joinJsonJoin1;
+                    joinJson["join_tables"] = joinJsonJoin;
                 }
                 reJson[key] = joinJson;
                 break;
@@ -236,24 +272,20 @@ var TapService = /** @class */ (function () {
         for (var key in data) {
             if (key == root) {
                 for (var join in data[key].join_tables) {
-                    if (join.indexOf("2") != -1) {
-                        continue;
-                    }
-                    else {
-                        if (list_exist.indexOf(join) == -1) {
-                            list_exist.push(join);
-                            var joinJsonJoin1 = {};
-                            joinJsonJoin1["description"] = data[join].description;
-                            joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
-                            joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
-                            joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                            joinJsonJoin1["target"] = data[key].join_tables[join].target;
-                            var a = this.ifJoin(data, list_exist, join);
-                            if (JSON.stringify(a) != '{}') {
-                                joinJsonJoin1["join_tables"] = a;
-                            }
-                            joinJsonJoin[join] = joinJsonJoin1;
+                    if (list_exist.indexOf(join) == -1) {
+                        list_exist.push(join);
+                        var joinJsonJoin1 = {};
+                        joinJsonJoin1["schema"] = data[join].schema;
+                        joinJsonJoin1["description"] = data[join].description;
+                        joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
+                        joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
+                        joinJsonJoin1["from"] = data[key].join_tables[join].from;
+                        joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                        var a = this.ifJoin(data, list_exist, join);
+                        if (JSON.stringify(a) != '{}') {
+                            joinJsonJoin1["join_tables"] = a;
                         }
+                        joinJsonJoin[join] = joinJsonJoin1;
                     }
                 }
                 break;
