@@ -4,31 +4,32 @@ function main(){
     var $top_vizier = $("#top_vizier");//VizieR
     var $top_caom = $("#top_caom");//CAOM
 
-    $("#simbad").click(function(){
+    $("#simbad,#cs00").click(function(){
         $("#showRoot").empty();//Clear the contents of menu.
         var top_simbad = false;
+        if($("#simbadCS").val()!=''){
+            var schema = $("#simbadCS").val()
+        }
+        else{
+            var schema = "public";
+        }
+        
         if($top_simbad.prop("checked"))//To check if choose the TOP 100. By default, it's false.
         {
             top_simbad = true;
         }
-        var s = new TapService("http://simbad.u-strasbg.fr/simbad/sim-tap/sync","public","Simbad",top_simbad);
-        //var a = s.query();
-        //var b = VOTableTools.votableToJson(a)
-        //console.log(b)
-        //console.log(btoa(1))
+        var s = new TapService("http://simbad.u-strasbg.fr/simbad/sim-tap/sync",schema,"Simbad",top_simbad);
         var data = s.createJson();
         $("#load1").html(
             JSON.stringify(data, undefined, 6)
         );
         var sj=new jsonRead(data); 
         s.createJson(data,"basic");
-        //var rootTable = sj.rootTable();//read json, return all the rootTable as array
         var output = "";
         output += sj.showAll(data);
         $("#load2").html(output);//show all the informations of rootTable and it's join tables
         var mostUsedTable = sj.mostUsed();//read json, return all the most used table ([0] is the most used) as array
         var add ="" 
-        //var serviceIndex = {0: "simbad", 1: "gavo", 2: "vizier", 3: "caom"}
         for(var i = 0;i<5;i++){//add five bouton of the most used table
             add ="<li><a href='#' id="+"\'"+ mostUsedTable[i]+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
             $("#showRoot").append(add);
@@ -92,14 +93,20 @@ function main(){
         })
     })
 
-    $("#gavo").click(function(){
+    $("#gavo,#cs01").click(function(){
         $("#showRoot").empty();//Clear the contents of menu.
         var top_gavo = false;
+        if($("#gavoCS").val()!=''){
+            var schema = $("#gavoCS").val()
+        }
+        else{
+            var schema = "rr";
+        }
         if($top_gavo.prop("checked"))
         {
             top_gavo = true;
         }
-        var g = new TapService("http://dc.zah.uni-heidelberg.de/tap/sync","rr","GAVO",top_gavo);
+        var g = new TapService("http://dc.zah.uni-heidelberg.de/tap/sync",schema,"GAVO",top_gavo);
         var data = g.createJson();
         $("#load1").html(
             JSON.stringify(data, undefined, 6)
@@ -174,14 +181,20 @@ function main(){
         })
     })
 
-    $("#vizier").click(function(){
+    $("#vizier,#cs02").click(function(){
         $("#showRoot").empty();//Clear the contents of menu.
         var top_vizier = false;
+        if($("#vizierCS").val()!=''){
+            var schema = $("#vizierCS").val()
+        }
+        else{
+            var schema = "rr";
+        }
         if($top_vizier.prop("checked"))
         {
             top_vizier = true;
         }
-        var v = new TapService("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync","metaviz","Vizier",top_vizier);
+        var v = new TapService("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",schema,"Vizier",top_vizier);
         var data = v.createJson();
         $("#load1").html(
             JSON.stringify(data, undefined, 6)
@@ -256,14 +269,20 @@ function main(){
         })
     })
 
-    $("#caom").click(function(){
+    $("#caom,#cs03").click(function(){
         $("#showRoot").empty();//Clear the contents of menu
         var top_caom = false;
+        if($("#caomCS").val()!=''){
+            var schema = $("#caomCS").val()
+        }
+        else{
+            var schema = "dbo";
+        }
         if($top_caom.prop("checked"))
         {
             top_caom = true;
         }
-        var c = new TapService("http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync","dbo","CAOM",top_caom);
+        var c = new TapService("http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync",schema,"CAOM",top_caom);
         var data = c.createJson();
         $("#load1").html(
             JSON.stringify(data, undefined, 6)

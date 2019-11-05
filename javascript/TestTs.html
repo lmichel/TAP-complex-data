@@ -13,9 +13,7 @@
 <script type="text/javascript" src= "./js/TapService.js" ></script>
 <script type="text/javascript" src= "./main.js" ></script>
 <script type="text/javascript">
-    /*window.onload=function(){
-        TrouveUnMeilleurNom.initAppli();
-    }*/
+
     window.onload=function(){
        main();
     }
@@ -36,7 +34,7 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:400px">
-        <li><a href="#" id="simbad">Show All</a></li>
+        <li><a href="#" id="simbad">schema: public</a></li>
         <li class="divider"></li>
         <li><a href="http://simbad.u-strasbg.fr/simbad/sim-tap">TAP Simbad</a></li>
     </ul>
@@ -50,7 +48,7 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="gavo">Show All</a></li>
+        <li><a href="#" id="gavo">schema: rr</a></li>
         <li class="divider"></li>
         <li><a href="http://dc.zah.uni-heidelberg.de/__system__/adql/query">TAP GAVO</a></li>
     </ul>
@@ -64,7 +62,7 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="vizier">Show All</a></li>
+        <li><a href="#" id="vizier">schema: metaviz</a></li>
         <li class="divider"></li>
         <li><a href="http://tapvizier.u-strasbg.fr/TAPVizieR/">TAP VizieR</a></li>
     </ul>
@@ -78,13 +76,37 @@
         <span class="sr-only"></span>
     </button>
     <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="caom">Show All</a></li>
+        <li><a href="#" id="caom">schema: dbo</a></li>
         <li class="divider"></li>
         <li><a href="http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/">TAP CAOM</a></li>
     </ul>
 </div>
 <input type="checkbox" id = "top_caom" >TOP 100
+
 <br></br>
+
+
+<input id="simbadCS" type="text" style = "width: 100px;margin-left:400px" placeholder="public">
+<div class="btn-group" style=" padding-left:5px;padding-right:40px">
+    <button type="button" id = "cs00" class="btn btn-primary">Change</button>
+</div>
+<input id="gavoCS" type="text" style = "width: 100px" placeholder="rr">
+<div class="btn-group" style=" padding-left:10px;padding-right:40px"> 
+    <button type="button" id = "cs01" class="btn btn-primary">Change</button>
+</div>
+<input id="vizierCS" type="text" style = "width: 100px" placeholder="metaviz">
+<div class="btn-group" style=" padding-left:10px;padding-right:40px">
+    <button type="button" id = "cs02" class="btn btn-primary">Change</button>
+</div>
+<input id="caomCS" type="text" style = "width: 100px" placeholder="dbo">
+<div class="btn-group" style=" padding-left:10px;padding-right:40px">
+    <button type="button" id = "cs03" class="btn btn-primary">Change</button>
+</div>
+
+
+<br></br>
+
+
 <pre id="load1" style= "background-color:white; overflow:scroll; width:800px; height:300px;margin-left:400px"></pre>
 
 <div class="btn-group" style="text-align: center; padding-left:600px">
@@ -102,6 +124,9 @@
     </ul>
 </div>
 <br></br>
-<pre id="load2" style= "background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px "></pre>
+<pre id="load2" style= "background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px ">
+
+    
+</pre>
 </body>
 </html>
