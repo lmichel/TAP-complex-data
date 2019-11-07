@@ -9,7 +9,8 @@ var VOTableTools = /** @class */ (function () {
      * @param vObject : votable object.
      */
     VOTableTools.votable2Rows = function (vObject) {
-        var contentText = vObject.responseText;
+        var contentText = "";
+        contentText = vObject.responseText;
         var reData = [];
         var method = contentText.indexOf("base64");
         if (method != -1) {
@@ -56,13 +57,27 @@ var VOTableTools = /** @class */ (function () {
         var nbFields = fields.length;
         var nameFields = [];
         for (var i = 0; i < nbFields; i++) {
-            nameFields.push(fields[i].name); //store the name of
+            nameFields.push(fields[i].name); //store the name of filed
         }
-        /***
-         *@todo design the structure of the data obtained by the query, and then organize it to output on the screen.
-         */
         p.cleanMemory();
-        return data;
+        return data; //name of field and data
+    };
+    VOTableTools.getField = function (vObject) {
+        var contentText = "";
+        contentText = vObject.responseText;
+        console.log(contentText);
+        var p = new VOTableParser();
+        console.log(p);
+        p.loadFile(contentText); //store the data(2-dimensional array) after query by url
+        var fields = p.getCurrentTableFields(); //store all the information of field
+        var nbFields = fields.length;
+        var nameFields = [];
+        for (var i = 0; i < nbFields; i++) {
+            nameFields.push(fields[i].name); //store the name of filed
+        }
+        console.log(nameFields);
+        p.cleanMemory();
+        return nameFields; //name of field and data
     };
     return VOTableTools;
 }());

@@ -87,25 +87,22 @@ var jsonRead = /** @class */ (function () {
         var joinTable = "";
         var flag2;
         flag2 = flag + 1;
+        var niveau = flag2 + 2;
         var space = "    ";
+        for (var i = 1; i <= flag2; i++) {
+            space += space;
+        }
         for (var key in jsonAll[table].join_tables) {
-            if (key.indexOf("2") != -1) {
-                continue;
-            }
-            else {
-                if (list_exist.indexOf(key) == -1) {
-                    for (var i = 0; i <= flag2; i++) {
-                        joinTable += space;
-                    }
-                    joinTable += "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
-                    list_exist.push(key);
-                    var table_1 = void 0;
-                    var tableCut = void 0;
-                    table_1 = this.json2HtmlJoin(key, list_exist, flag2);
-                    tableCut = table_1.replace(/ /g, "");
-                    if (tableCut.length != 0) {
-                        joinTable += table_1;
-                    }
+            if (list_exist.indexOf(key) == -1) {
+                joinTable += space + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
+                joinTable += space + "<input id=\"" + niveau + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<button type=\"button\" id = " + "\"b" + niveau + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>" + "<br/>";
+                list_exist.push(key);
+                var table_1 = void 0;
+                var tableCut = void 0;
+                table_1 = this.json2HtmlJoin(key, list_exist, flag2);
+                tableCut = table_1.replace(/ /g, "");
+                if (tableCut.length != 0) {
+                    joinTable += table_1;
                 }
             }
         }
@@ -123,16 +120,13 @@ var jsonRead = /** @class */ (function () {
         var list_exist = [];
         list_exist.push(table);
         joinTable += "<B>" + table + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(table) + "</font>" + "<br/>";
+        joinTable += "<input id=" + "\"1" + table + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<button type=\"button\" id = " + "\"b1" + table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>" + "<br/>";
         for (var key in jsonAll[table].join_tables) {
-            if (key.indexOf("2") != -1) {
-                continue;
-            }
-            else {
-                joinTable += "    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
-                if (list_exist.indexOf(key) == -1) {
-                    list_exist.push(key);
-                    joinTable += this.json2HtmlJoin(key, list_exist, 0);
-                }
+            joinTable += "    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>";
+            joinTable += "    " + "<input id=\"2" + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<button type=\"button\" id = " + "\"b2" + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>" + "<br/>";
+            if (list_exist.indexOf(key) == -1) {
+                list_exist.push(key);
+                joinTable += this.json2HtmlJoin(key, list_exist, 0);
             }
         }
         return joinTable;
@@ -165,6 +159,51 @@ var jsonRead = /** @class */ (function () {
             output += "<br/>";
         }
         return output;
+    };
+    jsonRead.prototype.CreateJsonAndContraint = function (list, constraint, flag, jsonJoin) {
+        var jsonAll = {};
+        var json = {};
+        var list_rest = list;
+        var key = list[0];
+        if (0 == list.length - 1 && flag == 0) {
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = jsonJoin[key].description;
+            jsonAll["columns"] = [];
+            jsonAll["constraints"] = constraint;
+            json[key] = jsonAll;
+        }
+        else if (0 != list.length - 1 && flag == 0) {
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = jsonJoin[key].description;
+            jsonAll["columns"] = [];
+            jsonAll["constraints"] = "";
+            list_rest.shift();
+            flag = flag + 1;
+            jsonAll["join_tables"] = this.CreateJsonAndContraint(list_rest, constraint, flag, this.json[key].join_tables);
+            json[key] = jsonAll;
+        }
+        else if (0 != list.length - 1 && flag != 0) {
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = this.json[key].description;
+            jsonAll["columns"] = [jsonJoin[key].from];
+            jsonAll["constraints"] = "";
+            jsonAll["from"] = jsonJoin[key].from;
+            jsonAll["target"] = jsonJoin[key].target;
+            list_rest.shift();
+            flag = flag + 1;
+            jsonAll["join_tables"] = this.CreateJsonAndContraint(list_rest, constraint, flag, this.json[key].join_tables);
+            json[key] = jsonAll;
+        }
+        else if (key == list[0] && 0 == list.length - 1 && flag != 0) {
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = this.json[key].description;
+            jsonAll["columns"] = [jsonJoin[key].from];
+            jsonAll["constraints"] = constraint;
+            jsonAll["from"] = jsonJoin[key].from;
+            jsonAll["target"] = jsonJoin[key].target;
+            json[key] = jsonAll;
+        }
+        return json;
     };
     return jsonRead;
 }());

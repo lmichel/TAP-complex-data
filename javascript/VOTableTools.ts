@@ -9,20 +9,21 @@ class VOTableTools{
    * @param vObject : votable object.
    */
   static votable2Rows(vObject: any):string[]{
-    let contentText:string = vObject.responseText;
+    let contentText:string = "";
+    contentText=vObject.responseText;
     let reData:string[]=[];
     var method = contentText.indexOf("base64");
     if(method!=-1){//The coding mode is "base64". e.g. Simbad, GAVO
       var data = VOTableTools.content2Rows(contentText);
-      let k:number = 0
-        for(var i=0;i<data.length;i=i+1)//Store the name of the table in an array
+      let k:number = 0;
+      for(var i=0;i<data.length;i=i+1)//Store the name of the table in an array
+      {
+        for(var j=0;j<data[i].length;j=j+1)
         {
-          for(var j=0;j<data[i].length;j=j+1)
-          {
-            reData[k]=data[i][j];
-            k=k+1;
-          }
+          reData[k]=data[i][j];
+          k=k+1;
         }
+      }
     }
     else{//The coding mode is normal. e.g. VizieR, CAOM
 			$(contentText).find('RESOURCE[type="results"]').each(function(){
@@ -62,12 +63,27 @@ class VOTableTools{
     var nbFields = fields.length;
     let nameFields:string[] = [];
     for(let i:number=0;i<nbFields;i++){
-      nameFields.push(fields[i].name);//store the name of
+      nameFields.push(fields[i].name);//store the name of filed
     }
-    /***
-     *@todo design the structure of the data obtained by the query, and then organize it to output on the screen.
-     */
     p.cleanMemory();
-    return data;
+    return data;//name of field and data
+  }
+
+  static getField(vObject: any){
+    let contentText:string = "";
+    contentText=vObject.responseText;
+    console.log(contentText)
+    var p = new VOTableParser();
+    console.log(p);
+    p.loadFile(contentText);//store the data(2-dimensional array) after query by url
+    var fields = p.getCurrentTableFields();//store all the information of field
+    var nbFields = fields.length;
+    let nameFields:string[] = [];
+    for(let i:number=0;i<nbFields;i++){
+      nameFields.push(fields[i].name);//store the name of filed
+    }
+    console.log(nameFields)
+    p.cleanMemory();
+    return nameFields;//name of field and data
   }
 }

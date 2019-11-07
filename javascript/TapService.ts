@@ -13,6 +13,22 @@ class TapService{
     this.checkstatus=checkstatus;
   }
 
+  Query(adql:string){
+    let site:string = this.url;
+    var reTable;
+    reTable = $.ajax({
+      url: `${site}`,
+      type: "GET",
+      data: {query: `${adql}`, format: 'votable', lang: 'ADQL', request :'doQuery'},
+      async:false
+      })
+    .done(function(result:any){
+        return result;
+    })
+  return reTable;
+  }
+  
+
   /**
    * Get the names of all the tables.
    * It's for Simbad(schema_name = 'public'), GAVO(schema_name = 'rr'), VizieR(schema_name = 'metaviz'), CAOM(schema_name = 'dbo').
@@ -313,6 +329,8 @@ class TapService{
     }
   return joinJsonJoin
   }
+
+
 }
 
 

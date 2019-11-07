@@ -6,6 +6,20 @@ var TapService = /** @class */ (function () {
         this.label = label;
         this.checkstatus = checkstatus;
     }
+    TapService.prototype.Query = function (adql) {
+        var site = this.url;
+        var reTable;
+        reTable = $.ajax({
+            url: "" + site,
+            type: "GET",
+            data: { query: "" + adql, format: 'votable', lang: 'ADQL', request: 'doQuery' },
+            async: false
+        })
+            .done(function (result) {
+            return result;
+        });
+        return reTable;
+    };
     /**
      * Get the names of all the tables.
      * It's for Simbad(schema_name = 'public'), GAVO(schema_name = 'rr'), VizieR(schema_name = 'metaviz'), CAOM(schema_name = 'dbo').

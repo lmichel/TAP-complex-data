@@ -1,9 +1,11 @@
+document.write("<script type='text/javascript' src= './js/json2Requete.js'></script>");
 function main(){
     var $top_simbad = $("#top_simbad");//Simbad
     var $top_gavo = $("#top_gavo");//GAVO
     var $top_vizier = $("#top_vizier");//VizieR
     var $top_caom = $("#top_caom");//CAOM
 
+   
     $("#simbad,#cs00").click(function(){
         $("#showRoot").empty();//Clear the contents of menu.
         var top_simbad = false;
@@ -13,7 +15,6 @@ function main(){
         else{
             var schema = "public";
         }
-        
         if($top_simbad.prop("checked"))//To check if choose the TOP 100. By default, it's false.
         {
             top_simbad = true;
@@ -39,30 +40,36 @@ function main(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
+            limitJson2data(sj,data,s)
+            
             flag= 1;
         })
         $("#"+mostUsedTable[1]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
+            limitJson2data(sj,data,s)
             flag= 2;
         })
         $("#"+mostUsedTable[2]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
+            limitJson2data(sj,data,s)
             flag= 3;
         })
         $("#"+mostUsedTable[3]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
+            limitJson2data(sj,data,s)
             flag= 4;
         })
         $("#"+mostUsedTable[4]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
+            limitJson2data(sj,data,s)
             flag= 5;
         })
         $("#c00").click(function(){
@@ -87,10 +94,13 @@ function main(){
                     $("#load2").empty();
                     output = sj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
+                    limitJson2data(sj,data,s)
                     flag = flag-5;
                     break;
             }
         })
+
+        
     })
 
     $("#gavo,#cs01").click(function(){
@@ -127,30 +137,35 @@ function main(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
+            limitJson2data(gj,data,g)
             flag= 1;
         })
         $("#r01").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
+            limitJson2data(gj,data,g)
             flag= 2;
         })
         $("#r02").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
+            limitJson2data(gj,data,g)
             flag= 3;
         })
         $("#r03").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
+            limitJson2data(gj,data,g)
             flag= 4;
         })
         $("#r04").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
+            limitJson2data(gj,data,g)
             flag= 5;
         })
         $("#c00").click(function(){
@@ -175,6 +190,7 @@ function main(){
                     $("#load2").empty();
                     output = gj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
+                    limitJson2data(gj,data,g)
                     flag = flag-5;
                     break;
             }
@@ -215,30 +231,35 @@ function main(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
+            limitJson2data(vj,data,v)
             flag= 1;
         })
         $("#r01").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
+            limitJson2data(vj,data,v)
             flag= 2;
         })
         $("#r02").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
+            limitJson2data(vj,data,v)
             flag= 3;
         })
         $("#r03").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
+            limitJson2data(vj,data,v)
             flag= 4;
         })
         $("#r04").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
+            limitJson2data(vj,data,v)
             flag= 5;
         })
         $("#c00").click(function(){
@@ -263,6 +284,7 @@ function main(){
                     $("#load2").empty();
                     output = vj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
+                    limitJson2data(vj,data,v)
                     flag = flag-5;
                     break;
             }
@@ -303,30 +325,35 @@ function main(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
+            limitJson2data(cj,data,c)
             flag= 1;
         })
         $("#r01").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
+            limitJson2data(cj,data,c)
             flag= 2;
         })
         $("#r02").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
+            limitJson2data(cj,data,c)
             flag= 3;
         })
         $("#r03").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
+            limitJson2data(cj,data,c)
             flag= 4;
         })
         $("#r04").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
+            limitJson2data(cj,data,c);
             flag= 5;
         })
         $("#c00").click(function(){
@@ -351,9 +378,66 @@ function main(){
                     $("#load2").empty();
                     output = cj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
+                    limitJson2data(cj,data,c);
                     flag = flag-5;
                     break;
             }
         })
     })
+}
+
+function limitJson2data(n,data,s){
+    var a = document.getElementsByName('Cbutton');
+    var b = document.getElementsByName('Cinput');
+    for(var i =0;i<a.length;i++){
+        a[i].onclick = (function closure(ii){
+            return function(){
+                var niveau =b[ii].id.slice(0,1);
+                var name = b[ii].id.slice(1);//the name of table
+                var list=[];
+                list.unshift(name);
+                for(var h=niveau-1;h>=0;h--){
+                    for(var j=ii-1;j>=0;j--){
+                        if(b[j].id.slice(0,1)==h){
+                            list.unshift(b[j].id.slice(1));
+                            break;
+                        }
+                    }
+                }
+                var constraints = $("#"+b[ii].id).val();
+                var p = n.CreateJsonAndContraint(list,constraints,0,data);
+                var adql = json2Requete.getAdql(p)
+                var QObject = s.Query(adql);
+                var dataTable = VOTableTools.votable2Rows(QObject)
+                var Field = VOTableTools.getField(QObject)
+                console.log(Field)//@TODO errer for caom
+                var nb = Field.length;
+                var out ="<div class = \"white_content\" id=\"light\"> <table border = \"1\" style = \"width: 80%; margin :auto\"> <button href = \"javascript:void(0)\" onclick = \" document.getElementById('light').style.display='none';\">Close</button>";//head
+                out +="<tr>";//head
+                for(var j=0;j<nb;j++){
+                    out +="<th style=\"text-align: auto;\">"+Field[j]+"</th>";
+                }
+                out +="</tr>";
+                var count =0;
+                for(var j=0;j<dataTable.length;j++){//table  content
+                    if(count==0){
+                        out+="<tr>";
+                    }
+                    out +="<th style=\"text-align: auto;\">"+dataTable[j]+"</th>";
+                    count =count+1;
+                    if(count==nb){
+                        out +="</tr>";
+                        count=0;
+                    }
+                }
+                out += "</table>  </div>"
+                $("body").append(out);
+                document.getElementById('light').style.display='block';
+                
+            }
+        })(i);
+    }
+
+
+    
 }
