@@ -54,6 +54,7 @@ class TapService{
     .done(function(result:any){
         return result;
     })
+    console.log(reTable)
   return reTable;
   }
 

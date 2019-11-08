@@ -72,9 +72,7 @@ class VOTableTools{
   static getField(vObject: any){
     let contentText:string = "";
     contentText=vObject.responseText;
-    console.log(contentText)
     var p = new VOTableParser();
-    console.log(p);
     p.loadFile(contentText);//store the data(2-dimensional array) after query by url
     var fields = p.getCurrentTableFields();//store all the information of field
     var nbFields = fields.length;
@@ -82,7 +80,6 @@ class VOTableTools{
     for(let i:number=0;i<nbFields;i++){
       nameFields.push(fields[i].name);//store the name of filed
     }
-    console.log(nameFields)
     p.cleanMemory();
     return nameFields;//name of field and data
   }

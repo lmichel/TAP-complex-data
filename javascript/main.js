@@ -204,7 +204,7 @@ function main(){
             var schema = $("#vizierCS").val()
         }
         else{
-            var schema = "rr";
+            var schema = "metaviz";
         }
         if($top_vizier.prop("checked"))
         {
@@ -409,8 +409,19 @@ function limitJson2data(n,data,s){
                 var adql = json2Requete.getAdql(p)
                 var QObject = s.Query(adql);
                 var dataTable = VOTableTools.votable2Rows(QObject)
-                var Field = VOTableTools.getField(QObject)
-                console.log(Field)//@TODO errer for caom
+                var contentText = QObject.responseText;
+                var method = contentText.indexOf("base64");
+                var Field =[]
+                if(method!=-1){//The coding mode is "base64". e.g. Simbad, GAVO
+                    Field = VOTableTools.getField(QObject)
+                }
+                else{//The coding mode is normal. e.g. VizieR, CAOM
+                    $(contentText).find('RESOURCE[type="results"]').each(function(){
+                        $(this).find("FIELD").each(function(){
+                                Field.push(this.attributes.name.nodeValue);
+                        });
+                    })
+                }
                 var nb = Field.length;
                 var out ="<div class = \"white_content\" id=\"light\"> <table border = \"1\" style = \"width: 80%; margin :auto\"> <button href = \"javascript:void(0)\" onclick = \" document.getElementById('light').style.display='none';\">Close</button>";//head
                 out +="<tr>";//head

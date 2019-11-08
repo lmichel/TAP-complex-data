@@ -45,6 +45,7 @@ var TapService = /** @class */ (function () {
             .done(function (result) {
             return result;
         });
+        console.log(reTable);
         return reTable;
     };
     /**
