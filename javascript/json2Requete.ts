@@ -2,12 +2,17 @@
 
 class json2Requete{
 
+    /**
+     * Receive json, generate adql
+     * @param json :the json with constraints
+     * @return : adql
+     */
     static getAdql(json:dic){
         var jsonAll = json;
         var adql = "";
         var column=[];
         var constraint="";
-        let schema:string
+        let schema:string="";
         for(var key in jsonAll)
         {
         if(jsonAll[key].schema=="public")//when schema_name = public, it needs to be double quoted.
@@ -27,6 +32,7 @@ class json2Requete{
                 }
             }
         }
+        
         if(jsonAll[key].join_tables!=undefined){
             var columnJoin =json2Requete.getColumn(jsonAll[key].join_tables,schema);
             column.push(...columnJoin);
@@ -47,9 +53,9 @@ class json2Requete{
         else{
             adql += column[i] + ", "+"\n";
         }
-        
         }
         adql += "FROM ";
+        
         for(var key in jsonAll)
         {
         adql += schema+"."+key + " "+"\n";
@@ -71,7 +77,13 @@ class json2Requete{
                     column.push(json[key].columns[columnkey]);
                 }
                 else{
-                    column.push(schema+"."+key+"."+json[key].columns[columnkey]);
+                    if(json2Requete.isString(json[key].columns[columnkey]))
+                    {
+                        column.push(schema+"."+key+"."+json[key].columns[columnkey]);
+                    }
+                    else{//have more than two keys
+                        column.push(schema+"."+key+"."+json[key].columns[columnkey][0])
+                    }
                 }
             }
             if(json[key].join_tables!=undefined){
@@ -111,20 +123,20 @@ class json2Requete{
         for(var key in json)
         {
             retour += "JOIN "+schema+"."+key+" "+"\n";
-            if(json2Requete.isString(json[key].target)){
+            if(json2Requete.isString(json[key].target) && json2Requete.isString(json[key].from)){
                 retour += "ON " + schema+"."+table + "." + json[key].target + "=" + schema+"."+key + "." + json[key].from + " "+"\n";
-                if(json2Requete.getJoin(json[key].join_tables)!=""){
+                if(json2Requete.getJoin(json[key].join_tables,key,schema)!=""){
                     retour += json2Requete.getJoin(json[key].join_tables,key,schema);
                 }
             }
             else{
                 var n = json[key].target.length;
                 retour += "ON " + schema+"."+table + "." + json[key].target[0] + "=" + schema+"."+key + "." + json[key].from[0] + " "+"\n";
-                for(i=1;i<n;i++){
+                for(var i=1;i<n;i++){
                     retour += "AND ";
                     retour += schema+"."+table + "." + json[key].target[i] + "=" + schema+"."+key + "." + json[key].from[i] + " "+"\n";
                 }
-                if(json2Requete.getJoin(json[key].join_tables)!=""){
+                if(json2Requete.getJoin(json[key].join_tables,key,schema)!=""){
                     retour += json2Requete.getJoin(json[key].join_tables,key,schema);
                 }
             }

@@ -109,8 +109,7 @@ function getJoin(json,table,schema){
   var retour="";
   for(var key in json)
   {
-    console.log(json[key].target)
-    console.log(isString(json[key].target))
+
     retour += "JOIN "+schema+"."+key+" "+"\n";
     if(isString(json[key].target)){
       retour += "ON " + schema+"."+table + "." + json[key].target + "=" + schema+"."+key + "." + json[key].from + " "+"\n";

@@ -212,6 +212,7 @@ function main(){
         }
         var v = new TapService("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",schema,"Vizier",top_vizier);
         var data = v.createJson();
+
         $("#load1").html(
             JSON.stringify(data, undefined, 6)
         );
@@ -386,11 +387,12 @@ function main(){
     })
 }
 
-function limitJson2data(n,data,s){
+function limitJson2data(n,data1,s){
+
     var a = document.getElementsByName('Cbutton');
     var b = document.getElementsByName('Cinput');
     for(var i =0;i<a.length;i++){
-        a[i].onclick = (function closure(ii){
+        a[i].onclick = (function closure(ii,){
             return function(){
                 var niveau =b[ii].id.slice(0,1);
                 var name = b[ii].id.slice(1);//the name of table
@@ -404,9 +406,11 @@ function limitJson2data(n,data,s){
                         }
                     }
                 }
+                console.log(data1)
                 var constraints = $("#"+b[ii].id).val();
-                var p = n.CreateJsonAndContraint(list,constraints,0,data);
+                var p = n.CreateJsonAndContraint(list,constraints,0,data1);
                 var adql = json2Requete.getAdql(p)
+                console.log(adql)
                 var QObject = s.Query(adql);
                 var dataTable = VOTableTools.votable2Rows(QObject)
                 var contentText = QObject.responseText;
@@ -423,7 +427,7 @@ function limitJson2data(n,data,s){
                     })
                 }
                 var nb = Field.length;
-                var out ="<div class = \"white_content\" id=\"light\"> <table border = \"1\" style = \"width: 80%; margin :auto\"> <button href = \"javascript:void(0)\" onclick = \" document.getElementById('light').style.display='none';\">Close</button>";//head
+                var out ="<div class = \"white_content\" id=\"light\"> <table border = \"1\" style = \"width: 80%; margin :auto\"> <button href = \"javascript:void(0)\" onclick = \" document.getElementById('light').style.display='none';location.reload()\">Close</button>";//head
                 out +="<tr>";//head
                 for(var j=0;j<nb;j++){
                     out +="<th style=\"text-align: auto;\">"+Field[j]+"</th>";

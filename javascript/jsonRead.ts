@@ -101,19 +101,22 @@ class jsonRead{
    */
   json2HtmlJoin(table:string,list_exist:string[],flag:number):string{
     let jsonAll:dic = this.json;
-    let joinTable:string="";
+    let htmlbuffer:string=""
+    let joinTable:string[]=[];
     let flag2:number
     flag2 = flag + 1;
     let niveau:number = flag2+2;
-    let space :string =  "    ";
-    for(let i:number = 1; i<=flag2;i++)
+    let space1 :string[]=[]
+    var space:string=  "    ";
+    for(let i:number = 0; i<=flag2;i++)
         {
-          space += space;
+          space1.push(space);
         }
+        space = space1.join('');
     for(var key in jsonAll[table].join_tables){
       if(list_exist.indexOf(key)==-1){
-        joinTable +=space+"<B>"+ key +"</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>";
-        joinTable += space+"<input id=\""+niveau+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">"+"<button type=\"button\" id = "+"\"b"+ niveau +key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>"+ "<br/>";
+        joinTable.push(space+"<B>"+ key +"</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>");
+        joinTable.push(space+"<input id=\""+niveau+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">"+"<button type=\"button\" id = "+"\"b"+ niveau +key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>"+ "<br/>");
         list_exist.push(key);
         let table :string;
         let tableCut : string; 
@@ -121,11 +124,12 @@ class jsonRead{
         tableCut = table.replace(/ /g,"");
         if(tableCut.length != 0)
         {
-          joinTable += table;
+          joinTable.push(table);
         }
       }
     }
-    return joinTable;
+    htmlbuffer=joinTable.join('')
+    return htmlbuffer;
   }
 
   /**
@@ -136,21 +140,23 @@ class jsonRead{
    */
   json2Html (table:string):string{
     let jsonAll:dic = this.json
-    let joinTable:string="";
+    let joinTable:string[]=[];
+    let htmlbuffer:string=""
     let list_exist:string[] = [];
     list_exist.push(table);
-    joinTable += "<B>"+ table +"</B>"+ ": "+"<font color = \"#545454\">"+ this.getDescription(table)+"</font>"+ "<br/>";
-    joinTable += "<input id="+"\"1"+table+"\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">"+"<button type=\"button\" id = "+"\"b1"+ table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>"+ "<br/>";
+    joinTable.push("<B>"+ table +"</B>"+ ": "+"<font color = \"#545454\">"+ this.getDescription(table)+"</font>"+ "<br/>");
+    joinTable.push("<input id="+"\"1"+table+"\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">"+"<button type=\"button\" id = "+"\"b1"+ table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>"+ "<br/>");
     for(var key in jsonAll[table].join_tables)
     {
-      joinTable += "    " + "<B>"+key + "</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>";
-      joinTable += "    " +"<input id=\"2"+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">"+"<button type=\"button\" id = "+"\"b2"+ key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>"+ "<br/>";
+      joinTable.push("    " + "<B>"+key + "</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>");
+      joinTable.push("    " +"<input id=\"2"+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">"+"<button type=\"button\" id = "+"\"b2"+ key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>"+ "<br/>");
       if(list_exist.indexOf(key)==-1){//return the table which are joined with the key.
         list_exist.push(key);
-        joinTable +=  this.json2HtmlJoin(key,list_exist,0);
+        joinTable.push(this.json2HtmlJoin(key,list_exist,0));
       }
     }
-    return joinTable;
+    htmlbuffer=joinTable.join('')
+    return htmlbuffer;
   }
 
   /**
@@ -185,6 +191,14 @@ class jsonRead{
     return output;  
   }
 
+  /**
+   * Generate json with contraints
+   * @param list : Recorded all table names from the table to the child table
+   * @param constraint :the constraint
+   * @param flag: control the number of recursions
+   * @param jsonJoin: original json
+   * @return :json with contraints
+   */
   CreateJsonAndContraint(list:string[],constraint:string,flag:number,jsonJoin:dic){//By default, flag=0
     let jsonAll:dic={};
     let json:dic ={};
@@ -224,7 +238,8 @@ class jsonRead{
       jsonAll["description"]=this.json[key].description;
       jsonAll["columns"]=[jsonJoin[key].from];
       jsonAll["constraints"]=constraint;
-      jsonAll["from"]=jsonJoin[key].from;
+      var from = jsonJoin[key].from
+      jsonAll["from"]=from;
       jsonAll["target"]=jsonJoin[key].target;
       json[key]=jsonAll;
     }

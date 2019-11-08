@@ -2,12 +2,17 @@
 var json2Requete = /** @class */ (function () {
     function json2Requete() {
     }
+    /**
+     * Receive json, generate adql
+     * @param json :the json with constraints
+     * @return : adql
+     */
     json2Requete.getAdql = function (json) {
         var jsonAll = json;
         var adql = "";
         var column = [];
         var constraint = "";
-        var schema;
+        var schema = "";
         for (var key in jsonAll) {
             if (jsonAll[key].schema == "public") {
                 schema = "\"public\"";
@@ -65,7 +70,12 @@ var json2Requete = /** @class */ (function () {
                     column.push(json[key].columns[columnkey]);
                 }
                 else {
-                    column.push(schema + "." + key + "." + json[key].columns[columnkey]);
+                    if (json2Requete.isString(json[key].columns[columnkey])) {
+                        column.push(schema + "." + key + "." + json[key].columns[columnkey]);
+                    }
+                    else {
+                        column.push(schema + "." + key + "." + json[key].columns[columnkey][0]);
+                    }
                 }
             }
             if (json[key].join_tables != undefined) {
@@ -99,20 +109,20 @@ var json2Requete = /** @class */ (function () {
         var retour = "";
         for (var key in json) {
             retour += "JOIN " + schema + "." + key + " " + "\n";
-            if (json2Requete.isString(json[key].target)) {
+            if (json2Requete.isString(json[key].target) && json2Requete.isString(json[key].from)) {
                 retour += "ON " + schema + "." + table + "." + json[key].target + "=" + schema + "." + key + "." + json[key].from + " " + "\n";
-                if (json2Requete.getJoin(json[key].join_tables) != "") {
+                if (json2Requete.getJoin(json[key].join_tables, key, schema) != "") {
                     retour += json2Requete.getJoin(json[key].join_tables, key, schema);
                 }
             }
             else {
                 var n = json[key].target.length;
                 retour += "ON " + schema + "." + table + "." + json[key].target[0] + "=" + schema + "." + key + "." + json[key].from[0] + " " + "\n";
-                for (i = 1; i < n; i++) {
+                for (var i = 1; i < n; i++) {
                     retour += "AND ";
                     retour += schema + "." + table + "." + json[key].target[i] + "=" + schema + "." + key + "." + json[key].from[i] + " " + "\n";
                 }
-                if (json2Requete.getJoin(json[key].join_tables) != "") {
+                if (json2Requete.getJoin(json[key].join_tables, key, schema) != "") {
                     retour += json2Requete.getJoin(json[key].join_tables, key, schema);
                 }
             }
