@@ -793,16 +793,6 @@ function VOTableParser() {
 
     return res;
   };
-  //-----------------------------------------------------------------------------
-  // New Functions related to B64 parsing @modifier 
-  function content2Rows(content){
-    var dataB64;
-    dataB64 = content;
-  }
-
-
-
-
 
   //-----------------------------------------------------------------------------
   // Functions related to B64 parsing
@@ -873,9 +863,12 @@ function VOTableParser() {
     start = new Date().getTime();
 
     do {
+
       dataType = fields[ptrCurrentField].datatype;
       dataSize = dataTypeSize[dataType];
-
+      if(dataType=='unicodeChar'){
+        dataType = 'char'
+      }
       arraySize = 1;
       arrayStruct = [];
 
@@ -929,7 +922,6 @@ function VOTableParser() {
           dataType = 'noData';
           break;
         }
-
         switch (dataType) {
         case 'short':
           value = bin2short16(bitArray);
@@ -999,6 +991,7 @@ function VOTableParser() {
       } else if (arraySize !== 1) {
         if (dataType !== 'char' && dataType !== 'unicodeChar')
           value = createMultidimensionalArray(arrayStruct, tempArray);
+          
         else
           value = tempArray.join('');
       } else {
@@ -1024,7 +1017,6 @@ function VOTableParser() {
     // (or we will not be able to parse another B64 datas)
     ptrStream = 0;
     tablesData[selected.resource.i][selected.table.i] = rows;
-
     thisParser.parsingTime = new Date().getTime() - start;
     debug('Performance parsing B64: ' + thisParser.parsingTime + ' ms.');
     return rows;//tableData also store the data
