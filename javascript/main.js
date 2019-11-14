@@ -40,36 +40,40 @@ function main(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
-            limitJson2data(sj,data,s)
-            
+            Aide(sj,data,s)
+            limitJson2data(sj,data,s);
             flag= 1;
         })
         $("#"+mostUsedTable[1]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
-            limitJson2data(sj,data,s)
+            Aide(sj,data,s)
+            limitJson2data(sj,data,s);
             flag= 2;
         })
         $("#"+mostUsedTable[2]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
-            limitJson2data(sj,data,s)
+            Aide(sj,data,s)
+            limitJson2data(sj,data,s);
             flag= 3;
         })
         $("#"+mostUsedTable[3]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
-            limitJson2data(sj,data,s)
+            Aide(sj,data,s)
+            limitJson2data(sj,data,s);
             flag= 4;
         })
         $("#"+mostUsedTable[4]).click(function(){
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
-            limitJson2data(sj,data,s)
+            Aide(sj,data,s)
+            limitJson2data(sj,data,s);
             flag= 5;
         })
         $("#c00").click(function(){
@@ -94,7 +98,8 @@ function main(){
                     $("#load2").empty();
                     output = sj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
-                    limitJson2data(sj,data,s)
+                    Aide(sj,data,s)
+                    limitJson2data(sj,data,s);
                     flag = flag-5;
                     break;
             }
@@ -137,35 +142,40 @@ function main(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
-            limitJson2data(gj,data,g)
+            Aide(gj,data,g)
+            limitJson2data(gj,data,g);
             flag= 1;
         })
         $("#r01").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
-            limitJson2data(gj,data,g)
+            Aide(gj,data,g);
+            limitJson2data(gj,data,g);
             flag= 2;
         })
         $("#r02").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
-            limitJson2data(gj,data,g)
+            Aide(gj,data,g);
+            limitJson2data(gj,data,g);
             flag= 3;
         })
         $("#r03").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
-            limitJson2data(gj,data,g)
+            Aide(gj,data,g);
+            limitJson2data(gj,data,g);
             flag= 4;
         })
         $("#r04").click(function(){
             $("#load2").empty();
             output = gj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
-            limitJson2data(gj,data,g)
+            Aide(gj,data,g);
+            limitJson2data(gj,data,g);
             flag= 5;
         })
         $("#c00").click(function(){
@@ -190,7 +200,8 @@ function main(){
                     $("#load2").empty();
                     output = gj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
-                    limitJson2data(gj,data,g)
+                    Aide(gj,data,g);
+                    limitJson2data(gj,data,g);
                     flag = flag-5;
                     break;
             }
@@ -232,35 +243,40 @@ function main(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
-            limitJson2data(vj,data,v)
+            Aide(vj,data,v);
+            limitJson2data(vj,data,v);
             flag= 1;
         })
         $("#r01").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
-            limitJson2data(vj,data,v)
+            Aide(vj,data,v);
+            limitJson2data(vj,data,v);
             flag= 2;
         })
         $("#r02").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
-            limitJson2data(vj,data,v)
+            Aide(vj,data,v);
+            limitJson2data(vj,data,v);
             flag= 3;
         })
         $("#r03").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
-            limitJson2data(vj,data,v)
+            Aide(vj,data,v);
+            limitJson2data(vj,data,v);
             flag= 4;
         })
         $("#r04").click(function(){
             $("#load2").empty();
             output = vj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
-            limitJson2data(vj,data,v)
+            Aide(vj,data,v);
+            limitJson2data(vj,data,v);
             flag= 5;
         })
         $("#c00").click(function(){
@@ -285,7 +301,8 @@ function main(){
                     $("#load2").empty();
                     output = vj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
-                    limitJson2data(vj,data,v)
+                    Aide(vj,data,v);
+                    limitJson2data(vj,data,v);
                     flag = flag-5;
                     break;
             }
@@ -326,34 +343,39 @@ function main(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[0]);
             $("#load2").html(output);
-            limitJson2data(cj,data,c)
+            Aide(cj,data,c);
+            limitJson2data(cj,data,c);
             flag= 1;
         })
         $("#r01").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
-            limitJson2data(cj,data,c)
+            Aide(cj,data,c);
+            limitJson2data(cj,data,c);
             flag= 2;
         })
         $("#r02").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[2]);
             $("#load2").html(output);
-            limitJson2data(cj,data,c)
+            Aide(cj,data,c);
+            limitJson2data(cj,data,c);
             flag= 3;
         })
         $("#r03").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[3]);
             $("#load2").html(output);
-            limitJson2data(cj,data,c)
+            Aide(cj,data,c);
+            limitJson2data(cj,data,c);
             flag= 4;
         })
         $("#r04").click(function(){
             $("#load2").empty();
             output = cj.json2Html(mostUsedTable[4]);
             $("#load2").html(output);
+            Aide(cj,data,c);
             limitJson2data(cj,data,c);
             flag= 5;
         })
@@ -379,6 +401,7 @@ function main(){
                     $("#load2").empty();
                     output = cj.json2Html(mostUsedTable[flag-6]);
                     $("#load2").html(output);
+                    Aide(cj,data,c);
                     limitJson2data(cj,data,c);
                     flag = flag-5;
                     break;
@@ -387,30 +410,30 @@ function main(){
     })
 }
 
-function limitJson2data(n,data1,s){
-
-    var a = document.getElementsByName('Cbutton');
+ function limitJson2data(n,data1,s){
+    var testButton = document.getElementById('test')
     var b = document.getElementsByName('Cinput');
-    for(var i =0;i<a.length;i++){
-        a[i].onclick = (function closure(ii,){
-            return function(){
-                var niveau =b[ii].id.slice(0,1);
-                var name = b[ii].id.slice(1);//the name of table
-                var list=[];
+    testButton.onclick = function test(){
+        var flag = 0;
+        var constraints="";
+        for(var i =0;i<b.length;i++){
+            var list=[];
+            if(($("#"+b[i].id).val()).length!=0){
+                flag = 1;
+                constraints = $("#"+b[i].id).val();
+                var niveau =b[i].id.slice(0,1);
+                var name = b[i].id.slice(1);//the name of table
                 list.unshift(name);
                 for(var h=niveau-1;h>=0;h--){
-                    for(var j=ii-1;j>=0;j--){
+                    for(var j=i-1;j>=0;j--){
                         if(b[j].id.slice(0,1)==h){
                             list.unshift(b[j].id.slice(1));
                             break;
                         }
                     }
                 }
-                console.log(data1)
-                var constraints = $("#"+b[ii].id).val();
-                var p = n.CreateJsonAndContraint(list,constraints,0,data1);
-                var adql = json2Requete.getAdql(p)
-                console.log(adql)
+                var json = n.CreateJsonWithoutColumns(list,constraints,0,data1);
+                var adql = json2Requete.getAdql(json);
                 var QObject = s.Query(adql);
                 var dataTable = VOTableTools.votable2Rows(QObject)
                 var contentText = QObject.responseText;
@@ -427,12 +450,85 @@ function limitJson2data(n,data1,s){
                     })
                 }
                 var nb = Field.length;
-                var out ="<div class = \"white_content\" id=\"light\"> <table border = \"1\" style = \"width: 80%; margin :auto\"> <button href = \"javascript:void(0)\" onclick = \" document.getElementById('light').style.display='none';location.reload()\">Close</button>";//head
-                out +="<tr>";//head
+                //var out ="<div class = \"white_content\" " +
+                //        "id=\"light\"> <table border = \"1\" style = \"width: 80%; margin :auto\">" +
+                //        "<button class=\"delete_right\" style = \"background:url('../javascript/img/close.png')\" href = \"javascript:void(0)\" "+
+                //        "onclick = \" document.getElementById('light').style.display='none'\"></button><br></br>";//head <div ng-show=\"base_view\" class=\"labletitle\" style=\"top: 54px; left: 0px;width: 70%; margin-top: 2%;margin-left: 22%;margin-right: 10%; background-color: #F7F4F4;   -webkit-box-shadow: 0 8px 20px rgba(100, 100, 100, 0.85); z-index: 10;\"> 
+                out = adql
+                out +="<br></br>"
+                out += "<table border = \"1\" style = \"width: 80%; margin :auto\">";
+                out +="<thead><tr role=\"row\">";//head
                 for(var j=0;j<nb;j++){
-                    out +="<th style=\"text-align: auto;\">"+Field[j]+"</th>";
+                    out +="<th class=\"sorting_disabled\" rowspan=\"1\" colspan=\"1\" style=\"text-align: auto;\">"+Field[j]+"</th>";
                 }
-                out +="</tr>";
+                out +="</tr></thead>";
+                out +="<tbody>"
+                var count =0;
+                for(var j=0;j<dataTable.length;j++){//table  content
+                    if(count==0){
+                        out+="<tr role=\"row\">";
+                    }
+                    out +="<td style=\"text-align: auto;\">"+dataTable[j]+"</td>";
+                    count =count+1;
+                    if(count==nb){
+                        out +="</tr>";
+                        count=0;
+                    }
+                }
+                out+="</tbody>"
+                out += "</table>"
+                $("#load3").html(out);
+                //document.getElementById('light').style.display='block';
+                constraints="";
+                flag =0;
+                $("input[name=Cinput]").val("");
+                window.location.hash = "#load3"
+            }
+            else if(flag==0){
+                continue;
+            }
+        }
+        
+    }
+    
+}
+
+function Aide(n,data1,s){
+    var a = document.getElementsByName('Cbutton');
+    var b = document.getElementsByName('Cinput');
+    for(var i =0;i<a.length;i++){
+        a[i].onclick = (function closure(ii){
+            return function(){
+                var name = b[ii].id.slice(1);//the name of table
+                var schema = data1[name].schema;
+                var adql = n.AdqlAllColumn(name,schema)
+                var QObject = s.Query(adql);
+                var dataTable = VOTableTools.votable2Rows(QObject)
+                var contentText = QObject.responseText;
+                var method = contentText.indexOf("base64");
+                var Field =[]
+                if(method!=-1){//The coding mode is "base64". e.g. Simbad, GAVO
+                    Field = VOTableTools.getField(QObject)
+                }
+                else{//The coding mode is normal. e.g. VizieR, CAOM
+                    $(contentText).find('RESOURCE[type="results"]').each(function(){
+                        $(this).find("FIELD").each(function(){
+                                Field.push(this.attributes.name.nodeValue);
+                        });
+                    })
+                }
+                var nb = Field.length;
+                var out ="<div class = \"white_content\" " +
+                      "id=\"light\"> <table border = \"1\" style = \"width: 80%; margin :auto\">" +
+                      "<button class=\"delete_right\" style = \"background:url('../javascript/img/close.png')\" href = \"javascript:void(0)\" "+
+                      "onclick = \" document.getElementById('light').style.display='none'\"></button><br></br>";//head <div ng-show=\"base_view\" class=\"labletitle\" style=\"top: 54px; left: 0px;width: 70%; margin-top: 2%;margin-left: 22%;margin-right: 10%; background-color: #F7F4F4;   -webkit-box-shadow: 0 8px 20px rgba(100, 100, 100, 0.85); z-index: 10;\"> 
+                out += "<table border = \"1\" style = \"width: 80%; margin :auto\">";
+                out +="<thead><tr role=\"row\">";//head
+                for(var j=0;j<nb;j++){
+                    out +="<th rowspan=\"1\" colspan=\"1\" style=\"text-align: auto;\">"+Field[j]+"</th>";
+                }
+                out +="</tr></thead>";
+                out +="<tbody>"
                 var count =0;
                 for(var j=0;j<dataTable.length;j++){//table  content
                     if(count==0){
@@ -445,14 +541,11 @@ function limitJson2data(n,data1,s){
                         count=0;
                     }
                 }
+                out+="</tbody>"
                 out += "</table>  </div>"
-                $("body").append(out);
+                $("body").prepend(out);
                 document.getElementById('light').style.display='block';
-                
             }
         })(i);
     }
-
-
-    
 }

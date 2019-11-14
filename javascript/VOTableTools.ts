@@ -15,6 +15,7 @@ class VOTableTools{
     var method = contentText.indexOf("base64");
     if(method!=-1){//The coding mode is "base64". e.g. Simbad, GAVO
       var data = VOTableTools.content2Rows(contentText);
+
       let k:number = 0;
       for(var i=0;i<data.length;i=i+1)//Store the name of the table in an array
       {

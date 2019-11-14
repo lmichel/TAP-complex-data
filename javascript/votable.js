@@ -865,7 +865,6 @@ function VOTableParser() {
     
     // We must clean the B64 data from all the spaces and tabs it could contains
     dataB64 = dataB64.replace(/[ \t\r]+/g, '');
-
     dataB64Length = dataB64.length;
   
     fields = thisParser.getCurrentTableFields();

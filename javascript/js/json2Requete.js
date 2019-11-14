@@ -39,13 +39,18 @@ var json2Requete = /** @class */ (function () {
                 }
                 constraint += json2Requete.getConstraint(jsonAll[key].join_tables, 0);
             }
+            else {
+                if (jsonAll[key].constraints != "") {
+                    constraint = jsonAll[key].constraints;
+                }
+            }
         }
         adql += "SELECT " + "\n" + "TOP 100" + "\n";
         for (var i = 0; i < column.length; i++) {
-            if (column[i].indexOf("*") != -1) {
-                adql += column[i] + " " + "\n";
-            }
-            else if (i == column.length - 1) {
+            //if(column[i].indexOf("*")!=-1){
+            //adql +=column[i]+ " "+"\n";
+            //}else 
+            if (i == column.length - 1) {
                 adql += column[i] + "\n";
             }
             else {

@@ -15,39 +15,44 @@ class json2Requete{
         let schema:string="";
         for(var key in jsonAll)
         {
-        if(jsonAll[key].schema=="public")//when schema_name = public, it needs to be double quoted.
-        {
-            schema="\"public\"";
-        }
-        else{
-            schema = jsonAll[key].schema
-        }
-        if(jsonAll[key].columns!=[]){
-            for(var columnkey in jsonAll[key].columns){
-                if( jsonAll[key].columns[columnkey].indexOf("*")!=-1){
-                    column.push(jsonAll[key].columns[columnkey]);
-                }
-                else{
-                    column.push(schema+"."+key+"."+jsonAll[key].columns[columnkey]);
+            if(jsonAll[key].schema=="public")//when schema_name = public, it needs to be double quoted.
+            {
+                schema="\"public\"";
+            }
+            else{
+                schema = jsonAll[key].schema
+            }
+            if(jsonAll[key].columns!=[]){
+                for(var columnkey in jsonAll[key].columns){
+                    if( jsonAll[key].columns[columnkey].indexOf("*")!=-1){
+                        column.push(jsonAll[key].columns[columnkey]);
+                    }
+                    else{
+                        column.push(schema+"."+key+"."+jsonAll[key].columns[columnkey]);
+                    }
                 }
             }
-        }
-        
-        if(jsonAll[key].join_tables!=undefined){
-            var columnJoin =json2Requete.getColumn(jsonAll[key].join_tables,schema);
-            column.push(...columnJoin);
-            if(jsonAll[key].constraints!=""){
-            constraint = jsonAll[key].constraints;
-            constraint += "\n AND \n";
+            if(jsonAll[key].join_tables!=undefined){
+                var columnJoin =json2Requete.getColumn(jsonAll[key].join_tables,schema);
+                column.push(...columnJoin);
+                if(jsonAll[key].constraints!=""){
+                constraint = jsonAll[key].constraints;
+                constraint += "\n AND \n";
+                }
+                constraint += json2Requete.getConstraint(jsonAll[key].join_tables,0);
             }
-            constraint += json2Requete.getConstraint(jsonAll[key].join_tables,0);
-        }
+            else{
+                if(jsonAll[key].constraints!=""){
+                    constraint = jsonAll[key].constraints;
+                }
+            }
         }
         adql +="SELECT "+"\n"+"TOP 100"+"\n";
         for(var i = 0;i<column.length;i++){
-        if(column[i].indexOf("*")!=-1){
-            adql +=column[i]+ " "+"\n";
-        }else if(i==column.length-1){
+        //if(column[i].indexOf("*")!=-1){
+            //adql +=column[i]+ " "+"\n";
+        //}else 
+        if(i==column.length-1){
             adql += column[i] +"\n";
         }
         else{

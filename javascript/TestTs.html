@@ -6,6 +6,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <style>
+    .close {
+        /* still bad on picking color */
+        background: orange;
+        color: red;
+        /* make a round button */
+        border-radius: 12px;
+        /* center text */
+        line-height: 20px;
+        text-align: center;
+        height: 20px;
+        width: 20px;
+        font-size: 18px;
+        padding: 1px;
+    }
+    /* use cross as close button */
+    .close::before {
+        content: "\2716";
+    }
+    .sorting_disabled{
+        border-bottom: 1px solid
+        black;
+        font-weight: bold;
+        cursor: pointer;
+        background-color:
+        white;
+        font-size: small;
+    }
     .black_overlay{ 
         display: none; 
         position: absolute; 
@@ -33,6 +60,17 @@
         overflow: auto; 
         text-align: center;
     }
+
+    .delete_right {
+        display: block;
+        cursor: pointer;
+        width: 12px;
+        height: 20px;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        
+    }
 </style>
 <title>test</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -40,7 +78,7 @@
 <script type="text/javascript" src= "./js/jsonRead.js" ></script>
 <script type="text/javascript" src= "./js/VOTableTools.js" ></script>
 <script type="text/javascript" src= "./js/TapService.js" ></script>
-<script type="text/javascript" src= "./main.js" ></script>
+<script type="text/javascript" src= "./main.js" charset="utf-8"></script>
 <script type="text/javascript">
     window.onload=function(){
        main();
@@ -55,6 +93,7 @@
         <small>Obas</small>
     </h1>
 </div>
+
 <div class="btn-group" style="padding-right:10px; padding-left:400px">
     <button type="button" class="btn btn-primary" >Simbad</button>
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" >
@@ -137,11 +176,11 @@
 
 <pre id="load1" style= "background-color:white; overflow:scroll; width:800px; height:300px;margin-left:400px"></pre>
 
-<div class="btn-group" style="text-align: center; padding-left:600px">
+<div class="btn-group" style="text-align: center; padding-left:400px">
     <button type="button" id = "c00" class="btn btn-primary">Change</button>
 </div>
 
-<div class="btn-group" style="text-align: center; padding-left:250px">
+<div class="btn-group" style="text-align: center; padding-left:270px">
     <button type="button" class="btn btn-primary">RootTable</button>
     <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
@@ -151,8 +190,14 @@
 
     </ul>
 </div>
+
+<div class="btn-group" style="text-align: center; padding-left:270px">
+        <button type="button" id = "test" class="btn btn-primary">Test</button>
+    </div>
+
 <br></br>
 <pre id="load2" style= "background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px "> </pre>
 
+<pre id="load3" style= "background-color:white; overflow:scroll; width:1400px; height:700px;margin-left:200px; font-size:12px; line-height: 2.3"></pre>
 </body>
 </html>

@@ -98,7 +98,7 @@ var jsonRead = /** @class */ (function () {
         for (var key in jsonAll[table].join_tables) {
             if (list_exist.indexOf(key) == -1) {
                 joinTable.push(space + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>");
-                joinTable.push(space + "<input id=\"" + niveau + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<button type=\"button\" id = " + "\"b" + niveau + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>" + "<br/>");
+                joinTable.push(space + "<button type=\"button\" id = " + "\"b" + niveau + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=\"" + niveau + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<br/>");
                 list_exist.push(key);
                 var table_1 = void 0;
                 var tableCut = void 0;
@@ -125,10 +125,10 @@ var jsonRead = /** @class */ (function () {
         var list_exist = [];
         list_exist.push(table);
         joinTable.push("<B>" + table + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(table) + "</font>" + "<br/>");
-        joinTable.push("<input id=" + "\"1" + table + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<button type=\"button\" id = " + "\"b1" + table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>" + "<br/>");
+        joinTable.push("<button type=\"button\" id = " + "\"b1" + table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=" + "\"1" + table + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<br/>");
         for (var key in jsonAll[table].join_tables) {
             joinTable.push("    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>");
-            joinTable.push("    " + "<input id=\"2" + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<button type=\"button\" id = " + "\"b2" + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add</button>" + "<br/>");
+            joinTable.push("    " + "<button type=\"button\" id = " + "\"b2" + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=\"2" + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<br/>");
             if (list_exist.indexOf(key) == -1) {
                 list_exist.push(key);
                 joinTable.push(this.json2HtmlJoin(key, list_exist, 0));
@@ -219,6 +219,78 @@ var jsonRead = /** @class */ (function () {
             json[key] = jsonAll;
         }
         return json;
+    };
+    jsonRead.prototype.CreateJsonWithoutColumns = function (list, constraints, flag, jsonJoin) {
+        var jsonAll = {};
+        var json = {};
+        var list_rest = list;
+        var key = list[0];
+        var schema = jsonJoin[key].schema;
+        if (schema == "public") {
+            schema = "\"" + "public" + "\"";
+        }
+        if (0 == list.length - 1 && flag == 0) {
+            var c = schema + "." + key + "." + "*";
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = jsonJoin[key].description;
+            jsonAll["columns"] = [c];
+            jsonAll["constraints"] = constraints;
+            json[key] = jsonAll;
+        }
+        else if (0 != list.length - 1 && flag == 0) {
+            var c = schema + "." + key + "." + "*";
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = jsonJoin[key].description;
+            jsonAll["columns"] = [c];
+            jsonAll["constraints"] = "";
+            list_rest.shift();
+            flag = flag + 1;
+            jsonAll["join_tables"] = this.CreateJsonWithoutColumns(list_rest, constraints, flag, this.json[key].join_tables);
+            json[key] = jsonAll;
+        }
+        else if (0 != list.length - 1 && flag != 0) {
+            var c = schema + "." + key + "." + "*";
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = this.json[key].description;
+            jsonAll["columns"] = [c];
+            jsonAll["constraints"] = "";
+            jsonAll["from"] = jsonJoin[key].from;
+            jsonAll["target"] = jsonJoin[key].target;
+            list_rest.shift();
+            flag = flag + 1;
+            jsonAll["join_tables"] = this.CreateJsonWithoutColumns(list_rest, constraints, flag, this.json[key].join_tables);
+            json[key] = jsonAll;
+        }
+        else if (key == list[0] && 0 == list.length - 1 && flag != 0) {
+            var c = schema + "." + key + "." + "*";
+            jsonAll["schema"] = jsonJoin[key].schema;
+            jsonAll["description"] = this.json[key].description;
+            jsonAll["columns"] = [c];
+            jsonAll["constraints"] = constraints;
+            var from = jsonJoin[key].from;
+            jsonAll["from"] = from;
+            jsonAll["target"] = jsonJoin[key].target;
+            json[key] = jsonAll;
+        }
+        return json;
+    };
+    jsonRead.prototype.AdqlAllColumn = function (name, schema) {
+        var adql = "";
+        adql = "SELECT "
+            + "TAP_SCHEMA.columns.column_name"
+            + ",TAP_SCHEMA.columns.unit"
+            + ",TAP_SCHEMA.columns.ucd"
+            + ",TAP_SCHEMA.columns.utype"
+            + ",TAP_SCHEMA.columns.dataType"
+            + ",TAP_SCHEMA.columns.description"
+            + " FROM TAP_SCHEMA.columns";
+        if (schema == 'public' || schema == 'metaviz') {
+            adql += " WHERE TAP_SCHEMA.columns.table_name = " + "'" + name + "'";
+        }
+        else {
+            adql += " WHERE TAP_SCHEMA.columns.table_name = " + "'" + schema + "." + name + "'";
+        }
+        return adql;
     };
     return jsonRead;
 }());
