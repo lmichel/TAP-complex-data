@@ -6,6 +6,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <style>
+    .table {
+        border: 1px #151515;
+        width: 80%; 
+        margin :auto; 
+        white-space: nowrap; 
+        border-spacing: 0;
+        border-collapse: collapse;
+    }
+    .odd {
+    background-color: white;
+    text-align: auto;
+    }   
+    .even {
+    background-color: whitesmoke;
+    text-align: auto;
+    }
     .close {
         /* still bad on picking color */
         background: orange;
@@ -48,7 +64,7 @@
     } 
     .white_content { 
         display: none; 
-        position: absolute; 
+        position: fixed; 
         top: 25%; 
         left: 25%; 
         width: 55%; 
@@ -64,8 +80,8 @@
     .delete_right {
         display: block;
         cursor: pointer;
-        width: 12px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
         position: absolute;
         top: 20px;
         right: 20px;
@@ -74,6 +90,7 @@
 </style>
 <title>test</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script type="text/javascript" src= "jquery-3.4.1.js" ></script>
 <script type="text/javascript" src= "./js/jsonRead.js" ></script>
 <script type="text/javascript" src= "./js/VOTableTools.js" ></script>
@@ -88,116 +105,5 @@
 <body>
 <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<div class="page-header" style="text-align: center">
-    <h1>TAP TEST
-        <small>Obas</small>
-    </h1>
-</div>
-
-<div class="btn-group" style="padding-right:10px; padding-left:400px">
-    <button type="button" class="btn btn-primary" >Simbad</button>
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" >
-        <span class="caret"></span>
-        <span class="sr-only"></span>
-    </button>
-    <ul class="dropdown-menu" role="menu" style="margin-left:400px">
-        <li><a href="#" id="simbad">schema: public</a></li>
-        <li class="divider"></li>
-        <li><a href="http://simbad.u-strasbg.fr/simbad/sim-tap">TAP Simbad</a></li>
-    </ul>
-</div>
-<input type="checkbox" id = "top_simbad" >TOP 100
-
-<div class="btn-group" style="padding-right:10px; padding-left:50px">
-    <button type="button" class="btn btn-primary">GAVO</button>
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-        <span class="caret"></span>
-        <span class="sr-only"></span>
-    </button>
-    <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="gavo">schema: rr</a></li>
-        <li class="divider"></li>
-        <li><a href="http://dc.zah.uni-heidelberg.de/__system__/adql/query">TAP GAVO</a></li>
-    </ul>
-</div>
-<input type="checkbox" id = "top_gavo" >TOP 100
-
-<div class="btn-group" style="padding-right:10px; padding-left:50px">
-    <button type="button" class="btn btn-primary">VizieR</button>
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-        <span class="caret"></span>
-        <span class="sr-only"></span>
-    </button>
-    <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="vizier">schema: metaviz</a></li>
-        <li class="divider"></li>
-        <li><a href="http://tapvizier.u-strasbg.fr/TAPVizieR/">TAP VizieR</a></li>
-    </ul>
-</div>
-<input type="checkbox" id = "top_vizier" >TOP 100
-
-<div class="btn-group" style="padding-right:10px; padding-left:50px">
-    <button type="button" class="btn btn-primary">CAOM</button>
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-        <span class="caret"></span>
-        <span class="sr-only"></span>
-    </button>
-    <ul class="dropdown-menu" role="menu" style="margin-left:50px">
-        <li><a href="#" id="caom">schema: dbo</a></li>
-        <li class="divider"></li>
-        <li><a href="http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/">TAP CAOM</a></li>
-    </ul>
-</div>
-<input type="checkbox" id = "top_caom" >TOP 100
-
-<br></br>
-
-
-<input id="simbadCS" type="text" style = "width: 100px;margin-left:400px" placeholder="public">
-<div class="btn-group" style=" padding-left:5px;padding-right:40px">
-    <button type="button" id = "cs00" class="btn btn-primary">Change</button>
-</div>
-<input id="gavoCS" type="text" style = "width: 100px" placeholder="rr">
-<div class="btn-group" style=" padding-left:10px;padding-right:40px"> 
-    <button type="button" id = "cs01" class="btn btn-primary">Change</button>
-</div>
-<input id="vizierCS" type="text" style = "width: 100px" placeholder="metaviz">
-<div class="btn-group" style=" padding-left:10px;padding-right:40px">
-    <button type="button" id = "cs02" class="btn btn-primary">Change</button>
-</div>
-<input id="caomCS" type="text" style = "width: 100px" placeholder="dbo">
-<div class="btn-group" style=" padding-left:10px;padding-right:40px">
-    <button type="button" id = "cs03" class="btn btn-primary">Change</button>
-</div>
-
-
-<br></br>
-
-
-<pre id="load1" style= "background-color:white; overflow:scroll; width:800px; height:300px;margin-left:400px"></pre>
-
-<div class="btn-group" style="text-align: center; padding-left:400px">
-    <button type="button" id = "c00" class="btn btn-primary">Change</button>
-</div>
-
-<div class="btn-group" style="text-align: center; padding-left:270px">
-    <button type="button" class="btn btn-primary">RootTable</button>
-    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-        <span class="caret"></span>
-        <span class="sr-only"></span>
-    </button>
-    <ul class="dropdown-menu" id = "showRoot" role="menu" style="margin-left:250px">
-
-    </ul>
-</div>
-
-<div class="btn-group" style="text-align: center; padding-left:270px">
-        <button type="button" id = "test" class="btn btn-primary">Test</button>
-    </div>
-
-<br></br>
-<pre id="load2" style= "background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px "> </pre>
-
-<pre id="load3" style= "background-color:white; overflow:scroll; width:1400px; height:700px;margin-left:200px; font-size:12px; line-height: 2.3"></pre>
 </body>
 </html>

@@ -98,7 +98,7 @@ var jsonRead = /** @class */ (function () {
         for (var key in jsonAll[table].join_tables) {
             if (list_exist.indexOf(key) == -1) {
                 joinTable.push(space + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>");
-                joinTable.push(space + "<button type=\"button\" id = " + "\"b" + niveau + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=\"" + niveau + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<br/>");
+                joinTable.push(space + "<button type=\"button\" id = " + "\"b" + niveau + key + "\" name = \"Cbutton\" class=\"btn btn-primary\" >Aide</button>" + "<input id=\"" + niveau + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"contraints\">" + "<br/>");
                 list_exist.push(key);
                 var table_1 = void 0;
                 var tableCut = void 0;
@@ -125,10 +125,10 @@ var jsonRead = /** @class */ (function () {
         var list_exist = [];
         list_exist.push(table);
         joinTable.push("<B>" + table + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(table) + "</font>" + "<br/>");
-        joinTable.push("<button type=\"button\" id = " + "\"b1" + table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=" + "\"1" + table + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<br/>");
+        joinTable.push("<button type=\"button\" id = " + "\"b1" + table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=" + "\"1" + table + "\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"contraints\">" + "<br/>");
         for (var key in jsonAll[table].join_tables) {
             joinTable.push("    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>");
-            joinTable.push("    " + "<button type=\"button\" id = " + "\"b2" + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=\"2" + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 200px\" placeholder=\"contraints\">" + "<br/>");
+            joinTable.push("    " + "<button type=\"button\" id = " + "\"b2" + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=\"2" + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"contraints\">" + "<br/>");
             if (list_exist.indexOf(key) == -1) {
                 list_exist.push(key);
                 joinTable.push(this.json2HtmlJoin(key, list_exist, 0));
@@ -174,58 +174,152 @@ var jsonRead = /** @class */ (function () {
      * @param jsonJoin: original json
      * @return :json with contraints
      */
-    jsonRead.prototype.CreateJsonAndContraint = function (list, constraint, flag, jsonJoin) {
+    jsonRead.prototype.CreateJsonAndContraint = function (list, constraints, column, flag, jsonJoin) {
         var jsonAll = {};
         var json = {};
-        var list_rest = list;
+        var list_rest = JSON.parse(JSON.stringify(list));
         var key = list[0];
+        var schema = jsonJoin[key].schema;
+        var flagC = 0, flagColumn = 0;
+        if (schema == "public") {
+            schema = "\"" + "public" + "\"";
+        }
         if (0 == list.length - 1 && flag == 0) {
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = jsonJoin[key].description;
-            jsonAll["columns"] = [];
-            jsonAll["constraints"] = constraint;
+            var temp = [];
+            for (var i = 0; i < column.length; i = i + 2) {
+                if (column[i] == key) {
+                    flagColumn = 1;
+                    temp.push(column[i + 1]);
+                }
+            }
+            jsonAll["columns"] = temp;
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagColumn == 0) {
+                jsonAll["columns"] = [];
+            }
+            ;
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             json[key] = jsonAll;
+            flagC = 0;
+            flagColumn = 0;
         }
         else if (0 != list.length - 1 && flag == 0) {
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = jsonJoin[key].description;
-            jsonAll["columns"] = [];
-            jsonAll["constraints"] = "";
+            var temp = [];
+            for (var i = 0; i < column.length; i = i + 2) {
+                if (column[i] == key) {
+                    flagColumn = 1;
+                    temp.push(column[i + 1]);
+                }
+            }
+            jsonAll["columns"] = temp;
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagColumn == 0) {
+                jsonAll["columns"] = [];
+            }
+            ;
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             list_rest.shift();
             flag = flag + 1;
-            jsonAll["join_tables"] = this.CreateJsonAndContraint(list_rest, constraint, flag, this.json[key].join_tables);
+            jsonAll["join_tables"] = this.CreateJsonAndContraint(list_rest, constraints, column, flag, this.json[key].join_tables);
             json[key] = jsonAll;
+            flagC = 0;
+            flagColumn = 0;
         }
         else if (0 != list.length - 1 && flag != 0) {
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = this.json[key].description;
-            jsonAll["columns"] = [jsonJoin[key].from];
-            jsonAll["constraints"] = "";
+            var temp = [];
+            for (var i = 0; i < column.length; i = i + 2) {
+                if (column[i] == key) {
+                    flagColumn = 1;
+                    temp.push(column[i + 1]);
+                }
+            }
+            jsonAll["columns"] = temp;
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagColumn == 0) {
+                jsonAll["columns"] = [];
+            }
+            ;
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             jsonAll["from"] = jsonJoin[key].from;
             jsonAll["target"] = jsonJoin[key].target;
             list_rest.shift();
             flag = flag + 1;
-            jsonAll["join_tables"] = this.CreateJsonAndContraint(list_rest, constraint, flag, this.json[key].join_tables);
+            jsonAll["join_tables"] = this.CreateJsonAndContraint(list_rest, constraints, column, flag, this.json[key].join_tables);
             json[key] = jsonAll;
+            flagC = 0;
+            flagColumn = 0;
         }
         else if (key == list[0] && 0 == list.length - 1 && flag != 0) {
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = this.json[key].description;
-            jsonAll["columns"] = [jsonJoin[key].from];
-            jsonAll["constraints"] = constraint;
+            var temp = [];
+            for (var i = 0; i < column.length; i = i + 2) {
+                if (column[i] == key) {
+                    flagColumn = 1;
+                    temp.push(column[i + 1]);
+                }
+            }
+            jsonAll["columns"] = temp;
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagColumn == 0) {
+                jsonAll["columns"] = [];
+            }
+            ;
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             var from = jsonJoin[key].from;
             jsonAll["from"] = from;
             jsonAll["target"] = jsonJoin[key].target;
             json[key] = jsonAll;
+            flagC = 0;
+            flagColumn = 0;
         }
         return json;
     };
     jsonRead.prototype.CreateJsonWithoutColumns = function (list, constraints, flag, jsonJoin) {
         var jsonAll = {};
         var json = {};
-        var list_rest = list;
+        var list_rest = JSON.parse(JSON.stringify(list));
         var key = list[0];
         var schema = jsonJoin[key].schema;
+        var flagC = 0;
         if (schema == "public") {
             schema = "\"" + "public" + "\"";
         }
@@ -234,43 +328,83 @@ var jsonRead = /** @class */ (function () {
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = jsonJoin[key].description;
             jsonAll["columns"] = [c];
-            jsonAll["constraints"] = constraints;
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             json[key] = jsonAll;
+            flagC = 0;
         }
         else if (0 != list.length - 1 && flag == 0) {
             var c = schema + "." + key + "." + "*";
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = jsonJoin[key].description;
             jsonAll["columns"] = [c];
-            jsonAll["constraints"] = "";
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             list_rest.shift();
             flag = flag + 1;
             jsonAll["join_tables"] = this.CreateJsonWithoutColumns(list_rest, constraints, flag, this.json[key].join_tables);
             json[key] = jsonAll;
+            flagC = 0;
         }
         else if (0 != list.length - 1 && flag != 0) {
             var c = schema + "." + key + "." + "*";
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = this.json[key].description;
-            jsonAll["columns"] = [c];
-            jsonAll["constraints"] = "";
+            jsonAll["columns"] = [];
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             jsonAll["from"] = jsonJoin[key].from;
             jsonAll["target"] = jsonJoin[key].target;
             list_rest.shift();
             flag = flag + 1;
             jsonAll["join_tables"] = this.CreateJsonWithoutColumns(list_rest, constraints, flag, this.json[key].join_tables);
             json[key] = jsonAll;
+            flagC = 0;
         }
         else if (key == list[0] && 0 == list.length - 1 && flag != 0) {
             var c = schema + "." + key + "." + "*";
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = this.json[key].description;
-            jsonAll["columns"] = [c];
-            jsonAll["constraints"] = constraints;
+            jsonAll["columns"] = [];
+            for (var i = 0; i < constraints.length; i = i + 2) {
+                if (constraints[i] == key) {
+                    flagC = 1;
+                    jsonAll["constraints"] = constraints[i + 1];
+                }
+            }
+            if (flagC == 0) {
+                jsonAll["constraints"] = "";
+            }
+            ;
             var from = jsonJoin[key].from;
             jsonAll["from"] = from;
             jsonAll["target"] = jsonJoin[key].target;
             json[key] = jsonAll;
+            flagC = 0;
         }
         return json;
     };

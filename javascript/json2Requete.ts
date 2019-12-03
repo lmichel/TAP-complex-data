@@ -22,7 +22,7 @@ class json2Requete{
             else{
                 schema = jsonAll[key].schema
             }
-            if(jsonAll[key].columns!=[]){
+            if(jsonAll[key].columns!=[]){//root table's columns
                 for(var columnkey in jsonAll[key].columns){
                     if( jsonAll[key].columns[columnkey].indexOf("*")!=-1){
                         column.push(jsonAll[key].columns[columnkey]);
@@ -32,22 +32,26 @@ class json2Requete{
                     }
                 }
             }
-            if(jsonAll[key].join_tables!=undefined){
+            if(jsonAll[key].join_tables!=undefined){//root table's join tables
                 var columnJoin =json2Requete.getColumn(jsonAll[key].join_tables,schema);
                 column.push(...columnJoin);
-                if(jsonAll[key].constraints!=""){
-                constraint = jsonAll[key].constraints;
-                constraint += "\n AND \n";
+                if(jsonAll[key].constraints!=undefined&&jsonAll[key].constraints.length!=0){//root table's constraints
+                    constraint = jsonAll[key].constraints;
+
+                    constraint += json2Requete.getConstraint(jsonAll[key].join_tables,1);
                 }
-                constraint += json2Requete.getConstraint(jsonAll[key].join_tables,0);
+                else{
+                    constraint += json2Requete.getConstraint(jsonAll[key].join_tables,0);
+                }
+                
             }
-            else{
+            else{//root table hasn't join tables
                 if(jsonAll[key].constraints!=""){
                     constraint = jsonAll[key].constraints;
                 }
             }
         }
-        adql +="SELECT "+"\n"+"TOP 100"+"\n";
+        adql +="SELECT "+"\n"+"TOP 100"+"\n";//+"\n"+"DISTINCT"
         for(var i = 0;i<column.length;i++){
         //if(column[i].indexOf("*")!=-1){
             //adql +=column[i]+ " "+"\n";
@@ -60,7 +64,6 @@ class json2Requete{
         }
         }
         adql += "FROM ";
-        
         for(var key in jsonAll)
         {
         adql += schema+"."+key + " "+"\n";
@@ -69,6 +72,19 @@ class json2Requete{
         if(constraint!=""){
         adql += "WHERE "+"\n" + constraint ;
         }
+        for(var key in jsonAll)
+        {
+            for(var keyJoin in jsonAll[key].join_tables)
+            {
+                var id = jsonAll[key].join_tables[keyJoin].target;
+            }
+        }
+        
+        if(id!=undefined&& adql.indexOf("public")!=-1){//@TODO
+            adql +="\n"
+            adql +="ORDER BY " + id;
+        }
+        
         return adql;
     }
 
@@ -102,12 +118,12 @@ class json2Requete{
         var constraint="";
         for(var key in json)
         {
-            if(json[key].constraints!="" && flag!=0){
+            if(json[key].constraints!=undefined && flag!=0&&json[key].constraints.length!=0){
                 constraint += "\n"+"AND"+"\n";
                 constraint += json[key].constraints;
                 flag++;
             }
-            else if(json[key].constraints!="" && flag == 0){
+            else if(json[key].constraints!=undefined && flag == 0&&json[key].constraints.length!=0){
                 constraint += json[key].constraints;
                 flag++;
             }

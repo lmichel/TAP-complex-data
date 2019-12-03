@@ -33,11 +33,13 @@ var json2Requete = /** @class */ (function () {
             if (jsonAll[key].join_tables != undefined) {
                 var columnJoin = json2Requete.getColumn(jsonAll[key].join_tables, schema);
                 column.push.apply(column, columnJoin);
-                if (jsonAll[key].constraints != "") {
+                if (jsonAll[key].constraints != undefined && jsonAll[key].constraints.length != 0) {
                     constraint = jsonAll[key].constraints;
-                    constraint += "\n AND \n";
+                    constraint += json2Requete.getConstraint(jsonAll[key].join_tables, 1);
                 }
-                constraint += json2Requete.getConstraint(jsonAll[key].join_tables, 0);
+                else {
+                    constraint += json2Requete.getConstraint(jsonAll[key].join_tables, 0);
+                }
             }
             else {
                 if (jsonAll[key].constraints != "") {
@@ -45,7 +47,7 @@ var json2Requete = /** @class */ (function () {
                 }
             }
         }
-        adql += "SELECT " + "\n" + "TOP 100" + "\n";
+        adql += "SELECT " + "\n" + "TOP 100" + "\n"; //+"\n"+"DISTINCT"
         for (var i = 0; i < column.length; i++) {
             //if(column[i].indexOf("*")!=-1){
             //adql +=column[i]+ " "+"\n";
@@ -64,6 +66,15 @@ var json2Requete = /** @class */ (function () {
         }
         if (constraint != "") {
             adql += "WHERE " + "\n" + constraint;
+        }
+        for (var key in jsonAll) {
+            for (var keyJoin in jsonAll[key].join_tables) {
+                var id = jsonAll[key].join_tables[keyJoin].target;
+            }
+        }
+        if (id != undefined && adql.indexOf("public") != -1) {
+            adql += "\n";
+            adql += "ORDER BY " + id;
         }
         return adql;
     };
@@ -92,12 +103,12 @@ var json2Requete = /** @class */ (function () {
     json2Requete.getConstraint = function (json, flag) {
         var constraint = "";
         for (var key in json) {
-            if (json[key].constraints != "" && flag != 0) {
+            if (json[key].constraints != undefined && flag != 0 && json[key].constraints.length != 0) {
                 constraint += "\n" + "AND" + "\n";
                 constraint += json[key].constraints;
                 flag++;
             }
-            else if (json[key].constraints != "" && flag == 0) {
+            else if (json[key].constraints != undefined && flag == 0 && json[key].constraints.length != 0) {
                 constraint += json[key].constraints;
                 flag++;
             }
