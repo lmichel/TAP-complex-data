@@ -171,8 +171,8 @@ var jsonRead = /** @class */ (function () {
      * @param list : Recorded all table names from the table to the child table
      * @param constraint :the constraint
      * @param flag: control the number of recursions
-     * @param jsonJoin: original json
-     * @return :json with contraints
+     * @param jsonJoin: the json of join table
+     * @return :json with contraints,column(key)
      */
     jsonRead.prototype.CreateJsonAndContraint = function (list, constraints, column, flag, jsonJoin) {
         var jsonAll = {};
@@ -313,6 +313,12 @@ var jsonRead = /** @class */ (function () {
         }
         return json;
     };
+    /**
+     * @param list root table and his join table
+     * @param constraints the constranits entered
+     * @param flag record the number of recursion
+     * @param jsonJoin the json of join table
+     */
     jsonRead.prototype.CreateJsonWithoutColumns = function (list, constraints, flag, jsonJoin) {
         var jsonAll = {};
         var json = {};
@@ -323,8 +329,8 @@ var jsonRead = /** @class */ (function () {
         if (schema == "public") {
             schema = "\"" + "public" + "\"";
         }
+        var c = schema + "." + key + "." + "*";
         if (0 == list.length - 1 && flag == 0) {
-            var c = schema + "." + key + "." + "*";
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = jsonJoin[key].description;
             jsonAll["columns"] = [c];
@@ -342,7 +348,6 @@ var jsonRead = /** @class */ (function () {
             flagC = 0;
         }
         else if (0 != list.length - 1 && flag == 0) {
-            var c = schema + "." + key + "." + "*";
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = jsonJoin[key].description;
             jsonAll["columns"] = [c];
@@ -363,7 +368,6 @@ var jsonRead = /** @class */ (function () {
             flagC = 0;
         }
         else if (0 != list.length - 1 && flag != 0) {
-            var c = schema + "." + key + "." + "*";
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = this.json[key].description;
             jsonAll["columns"] = [];
@@ -386,7 +390,6 @@ var jsonRead = /** @class */ (function () {
             flagC = 0;
         }
         else if (key == list[0] && 0 == list.length - 1 && flag != 0) {
-            var c = schema + "." + key + "." + "*";
             jsonAll["schema"] = jsonJoin[key].schema;
             jsonAll["description"] = this.json[key].description;
             jsonAll["columns"] = [];
@@ -408,6 +411,11 @@ var jsonRead = /** @class */ (function () {
         }
         return json;
     };
+    /**
+     * generate adql statements for querying table information
+     * @param name table's name
+     * @param schema schema name
+     */
     jsonRead.prototype.AdqlAllColumn = function (name, schema) {
         var adql = "";
         adql = "SELECT "

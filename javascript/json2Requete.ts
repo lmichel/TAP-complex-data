@@ -53,9 +53,6 @@ class json2Requete{
         }
         adql +="SELECT "+"\n"+"TOP 100"+"\n";//+"\n"+"DISTINCT"
         for(var i = 0;i<column.length;i++){
-        //if(column[i].indexOf("*")!=-1){
-            //adql +=column[i]+ " "+"\n";
-        //}else 
         if(i==column.length-1){
             adql += column[i] +"\n";
         }

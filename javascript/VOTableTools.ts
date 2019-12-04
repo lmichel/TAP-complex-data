@@ -55,8 +55,9 @@ class VOTableTools{
   }
 
 
-
-
+  /***
+   * Get the table with the data
+   */
   static content2Rows(content:string){
     var p = new VOTableParser();
     var data = p.loadFile(content);//store the data(2-dimensional array) after query by url
@@ -70,6 +71,9 @@ class VOTableTools{
     return data;//name of field and data
   }
 
+  /***
+   * Get the name of field
+   */
   static getField(vObject: any){
     let contentText:string = "";
     contentText=vObject.responseText;
@@ -84,4 +88,22 @@ class VOTableTools{
     p.cleanMemory();
     return nameFields;//name of field and data
   }
+
+  static genererField(QObject:any,contentText:string){
+    let method:number = contentText.indexOf("base64");
+    let Field:string[]=[];
+    if(method!=-1){//The coding mode is "base64". e.g. Simbad, GAVO
+        Field = VOTableTools.getField(QObject)
+    }
+    else{//The coding mode is normal. e.g. VizieR, CAOM
+        $(contentText).find('RESOURCE[type="results"]').each(function(){
+            $(this).find("FIELD").each(function(){
+                    Field.push(this.attributes.name.nodeValue);
+            });
+        })
+    }
+    return Field;
+}
+
+
 }

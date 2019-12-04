@@ -303,6 +303,12 @@ class TapService{
     return reJson;
   }
 
+
+  /***
+   * @param data: the main json
+   * @param list_exist:list of tables who are already recorded
+   * @param root: the root table
+   */
   ifJoin(data:dic,list_exist:string[],root:string):dic{
     let joinJsonJoin:dic={};
     for(var key in data){
@@ -327,10 +333,92 @@ class TapService{
         break;
       }
     }
-  return joinJsonJoin
+  return joinJsonJoin;
   }
 
 
+  /**
+   * 
+   * @param adql 
+   * @param jsonAll json
+   * @param root root table's name
+   * @param listId all the key between root table and join table
+   * @param listJoinAndId all the join table and it's id with root table
+   */
+  createMainJson(adql:string,jsonAll:dic,root:string,listId:string[],listJoinAndId:string[]){
+    var QObject = this.Query(adql);
+    let joinIdDic:dic ={};
+    for(var i=0;i<listJoinAndId.length;i=i+2){
+        if(!json2Requete.isString(listJoinAndId[i])){
+            joinIdDic[listJoinAndId[i+1]]=listJoinAndId[i][0];
+        }else{
+            joinIdDic[listJoinAndId[i+1]]=listJoinAndId[i];
+        }
+    }
+    let IdDic:dic ={};
+    for(var i =0;i<listId.length;i++){
+        IdDic[listId[i]]=i;
+    }
+    var dataTable = VOTableTools.votable2Rows(QObject);
+    let json:dic={};
+    let content:dic = {};
+    let contentTable:dic={};
+    var contentAdql;
+    let schema:string;
+    for(var keyRoot in jsonAll){
+      if(keyRoot==root){
+        schema = jsonAll[keyRoot].schema;
+        if(schema=='public'){schema = "\""+"public"+"\""}
+        for(var i=0;i<dataTable.length;i=i+listId.length){//par defaut, read the first id
+          contentTable={};
+          content = {};
+          for(var key in jsonAll[keyRoot].join_tables){
+            contentAdql = "SELECT \nTOP 100 \n" + schema +"."+key +".*"+"\n";
+            contentAdql += "FROM " + schema +"."+keyRoot+"\n";
+            contentAdql += "JOIN "+ schema +"."+key +"\n";
+            for(var table in joinIdDic){
+              if(table == key ){
+                if(!json2Requete.isString(jsonAll[keyRoot].join_tables[key].target)){
+                  var n = jsonAll[keyRoot].join_tables[key].target-1;
+                  var m = jsonAll[keyRoot].join_tables[key].from-1;
+                  contentAdql += "ON " + schema +"."+keyRoot +"."+jsonAll[keyRoot].join_tables[key].target[n];
+                  contentAdql += "="+ schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].from[m];
+                  var temp = IdDic[joinIdDic[table]]
+                  if(schema.indexOf("basic")!=-1){
+                    contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target[0]+"="+dataTable[i+temp];
+                  }else if(schema.indexOf("public")!=-1){
+                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
+
+                  }else{
+                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target[0]+"="+"\'"+dataTable[i+temp]+"\'";
+                  }
+                  contentTable[key]=contentAdql;
+                }else{
+                  contentAdql += "ON " + schema +"."+keyRoot +"."+jsonAll[keyRoot].join_tables[key].target;
+                  contentAdql += "="+ schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].from;
+                  var temp = IdDic[joinIdDic[table]]
+                  if(schema.indexOf("basic")!=-1){
+                    contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
+                  }else if(schema.indexOf("public")!=-1){
+                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
+
+                  }else{
+                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+"\'"+dataTable[i+temp]+"\'";
+                  }
+                  contentTable[key]=contentAdql;
+                }
+              }
+            }
+          }
+          content["component"]=contentTable;
+          json[dataTable[i]]=content;
+        }
+        break;
+      }
+    }
+    console.log(json);
+    return json;
+  }
 }
 
 

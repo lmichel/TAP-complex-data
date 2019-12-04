@@ -196,14 +196,14 @@ class jsonRead{
    * @param list : Recorded all table names from the table to the child table
    * @param constraint :the constraint
    * @param flag: control the number of recursions
-   * @param jsonJoin: original json
-   * @return :json with contraints
+   * @param jsonJoin: the json of join table
+   * @return :json with contraints,column(key)
    */
   CreateJsonAndContraint(list:string[],constraints:string[],column:string[],flag:number,jsonJoin:dic){//By default, flag=0
     let jsonAll:dic={};
     let json:dic ={};
-    let list_rest:string[]=JSON.parse(JSON.stringify(list))
-    var key = list[0]
+    let list_rest:string[]=JSON.parse(JSON.stringify(list));
+    var key = list[0];
     var schema = jsonJoin[key].schema;
     var flagC=0,flagColumn=0;
     if(schema == "public"){
@@ -212,7 +212,7 @@ class jsonRead{
     if(0==list.length-1 && flag==0){//only the first table has not join tables
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=jsonJoin[key].description;
-      var temp=[]
+      var temp=[];
       for(var i = 0;i<column.length;i=i+2){
         if(column[i]==key){
           flagColumn=1;
@@ -222,24 +222,23 @@ class jsonRead{
       jsonAll["columns"]=temp;
       for(var i = 0;i<constraints.length;i=i+2){
         if(constraints[i]==key){
-          flagC=1
+          flagC=1;
           jsonAll["constraints"]=constraints[i+1];
         }
       }
       if(flagColumn==0){jsonAll["columns"]=[];};
       if(flagC==0){jsonAll["constraints"]="";};
-      json[key]=jsonAll
+      json[key]=jsonAll;
       flagC=0;
       flagColumn=0;
-    }
-    else if( 0!=list.length-1 &&flag ==0){//the first table has join tables
+    }else if( 0!=list.length-1 &&flag ==0){//the first table has join tables
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=jsonJoin[key].description;
-      var temp=[]
+      var temp=[];
       for(var i = 0;i<column.length;i=i+2){
         if(column[i]==key){
           flagColumn=1;
-          temp.push(column[i+1])
+          temp.push(column[i+1]);
         }
       }
       jsonAll["columns"]=temp;
@@ -252,13 +251,12 @@ class jsonRead{
       if(flagColumn==0){jsonAll["columns"]=[];};
       if(flagC==0){jsonAll["constraints"]="";};
       list_rest.shift();
-      flag = flag +1
+      flag = flag +1;
       jsonAll["join_tables"]=this.CreateJsonAndContraint(list_rest,constraints,column,flag,this.json[key].join_tables);
-      json[key]=jsonAll
+      json[key]=jsonAll;
       flagC=0;
       flagColumn=0;
-    }
-    else if(0!=list.length-1 && flag !=0){//not the last/first one
+    }else if(0!=list.length-1 && flag !=0){//not the last/first one
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=this.json[key].description;
       var temp=[];
@@ -271,7 +269,7 @@ class jsonRead{
       jsonAll["columns"]=temp;
       for(var i = 0;i<constraints.length;i=i+2){
         if(constraints[i]==key){
-          flagC=1
+          flagC=1;
           jsonAll["constraints"]=constraints[i+1];
         }
       }
@@ -282,18 +280,17 @@ class jsonRead{
       list_rest.shift();
       flag = flag +1;
       jsonAll["join_tables"]=this.CreateJsonAndContraint(list_rest,constraints,column,flag,this.json[key].join_tables);
-      json[key]=jsonAll
+      json[key]=jsonAll;
       flagC=0;
       flagColumn=0;
-    }
-    else if(key==list[0] && 0==list.length-1 && flag !=0){//the last one 
+    }else if(key==list[0] && 0==list.length-1 && flag !=0){//the last one 
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=this.json[key].description;
-      var temp=[]
+      var temp=[];
       for(var i = 0;i<column.length;i=i+2){
         if(column[i]==key){
           flagColumn=1;
-          temp.push(column[i+1])
+          temp.push(column[i+1]);
         }
       }
       jsonAll["columns"]=temp;
@@ -305,7 +302,7 @@ class jsonRead{
       }
       if(flagColumn==0){jsonAll["columns"]=[];};
       if(flagC==0){jsonAll["constraints"]="";};
-      var from = jsonJoin[key].from
+      var from = jsonJoin[key].from;
       jsonAll["from"]=from;
       jsonAll["target"]=jsonJoin[key].target;
       json[key]=jsonAll;
@@ -313,21 +310,28 @@ class jsonRead{
       flagColumn=0;
     }
 
-    return json
+    return json;
   }
 
+
+   /**
+    * @param list root table and his join table
+    * @param constraints the constranits entered
+    * @param flag record the number of recursion
+    * @param jsonJoin the json of join table
+    */
   CreateJsonWithoutColumns(list:string[],constraints:string[],flag:number,jsonJoin:dic){
     let jsonAll:dic={};
     let json:dic ={};
-    let list_rest:string[]=JSON.parse(JSON.stringify(list))
-    var key = list[0]
+    let list_rest:string[]=JSON.parse(JSON.stringify(list));
+    var key = list[0];
     var schema = jsonJoin[key].schema;
     var flagC=0;
     if(schema == "public"){
       schema = "\""+"public"+"\"";
     }
+    var c = schema +"."+ key +"."+"*";
     if(0==list.length-1 && flag==0){//only the first table has not join tables
-      var c = schema +"."+ key +"."+"*";
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=jsonJoin[key].description;
       jsonAll["columns"]=[c];
@@ -340,9 +344,7 @@ class jsonRead{
       if(flagC==0){jsonAll["constraints"]="";};
       json[key]=jsonAll
       flagC=0;
-    }
-    else if( 0!=list.length-1 &&flag ==0){//the first table has join tables
-      var c = schema +"."+ key +"."+"*";
+    }else if( 0!=list.length-1 &&flag ==0){//the first table has join tables
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=jsonJoin[key].description;
       jsonAll["columns"]=[c];
@@ -358,9 +360,7 @@ class jsonRead{
       jsonAll["join_tables"]=this.CreateJsonWithoutColumns(list_rest,constraints,flag,this.json[key].join_tables);
       json[key]=jsonAll
       flagC=0;
-    }
-    else if(0!=list.length-1 && flag !=0){//not the last/first one
-      var c = schema +"."+ key +"."+"*";
+    }else if(0!=list.length-1 && flag !=0){//not the last/first one
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=this.json[key].description;
       jsonAll["columns"]=[];
@@ -378,9 +378,7 @@ class jsonRead{
       jsonAll["join_tables"]=this.CreateJsonWithoutColumns(list_rest,constraints,flag,this.json[key].join_tables);
       json[key]=jsonAll
       flagC=0;
-    }
-    else if(key==list[0] && 0==list.length-1 && flag !=0){//the last one 
-      var c = schema +"."+ key +"."+"*";
+    }else if(key==list[0] && 0==list.length-1 && flag !=0){//the last one 
       jsonAll["schema"]=jsonJoin[key].schema;
       jsonAll["description"]=this.json[key].description;
       jsonAll["columns"]=[];
@@ -397,9 +395,14 @@ class jsonRead{
       json[key]=jsonAll;
       flagC=0;
     }
-    return json
+    return json;
   }
 
+  /**
+   * generate adql statements for querying table information
+   * @param name table's name
+   * @param schema schema name
+   */
   AdqlAllColumn(name:string,schema:string){
     let adql:string = "";
     adql = "SELECT "
@@ -409,14 +412,14 @@ class jsonRead{
     +",TAP_SCHEMA.columns.utype"
     +",TAP_SCHEMA.columns.dataType"
     +",TAP_SCHEMA.columns.description"
-    +" FROM TAP_SCHEMA.columns"
+    +" FROM TAP_SCHEMA.columns";
     if(schema=='public' || schema=='metaviz'){
       adql += " WHERE TAP_SCHEMA.columns.table_name = "+"'"+name+"'";
     }
     else{
       adql += " WHERE TAP_SCHEMA.columns.table_name = "+"'"+schema+"."+name+"'";
     }
-    return adql
+    return adql;
   }
   
 

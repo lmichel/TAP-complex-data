@@ -50,6 +50,9 @@ var VOTableTools = /** @class */ (function () {
             allstr;
         }
     };
+    /***
+     * Get the table with the data
+     */
     VOTableTools.content2Rows = function (content) {
         var p = new VOTableParser();
         var data = p.loadFile(content); //store the data(2-dimensional array) after query by url
@@ -62,6 +65,9 @@ var VOTableTools = /** @class */ (function () {
         p.cleanMemory();
         return data; //name of field and data
     };
+    /***
+     * Get the name of field
+     */
     VOTableTools.getField = function (vObject) {
         var contentText = "";
         contentText = vObject.responseText;
@@ -75,6 +81,21 @@ var VOTableTools = /** @class */ (function () {
         }
         p.cleanMemory();
         return nameFields; //name of field and data
+    };
+    VOTableTools.genererField = function (QObject, contentText) {
+        var method = contentText.indexOf("base64");
+        var Field = [];
+        if (method != -1) {
+            Field = VOTableTools.getField(QObject);
+        }
+        else {
+            $(contentText).find('RESOURCE[type="results"]').each(function () {
+                $(this).find("FIELD").each(function () {
+                    Field.push(this.attributes.name.nodeValue);
+                });
+            });
+        }
+        return Field;
     };
     return VOTableTools;
 }());
