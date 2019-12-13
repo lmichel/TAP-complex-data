@@ -51,7 +51,7 @@ class json2Requete{
                 }
             }
         }
-        adql +="SELECT "+"\n"+"TOP 100"+"\n";//+"\n"+"DISTINCT"
+        adql +="SELECT "+"\n" +"TOP 100"+"\n";//"\n"+"DISTINCT"+
         for(var i = 0;i<column.length;i++){
         if(i==column.length-1){
             adql += column[i] +"\n";
@@ -74,10 +74,12 @@ class json2Requete{
             for(var keyJoin in jsonAll[key].join_tables)
             {
                 var id = jsonAll[key].join_tables[keyJoin].target;
+                console.log("id")
+                console.log(id)
             }
         }
         
-        if(id!=undefined&& adql.indexOf("public")!=-1){//@TODO
+        if(id!=undefined){//@TODO && adql.indexOf("public")!=-1
             adql +="\n"
             adql +="ORDER BY " + id;
         }
@@ -85,6 +87,12 @@ class json2Requete{
         return adql;
     }
 
+    /**
+     * Receive json and schema to get the column
+     * @param json :the json with constraints
+     * @param schema :the schema of the service
+     * @return : column
+     */
     static getColumn(json:dic,schema:string){
         let column:string[]=[];
         for(var key in json)
@@ -110,7 +118,12 @@ class json2Requete{
         }
         return column;
     }
-
+    /**
+     * Receive json and schema to get the constraint
+     * @param json :the json with constraints
+     * @param flag :record iterations
+     * @return : content of constraint recorded in json
+     */
     static getConstraint(json:dic,flag:number){
         var constraint="";
         for(var key in json)
@@ -131,11 +144,22 @@ class json2Requete{
         return constraint;
     }
 
+    /**
+     * Determine if the parameter is a string
+     * @param s :judged content
+     * @return : boleen true:is string ; false:not string
+     */
     static isString(s:string){
         return typeof s === 'string';
     }
 
-
+    /**
+     * Determine whether the table has been joined and return the joined part in adql
+     * @param json :the json with constraints
+     * @param table :juded table
+     * @param schema :the schema of the service
+     * @return : part of adql statement
+     */
     static getJoin(json:dic,table:string,schema:string){
         var retour="";
         for(var key in json)

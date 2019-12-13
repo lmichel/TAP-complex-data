@@ -1,4 +1,3 @@
-document.write("<script type='text/javascript' src= 'votable.js'></script>");
 
 "use strict"
 

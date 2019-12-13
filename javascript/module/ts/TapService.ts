@@ -41,9 +41,9 @@ class TapService{
     let schema_name:string = this.schema;
     var reTable;
     //By default, all are displayed.
-    var checkvalue = 'SELECT DISTINCT T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \''+schema_name+'\'';
+    var checkvalue = 'SELECT DISTINCT T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \''+schema_name+'\' ';
     if(checkstatus==true){//Select TOP 100 on the page.
-      checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \''+schema_name+'\'';
+      checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \''+schema_name+'\' ';
     }
     reTable = $.ajax({
       url: `${site}`,
@@ -56,6 +56,8 @@ class TapService{
     })
   return reTable;
   }
+
+
 
   /**
    * Get the from_table, target_table, from_column, target_column
@@ -118,7 +120,9 @@ class TapService{
     let reTableRe:string[];
     let everyLink:string[]=[];
     let allLink:string[][]=[[]];
+    console.log(allLinkLimitObject)
     reTableRe = VOTableTools.votable2Rows(allLinkLimitObject);
+    console.log(reTableRe)
     for(let i:number=0;i<reTableRe.length;i=i+5)
     {
       let tt:string= reTableRe[i+1];
@@ -141,7 +145,12 @@ class TapService{
       allLinkRe[k]=allLink[h];
       k = k+1;
     }
-    return allLinkRe;
+    console.log(allLinkRe)
+    var t = this.removeViewTable(allLinkRe)
+    console.log(t)
+    var re = JSON.parse(JSON.stringify(t));
+    console.log(re)
+    return re;
     }
 
   /**
@@ -168,7 +177,9 @@ class TapService{
     let constraints:string = "";
     let alllink:string[][]=[[]];
     alllink = this.allLink(); 
+    console.log(alllink)
     allTtable = this.allTable();//Get the array containing the names of the tables.//Even number is the table name.
+    console.log(allTtable)
     for(let k:number=0;k<allTtable.length;k=k+2){
       let arrLink:dic={};
       let arrJoint:dic = {};
@@ -189,18 +200,27 @@ class TapService{
               arrLinkJoint["columns"]=columns;
               arrLinkJoint["constraints"] =constraints;
               var temp1 = [];
-              temp1.push(arrLink[ft[0]].from);
-              temp1.push(ft[1]);
+              if(Array.isArray(arrLink[ft[0]].from)&&arrLink[ft[0]].from.indexOf(ft[1])==-1){
+                temp1= JSON.parse(JSON.stringify(arrLink[ft[0]].from));
+                temp1.push(ft[1]);
+              }else{
+                temp1= JSON.parse(JSON.stringify(arrLink[ft[0]].from));
+              }
               arrLinkJoint["from"]=temp1;
               temp1= [];
-              temp1.push(arrLink[ft[0]].target);
-              temp1.push(tt[1]);
+              if(Array.isArray(arrLink[ft[0]].target)&&arrLink[ft[0]].target.indexOf(tt[1])==-1){
+                temp1= JSON.parse(JSON.stringify(arrLink[ft[0]].target));
+                temp1.push(tt[1]);
+              }else{
+                temp1= JSON.parse(JSON.stringify(arrLink[ft[0]].target));
+              }
+              
               arrLinkJoint["target"]=temp1;
               arrLink[ft[0]]=arrLinkJoint;
               break loop;
             }
             else{
-              ifSame=0
+              ifSame=0;
             }
           }
           if(ifSame==0){
@@ -212,8 +232,7 @@ class TapService{
             arrLinkJoint["target"]=tt[1];
             arrLink[ft[0]]=arrLinkJoint;
           }
-        };
-        if(ft[0] == nowTable){
+        }else if(ft[0] == nowTable){
           loop:
           for(var key in arrLink){
             if(tt[0]==key){
@@ -222,12 +241,20 @@ class TapService{
               arrLinkJoint["columns"]=columns;
               arrLinkJoint["constraints"] =constraints;
               var temp1 = [];
-              temp1.push(arrLink[tt[0]].from);
-              temp1.push(tt[1]);
+              if(Array.isArray(arrLink[tt[0]].from)&&arrLink[tt[0]].from.indexOf(tt[1])==-1){
+                temp1= JSON.parse(JSON.stringify(arrLink[tt[0]].from))
+                temp1.push(tt[1]);
+              }else{
+                temp1= JSON.parse(JSON.stringify(arrLink[tt[0]].from))
+              }
               arrLinkJoint["from"]=temp1;
               temp1= [];
-              temp1.push(arrLink[tt[0]].target);
-              temp1.push(ft[1]);
+              if(Array.isArray(arrLink[tt[0]].target)&&arrLink[tt[0]].target.indexOf(ft[1])==-1){
+                temp1= JSON.parse(JSON.stringify(arrLink[tt[0]].target));
+                temp1.push(ft[1]);
+              }else{
+                temp1= JSON.parse(JSON.stringify(arrLink[tt[0]].target));
+              }
               arrLinkJoint["target"]=temp1;
               arrLink[tt[0]]=arrLinkJoint;
               break loop;
@@ -361,7 +388,6 @@ class TapService{
     }
     var dataTable = VOTableTools.votable2Rows(QObject);
     let json:dic={};
-    let content:dic = {};
     let contentTable:dic={};
     var contentAdql;
     let schema:string;
@@ -369,55 +395,132 @@ class TapService{
       if(keyRoot==root){
         schema = jsonAll[keyRoot].schema;
         if(schema=='public'){schema = "\""+"public"+"\""}
-        for(var i=0;i<dataTable.length;i=i+listId.length){//par defaut, read the first id
+        for(var key in jsonAll[keyRoot].join_tables){
           contentTable={};
-          content = {};
-          for(var key in jsonAll[keyRoot].join_tables){
+         for(var i=0;i<dataTable.length;i=i+listId.length){//par defaut, read the first id
+            contentAdql = "";
             contentAdql = "SELECT \nTOP 100 \n" + schema +"."+key +".*"+"\n";
             contentAdql += "FROM " + schema +"."+keyRoot+"\n";
             contentAdql += "JOIN "+ schema +"."+key +"\n";
-            for(var table in joinIdDic){
-              if(table == key ){
-                if(!json2Requete.isString(jsonAll[keyRoot].join_tables[key].target)){
-                  var n = jsonAll[keyRoot].join_tables[key].target-1;
-                  var m = jsonAll[keyRoot].join_tables[key].from-1;
-                  contentAdql += "ON " + schema +"."+keyRoot +"."+jsonAll[keyRoot].join_tables[key].target[n];
-                  contentAdql += "="+ schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].from[m];
-                  var temp = IdDic[joinIdDic[table]]
-                  if(schema.indexOf("basic")!=-1){
-                    contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target[0]+"="+dataTable[i+temp];
-                  }else if(schema.indexOf("public")!=-1){
-                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
+            if(!json2Requete.isString(jsonAll[keyRoot].join_tables[key].target)){
+              contentAdql += "ON " + schema +"."+keyRoot +"."+jsonAll[keyRoot].join_tables[key].target[0];
+              contentAdql += "="+ schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].from[0];
+              var temp = IdDic[joinIdDic[key]];
+              if(schema.indexOf("public")!=-1){
+                contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target[0]+"="+dataTable[i+temp];
+              }else if(schema.indexOf("rr")!=-1){
+                contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target+"="+"\'"+dataTable[i+temp]+"\'";
+              }
+              else if(schema.indexOf("public")!=-1&&contentAdql.indexOf("oid")==-1){
+                contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
+              }else{
+                contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target[0]+"="+"\'"+dataTable[i+temp]+"\'";
+              }
+              contentTable[dataTable[i+temp]]=contentAdql;
+            }else{
+              contentAdql += "ON " + schema +"."+keyRoot +"."+jsonAll[keyRoot].join_tables[key].target;
+              contentAdql += "="+ schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].from;
+              var temp = IdDic[joinIdDic[key]];
+              if(schema.indexOf("public")!=-1){
+                contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
 
-                  }else{
-                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target[0]+"="+"\'"+dataTable[i+temp]+"\'";
-                  }
-                  contentTable[key]=contentAdql;
-                }else{
-                  contentAdql += "ON " + schema +"."+keyRoot +"."+jsonAll[keyRoot].join_tables[key].target;
-                  contentAdql += "="+ schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].from;
-                  var temp = IdDic[joinIdDic[table]]
-                  if(schema.indexOf("basic")!=-1){
-                    contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
-                  }else if(schema.indexOf("public")!=-1){
-                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
+              }else if(schema.indexOf("rr")!=-1&&contentAdql.indexOf("ivoid=")==-1){
+                contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target+"="+"\'"+dataTable[i+temp]+"\'";
 
-                  }else{
-                    contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+"\'"+dataTable[i+temp]+"\'";
-                  }
-                  contentTable[key]=contentAdql;
-                }
+              }
+              else if(schema.indexOf("public")!=-1&&contentAdql.indexOf("oid")==-1){
+                contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
+
+              }else{
+                contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+"\'"+dataTable[i+temp]+"\'";
+
               }
             }
+            contentTable[dataTable[i+temp]]=contentAdql;
           }
-          content["component"]=contentTable;
-          json[dataTable[i]]=content;
+          contentTable["key"]=joinIdDic[key]; 
+          json[key]=contentTable;
         }
         break;
       }
     }
     console.log(json);
     return json;
+  }
+
+  removeViewTable(allLinkRe:string[][]){
+    let site:string = this.url;
+    let checkstatus:boolean = this.checkstatus;
+    let schema_name:string = this.schema;
+    var reTable;
+    let position :number[]=[]
+    let flag:number = 0;
+    //By default, all are displayed.
+    var checkvalue = 'SELECT DISTINCT T.table_name as table_name FROM tap_schema.tables as T WHERE T.schema_name = \''+schema_name+'\' AND T.table_type = \'view\'';
+    if(checkstatus==true){//Select TOP 100 on the page.
+      checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name FROM tap_schema.tables as T WHERE T.schema_name = \''+schema_name+'\' AND T.table_type = \'view\'';
+    }
+    reTable = $.ajax({
+      url: `${site}`,
+      type: "GET",
+      data: {query: `${checkvalue}`, format: 'votable', lang: 'ADQL', request :'doQuery'},
+      async:false
+      })
+    .done(function(result:any){
+        return result;
+    })
+    let allTable:string[]=[];
+    var content = reTable.responseText;
+    let l :number=0;
+    $(content).find('RESOURCE[type="results"]').each(function(){
+      $(this).find("STREAM").each(function(){
+        l= $(this).context.textContent.length
+      });
+  })
+    if(l==0){
+      return allLinkRe;
+    }
+    else{
+      allTable = VOTableTools.votable2Rows(reTable);
+      let viewTable:string[]=[];
+      let j:number=0;
+      for(let i:number=0;i<allTable.length;i++){
+        if(allTable[i]!=undefined&&allTable[i].length!=0){
+          viewTable[j]=allTable[i];
+          j++
+        }
+      }
+      for(let i:number=0;i<viewTable.length;i++){
+        let a = viewTable[i]
+        for(let j:number=0;j<allLinkRe.length;j++){
+          for(let h:number=0;h<allLinkRe[j].length;h++){
+            if(allLinkRe[j][h].indexOf(a)!=-1){
+              flag = 1;
+            }
+          }
+          if(flag==1){
+            position.push(j);
+            flag=0;
+          }
+        }
+      }
+  
+      for(let i:number=0;i<position.length-1;i++){
+        for(let j:number=0;j<position.length-1;j++){
+          if (position[j] < position[j + 1]) {
+            var temp = position[j];
+            position[j] = position[j + 1];
+            position[j + 1] = temp;
+        }
+      }
+    }
+    for(let i:number=0;i<position.length;i++){
+      allLinkRe.splice(position[i],1)
+    }
+  
+      return allLinkRe; //Return an array containing the names of the tables
+    }
+    
   }
 }
 

@@ -1,4 +1,4 @@
-document.write("<script type='text/javascript' src= './js/json2Requete.js'></script>");
+document.write("<script type='text/javascript' src= '../../module/js/json2Requete.js'></script>");
 function main(){
     initial();
 
@@ -312,6 +312,7 @@ function main(){
     })
 
     $("#caom,#cs03").click(function(){
+
         $("#showRoot").empty();//Clear the contents of menu
         var top_caom = false;
         if($("#caomCS").val()!=''){
@@ -414,7 +415,10 @@ function main(){
 
 
 function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapService
-    $("button#test").on("click",function(){
+    var jsont = n.json
+    $("button#test").on('click',{"json" : jsont},function(event){//@TODO 
+        console.log(event.data.json);
+        var t =event.data.json
         var keyConstraint=[]
         var list=[]
         var allList=[];
@@ -424,7 +428,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
         var oidJson;
         var niveau;
         var rootName = $("input[name='Cinput']:first").attr("id").slice(1);
-        listJoinAndId = joinAndId(rootName,n.json);//record all the keys linked to root table and the join table's name
+        listJoinAndId = joinAndId(rootName,t);//record all the keys linked to root table and the join table's name
         for(var i = 0;i<listJoinAndId.length;i=i+2){
             if(!json2Requete.isString(listJoinAndId[i])){
                 var temp = listJoinAndId[i][0];
@@ -448,7 +452,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
         }
         //allList.push( $("input[name='Cinput']:first").attr("id"));//record the root table's niveau and name
         var count = 0;
-        var p=-1;//position of the last constraints
+        var p=-1;//position of the last constraints;if p=-1, it means no constraints on input
         $("input[name='Cinput']").each(function(){
             count++;
             allList.push($(this).attr("id"));
@@ -479,15 +483,18 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
             for(var i=0;i<listId.length;i++){
                 column.push(rootName);
                 column.push(listId[i]);
-            }
-            var json2= n.CreateJsonAndContraint(list,keyConstraint,column,0,n.json);
+            } 
+            console.log("haoyun \n"+ list +"\n"+keyConstraint+"\n"+column+"\n"+t);
+            var json2= n.CreateJsonAndContraint(list,keyConstraint,column,0,t);
             adqlMain = json2Requete.getAdql(json2);
-            oidJson = s.createMainJson(adqlMain,n.json,rootName,listId,listJoinAndId);
+            oidJson = s.createMainJson(adqlMain,t,rootName,listId,listJoinAndId);
 
-            var json = n.CreateJsonWithoutColumns(list,keyConstraint,0,n.json);//normal json with constraints
+            var json = n.CreateJsonWithoutColumns(list,keyConstraint,0,t);//normal json with constraints
             var adql = json2Requete.getAdql(json);
+            console.log("$$\n"+adql);
             var QObject = s.Query(adql);
-            var dataTable = VOTableTools.votable2Rows(QObject)
+            console.log(QObject)
+            var dataTable = VOTableTools.votable2Rows(QObject);
             var contentText = QObject.responseText;
             var Field =VOTableTools.genererField(QObject,contentText);
 
@@ -495,13 +502,13 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
             if(nb==0){//report error message
                 $(contentText).find('RESOURCE[type="results"]').each(function(){
                     if($(this).find("INFO").attr("name")=="QUERY_STATUS"){
-                        out = $(this).context.textContent
+                        out = $(this).context.textContent;
                         alert(out);
                     }
                 })
             }
             var out = genererTextArea(adql);
-            out += genererTable(Field,dataTable,n.json,rootName,listJoinAndId);
+            out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
             $("#load3").html(out);
             constraints="";
             window.location.hash = "#load3"
@@ -511,28 +518,33 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 var id = tempArr[0];
                 var tableName = tempArr[1];
                 for(var root in oidJson){
-                    if(root==id){
-                        for(var t in oidJson[root].component){
-                            if(t==tableName){
-                                var Adql = oidJson[root].component[t];
+                    if(root==tableName){
+                        for(var t in oidJson[root]){
+                            if(t==id){
+                                var Adql = oidJson[root][t];
                             }
                         }
                     }
                 }
                 var QObject = s.Query(Adql);
-                var dataTable = VOTableTools.votable2Rows(QObject)
+                console.log(Adql);
+                var dataTable = VOTableTools.votable2Rows(QObject);
                 var contentText = QObject.responseText;
                 var Field =VOTableTools.genererField(QObject,contentText);
                 if(dataTable.length==0){
-                    alert("No Data!");
+                    $(contentText).find('RESOURCE[type="results"]').each(function(){
+                        if($(this).find("INFO").attr("name")=="QUERY_STATUS"){
+                            out1 = $(this).context.textContent;
+                            alert(out1);
+                        }
+                    })
                 }
                 else{
                     var out1 =genererDataTable(Field,dataTable);
                     $("body").prepend(out1);
                     document.getElementById('light1').style.display='block';
                 }
-            
-        });
+            });
         }
                
         if(p==-1){//without constraints or with the root table's constraints, it will select all columns of the root table
@@ -545,7 +557,9 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 temp.push(rootName,constraints);
                 keyConstraint.push(...temp);//record all constraints
             }
-            var json =n.CreateJsonWithoutColumns(list,keyConstraint,0,n.json);
+            console.log("haoyun \n"+ list +"\n"+keyConstraint+"\n"+t)
+            console.log(t)
+            var json =n.CreateJsonWithoutColumns(list,keyConstraint,0,t);
             var adql = json2Requete.getAdql(json);
             var QObject = s.Query(adql);
             var dataTable = VOTableTools.votable2Rows(QObject)
@@ -561,7 +575,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 })
             }
             var out = genererTextArea(adql);
-            out += genererTable(Field,dataTable,n.json,rootName,listJoinAndId);
+            out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
             $("#load3").html(out);
             window.location.hash = "#load3";
             var column=[];
@@ -569,9 +583,9 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 column.push(rootName);
                 column.push(listId[i]);
             }
-            var json2= n.CreateJsonAndContraint(list,keyConstraint,column,0,n.json);
+            var json2= n.CreateJsonAndContraint(list,keyConstraint,column,0,t);
             adqlMain = json2Requete.getAdql(json2);
-            oidJson = s.createMainJson(adqlMain,n.json,rootName,listId,listJoinAndId);
+            oidJson = s.createMainJson(adqlMain,t,rootName,listId,listJoinAndId);
 
             $("a[name='boid']").on("click",function(){
                 var temp = $(this).attr("id");
@@ -579,16 +593,17 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 var id = tempArr[0];
                 var tableName = tempArr[1];
                 for(var root in oidJson){
-                    if(root==id){
-                        for(var t in oidJson[root].component){
-                            if(t==tableName){
-                                var Adql = oidJson[root].component[t];
+                    if(root==tableName){
+                        for(var t in oidJson[root]){
+                            if(t==id){
+                                var Adql = oidJson[root][t];
                             }
                         }
                     }
                 }
                 var QObject = s.Query(Adql);
-                var dataTable = VOTableTools.votable2Rows(QObject)
+                console.log("laurent "+Adql);
+                var dataTable = VOTableTools.votable2Rows(QObject);
                 var contentText = QObject.responseText;
                 var Field =VOTableTools.genererField(QObject,contentText);
                 if(dataTable.length==0){//report error message
@@ -606,22 +621,38 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 }
             })
         }
+        //$("button#test").unbind('click')
         $("#badql").on("click",function(){//regenerate the form of the query
             var adql2 = checkAdql(listId);
+
             out = genererZone3(adql2,s,rootName,n,listJoinAndId);
-            for(var i = 1;i<listId.length;i++){
-                var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
+            if(listId.length == 1){
+                var start = adql2.indexOf(listId[0])+listId[0].length;
                 var end = adql2.indexOf("FROM");
-                if(adql2.indexOf(listId[i])==-1){
-                    adql2 = adql2.slice(0,start)+",\n"+listId[i]+"\n"+adql2.slice(end);
+                if(adql2.indexOf(listId[0])==-1){
+                    adql2 = adql2.slice(0,start)+",\n"+listId[0]+"\n"+adql2.slice(end);
                 }
                 else{
-                    start = adql2.indexOf(listId[i])+listId[i].length;
+                    start = adql2.indexOf(listId[0])+listId[0].length;
                     adql2 = adql2.slice(0,start)+"\n"+adql2.slice(end);
                 }
             }
+            else{
+                for(var i = 1;i<listId.length;i++){
+                    var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
+                    var end = adql2.indexOf("FROM");
+                    if(adql2.indexOf(listId[i])==-1){
+                        adql2 = adql2.slice(0,start)+",\n"+listId[i]+"\n"+adql2.slice(end);
+                    }
+                    else{
+                        start = adql2.indexOf(listId[i])+listId[i].length;
+                        adql2 = adql2.slice(0,start)+"\n"+adql2.slice(end);
+                    }
+                }
+            }
             
-            var oidJson = s.createMainJson(adql2,n.json,rootName,listId,listJoinAndId);//@TODO oid otype should not appear in this place
+            
+            var oidJson = s.createMainJson(adql2,t,rootName,listId,listJoinAndId);//@TODO oid otype should not appear in this place
 
             if(out.indexOf("Incorrect")!=-1){
                 alert(out);
@@ -635,15 +666,16 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                     var id = tempArr[0];
                     var tableName = tempArr[1];
                     for(var root in oidJson){
-                        if(root==id){
-                            for(var t in oidJson[root].component){
-                                if(t==tableName){
-                                    var Adql = oidJson[root].component[t];
+                        if(root==tableName){
+                            for(var t in oidJson[root]){
+                                if(t==id){
+                                    var Adql = oidJson[root][t];
                                 }
                             }
                         }
                     }
                     var QObject = s.Query(Adql);
+                    console.log(Adql)
                     var dataTable = VOTableTools.votable2Rows(QObject)
                     var contentText = QObject.responseText;
                     var Field =VOTableTools.genererField(QObject,contentText);
@@ -663,13 +695,15 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 })
             }
         })
+        $("button#test").unbind('click');
     });
+    
 }
 
 function genererTextArea(adql){
     out = "<div id = \"dadql\">"
     out += "<textarea rows=\"100\" col=\"100\"  id = \"textadql\" style= \" width:500px; height:300px;margin-left:20px\">"+adql+"</textarea>"
-    out += " <button type=\"button\" id = \"badql\"class=\"btn btn-primary\" style = \"width:65px;height:30px;position: relative;top: -8px;right: -8px;\">Test</button>"
+    out += " <button type=\"button\" id = \"badql\"class=\"btn btn-primary\" style = \"width:65px;height:30px;position: relative;top: -8px;right: -8px\">Query</button>"
     out +="</div>";
     out +="<br></br>";
     return out;
@@ -740,8 +774,15 @@ function Aide(n,s){
                 for (var i = 0; i < td.length; i++) {
                     $(td[i]).click(function () {
                         var i = $(this).attr("id");
-                        $("#"+b[ii].id).val(name+"."+i+"=");
-                        document.getElementById('light').style.display='none';
+                        if($("#"+b[ii].id).val().length!=0){
+                            var content = $("#"+b[ii].id).val();
+                            $("#"+b[ii].id).val(content + " AND " +name+"."+i+"=");
+                            document.getElementById('light').style.display='none';
+                        }else{
+                            $("#"+b[ii].id).val(name+"."+i+"=");
+                            document.getElementById('light').style.display='none';
+                        }
+                        
                     });
                 }
                 document.getElementById('light').style.display='block';
@@ -780,6 +821,7 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
     }
     var out = ""
     out += "<div id = \"ddata\"><table class = 'table' role = \"grid\">";
+    out += "<h4>The amount of data is: </h4>"
     out +="<thead><tr role=\"row\">";//head
     out +="<th></th>";
     for(var j=0;j<nb;j++){
@@ -803,13 +845,17 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
         }
         jsonTable[key]=temp;
     }
+    //console.log(listJoinAndId)
+    //console.log(joinIdDic)
+    //console.log(jsonTable)
     out +="<tbody>"
     var count =0;
+    var number=0;
     for(var j=0;j<dataTable.length;j++){//table  content
         if(count==0){
             out +="<tr role=\"row\">";
             out +="<td><div class=\"btn-group\" style=\"width :100px\">"+
-            "<button type=\"button\" class=\"btn btn-primary\" >Simbad</button>"+
+            "<button type=\"button\" class=\"btn btn-primary\" >JOIN</button>"+
             "<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" >"+
                 "<span class=\"caret\"></span>"+
                 "<span class=\"sr-only\"></span>"+
@@ -826,11 +872,14 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
         count =count+1;
         if(count==nb){
             out +="</tr>";
+            number++;
             count=0;
         }
     }
     out+="</tbody>"
     out += "</table></div>"
+    var start = out.indexOf("is:")+3;
+    out = out.slice(0,start)+" "+number +out.slice(start)
     return out;
 }
 
@@ -882,11 +931,22 @@ function genererDataTable(Field,dataTable){//zone 3 except textarea
 
 function checkAdql(listId){//@TODO special for simbad 
     var adql2 = $("#textadql").val()
+    console.log("------------------------")
+    console.log(adql2)
+    console.log(listId)
+    console.log("------------------------")
+    var col = adql2.slice(0,adql2.indexOf("FROM"))
+    var start1 = adql2.indexOf("FROM")+5;
+    var end = adql2.indexOf("JOIN")-1;
+    var root = adql2.slice(start1,end)+".";
+    console.log(root)
+    console.log(col);
     for(var i=0;i<listId.length;i++){
-        if(adql2.indexOf("*")!=-1){//adql has "*"
-        adql2 = adql2;
-        }
-        else if(adql2.indexOf(listId[i])!=-1){//adql has "oid"
+        //if(adql2.indexOf("*")!=-1){//adql has "*"
+        //adql2 = adql2;
+        //}
+        if(col.indexOf(listId[i])!=-1){//adql has "oid"
+        console.log(listId[i])
             if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
                 if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
                     continue;
@@ -894,7 +954,6 @@ function checkAdql(listId){//@TODO special for simbad
                 else{//adql has not "TOP 100" 
                     var start = adql2.indexOf("DISTINCT")+8;
                     adql2 = adql2.slice(0, start) + "\nTOP 100 \n" + adql2.slice(start);
-                    
                 }
                 
             }
@@ -902,51 +961,50 @@ function checkAdql(listId){//@TODO special for simbad
                 if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
                     var start = adql2.indexOf("TOP 100");
                     aadql2 = adql2.slice(0, start) + "DISTINCT \n" + adql2.slice(start);
-            
                 }
                 else{//adql has not "TOP 100" 
-                    var start = adql2.indexOf("SELECT")+7;
+                    var start = adql2.indexOf("SELECT")+6;
                     adql2 = adql2.slice(0, start) + "DISTINCT \nTOP 100 \n" + adql2.slice(start);
-            
                 }
             }
         }
-        else{//adql has not "oid"
+        else{
+            console.log(listId[i])
             if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
                 if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
-                    if(i!=0){
+                    if(i!=0&&i!=listId.length-1){//not the first key, not the last key, more than one key
                         var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
-                    }else{
+                        adql2 = adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
+                    }else if(i==0&&i!=listId.length-1){//the first key, not the last key, more than one key
                         var start = adql2.indexOf("TOP 100")+7;
+                        adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
+                    }else if(i==0&&listId.length==1){//the first key, only one key
+                        var start = adql2.indexOf("TOP 100")+7;
+                        adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
+                    }else{
+                        var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
+                        adql2 = adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
                     }
-                    adql2 = adql2.slice(0, start) + ",\n"+listId[i] + adql2.slice(start);
-            
                 }
                 else{//adql has not "TOP 100" 
                     var start = adql2.indexOf("DISTINCT")+8;
-                    adql2 = adql2.slice(0, start) + "\nTOP 100 \n"+listId[i]+"," + adql2.slice(start);
-                
+                    adql2 = adql2.slice(0, start) + "\nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
                 }
-                
             }
             else{//adql has not "DISTINCT"
                 if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
                     var start = adql2.indexOf("TOP 100");
                     var adql2 = adql2.slice(0, start) + "DISTINCT \n" + adql2.slice(start);
                     start = adql2.indexOf("TOP 100")+7;
-                    adql2 = adql2.slice(0, start) + "\n"+listId[i]+"," + adql2.slice(start);
-                
+                    adql2 = adql2.slice(0, start) + "\n"+root+listId[i]+"," + adql2.slice(start);
                 }
                 else{//adql has not "TOP 100" 
-                    var start = adql2.indexOf("SELECT")+7;
-                    adql2 = adql2.slice(0, start) + "\nDISTINCT \nTOP 100 \n"+listId[i]+"," + adql2.slice(start);
+                    var start = adql2.indexOf("SELECT")+6;
+                    adql2 = adql2.slice(0, start) + "\nDISTINCT \nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
                 }
             }
         }
-
-
     }
-    
     if(adql2.indexOf("ORDER")==-1&&adql2.indexOf("order")==-1&&adql2.indexOf("basic")!=-1){
         adql2 += " ORDER BY oid";
     }
@@ -1037,20 +1095,21 @@ function initial(){
     "<div class=\"btn-group\" style=\"text-align: center; padding-left:400px\">"+
         "<button type=\"button\" id = \"c00\" class=\"btn btn-primary\">Change</button>"+
     "</div>"+
-    "<div class=\"btn-group\" style=\"text-align: center; padding-left:270px\">"+
+    "<div class=\"btn-group\" style=\"text-align: center; padding-left:610px\">"+
         "<button type=\"button\" class=\"btn btn-primary\">RootTable</button>"+
         "<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\">"+
             "<span class=\"caret\"></span>"+
             "<span class=\"sr-only\"></span>"+
         "</button>"+
-        "<ul class=\"dropdown-menu\" id = \"showRoot\" role=\"menu\" style=\"margin-left:250px\">"+
+        "<ul class=\"dropdown-menu\" id = \"showRoot\" role=\"menu\" style=\"margin-left:590px\">"+
         "</ul>"+
     "</div>"+
-    "<div class=\"btn-group\" style=\"text-align: center; padding-left:270px\">"+
-            "<button type=\"button\" id = \"test\" class=\"btn btn-primary\">Test</button>"+
-        "</div>"+
+    
     "<br></br>"+
-    "<pre id=\"load2\" style= \"background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px \"> </pre>"+
+    "<pre id=\"load2\" style= \"background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px ;float:left\"> </pre>"+
+    "<div class=\"btn-group\" style=\"text-align: center; padding-left:100px;float:left;top :350px\">"+
+            "<button type=\"button\" id = \"test\" class=\"btn btn-primary\">Query</button>"+
+        "</div>"+
     "<pre id=\"load3\" style= \"background-color:white; overflow:scroll; width:1400px; height:900px;margin-left:200px; font-size:12px; line-height: 2.3\"></pre>")
     $("body").append($initial);
 }

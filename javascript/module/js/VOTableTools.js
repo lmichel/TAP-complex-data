@@ -1,6 +1,4 @@
 "use strict";
-document.write("<script type='text/javascript' src= 'votable.js'></script>");
-"use strict";
 var VOTableTools = /** @class */ (function () {
     function VOTableTools() {
     }

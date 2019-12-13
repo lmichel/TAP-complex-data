@@ -47,7 +47,7 @@ var json2Requete = /** @class */ (function () {
                 }
             }
         }
-        adql += "SELECT " + "\n" + "TOP 100" + "\n"; //+"\n"+"DISTINCT"
+        adql += "SELECT " + "\n" + "TOP 100" + "\n"; //"\n"+"DISTINCT"+
         for (var i = 0; i < column.length; i++) {
             if (i == column.length - 1) {
                 adql += column[i] + "\n";
@@ -67,14 +67,22 @@ var json2Requete = /** @class */ (function () {
         for (var key in jsonAll) {
             for (var keyJoin in jsonAll[key].join_tables) {
                 var id = jsonAll[key].join_tables[keyJoin].target;
+                console.log("id");
+                console.log(id);
             }
         }
-        if (id != undefined && adql.indexOf("public") != -1) {
+        if (id != undefined) {
             adql += "\n";
             adql += "ORDER BY " + id;
         }
         return adql;
     };
+    /**
+     * Receive json and schema to get the column
+     * @param json :the json with constraints
+     * @param schema :the schema of the service
+     * @return : column
+     */
     json2Requete.getColumn = function (json, schema) {
         var column = [];
         for (var key in json) {
@@ -97,6 +105,12 @@ var json2Requete = /** @class */ (function () {
         }
         return column;
     };
+    /**
+     * Receive json and schema to get the constraint
+     * @param json :the json with constraints
+     * @param flag :record iterations
+     * @return : content of constraint recorded in json
+     */
     json2Requete.getConstraint = function (json, flag) {
         var constraint = "";
         for (var key in json) {
@@ -115,9 +129,21 @@ var json2Requete = /** @class */ (function () {
         }
         return constraint;
     };
+    /**
+     * Determine if the parameter is a string
+     * @param s :judged content
+     * @return : boleen true:is string ; false:not string
+     */
     json2Requete.isString = function (s) {
         return typeof s === 'string';
     };
+    /**
+     * Determine whether the table has been joined and return the joined part in adql
+     * @param json :the json with constraints
+     * @param table :juded table
+     * @param schema :the schema of the service
+     * @return : part of adql statement
+     */
     json2Requete.getJoin = function (json, table, schema) {
         var retour = "";
         for (var key in json) {
