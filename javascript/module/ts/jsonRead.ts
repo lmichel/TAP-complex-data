@@ -13,8 +13,7 @@ class jsonRead{
 
   /**
   * This function reads the json object and get the most used table's name.
-  * @param data :json object
-  * RETURN: an array containing table's name.
+  * @return : an array containing table's name.
   */
   mostUsed():string[]{
     let data:dic = this.json
@@ -194,7 +193,8 @@ class jsonRead{
   /**
    * Generate json with contraints
    * @param list : Recorded all table names from the table to the child table
-   * @param constraint :the constraint
+   * @param constraints :the constraint
+   * @param column: the columns to select
    * @param flag: control the number of recursions
    * @param jsonJoin: the json of join table
    * @return :json with contraints,column(key)

@@ -56,6 +56,7 @@ class VOTableTools{
 
   /***
    * Get the table with the data
+   * @param content: the content of votable object.
    */
   static content2Rows(content:string){
     var p = new VOTableParser();
@@ -72,6 +73,7 @@ class VOTableTools{
 
   /***
    * Get the name of field
+   * @param vObject: votable object.
    */
   static getField(vObject: any){
     let contentText:string = "";

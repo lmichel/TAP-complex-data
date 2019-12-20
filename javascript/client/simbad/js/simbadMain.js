@@ -1,4 +1,4 @@
-document.write("<script type='text/javascript' src= './js/json2Requete.js'></script>");
+
 function simbadMain(){
     initial();
     
@@ -27,15 +27,14 @@ function simbadMain(){
 
 function initial(){
     var $initial = $("<div class=\"page-header\" style=\"text-align: center\">"+
-    "<img src=\"./img/cds.png\" style=\"width:100px;float: left;\">"+
-    "<img src=\"./img/simbad_blackx30px.png\" style=\"width:100px;float: left;\">"+
+    "<img src=\"../img/cds.png\" style=\"width:100px;float: left;\">"+
+    "<img src=\"../img/simbad_blackx30px.png\" style=\"width:100px;float: left;\">"+
         "<h1>TAP TEST"+
             "<small>Obas</small>"+
         "</h1>"+
         
     "</div>"+
     
-    //"<div class=\"simbadlogo\"></div>"+
     "<div class=\"btn-group\" style=\" margin-left:600px;padding-right:40px\">"+
         "<button type=\"button\" id = \"bObject\" class=\"btn btn-primary\">Object</button>"+
     "</div>"+
@@ -49,8 +48,6 @@ function initial(){
             "<button type=\"button\" id = \"test\" class=\"btn btn-primary\">Query</button>"+
         "</div>"+
     "<pre id=\"load2\" style= \"background-color:white; overflow:scroll; width:1400px; height:700px;margin-left:200px; font-size:15px ;float:left\"> </pre>"
-    
-    
     )
     
     $("body").append($initial);
@@ -154,6 +151,15 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
             out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
             $("#load2").html(out);
             constraints="";
+            $("button[name='div1']").on("click",function(){
+                var c = document.getElementsByName("div1c");
+                if($("div[name='div1c']").style.display=="none"){
+                    $("div[name='div1c']").style.display = "block";
+                }else{
+                    c.style.display = "none";
+                }
+            })
+
             window.location.hash = "#load2"
             $("a[name='boid']").on("click",function(){
                 var temp = $(this).attr("id");
@@ -184,6 +190,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 }
                 else{
                     var out1 =genererDataTable(Field,dataTable);
+                    var a  = listTable(Field,dataTable,tableName);
+                    console.log(a)
                     $("body").prepend(out1);
                     document.getElementById('light1').style.display='block';
                 }
@@ -220,6 +228,13 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
             var out = genererTextArea(adql);
             out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
             $("#load2").html(out);
+            $("button[name='div1']").on("click",function(){
+                if($("div[name='div1c']").style.display=="none"){
+                    $("div[name='div1c']").style.display = "block";
+                }else{
+                    $("div[name='div1c']").style.display = "none";
+                }
+            })
             window.location.hash = "#load2";
             var column=[];
             for(var i=0;i<listId.length;i++){
@@ -259,6 +274,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 }
                 else{
                     var out1 =genererDataTable(Field,dataTable);
+                    var a  = listTable(Field,dataTable,tableName);
+                    console.log(a)
                     $("body").prepend(out1);
                     document.getElementById('light1').style.display='block';
                 }
@@ -332,6 +349,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                     }
                     else{
                         var out1 =genererDataTable(Field,dataTable);
+                        var a  = listTable(Field,dataTable,tableName);
+                    console.log(a)
                         $("body").prepend(out1);
                         document.getElementById('light1').style.display='block';
                     }
@@ -494,30 +513,42 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
     out +="<tbody>"
     var count =0;
     var number=0;
+
     for(var j=0;j<dataTable.length;j++){//table  content
+        
         if(count==0){
+            var idTable = [];
             out +="<tr role=\"row\">";
-            out +="<td><div class=\"btn-group\" style=\"width :100px\">"+
-            "<button type=\"button\" class=\"btn btn-primary\" >JOIN</button>"+
-            "<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" >"+
-                "<span class=\"caret\"></span>"+
-                "<span class=\"sr-only\"></span>"+
-            "</button>"+
-            "<ul class=\"dropdown-menu\" role=\"menu\">";
+            
+            out +="<td><button type=\"button\" name=\"div1\" class=\"btn btn-primary\" >open</button></td>"
+            //out +="<td><div class=\"btn-group\" style=\"width :100px\">"+
+            //"<button type=\"button\" class=\"btn btn-primary\" >JOIN</button>"+
+            //"<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" >"+
+            //    "<span class=\"caret\"></span>"+
+            //    "<span class=\"sr-only\"></span>"+
+            //"</button>"+
+            //"<ul class=\"dropdown-menu\" role=\"menu\">";
             for(var i=0;i<listJoin.length;i++){
                 var position = jsonTable[listJoin[i]];
-                out+="<li><a href=\"#\" id=\""+ dataTable[j+position] +"|"+ listJoin[i] + "\"  name = \"boid\">"+listJoin[i]+"</a></li>";
+                idTable.push(dataTable[j+position])
+                idTable.push(listJoin[i])
+            //    out+="<li><a href=\"#\" id=\""+ dataTable[j+position] +"|"+ listJoin[i] + "\"  name = \"boid\">"+listJoin[i]+"</a></li>";
             }
-            out +="</ul>"+"</div></td>";
+            //out +="</ul>"+"</div></td>";
         }
         
         out +="<td style=\"text-align: auto;\">"+dataTable[j]+"</td>";
         count =count+1;
         if(count==nb){
-            out +="</tr>";
+            out +="</tr role=\"row\">";
             number++;
             count=0;
+            console.log(idTable);
+            out +="<tr><td>";
+            out +=listTableChoisir(idTable);
+            out +="</tr></td>";
         }
+        
     }
     out+="</tbody>"
     out += "</table></div>"
@@ -686,4 +717,89 @@ function getDepth(arr) {
       if (curr > accu) return curr
       return accu
     })
+  }
+
+  function listTable(Field,dataTable,tableName){//data displayed after clicking on the table name
+    var out1="<div class = \"white_content\" " +
+    "id=\""+tableName+"\">" ;//
+    out1 += "<table  class = 'table' role = \"grid\" >";
+    out1 +="<thead><tr role=\"row\">";//head
+    //out +="<th/>";
+    var nb = Field.length;
+    for(var j=0;j<nb;j++){
+        out1 +="<th rowspan=\"1\"  colspan=\"1\" style=\"text-align:center;vertical-align:bottom\">"+Field[j]+"</th>";
+    }
+    out1 +="</tr></thead>";
+    out1 +="<tbody>";
+    var column =0;
+    for(var j=0;j<dataTable.length;j++){//table  content
+    if(column==0){    
+        var judge = (j+nb)/nb;
+        if(judge%2==1){
+            out1+="<tr class = \"odd\">";
+            //out+="<td><input type=\"checkbox\"></td>";
+        }
+        else{
+            out1+="<tr class = \"even\">";
+            //out+="<td><input type=\"checkbox\"></td>";
+        }
+        out1 +="<td id = \""+dataTable[j]+"\" style=\"text-align: center;vertical-align:bottom\" >"+dataTable[j]+"</td>";
+    }
+    else{
+        out1 +="<td style=\"text-align: center;vertical-align:bottom\">"+dataTable[j]+"</td>";
+    }
+    column =column+1;
+    if(column==nb){
+        out1 +="</tr>";
+        column=0;
+    }
+    }
+    out1 +="</tbody>";
+    out1 += "</table></div>";
+    return out1;
+  }
+
+  function listTableChoisir(listTable){
+        var out = "<div style=\"display:block\" name = \"div1c\">";
+        var a = listTable.indexOf("ident");
+        if(a!=-1){
+            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            listTable.splice(a,1);
+            listTable.splice(a-1,1);
+        }
+        var a = listTable.indexOf("flux");
+        if(a!=-1){
+            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            listTable.splice(a,1);
+            listTable.splice(a-1,1);
+        }
+        var a = listTable.indexOf("otypes");
+        if(a!=-1){
+            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            listTable.splice(a,1);
+            listTable.splice(a-1,1);
+        }
+        var a = listTable.indexOf("ref");
+        if(a!=-1){
+            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            listTable.splice(a,1);
+            listTable.splice(a-1,1);
+        }
+        
+        console.log(listTable)
+        out +="<div class=\"btn-group\" style=\"width :100px\">"+
+            "<button type=\"button\" class=\"btn btn-primary\" >JOIN</button>"+
+            "<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" >"+
+                "<span class=\"caret\"></span>"+
+                "<span class=\"sr-only\"></span>"+
+            "</button>"+
+            "<ul class=\"dropdown-menu\" role=\"menu\">";
+            for(var i=1;i<listTable.length;i=i+2){
+                out += "<li><a href=\"#\" id=\""+listTable[i-1]+"|"+listTable[i]+"\" name = \"boid\">"+listTable[i]+"</a></li>";
+            }
+            out +="</ul>"+"</div>";
+        
+        out += "</div>"
+        console.log(out)
+        return out;
   }

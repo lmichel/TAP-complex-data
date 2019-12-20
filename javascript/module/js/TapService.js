@@ -6,6 +6,10 @@ var TapService = /** @class */ (function () {
         this.label = label;
         this.checkstatus = checkstatus;
     }
+    /***
+     * @param :receive adql statements and perform queries
+     * @returns :votavle object
+     */
     TapService.prototype.Query = function (adql) {
         var site = this.url;
         var reTable;
@@ -23,8 +27,7 @@ var TapService = /** @class */ (function () {
     /**
      * Get the names of all the tables.
      * It's for Simbad(schema_name = 'public'), GAVO(schema_name = 'rr'), VizieR(schema_name = 'metaviz'), CAOM(schema_name = 'dbo').
-     * @param site : website as as tring
-     * @param checkstatus : true(TOP 100), false(all)
+     * @returns :votavle object
      */
     TapService.prototype.allTableQuery = function () {
         var site = this.url;
@@ -49,8 +52,7 @@ var TapService = /** @class */ (function () {
     };
     /**
      * Get the from_table, target_table, from_column, target_column
-     * @param site : website as as tring
-     * @param checkstatus : true(TOP 100), false(all)
+     * @returns :votavle object
      */
     TapService.prototype.allLinkQuery = function () {
         var site = this.url;
@@ -74,6 +76,7 @@ var TapService = /** @class */ (function () {
     /**
      * Add the schema name
      * @param table
+     * @return schema.tablename
      */
     TapService.prototype.getQualifiedName = function (table) {
         if (table.indexOf(this.schema) != -1) {
@@ -86,6 +89,7 @@ var TapService = /** @class */ (function () {
     /**
      * Delete the schema name
      * @param table
+     * @return table name
      */
     TapService.prototype.getRightName = function (table) {
         if (table.indexOf(this.schema) == -1) {
@@ -97,7 +101,7 @@ var TapService = /** @class */ (function () {
     };
     /**
      * Get 2-dimensional array. The array returns all the information related to the rootTable.
-     * RETURN: A 2-dimensional array. The array returns all the information related to the rootTable.
+     * @return : A 2-dimensional array. The array returns all the information related to the rootTable.
      */
     TapService.prototype.allLink = function () {
         var allLinkLimitObject;
@@ -147,8 +151,6 @@ var TapService = /** @class */ (function () {
     };
     /**
      * return all tables with the name of the join table.
-     * @param site
-     * @param checkstatus
      * @return json object
      */
     TapService.prototype.createJson = function () {
@@ -274,6 +276,7 @@ var TapService = /** @class */ (function () {
    * In order to create the json with all join table
    * @param data :json
    * @param root :the main table
+   * @return the json with all join table
    */
     TapService.prototype.createNewJson = function (data, root) {
         var reJson = {};
@@ -427,6 +430,10 @@ var TapService = /** @class */ (function () {
         console.log(json);
         return json;
     };
+    /***
+     * @param allLinkRe: all table
+     * @return: an array containing the names of the tables
+     */
     TapService.prototype.removeViewTable = function (allLinkRe) {
         var site = this.url;
         var checkstatus = this.checkstatus;
@@ -457,7 +464,7 @@ var TapService = /** @class */ (function () {
             });
         });
         if (l == 0) {
-            return allLinkRe;
+            return allLinkRe; //
         }
         else {
             allTable = VOTableTools.votable2Rows(reTable);
@@ -478,7 +485,7 @@ var TapService = /** @class */ (function () {
                         }
                     }
                     if (flag == 1) {
-                        position.push(j_1);
+                        position.push(j_1); //record the position of the "view" table
                         flag = 0;
                     }
                 }
@@ -493,9 +500,9 @@ var TapService = /** @class */ (function () {
                 }
             }
             for (var i = 0; i < position.length; i++) {
-                allLinkRe.splice(position[i], 1);
+                allLinkRe.splice(position[i], 1); //delete "view" table
             }
-            return allLinkRe; //Return an array containing the names of the tables
+            return allLinkRe;
         }
     };
     return TapService;

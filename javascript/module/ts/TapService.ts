@@ -13,6 +13,10 @@ class TapService{
     this.checkstatus=checkstatus;
   }
 
+  /***
+   * @param :receive adql statements and perform queries
+   * @returns :votavle object
+   */
   Query(adql:string){
     let site:string = this.url;
     var reTable;
@@ -32,8 +36,7 @@ class TapService{
   /**
    * Get the names of all the tables.
    * It's for Simbad(schema_name = 'public'), GAVO(schema_name = 'rr'), VizieR(schema_name = 'metaviz'), CAOM(schema_name = 'dbo').
-   * @param site : website as as tring
-   * @param checkstatus : true(TOP 100), false(all)
+   * @returns :votavle object
    */
   allTableQuery (){
     let site:string = this.url;
@@ -61,8 +64,7 @@ class TapService{
 
   /**
    * Get the from_table, target_table, from_column, target_column
-   * @param site : website as as tring
-   * @param checkstatus : true(TOP 100), false(all)
+   * @returns :votavle object
    */
   allLinkQuery (){
     let site:string = this.url;
@@ -87,6 +89,7 @@ class TapService{
   /**
    * Add the schema name
    * @param table 
+   * @return schema.tablename
    */
   getQualifiedName(table:string){
     if(table.indexOf(this.schema)!=-1){
@@ -100,6 +103,7 @@ class TapService{
   /**
    * Delete the schema name
    * @param table 
+   * @return table name
    */
   getRightName(table:string){
     if(table.indexOf(this.schema)==-1){
@@ -112,7 +116,7 @@ class TapService{
 
   /**
    * Get 2-dimensional array. The array returns all the information related to the rootTable.
-   * RETURN: A 2-dimensional array. The array returns all the information related to the rootTable.
+   * @return : A 2-dimensional array. The array returns all the information related to the rootTable.
    */
   allLink ():string[][]{                                                              
     let allLinkLimitObject:any;
@@ -166,8 +170,6 @@ class TapService{
 
   /**
    * return all tables with the name of the join table.
-   * @param site 
-   * @param checkstatus 
    * @return json object
    */
   createJson():dic{
@@ -292,6 +294,7 @@ class TapService{
  * In order to create the json with all join table
  * @param data :json
  * @param root :the main table
+ * @return the json with all join table
  */
   createNewJson(data:dic,root:string):dic{
     let reJson : dic = {}
@@ -448,6 +451,10 @@ class TapService{
     return json;
   }
 
+  /***
+   * @param allLinkRe: all table 
+   * @return: an array containing the names of the tables
+   */
   removeViewTable(allLinkRe:string[][]){
     let site:string = this.url;
     let checkstatus:boolean = this.checkstatus;
@@ -474,11 +481,11 @@ class TapService{
     let l :number=0;
     $(content).find('RESOURCE[type="results"]').each(function(){
       $(this).find("STREAM").each(function(){
-        l= $(this).context.textContent.length
+        l= $(this).context.textContent.length;
       });
   })
     if(l==0){
-      return allLinkRe;
+      return allLinkRe;//
     }
     else{
       allTable = VOTableTools.votable2Rows(reTable);
@@ -499,7 +506,7 @@ class TapService{
             }
           }
           if(flag==1){
-            position.push(j);
+            position.push(j);//record the position of the "view" table
             flag=0;
           }
         }
@@ -515,10 +522,9 @@ class TapService{
       }
     }
     for(let i:number=0;i<position.length;i++){
-      allLinkRe.splice(position[i],1)
+      allLinkRe.splice(position[i],1) //delete "view" table
     }
-  
-      return allLinkRe; //Return an array containing the names of the tables
+      return allLinkRe;
     }
     
   }

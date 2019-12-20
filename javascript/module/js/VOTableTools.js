@@ -50,6 +50,7 @@ var VOTableTools = /** @class */ (function () {
     };
     /***
      * Get the table with the data
+     * @param content: the content of votable object.
      */
     VOTableTools.content2Rows = function (content) {
         var p = new VOTableParser();
@@ -65,6 +66,7 @@ var VOTableTools = /** @class */ (function () {
     };
     /***
      * Get the name of field
+     * @param vObject: votable object.
      */
     VOTableTools.getField = function (vObject) {
         var contentText = "";

@@ -754,7 +754,7 @@ function Aide(n,s){
                             out+="<tr class = \"even\">";
                             //out+="<td><input type=\"checkbox\"></td>";
                         }
-                        var row = j/6+1;
+                        //var row = j/6+1;
                         out +="<td id = \""+dataTable[j]+"\" style=\"text-align: center;vertical-align:bottom;text-decoration:underline\" >"+dataTable[j]+"</td>";
                     }
                     else{
