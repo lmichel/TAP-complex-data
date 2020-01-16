@@ -13,6 +13,7 @@ var VOTableTools = /** @class */ (function () {
         var method = contentText.indexOf("base64");
         if (method != -1) {
             var data = VOTableTools.content2Rows(contentText);
+            console.log(data);
             var k = 0;
             for (var i = 0; i < data.length; i = i + 1) {
                 for (var j = 0; j < data[i].length; j = j + 1) {
@@ -30,6 +31,7 @@ var VOTableTools = /** @class */ (function () {
                 });
             });
         }
+        console.log(reData);
         return reData;
     };
     /**
@@ -55,12 +57,13 @@ var VOTableTools = /** @class */ (function () {
     VOTableTools.content2Rows = function (content) {
         var p = new VOTableParser();
         var data = p.loadFile(content); //store the data(2-dimensional array) after query by url
-        var fields = p.getCurrentTableFields(); //store all the information of field
+        /*
+        var fields = p.getCurrentTableFields();//store all the information of field
         var nbFields = fields.length;
-        var nameFields = [];
-        for (var i = 0; i < nbFields; i++) {
-            nameFields.push(fields[i].name); //store the name of filed
-        }
+        let nameFields:string[] = [];
+        for(let i:number=0;i<nbFields;i++){
+          nameFields.push(fields[i].name);//store the name of filed
+        }*/
         p.cleanMemory();
         return data; //name of field and data
     };

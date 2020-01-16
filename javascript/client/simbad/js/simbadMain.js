@@ -148,15 +148,15 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 })
             }
             var out = genererTextArea(adql);
-            out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
+            out += genererTable(Field,dataTable,t,rootName,listJoinAndId,s);
             $("#load2").html(out);
             constraints="";
             $("button[name='div1']").on("click",function(){
-                var c = document.getElementsByName("div1c");
-                if($("div[name='div1c']").style.display=="none"){
-                    $("div[name='div1c']").style.display = "block";
+                var id = $(this).context.id
+                if($("table[id="+id+"]").css('display')=="none"){
+                    $("table[id="+id+"]").css('display','block');
                 }else{
-                    c.style.display = "none";
+                    $("table[id="+id+"]").css('display','none');
                 }
             })
 
@@ -171,6 +171,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                         for(var t in oidJson[root]){
                             if(t==id){
                                 var Adql = oidJson[root][t];
+                                console.log(Adql)
                             }
                         }
                     }
@@ -208,7 +209,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 temp.push(rootName,constraints);
                 keyConstraint.push(...temp);//record all constraints
             }
-            console.log("haoyun \n"+ list +"\n"+keyConstraint+"\n"+t)
+            console.log("haoyun \n"+ list +"\n"+keyConstraint+"\n"+t);
             console.log(t)
             var json =n.CreateJsonWithoutColumns(list,keyConstraint,0,t);
             var adql = json2Requete.getAdql(json);
@@ -226,13 +227,15 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 })
             }
             var out = genererTextArea(adql);
-            out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
+            out += genererTable(Field,dataTable,t,rootName,listJoinAndId,s);
             $("#load2").html(out);
             $("button[name='div1']").on("click",function(){
-                if($("div[name='div1c']").style.display=="none"){
-                    $("div[name='div1c']").style.display = "block";
+                var id = $(this).context.id
+                console.log($("table[id="+id+"]").css('display'))
+                if($("table[id="+id+"]").css('display')=="none"){
+                    $("table[id="+id+"]").css('display','block');
                 }else{
-                    $("div[name='div1c']").style.display = "none";
+                    $("table[id="+id+"]").css('display','none');
                 }
             })
             window.location.hash = "#load2";
@@ -470,12 +473,12 @@ function genererZone3(adql,s,root,n,listJoinAndId){
         })
     }
     else{
-        out = genererTable(Field,dataTable,n.json,root,listJoinAndId);
+        out = genererTable(Field,dataTable,n.json,root,listJoinAndId,s);
     }
     return out;
 }
 
-function genererTable(Field,dataTable,json,root,listJoinAndId){//include textarea
+function genererTable(Field,dataTable,json,root,listJoinAndId,s){//include textarea
     var listJoin=[];
     var nb = Field.length;
     for(var key in json[root].join_tables){
@@ -515,12 +518,11 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
     var number=0;
 
     for(var j=0;j<dataTable.length;j++){//table  content
-        
         if(count==0){
             var idTable = [];
             out +="<tr role=\"row\">";
-            
-            out +="<td><button type=\"button\" name=\"div1\" class=\"btn btn-primary\" >open</button></td>"
+            console.log("number ***   " + number)
+            out +="<td><button type=\"button\" id=\""+number+"\" class=\"btn btn-primary\" name = \"div1\">open</button></td>"
             //out +="<td><div class=\"btn-group\" style=\"width :100px\">"+
             //"<button type=\"button\" class=\"btn btn-primary\" >JOIN</button>"+
             //"<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" >"+
@@ -540,15 +542,16 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
         out +="<td style=\"text-align: auto;\">"+dataTable[j]+"</td>";
         count =count+1;
         if(count==nb){
-            out +="</tr role=\"row\">";
-            number++;
+            out +="</tr>";
+            console.log("number   " + number)
             count=0;
             console.log(idTable);
-            out +="<tr><td>";
-            out +=listTableChoisir(idTable);
-            out +="</tr></td>";
+            out +="<tr role=\"row\"><td colspan = \"100\">"
+            out +="<table class = 'table' role = \"grid\"  style=\"display:none\"  id = \""+number+"\" name = \"div1\" width=\"100%\">";
+            out +=listTableChoisir(idTable,s);
+            out +="</table></td></tr>";
+            number++;
         }
-        
     }
     out+="</tbody>"
     out += "</table></div>"
@@ -759,35 +762,88 @@ function getDepth(arr) {
     return out1;
   }
 
-  function listTableChoisir(listTable){
-        var out = "<div style=\"display:block\" name = \"div1c\">";
+  function listTableChoisir(listTable,s){
+        var out = "";
         var a = listTable.indexOf("ident");
         if(a!=-1){
-            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            out += "<tr><td colspan = \"100%\"><p id=\""+listTable[a-1]+"|"+listTable[a]+"\" style=\"display:inline\">"+listTable[a]+"</p></td>";
+            adql = "SELECT id FROM ident WHERE oidref="+listTable[a-1]
+            var QObject = s.Query(adql);
+            var dataTable = VOTableTools.votable2Rows(QObject);
+            out+= "<td><p style=\"display:inline\">"+""+dataTable+"</p></td></tr>"
             listTable.splice(a,1);
             listTable.splice(a-1,1);
         }
         var a = listTable.indexOf("flux");
         if(a!=-1){
-            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            out += "<tr><td colspan = \"100%\"><p id=\""+listTable[a-1]+"|"+listTable[a]+"\" style=\"display:inline\">"+listTable[a]+"</p></td>";
+            adql = "SELECT flux FROM flux WHERE oidref="+listTable[a-1]
+            var QObject = s.Query(adql);
+            var dataTable = VOTableTools.votable2Rows(QObject);
+            out+= "<td><p style=\"display:inline\">"+""+dataTable+"</p></td></tr>"
             listTable.splice(a,1);
             listTable.splice(a-1,1);
         }
         var a = listTable.indexOf("otypes");
         if(a!=-1){
-            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            out += "<tr><td colspan = \"100%\"><p id=\""+listTable[a-1]+"|"+listTable[a]+"\" style=\"display:inline\">"+listTable[a]+"</p></td>";
+            adql = "SELECT  otype_shortname FROM otypedef join otypes on otypedef.otype=otypes.otype WHERE oidref="+listTable[a-1]
+            var QObject = s.Query(adql);
+            var dataTable = VOTableTools.votable2Rows(QObject);
+            out+= "<td><p style=\"display:inline\">"+""+dataTable+"</p></td></tr>"
             listTable.splice(a,1);
             listTable.splice(a-1,1);
         }
         var a = listTable.indexOf("ref");
         if(a!=-1){
-            out += "<p id=\""+listTable[a-1]+"|"+listTable[a]+"\">"+listTable[a]+"</p>";
+            out += "<tr><td colspan = \"100%\"><p id=\""+listTable[a-1]+"|"+listTable[a]+"\" style=\"display:inline\">"+listTable[a]+"</p></td>";
+            adql = "SELECT bibcode FROM ref join has_ref on oidbib = oidbibref WHERE oidref="+listTable[a-1]
+            var QObject = s.Query(adql);
+            var dataTable = VOTableTools.votable2Rows(QObject);
+            out+= "<td><p style=\"display:inline\">"+""+dataTable+"</p></td></tr>"
             listTable.splice(a,1);
             listTable.splice(a-1,1);
         }
-        
+        var a = listTable.indexOf("author");
+        if(a!=-1){
+            out += "<tr><td colspan = \"100%\"><p id=\""+listTable[a-1]+"|"+listTable[a]+"\" style=\"display:inline\">"+listTable[a]+"</p></td>";
+            adql = "SELECT name FROM author join \"public\".ref.oidbib=\"public\".author.oidbibref WHERE oidbib="+listTable[a-1]
+
+            var QObject = s.Query(adql);
+            var dataTable = VOTableTools.votable2Rows(QObject);
+            out+= "<td><p style=\"display:inline\">"+""+dataTable+"</p></td></tr>"
+            listTable.splice(a,1);
+            listTable.splice(a-1,1);
+        }
+        var a = listTable.indexOf("keywords");
+        if(a!=-1){
+            out += "<tr><td colspan = \"100%\"><p id=\""+listTable[a-1]+"|"+listTable[a]+"\" style=\"display:inline\">"+listTable[a]+"</p></td>";
+            adql = "SELECT keyword FROM \"public\".ref JOIN \"public\".keywords ON \"public\".ref.oidbib=\"public\".keywords.oidbibref WHERE oidbib="+listTable[a-1]
+            var QObject = s.Query(adql);
+            var dataTable = VOTableTools.votable2Rows(QObject);
+            out+= "<td><p style=\"display:inline\">"+""+dataTable+"</p></td></tr>"
+            listTable.splice(a,1);
+            listTable.splice(a-1,1);
+        }
+        var a = listTable.indexOf("has_ref");
+        if(a!=-1){
+            out += "<tr><td colspan = \"100%\"><p id=\""+listTable[a-1]+"|"+listTable[a]+"\" style=\"display:inline\">"+"object"+"</p></td>";
+            adql = "SELECT \"public\".basic.main_id FROM \"public\".has_ref JOIN \"public\".ref ON \"public\".ref.oidbib=\"public\".has_ref.oidbibref JOIN \"public\".basic ON \"public\".has_ref.oidbibref=\"public\".basic.oid WHERE oidbib="+listTable[a-1]
+            console.log("**********************")
+            console.log(listTable[a-1])
+            var QObject = s.Query(adql);
+            var dataTable = VOTableTools.votable2Rows(QObject);
+            var newDataTable = Array.from(new Set(dataTable))//remove dulicate data from an array
+            out+= "<td><p style=\"display:inline\">"+""+newDataTable+"</p></td></tr>"
+            listTable.splice(a,1);
+            listTable.splice(a-1,1);
+        }
+
         console.log(listTable)
-        out +="<div class=\"btn-group\" style=\"width :100px\">"+
+        if(listTable.length==0){
+
+        }else{
+            out +="<tr><td><div class=\"btn-group\" style=\"width :100px\">"+
             "<button type=\"button\" class=\"btn btn-primary\" >JOIN</button>"+
             "<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" >"+
                 "<span class=\"caret\"></span>"+
@@ -797,9 +853,10 @@ function getDepth(arr) {
             for(var i=1;i<listTable.length;i=i+2){
                 out += "<li><a href=\"#\" id=\""+listTable[i-1]+"|"+listTable[i]+"\" name = \"boid\">"+listTable[i]+"</a></li>";
             }
-            out +="</ul>"+"</div>";
+            out +="</ul>"+"</div></td></tr>";
+        }
         
-        out += "</div>"
+        //out += "</div>";
         console.log(out)
         return out;
   }

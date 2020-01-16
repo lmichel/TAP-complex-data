@@ -14,7 +14,7 @@ class VOTableTools{
     var method = contentText.indexOf("base64");
     if(method!=-1){//The coding mode is "base64". e.g. Simbad, GAVO
       var data = VOTableTools.content2Rows(contentText);
-
+      console.log(data)
       let k:number = 0;
       for(var i=0;i<data.length;i=i+1)//Store the name of the table in an array
       {
@@ -34,6 +34,7 @@ class VOTableTools{
 				});
     })
   }
+  console.log(reData)
     return reData;
   }
 
@@ -61,12 +62,13 @@ class VOTableTools{
   static content2Rows(content:string){
     var p = new VOTableParser();
     var data = p.loadFile(content);//store the data(2-dimensional array) after query by url
+    /*
     var fields = p.getCurrentTableFields();//store all the information of field
     var nbFields = fields.length;
     let nameFields:string[] = [];
     for(let i:number=0;i<nbFields;i++){
       nameFields.push(fields[i].name);//store the name of filed
-    }
+    }*/
     p.cleanMemory();
     return data;//name of field and data
   }

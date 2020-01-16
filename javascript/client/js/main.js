@@ -27,7 +27,7 @@ function main(){
             JSON.stringify(data, undefined, 6)
         );
         var sj=new jsonRead(data); 
-        s.createJson(data,"basic");
+        //s.createJson(data,"basic");
         var output = "";
         output += sj.showAll(data);
         $("#load2").html(output);//show all the informations of rootTable and it's join tables
@@ -417,6 +417,7 @@ function main(){
 function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapService
     var jsont = n.json
     $("button#test").on('click',{"json" : jsont},function(event){//@TODO 
+        console.log("******************++++++++++++++++++++++++++")
         console.log(event.data.json);
         var t =event.data.json
         var keyConstraint=[]

@@ -195,7 +195,7 @@ class TapService{
         var ft = alllink[i][1].split("|");
         if(tt[0]== nowTable){
           loop:
-          for(var key in arrLink){
+          for(var key in arrLink){//record links other than the first link between tow tables
             if(ft[0]==key){
               ifSame=1;
               arrLinkJoint["schema"]=this.schema;
@@ -424,19 +424,14 @@ class TapService{
               contentAdql += "ON " + schema +"."+keyRoot +"."+jsonAll[keyRoot].join_tables[key].target;
               contentAdql += "="+ schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].from;
               var temp = IdDic[joinIdDic[key]];
-              if(schema.indexOf("public")!=-1){
+              if(schema.indexOf("public")!=-1&&contentAdql.indexOf("oid")!=-1){//have public ;have oid
                 contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
-
-              }else if(schema.indexOf("rr")!=-1&&contentAdql.indexOf("ivoid=")==-1){
+              }else if(schema.indexOf("rr")!=-1&&contentAdql.indexOf("ivoid=")==-1){//have rr; not ivoid
                 contentAdql += "\nWHERE \n" +jsonAll[keyRoot].join_tables[key].target+"="+"\'"+dataTable[i+temp]+"\'";
-
-              }
-              else if(schema.indexOf("public")!=-1&&contentAdql.indexOf("oid")==-1){
+              }else if(schema.indexOf("public")!=-1&&contentAdql.indexOf("oid")==-1){//have public;not oid
                 contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+dataTable[i+temp];
-
               }else{
                 contentAdql += "\nWHERE \n" +schema +"."+key+"."+jsonAll[keyRoot].join_tables[key].target+"="+"\'"+dataTable[i+temp]+"\'";
-
               }
             }
             contentTable[dataTable[i+temp]]=contentAdql;
