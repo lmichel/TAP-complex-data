@@ -112,21 +112,27 @@ class jsonRead{
           space1.push(space);
         }
         space = space1.join('');
-    for(var key in jsonAll[table].join_tables){
-      if(list_exist.indexOf(key)==-1){
-        joinTable.push(space+"<B>"+ key +"</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>");
-        joinTable.push(space+"<button type=\"button\" id = "+"\"b"+ niveau +key + "\" name = \"Cbutton\" class=\"btn btn-primary\" >Aide</button>"+"<input id=\""+niveau+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"contraints\">"+ "<br/>");
-        list_exist.push(key);
-        let table :string;
-        let tableCut : string; 
-        table = this.json2HtmlJoin(key,list_exist,flag2);
-        tableCut = table.replace(/ /g,"");
-        if(tableCut.length != 0)
-        {
-          joinTable.push(table);
+    if(jsonAll[table]==undefined){
+      
+    }
+    else{
+      for(var key in jsonAll[table].join_tables){
+        if(list_exist.indexOf(key)==-1){
+          joinTable.push(space+"<B>"+ key +"</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>");
+          joinTable.push(space+"<button type=\"button\" id = "+"\"b"+ niveau +key + "\" name = \"Cbutton\" class=\"btn btn-primary\" >Aide</button>"+"<input id=\""+niveau+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"constrains \">"+ "<br/>");
+          list_exist.push(key);
+          let table :string;
+          let tableCut : string; 
+          table = this.json2HtmlJoin(key,list_exist,flag2);
+          tableCut = table.replace(/ /g,"");
+          if(tableCut.length != 0)
+          {
+            joinTable.push(table);
+          }
         }
       }
     }
+    
     htmlbuffer=joinTable.join('')
     return htmlbuffer;
   }
@@ -144,11 +150,11 @@ class jsonRead{
     let list_exist:string[] = [];
     list_exist.push(table);
     joinTable.push("<B>"+ table +"</B>"+ ": "+"<font color = \"#545454\">"+ this.getDescription(table)+"</font>"+ "<br/>");
-    joinTable.push("<button type=\"button\" id = "+"\"b1"+ table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>"+"<input id="+"\"1"+table+"\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"contraints\">"+ "<br/>");
+    joinTable.push("<button type=\"button\" id = "+"\"b1"+ table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>"+"<input id="+"\"1"+table+"\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"constrains\">"+ "<br/>");
     for(var key in jsonAll[table].join_tables)
     {
       joinTable.push("    " + "<B>"+key + "</B>" + ": "+"<font color = \"#545454\">"+ this.getDescription(key)+"</font>"+  "<br/>");
-      joinTable.push("    " +"<button type=\"button\" id = "+"\"b2"+ key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>"+"<input id=\"2"+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"contraints\">"+ "<br/>");
+      joinTable.push("    " +"<button type=\"button\" id = "+"\"b2"+ key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>"+"<input id=\"2"+key+"\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"constrains\">"+ "<br/>");
       if(list_exist.indexOf(key)==-1){//return the table which are joined with the key.
         list_exist.push(key);
         joinTable.push(this.json2HtmlJoin(key,list_exist,0));
@@ -166,8 +172,14 @@ class jsonRead{
   getDescription(table:string):string{
     let jsonAll:dic = this.json
     let description:string;
-    description=jsonAll[table].description;
-    return description;
+    if(jsonAll[table] == undefined){
+      return  "No description";
+    }
+    else{
+      description=jsonAll[table].description;
+      return description;
+    }
+    
   }
 
   /**
@@ -176,6 +188,7 @@ class jsonRead{
    */
   showAll():string{
     let rootTable:string[] = this.rootTable();
+    console.log(rootTable)
     let joinTable:string[]=[];
     let output:string="";
     for(var i = 0;i<rootTable.length;i++){
@@ -395,6 +408,8 @@ class jsonRead{
       json[key]=jsonAll;
       flagC=0;
     }
+    console.log("======================")
+    console.log(json)
     return json;
   }
 

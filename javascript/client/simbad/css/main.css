@@ -55,13 +55,11 @@ text-align: auto;
     filter: alpha(opacity=88); 
 } 
 .white_content { 
-    display: none; 
-    position: fixed; 
     top: 25%; 
     left: 25%; 
-    width: 55%; 
-    height: 55%; 
-    padding: 20px; 
+    width: auto;
+    height: 300px;
+    padding: 30px; 
     border: 5px solid #003366; 
     background-color: white; 
     z-index:1002; 

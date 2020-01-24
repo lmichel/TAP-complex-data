@@ -225,11 +225,12 @@ function main(){
         }
         var v = new TapService("http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",schema,"Vizier",top_vizier);
         var data = v.createJson();
-
+        console.log(data)
         $("#load1").html(
             JSON.stringify(data, undefined, 6)
         );
         var vj=new jsonRead(data);
+        console.log(vj)
         //var rootTable = vj.rootTable();//read json, return all the rootTable as array
         var output = "";
         output += vj.showAll(data)
@@ -441,6 +442,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 listId.push(temp);//record the key linked to root table, No repeating
             }
         }
+        console.log("0000000000000000000000")
+        console.log(listId)
         var countedNames = listJoinAndId.reduce(function (allNames, name) { if (name in allNames) { allNames[name]++; } else { allNames[name] = 1; } return allNames; }, {});
         for(var i=0;i<listId.length;i++){
             for(var j = 0;j<listId.length-i-1;j++){
@@ -527,6 +530,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                         }
                     }
                 }
+                console.log("oidJson /n" + oidJson)
+                console.log(oidJson)
                 var QObject = s.Query(Adql);
                 console.log(Adql);
                 var dataTable = VOTableTools.votable2Rows(QObject);
@@ -602,6 +607,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                         }
                     }
                 }
+                console.log("oidJson /n" )
+                console.log(oidJson)
                 var QObject = s.Query(Adql);
                 console.log("laurent "+Adql);
                 var dataTable = VOTableTools.votable2Rows(QObject);
@@ -675,6 +682,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                             }
                         }
                     }
+                    console.log("oidJson /n" )
+                    console.log(oidJson)
                     var QObject = s.Query(Adql);
                     console.log(Adql)
                     var dataTable = VOTableTools.votable2Rows(QObject)
@@ -887,8 +896,8 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
 
 
 
-function genererDataTable(Field,dataTable){//zone 3 except textarea
-    var out1="<div class = \"white_content\" " +
+function genererDataTable(Field,dataTable){//zone 3 except textarea class = \"white_content\" 
+    var out1="<div " +
         "id=\"light1\">" +
         //"<span style=\"text-align: left;font-weight: bold;font-size: x-large;\"> Data of table " +name +"</span>"+
         "<button class=\"delete_right\" href = \"javascript:void(0)\" "+
@@ -1009,6 +1018,7 @@ function checkAdql(listId){//@TODO special for simbad
     if(adql2.indexOf("ORDER")==-1&&adql2.indexOf("order")==-1&&adql2.indexOf("basic")!=-1){
         adql2 += " ORDER BY oid";
     }
+    console.log(adql2)
     $("#textadql").val(adql2);
     return adql2;
 }

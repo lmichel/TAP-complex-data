@@ -64,13 +64,19 @@ var json2Requete = /** @class */ (function () {
         if (constraint != "") {
             adql += "WHERE " + "\n" + constraint;
         }
+        var table = "";
         for (var key in jsonAll) {
             for (var keyJoin in jsonAll[key].join_tables) {
                 var id = jsonAll[key].join_tables[keyJoin].target;
+                table = keyJoin;
                 console.log("id");
                 console.log(id);
             }
         }
+        if (adql.indexOf("ref") != -1) {
+            id = "oidbib";
+        }
+        console.log(id);
         if (id != undefined) {
             adql += "\n";
             adql += "ORDER BY " + id;
@@ -146,17 +152,26 @@ var json2Requete = /** @class */ (function () {
      */
     json2Requete.getJoin = function (json, table, schema) {
         var retour = "";
+        //let flag:number=0
         for (var key in json) {
             retour += "JOIN " + schema + "." + key + " " + "\n";
             if (json2Requete.isString(json[key].target) && json2Requete.isString(json[key].from)) {
+                //if(json[key].target==json[key].from&&json[key].target=='otype'){
+                //    retour += "USING("+json[key].target+")"+"\n";
+                //}else{
                 retour += "ON " + schema + "." + table + "." + json[key].target + "=" + schema + "." + key + "." + json[key].from + " " + "\n";
+                // }
                 if (json2Requete.getJoin(json[key].join_tables, key, schema) != "") {
                     retour += json2Requete.getJoin(json[key].join_tables, key, schema);
                 }
             }
             else {
                 var n = json[key].target.length;
+                //if(json[key].target[0]==json[key].from[0]&&json[key].target[0]=='otype'){
+                //   retour += "USING("+ json[key].target[0]+")"+"\n";
+                //}else{
                 retour += "ON " + schema + "." + table + "." + json[key].target[0] + "=" + schema + "." + key + "." + json[key].from[0] + " " + "\n";
+                //}
                 for (var i = 1; i < n; i++) {
                     retour += "AND ";
                     retour += schema + "." + table + "." + json[key].target[i] + "=" + schema + "." + key + "." + json[key].from[i] + " " + "\n";

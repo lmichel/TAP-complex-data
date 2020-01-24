@@ -407,16 +407,21 @@ var TapService = /** @class */ (function () {
                             contentAdql += "=" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from;
                             var temp = IdDic[joinIdDic[key]];
                             if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") != -1) {
-                                contentAdql += "\nWHERE \n" + jsonAll[keyRoot].join_tables[key].target + "=" + dataTable[i + temp];
+                                contentAdql += "\nWHERE \n" + jsonAll[keyRoot].join_tables[key].from + "=" + dataTable[i + temp];
                             }
                             else if (schema.indexOf("rr") != -1 && contentAdql.indexOf("ivoid=") == -1) {
-                                contentAdql += "\nWHERE \n" + jsonAll[keyRoot].join_tables[key].target + "=" + "\'" + dataTable[i + temp] + "\'";
+                                contentAdql += "\nWHERE \n" + jsonAll[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[i + temp] + "\'";
                             }
                             else if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") == -1) {
-                                contentAdql += "\nWHERE \n" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].target + "=" + dataTable[i + temp];
+                                if (json2Requete.isString(dataTable[i + temp])) {
+                                    contentAdql += "\nWHERE \n" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[i + temp] + "\'";
+                                }
+                                else {
+                                    contentAdql += "\nWHERE \n" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from + "=" + dataTable[i + temp];
+                                }
                             }
                             else {
-                                contentAdql += "\nWHERE \n" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].target + "=" + "\'" + dataTable[i + temp] + "\'";
+                                contentAdql += "\nWHERE \n" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[i + temp] + "\'";
                             }
                         }
                         contentTable[dataTable[i + temp]] = contentAdql;
