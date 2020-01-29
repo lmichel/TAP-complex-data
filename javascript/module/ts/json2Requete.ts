@@ -80,7 +80,7 @@ class json2Requete{
                 console.log(id)
             }
         }
-        if(adql.indexOf("ref")!=-1){//@TODO 
+        if(adql.indexOf("ref.")!=-1){//@TODO 
             id = "oidbib"
         }
         console.log(id)

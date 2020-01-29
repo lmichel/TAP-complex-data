@@ -442,8 +442,6 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 listId.push(temp);//record the key linked to root table, No repeating
             }
         }
-        console.log("0000000000000000000000")
-        console.log(listId)
         var countedNames = listJoinAndId.reduce(function (allNames, name) { if (name in allNames) { allNames[name]++; } else { allNames[name] = 1; } return allNames; }, {});
         for(var i=0;i<listId.length;i++){
             for(var j = 0;j<listId.length-i-1;j++){
@@ -632,7 +630,6 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
         //$("button#test").unbind('click')
         $("#badql").on("click",function(){//regenerate the form of the query
             var adql2 = checkAdql(listId);
-
             out = genererZone3(adql2,s,rootName,n,listJoinAndId);
             if(listId.length == 1){
                 var start = adql2.indexOf(listId[0])+listId[0].length;
@@ -739,7 +736,7 @@ function Aide(n,s){
                 var contentText = QObject.responseText;
                 var Field =VOTableTools.genererField(QObject,contentText)
                 var nb = Field.length;
-                var out ="<div class = \"white_content\" " +
+                var out ="<div class = \"AIDE\" " +
                       "id=\"light\">" +
                       "<span style=\"text-align: left;font-weight: bold;font-size: x-large;\"> Columns of table " +name +"</span>"+
                       "<button class=\"delete_right\" href = \"javascript:void(0)\" "+

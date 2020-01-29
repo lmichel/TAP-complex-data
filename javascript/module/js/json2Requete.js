@@ -73,7 +73,7 @@ var json2Requete = /** @class */ (function () {
                 console.log(id);
             }
         }
-        if (adql.indexOf("ref") != -1) {
+        if (adql.indexOf("ref.") != -1) {
             id = "oidbib";
         }
         console.log(id);
