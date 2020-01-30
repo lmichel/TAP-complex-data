@@ -545,7 +545,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 }
                 else{
                     var out1 =genererDataTable(Field,dataTable);
-                    $("body").prepend(out1);
+                    $(this).parent().parent().after(out1);
                     document.getElementById('light1').style.display='block';
                 }
             });
@@ -622,7 +622,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 }
                 else{
                     var out1 =genererDataTable(Field,dataTable);
-                    $("body").prepend(out1);
+                    $(this).parent().parent().after(out1);
                     document.getElementById('light1').style.display='block';
                 }
             })
@@ -696,7 +696,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                     }
                     else{
                         var out1 =genererDataTable(Field,dataTable);
-                        $("body").prepend(out1);
+                        $(this).parent().parent().after(out1);
                         document.getElementById('light1').style.display='block';
                     }
                 })
@@ -894,17 +894,26 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
 
 
 function genererDataTable(Field,dataTable){//zone 3 except textarea class = \"white_content\" 
-    var out1="<div " +
-        "id=\"light1\">" +
-        //"<span style=\"text-align: left;font-weight: bold;font-size: x-large;\"> Data of table " +name +"</span>"+
-        "<button class=\"delete_right\" href = \"javascript:void(0)\" "+
-        "onclick = \" document.getElementById('light1').style.display='none'\"><i class=\"fa fa-close\" ></i></button><br></br>";//head 
-    out1 += "<table  class = 'table' role = \"grid\" >";
+    var out1="<tr name =\"light1\"><td colspan=\"100\" style=\"position:relative\"><div class = \"white_content\" " +
+    "> <table style=\"text-align:center;display:inline; table-layout:fixed; word-break: break-all\" >" +
+   /*
+    "<div class=\"btn-group\" style=\"width :100px; left:auto \"\">"+
+        "<button type=\"button\" class=\"btn btn-primary\">JOIN</button>"+
+        "<button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" >"+
+            "<span class=\"caret\"></span>"+
+            "<span class=\"sr-only\"></span>"+
+        "</button>"+
+        "</div>"+*/
+
+    "<button class=\"delete_right\" href = \"javascript:void(0)\" "+
+    "onclick = \" var a = document.getElementsByName('light1')[0]; var listChild = a.childNodes;"+
+    " while(listChild != null && listChild.length>0){a.removeChild(listChild[0]);var b = a.parentNode;b.removeChild(a)}\">"+
+    "<i class=\"fa fa-close\" ></i></button><br></br>";//head 
     out1 +="<thead><tr role=\"row\">";//head
     //out +="<th/>";
     var nb = Field.length;
     for(var j=0;j<nb;j++){
-    out1 +="<th rowspan=\"1\"  colspan=\"1\" style=\"text-align:center;vertical-align:bottom\">"+Field[j]+"</th>";
+    out1 +="<th rowspan=\"1\"  colspan=\"1\" style=\"text-align:center;vertical-align:bottom\">"+Field[j]+"&nbsp&nbsp</th>";
     }
     out1 +="</tr></thead>";
     out1 +="<tbody>";
@@ -932,7 +941,7 @@ function genererDataTable(Field,dataTable){//zone 3 except textarea class = \"wh
     }
     }
     out1 +="</tbody>";
-    out1 += "</table></div>";
+    out1 += "</table></div></td></tr>";
     return out1;
 }
 
