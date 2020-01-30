@@ -710,7 +710,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
 function genererTextArea(adql){
     out = "<div id = \"dadql\">"
     out += "<textarea rows=\"100\" col=\"100\"  id = \"textadql\" style= \" width:500px; height:300px;margin-left:20px\">"+adql+"</textarea>"
-    out += " <button type=\"button\" id = \"badql\"class=\"btn btn-primary\" style = \"width:65px;height:30px;position: relative;top: -8px;right: -8px\">Query</button>"
+    out += " <button type=\"button\" id = \"badql\"class=\"btn btn-primary\" style = \"width:auto;height:30px;position: relative;top: -8px;right: -8px\">Query ADQL</button>"
     out +="</div>";
     out +="<br></br>";
     return out;
@@ -1116,7 +1116,7 @@ function initial(){
     "<br></br>"+
     "<pre id=\"load2\" style= \"background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px ;float:left\"> </pre>"+
     "<div class=\"btn-group\" style=\"text-align: center; padding-left:100px;float:left;top :350px\">"+
-            "<button type=\"button\" id = \"test\" class=\"btn btn-primary\">Query</button>"+
+            "<button type=\"button\" id = \"test\" class=\"btn btn-primary\">Génerer ADQL</button>"+
         "</div>"+
     "<pre id=\"load3\" style= \"background-color:white; overflow:scroll; width:1400px; height:900px;margin-left:200px; font-size:12px; line-height: 2.3\"></pre>")
     $("body").append($initial);
