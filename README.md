@@ -35,21 +35,27 @@ function simbadMain(){
 }
 ```
 
-To run the program. First you need to add an initial () function. This function initializes the page. The components inside can be modified.  
+To run the program. First you need to add an `initial ()` function. This function initializes the page. The components inside can be modified.  
 Then you need to instantiate TapService.  
 If there is a TOP100 checkbox. You can set the value of the check box to false first. If the check box is checked, you can set the value to true again. Pass the value of the check box to TapService.（The fourth parameter.）  
-var s = TapService("http://simbad.u-strasbg.fr/simbad/sim-tap/sync","public","Simbad",true);  
+`var s = TapService("http://simbad.u-strasbg.fr/simbad/sim-tap/sync","public","Simbad",true); ` 
 After instantiation, the first json file can be generated.  
-var json1 = s.createJson（）  
+`var json1 = s.createJson（）  `
 Based on this basic json file we can instantiate jsonRead.  
-var sj = jsonRead（json1）  
-sj.json2Html (roottable) generates an html document based on the root table. It contains Aide buttons and restricted input boxes. Then add Aide (sj, s) and limitJson2data (sj, s) to add functionality in the html document.（ contains all the functions after the input limit.）  
+`var sj = jsonRead（json1） ` 
+`sj.json2Html (roottable)` generates an html document based on the root table. It contains Aide buttons and restricted input boxes. Then add `Aide (sj, s)` and `limitJson2data (sj, s)` to add functionality in the html document.（ contains all the functions after the input limit.）  
 
 # limitJson2data（sj，s）：
 **joinAndId (root, json)** returns the id value and table name of all jointables in the root table.  
-The latter part of the function is divided into three main parts. There will be a variable that records whether there are input restrictions. 1. If the variable is -1, there is no limit. An adql statement will be generated to query the data of the root table. 2. If the variable is not -1, it means that the user has entered a limit, and an adql statement containing a limit condition will be generated. 3. The program in the third part of the page after the Query ADQL button is clicked.  
-The first two parts are basically similar. Will generate two json files. The first json file is an adql statement that stores the root table and other tables according to the key value. The second json file is to generate a json file with restrictions and table information for the adql statement. The generated adql statement then displays the information on the page through a query function.  
-The third part of the logic is basically similar to the previous two parts. However, according to the adql statement manually modified by the user, the key value of the table is searched again, and a query data page is generated.  
+The latter part of the function is divided into three main parts. There will be a variable that records whether there are input restrictions.   
+
+1. If the variable is -1, there is no limit. An adql statement will be generated to query the data of the root table.   
+2. If the variable is not -1, it means that the user has entered a limit, and an adql statement containing a limit condition will be generated.  
+3. The program in the third part of the page after the Query ADQL button is clicked.   
+
+The first two parts are basically similar. Will generate two json files. The first json file is an adql statement that stores the root table and other tables according to the key value.   
+The second json file is to generate a json file with restrictions and table information for the adql statement. The generated adql statement then displays the information on the page through a query function.  
+The third part of the logic is basically similar to the previous two parts. However, according to the adql statement manually modified by the user, the key value of the table is searched again, and a query data page is generated.    
 
 
 # jsonRead.ts
@@ -79,7 +85,7 @@ Need to be instantiated. Pass the url, schema, label, and checkstatues of the qu
 
 # VOTableTools.ts
 This is a static class and does not need to be instantiated. It can be called directly.  
-The object received after the ajax query is directly passed to votable2Rows () to obtain the formatted data. The data is stored in an array.  
+The object received after the ajax query is directly passed to **votable2Rows ()** to obtain the formatted data. The data is stored in an array.  
 **genererFiled ()** gets the name of the Filed  
 
 
