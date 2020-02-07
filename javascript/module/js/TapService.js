@@ -7,6 +7,7 @@ var TapService = /** @class */ (function () {
         this.checkstatus = checkstatus;
     }
     /***
+     * Receive adql, return query objects
      * @param :receive adql statements and perform queries
      * @returns :votavle object
      */

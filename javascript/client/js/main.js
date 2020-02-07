@@ -418,8 +418,6 @@ function main(){
 function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapService
     var jsont = n.json
     $("button#test").on('click',{"json" : jsont},function(event){//@TODO 
-        console.log("******************++++++++++++++++++++++++++")
-        console.log(event.data.json);
         var t =event.data.json
         var keyConstraint=[]
         var list=[]
@@ -488,6 +486,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
             } 
             console.log("haoyun \n"+ list +"\n"+keyConstraint+"\n"+column+"\n"+t);
             var json2= n.CreateJsonAndContraint(list,keyConstraint,column,0,t);
+            console.log("èèèèèèèèèèè")
+            console.log(json2)
             adqlMain = json2Requete.getAdql(json2);
             oidJson = s.createMainJson(adqlMain,t,rootName,listId,listJoinAndId);
 
@@ -588,6 +588,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 column.push(listId[i]);
             }
             var json2= n.CreateJsonAndContraint(list,keyConstraint,column,0,t);
+            console.log("èèèèèèèèèèè")
+            console.log(json2)
             adqlMain = json2Requete.getAdql(json2);
             oidJson = s.createMainJson(adqlMain,t,rootName,listId,listJoinAndId);
 
@@ -804,6 +806,8 @@ function genererZone3(adql,s,root,n,listJoinAndId){
     var dataTable = VOTableTools.votable2Rows(QObject);
     var contentText = QObject.responseText;
     var Field =VOTableTools.genererField(QObject,contentText);
+    console.log("field1111111111111")
+    console.log(Field)
     var nb = Field.length;
     if(nb==0){
         $(contentText).find('RESOURCE[type="results"]').each(function(){

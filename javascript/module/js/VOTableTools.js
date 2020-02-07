@@ -57,18 +57,11 @@ var VOTableTools = /** @class */ (function () {
     VOTableTools.content2Rows = function (content) {
         var p = new VOTableParser();
         var data = p.loadFile(content); //store the data(2-dimensional array) after query by url
-        /*
-        var fields = p.getCurrentTableFields();//store all the information of field
-        var nbFields = fields.length;
-        let nameFields:string[] = [];
-        for(let i:number=0;i<nbFields;i++){
-          nameFields.push(fields[i].name);//store the name of filed
-        }*/
         p.cleanMemory();
         return data; //name of field and data
     };
     /***
-     * Get the name of field
+     * Get the name of field (get data)
      * @param vObject: votable object.
      */
     VOTableTools.getField = function (vObject) {
@@ -85,6 +78,11 @@ var VOTableTools = /** @class */ (function () {
         p.cleanMemory();
         return nameFields; //name of field and data
     };
+    /***
+       * Get the name of field
+       * @param vObject: votable object.
+       * @param content: the content of votable object.
+       */
     VOTableTools.genererField = function (QObject, contentText) {
         var method = contentText.indexOf("base64");
         var Field = [];
