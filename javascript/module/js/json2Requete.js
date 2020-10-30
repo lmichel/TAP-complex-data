@@ -79,9 +79,9 @@ var json2Requete = /** @class */ (function () {
         console.log(id);
         if (id != undefined) {
             adql += "\n";
-            adql += "ORDER BY " + id;
+            //adql += "ORDER BY " + id; // THE ORDERED BY ID GERERATE SOMME ERROR THAT'IS
         }
-        return adql;
+        return adql
     };
     /**
      * Receive json and schema to get the column

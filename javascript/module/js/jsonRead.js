@@ -64,14 +64,28 @@ var jsonRead = /** @class */ (function () {
     jsonRead.prototype.joinTable = function (table) {
         var jsonAll = this.json;
         var joinTable = [];
-        for (var key in jsonAll[table].join_tables) {
-            if (key.indexOf("2") != -1) {
-                continue; //same rootTable and join_table, I made the second name of the repeat followed by a number 2//@TODO 
-            }
-            else {
-                joinTable.push(key);
-            }
+        //console.log(JSON.stringify(jsonAll,undefined,2));
+        //alert(jsonAll[table]);
+        if(jsonAll[table]==undefined){
+            this.json={}
+            jsonAll=this.json;
+            
+            joinTable.push(table);
+            //alert(JSON.stringify(joinTable,undefined,2))
+        }else{
+            // alert(table+ " has join table")
+            for (var key in jsonAll[table].join_tables) {
+                //alert(key)
+                 if (key.indexOf("2") != -1) {
+                     continue; //same rootTable and join_table, I made the second name of the repeat followed by a number 2//@TODO 
+                 }
+                 else {
+                     joinTable.push(key);
+                 }
+             }
         }
+
+      
         return joinTable;
     };
     /**
@@ -162,7 +176,7 @@ var jsonRead = /** @class */ (function () {
      */
     jsonRead.prototype.showAll = function () {
         var rootTable = this.rootTable();
-        console.log(rootTable);
+       // console.log(rootTable);
         var joinTable = [];
         var output = "";
         for (var i = 0; i < rootTable.length; i++) {
@@ -419,8 +433,8 @@ var jsonRead = /** @class */ (function () {
             json[key] = jsonAll;
             flagC = 0;
         }
-        console.log("======================");
-        console.log(json);
+       // console.log("======================");
+       // console.log(json);
         return json;
     };
     /**

@@ -22,6 +22,7 @@ function main(){
             top_simbad = true;
         }
         var s = new TapService("http://simbad.u-strasbg.fr/simbad/sim-tap/sync",schema,"Simbad",top_simbad);
+        alert(+" shema "+schema+"\n top "+top_simbad);
         var data = s.createJson();
         $("#load1").html(
             JSON.stringify(data, undefined, 6)
@@ -30,10 +31,8 @@ function main(){
         //s.createJson(data,"basic");
         var output = "";
         output += sj.showAll(data);
-       // console.log(output)
         $("#load2").html(output);//show all the informations of rootTable and it's join tables
         var mostUsedTable = sj.mostUsed();//read json, return all the most used table ([0] is the most used) as array
-        //alert(mostUsedTable[0])
         var add ="" 
         for(var i = 0;i<5;i++){//add five bouton of the most used table
             add ="<li><a href='#' id="+"\'"+ mostUsedTable[i]+"\'"+">"+mostUsedTable[i]+": "+data[mostUsedTable[i]].description+"</a></li>";
@@ -41,17 +40,14 @@ function main(){
         }
         var flag = 0;
         $("#"+mostUsedTable[0]).click(function(){//add the click event
-            alert(mostUsedTable[0])
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[0]);
-            alert()
             $("#load2").html(output);
             Aide(sj,s)
             limitJson2data(sj,s);
             flag= 1;
         })
         $("#"+mostUsedTable[1]).click(function(){
-            alert(mostUsedTable[1])
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[1]);
             $("#load2").html(output);
@@ -323,7 +319,6 @@ function main(){
         var top_caom = false;
         if($("#caomCS").val()!=''){
             var schema = $("#caomCS").val()
-            alert(schema);
         }
         else{
             var schema = "dbo";
@@ -435,7 +430,6 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
         var niveau;
         var rootName = $("input[name='Cinput']:first").attr("id").slice(1);
         listJoinAndId = joinAndId(rootName,t);//record all the keys linked to root table and the join table's name
-        console.log("aaaaaaaaaaaaaaaaaaaaa"+listJoinAndId+"************************"+rootName+"<br>tttttttttttttt  =>"+JSON.stringify(t,undefined,6));
         for(var i = 0;i<listJoinAndId.length;i=i+2){
             if(!json2Requete.isString(listJoinAndId[i])){
                 var temp = listJoinAndId[i][0];
@@ -494,15 +488,16 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
             console.log("haoyun \n"+ list +"\n"+keyConstraint+"\n"+column+"\n"+t);
             var json2= n.CreateJsonAndContraint(list,keyConstraint,column,0,t);
             console.log("èèèèèèèèèèè")
-            console.log("----------------> json2 = "+json2)
+            console.log(json2)
             adqlMain = json2Requete.getAdql(json2);
             oidJson = s.createMainJson(adqlMain,t,rootName,listId,listJoinAndId);
-
+            
             var json = n.CreateJsonWithoutColumns(list,keyConstraint,0,t);//normal json with constraints
             var adql = json2Requete.getAdql(json);
-            console.log("----------------> adql = +$$\n"+adql);
+            console.log("$$\n"+adql);
+           
             var QObject = s.Query(adql);
-            console.log("----------------> qobject = "+QObject)
+            console.log(QObject)
             var dataTable = VOTableTools.votable2Rows(QObject);
             var contentText = QObject.responseText;
             var Field =VOTableTools.genererField(QObject,contentText);
@@ -516,13 +511,13 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                     }
                 })
             }
-            var out = genererTextArea(adql);
-            $("#load4").html(out);
+            var out3 = genererTextArea(adql);
+           // $("#load4").html(out);
             
            // out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
-           // $("#load3").html(out3);
+            $("#load3").html(out3);
             constraints="";
-            window.location.hash = "#load4"
+            window.location.hash = "#load3"
             $("a[name='boid']").on("click",function(){
                 var temp = $(this).attr("id");
                 var tempArr = temp.split("|");
@@ -537,10 +532,10 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                         }
                     }
                 }
-                console.log("----------------> oidjson= "+"oidJson /n" + oidJson)
-                //console.log(oidJson)
+                console.log("oidJson /n" + oidJson)
+                console.log(oidJson)
                 var QObject = s.Query(Adql);
-                console.log("---------------->22 adql = "+Adql);
+                console.log(Adql);
                 var dataTable = VOTableTools.votable2Rows(QObject);
                 var contentText = QObject.responseText;
                 var Field =VOTableTools.genererField(QObject,contentText);
@@ -574,6 +569,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
             console.log(t)
             var json =n.CreateJsonWithoutColumns(list,keyConstraint,0,t);
             var adql = json2Requete.getAdql(json);
+            alert("adql\n"+adql);
             var QObject = s.Query(adql);
             var dataTable = VOTableTools.votable2Rows(QObject)
             var contentText = QObject.responseText;
@@ -583,7 +579,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 $(contentText).find('RESOURCE[type="results"]').each(function(){
                     if($(this).find("INFO").attr("name")=="QUERY_STATUS"){
                         out = $(this).context.textContent
-                        alert(out);
+                       // alert(out);
                     }
                 })
             
@@ -596,7 +592,6 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
 
 
             var out2 = genererTable(Field,dataTable,t,rootName,listJoinAndId);
-            //alert(+"out 2 "+out2);
             $("#load3").html(out2);
             window.location.hash = "#load3";
             var column=[];
@@ -625,7 +620,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                     }
                 }
                 console.log("oidJson /n" )
-                console.log("----------------> 33333oidjson = "+oidJson)
+                console.log(oidJson)
                 var QObject = s.Query(Adql);
                 console.log("laurent "+Adql);
                 var dataTable = VOTableTools.votable2Rows(QObject);
@@ -646,33 +641,24 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                 }
             })
         }
-       // var tables = $('#example-table2').val();
-        
         //$("button#test").unbind('click')
         $("#badql").on("click",function(){//regenerate the form of the query
-            var tableOfResultQuery = $('#example-table2').tableToJSON(); // Convert the table into a javascript object
-           
-            var correctJsonTable =  getCorrectOutputJson(tableOfResultQuery);
-            
-            $("#loadJson").html(correctJsonTable);
-            window.location.hash = "#loadJson";
-            //console.log(" val -----------  "+table.length);
-            //var outdd = obj;
-            
-
-
-            var Myadql = $("#textadql").val();
             var adql2 = checkAdql(listId);
+            
             out = genererZone3(adql2,s,rootName,n,listJoinAndId);
+            
             if(listId.length == 1){
                 var start = adql2.indexOf(listId[0])+listId[0].length;
                 var end = adql2.indexOf("FROM");
                 if(adql2.indexOf(listId[0])==-1){
                     adql2 = adql2.slice(0,start)+",\n"+listId[0]+"\n"+adql2.slice(end);
+                    console.log(" 1 @@@@@@@@@@@@@@@ "+adql2+" @@@@@@@@@@@@@@@")
                 }
                 else{
                     start = adql2.indexOf(listId[0])+listId[0].length;
-                    adql2 = Myadql;//adql2.slice(0,start)+"\n"+adql2.slice(end);
+                    adql2 = adql2.slice(0,start)+"\n"+adql2.slice(end);
+
+                    console.log(" 2 @@@@@@@@@@@@@@@ "+adql2+" @@@@@@@@@@@@@@@")
                 }
             }
             else{
@@ -680,40 +666,23 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                     var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
                     var end = adql2.indexOf("FROM");
                     if(adql2.indexOf(listId[i])==-1){
-                        adql2 = Myadql;//adql2.slice(0,start)+",\n"+listId[i]+"\n"+adql2.slice(end);
+                        adql2 = adql2.slice(0,start)+",\n"+listId[i]+"\n"+adql2.slice(end);
+                        
+                        console.log(" 3 start @@@@@@@@@@@@@@@ "+start+" @@@@@@@@@@@@@@@")
+                        console.log(" 3 @@@@@@@@@@@@@@@ "+adql2+" @@@@@@@@@@@@@@@")
                     }
                     else{
                         start = adql2.indexOf(listId[i])+listId[i].length;
-                        adql2 = Myadql;//adql2.slice(0,start)+"\n"+adql2.slice(end);
-                       
+                        adql2 = //adql2.slice(0,start)+"\n"+adql2.slice(end);
+                        //console.log(" 4 start @@@@@@@@@@@@@@@ "+listId[i]+" @@@@@@@@@@@@@@@")
+                        console.log(" 4 @@@@@@@@@@@@@@@ "+adql2+" @@@@@@@@@@@@@@@")
                     }
                 }
             }
             
             
-           var oidJson = s.createMainJson(Myadql,t,rootName,listId,listJoinAndId);//@TODO oid otype should not appear in this place
-           //var data = s.createJson();
-           adqlMain = json2Requete.getAdql(oidJson);
-           var oidJson = s.createMainJson(adqlMain,t,rootName,listId,listJoinAndId);
-           console.log("=====================")        
-           console.log(oidJson)
-           console.log("=====================")        
-           
-
-           //let json = oidJson;
-           console.log("@@@@@@@@@@@@@@@@ nouveau js ");
-
-            const obj = JSON.stringify(oidJson,undefined,2);
-
-            console.log("@@@@@@@@@@@@@@@@ nouveau js ");
-            //let muout = JSON.parse(out2);
-            console.log("@@@@@@@@@@@@@@@@ nouveau js ");
-            //console.log("\n@@@@@@@@@@@@@@@@ nouveau out "+out2+"\n mout ");
-           // console.log("@@@@@@@@@@@@@@@@ nouveau js "+s.createMainJson(adql2,t,rootName,listId,listJoinAndId));//alert( adql2+" = "+i++  )
-           
-           
-
-
+            var oidJson = s.createMainJson(adql2,t,rootName,listId,listJoinAndId);//@TODO oid otype should not appear in this place
+           // console.log("@@@@@@@@@@@@@@@ "+adql2+" @@@@@@@@@@@@@@@")
             if(out.indexOf("Incorrect")!=-1){
                 alert(out);
             }
@@ -735,7 +704,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
                         }
                     }
                     console.log("oidJson /n" )
-                   // console.log(oidJson)
+                    console.log(oidJson)
                     var QObject = s.Query(Adql);
                     console.log(Adql)
                     var dataTable = VOTableTools.votable2Rows(QObject)
@@ -764,8 +733,8 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
 
 function genererTextArea(adql){
     out = "<div id = 'dadql'>"
-    out += "<textarea rows='100' col='100'  id = 'textadql' style= ' width:500px; height:300px;margin-left:20px'>"+adql+"</textarea><br><br>"
-    out += " <button type='button' id = 'badql'class='btn btn-primary' style = 'width:auto;height:30px;position: relative;top: -8px;right: -8px'>Query ADQL</button>"
+    out += "<textarea rows='100' col='100'  id = 'textadql' style= ' width:400px; height:300px;margin-left:20px'>"+adql+"</textarea><br><br>"
+    out += " <button type='button' id = 'badql'class='btn btn-primary' style = 'width:auto;height:30px;position: relative;top: -8px;right: -8px'>Run ADQL Query</button>"
     out +="</div>";
     out +="<br></br>";
     return out;
@@ -799,7 +768,7 @@ function Aide(n,s){
                       "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " +name +"</span>"+
                       "<button class='delete_right' id='d_right' href = 'javascript:void(0)' "+
                       "onclick = ' document.getElementById('light').style.display='none''><i class='fa fa-close' ></i></button><br></br>";//head 
-                out += "<table  class = 'table'  role = 'grid' >";
+                out += "<table  class = 'table' role = 'grid' >";
                 out +="<thead><tr role='row'>";//head
                 //out +="<th/>";
                 for(var j=0;j<nb;j++){
@@ -887,10 +856,10 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
         listJoin.push(key);
     }
     var out = ""
-    out += "<div id = 'ddata'><table class = 'table' id='example-table2' role = 'grid'>";
+    out += "<div id = 'ddata'><table class = 'table' role = 'grid'>";
     out += "<h4>The amount of data is: </h4>"
     out +="<thead><tr role='row'>";//head
-    out +="<th>JoinTable</th>";
+    out +="<th></th>";
     for(var j=0;j<nb;j++){
         out +="<th class='sorting_disabled' rowspan='1' colspan='1' style='text-align: auto;'>"+Field[j]+"</th>";
     }
@@ -905,7 +874,7 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
     }
     var jsonTable ={};
     for(var key in joinIdDic){
-        for(var j=1;j<nb;j++){
+        for(var j=0;j<nb;j++){
             if(Field[j]==joinIdDic[key]){
                 var temp =j;//save the position of key
             }
@@ -930,15 +899,12 @@ function genererTable(Field,dataTable,json,root,listJoinAndId){//include textare
             "<ul class='dropdown-menu' role='menu'>";
             for(var i=0;i<listJoin.length;i++){
                 var position = jsonTable[listJoin[i]];
-                out+="<li><a href='#' id='"+ dataTable[j+position] +"|"+ listJoin[i] + "'  name = 'boid'>"+listJoin[i]+" "+"</a></li>";
+                out+="<li><a href='#' id='"+ dataTable[j+position] +"|"+ listJoin[i] + "'  name = 'boid'>"+listJoin[i]+"</a></li>";
             }
-            out +="</div></td>"
+            out +="</ul>"+"</div></td>";
         }
-      
-            out +="<td style='text-align: auto;'>"+dataTable[j]+"</td>";
         
-        
-       
+        out +="<td style='text-align: auto;'>"+dataTable[j]+"</td>";
         count =count+1;
         if(count==nb){
             out +="</tr>";
@@ -1010,7 +976,7 @@ function genererDataTable(Field,dataTable){//zone 3 except textarea class = 'whi
 
 function checkAdql(listId){//@TODO special for simbad 
     var adql2 = $("#textadql").val()
-    var Myadql = $("#textadql").val();
+    var adqlFromTextArea = adql2;
     console.log("------------------------")
     console.log(adql2)
     console.log(listId)
@@ -1026,7 +992,7 @@ function checkAdql(listId){//@TODO special for simbad
         //adql2 = adql2;
         //}
         if(col.indexOf(listId[i])!=-1){//adql has "oid"
-        console.log(listId[i])
+        
             if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
                 if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
                     continue;
@@ -1050,25 +1016,32 @@ function checkAdql(listId){//@TODO special for simbad
         }
         else{
             console.log(listId[i])
+            
             if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
                 if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
                     if(i!=0&&i!=listId.length-1){//not the first key, not the last key, more than one key
                         var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
+                        //console.log("+++++++++++++++++++++++++++> "+adql2)
                         adql2 = adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
+                        
                     }else if(i==0&&i!=listId.length-1){//the first key, not the last key, more than one key
                         var start = adql2.indexOf("TOP 100")+7;
                         adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
+                        console.log("11 +++++++++++++++++++++++++++> "+adql2+"\n end"+adql2.slice(start)+"\n root id"+root+listId[i])
                     }else if(i==0&&listId.length==1){//the first key, only one key
                         var start = adql2.indexOf("TOP 100")+7;
                         adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
+                        console.log("22 +++++++++++++++++++++++++++> "+adql2+"\n end"+adql2.slice(start)+"\n root id"+root+listId[i])
                     }else{
                         var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
-                        adql2 =Myadql// adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
+                        adql2 =adqlFromTextArea; //adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
+                        //console.log("33 +++++++++++++++++++++++++++> "+adql2+"\n end"+adql2.slice(start)+"\n root id"+root+listId[i])
                     }
+                    //console.log("+++++++++++++++++++++++++++>"+adql2)
                 }
                 else{//adql has not "TOP 100" 
                     var start = adql2.indexOf("DISTINCT")+8;
-                    adql2 = Myadql;//adql2.slice(0, start) + "\nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
+                    adql2 = adql2.slice(0, start) + "\nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
                 }
             }
             else{//adql has not "DISTINCT"
@@ -1076,11 +1049,11 @@ function checkAdql(listId){//@TODO special for simbad
                     var start = adql2.indexOf("TOP 100");
                     var adql2 = adql2.slice(0, start) + "DISTINCT \n" + adql2.slice(start);
                     start = adql2.indexOf("TOP 100")+7;
-                    adql2 = Myadql;//adql2.slice(0, start) + "\n"+root+listId[i]+"," + adql2.slice(start);
+                    adql2 = adql2.slice(0, start) + "\n"+root+listId[i]+"," + adql2.slice(start);
                 }
                 else{//adql has not "TOP 100" 
                     var start = adql2.indexOf("SELECT")+6;
-                    adql2 = Myadql;//adql2.slice(0, start) + "\nDISTINCT \nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
+                    adql2 = adql2.slice(0, start) + "\nDISTINCT \nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
                 }
             }
         }
@@ -1094,7 +1067,109 @@ function checkAdql(listId){//@TODO special for simbad
 }
 
 function initial(){
-    //initial content
+    var $initial = $("<div class='page-header' style='text-align: center'>"+
+        "<h1>TAP TEST"+
+            "<small>Obas</small>"+
+        "</h1>"+
+    "</div>"+
+        "<h1>TAP TEST"+
+            "<small>Obas</small>"+
+        "</h1>"+
+    "</div>"+
+    "<div class='btn-group' style='padding-right:10px; padding-left:400px'>"+
+        "<button type='button' class='btn btn-primary' >Simbad</button>"+
+        "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown' >"+
+            "<span class='caret'></span>"+
+            "<span class='sr-only'></span>"+
+        "</button>"+
+        "<ul class='dropdown-menu' role='menu' style='margin-left:400px'>"+
+            "<li><a href='#' id='simbad'>schema: public</a></li>"+
+            "<li class='divider'></li>"+
+            "<li><a href='http://simbad.u-strasbg.fr/simbad/sim-tap'>TAP Simbad</a></li>"+
+        "</ul>"+
+    "</div>"+
+    "<input type='checkbox' id = 'top_simbad' >TOP 100"+
+
+    "<div class='btn-group' style='padding-right:10px; padding-left:50px'>"+
+        "<button type='button' class='btn btn-primary'>GAVO</button>"+
+        "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+            "<span class='caret'></span>"+
+            "<span class='sr-only'></span>"+
+        "</button>"+
+        "<ul class='dropdown-menu' role='menu' style='margin-left:50px'>"+
+            "<li><a href='#' id='gavo'>schema: rr</a></li>"+
+            "<li class='divider'></li>"+
+            "<li><a href='http://dc.zah.uni-heidelberg.de/__system__/adql/query'>TAP GAVO</a></li>"+
+        "</ul>"+
+    "</div>"+
+    "<input type='checkbox' id = 'top_gavo' >TOP 100"+
+
+    "<div class='btn-group' style='padding-right:10px; padding-left:50px'>"+
+        "<button type='button' class='btn btn-primary'>VizieR</button>"+
+        "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+            "<span class='caret'></span>"+
+            "<span class='sr-only'></span>"+
+        "</button>"+
+        "<ul class='dropdown-menu' role='menu' style='margin-left:50px'>"+
+            "<li><a href='#' id='vizier'>schema: metaviz</a></li>"+
+            "<li class='divider'></li>"+
+            "<li><a href='http://tapvizier.u-strasbg.fr/TAPVizieR/'>TAP VizieR</a></li>"+
+        "</ul>"+
+    "</div>"+
+    "<input type='checkbox' id = 'top_vizier' >TOP 100"+
+
+    "<div class='btn-group' style='padding-right:10px; padding-left:50px'>"+
+        "<button type='button' class='btn btn-primary'>CAOM</button>"+
+        "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+            "<span class='caret'></span>"+
+            "<span class='sr-only'></span>"+
+        "</button>"+
+        "<ul class='dropdown-menu' role='menu' style='margin-left:50px'>"+
+            "<li><a href='#' id='caom'>schema: dbo</a></li>"+
+            "<li class='divider'></li>"+
+            "<li><a href='http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/'>TAP CAOM</a></li>"+
+        "</ul>"+
+    "</div>"+
+    "<input type='checkbox' id = 'top_caom' >TOP 100"+
+    "<br></br>"+
+    "<input id='simbadCS' type='text' style = 'width: 100px;margin-left:400px' placeholder='public'>"+
+    "<div class='btn-group' style=' padding-left:5px;padding-right:40px'>"+
+        "<button type='button' id = 'cs00' class='btn btn-primary'>Change</button>"+
+    "</div>"+
+    "<input id='gavoCS' type='text' style = 'width: 100px' placeholder='rr'>"+
+    "<div class='btn-group' style=' padding-left:10px;padding-right:40px'> "+
+        "<button type='button' id = 'cs01' class='btn btn-primary'>Change</button>"+
+    "</div>"+
+    "<input id='vizierCS' type='text' style = 'width: 100px' placeholder='metaviz'>"+
+    "<div class='btn-group' style=' padding-left:10px;padding-right:40px'>"+
+        "<button type='button' id = 'cs02' class='btn btn-primary'>Change</button>"+
+    "</div>"+
+    "<input id='caomCS' type='text' style = 'width: 100px' placeholder='dbo'>"+
+    "<div class='btn-group' style=' padding-left:10px;padding-right:40px'>"+
+        "<button type='button' id = 'cs03' class='btn btn-primary'>Change</button>"+
+    "</div>"+
+    "<br></br>"+
+    "<pre id='load1' style= 'background-color:white; overflow:scroll; width:800px; height:300px;margin-left:400px'></pre>"+
+    "<div class='btn-group' style='text-align: center; padding-left:400px'>"+
+        "<button type='button' id = 'c00' class='btn btn-primary'>Change</button>"+
+    "</div>"+
+    "<div class='btn-group' style='text-align: center; padding-left:610px'>"+
+        "<button type='button' class='btn btn-primary'>RootTable</button>"+
+        "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+            "<span class='caret'></span>"+
+            "<span class='sr-only'></span>"+
+        "</button>"+
+        "<ul class='dropdown-menu' id = 'showRoot' role='menu' style='margin-left:590px'>"+
+        "</ul>"+
+    "</div>"+
+    
+    "<br></br>"+
+    "<pre id='load2' style= 'background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px ;float:left'> </pre>"+
+    "<div class='btn-group' style='text-align: center; padding-left:100px;float:left;top :350px'>"+
+            "<button type='button' id = 'test' class='btn btn-primary'>Génerer ADQL</button>"+
+        "</div>"+
+    "<pre id='load3' style= 'background-color:white; overflow:scroll; width:1400px; height:900px;margin-left:200px; font-size:12px; line-height: 2.3'></pre>")
+    $("body").append($initial);
 }
 
 function joinAndId(root,json){
@@ -1129,24 +1204,224 @@ function getDepth(arr) {
     })
   }
 
-  function getCorrectOutputJson(json) {
-    if (typeof json != 'string') {
-         json = JSON.stringify(json, undefined, 2);
-    }
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-        var cls = 'number';
-        if (/^"/.test(match)) {
-            if (/:$/.test(match)) {
-                cls = 'key';
-            } else {
-                cls = 'string';
-            }
-        } else if (/true|false/.test(match)) {
-            cls = 'boolean';
-        } else if (/null/.test(match)) {
-            cls = 'null';
-        }
-        return '<span class="' + cls + '">' + match + '</span>';
-    });
+
+
+
+
+
+
+
+
+
+function initial2
+
+(){
+
+  var $initial = $("<div class='page-header' style='text-align: center'>"+
+  "<h1>TAP TEST"+
+      "<small>Obas</small>"+
+  "</h1>"+
+"</div>"+
+  "<h1>TAP TEST"+
+      "<small>Obas</small>"+
+  "</h1>"+
+"</div>"+
+"<div class='btn-group' style='padding-right:10px; padding-left:400px'>"+
+  "<button type='button' class='btn btn-primary' >Simbad</button>"+
+  "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown' >"+
+      "<span class='caret'></span>"+
+      "<span class='sr-only'></span>"+
+  "</button>"+
+  "<ul class='dropdown-menu' role='menu' style='margin-left:400px'>"+
+      "<li><a href='#' id='simbad'>schema: public</a></li>"+
+      "<li class='divider'></li>"+
+      "<li><a href='http://simbad.u-strasbg.fr/simbad/sim-tap'>TAP Simbad</a></li>"+
+  "</ul>"+
+"</div>"+
+"<input type='checkbox' id = 'top_simbad' >TOP 100"+
+
+"<div class='btn-group' style='padding-right:10px; padding-left:50px'>"+
+  "<button type='button' class='btn btn-primary'>GAVO</button>"+
+  "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+      "<span class='caret'></span>"+
+      "<span class='sr-only'></span>"+
+  "</button>"+
+  "<ul class='dropdown-menu' role='menu' style='margin-left:50px'>"+
+      "<li><a href='#' id='gavo'>schema: rr</a></li>"+
+      "<li class='divider'></li>"+
+      "<li><a href='http://dc.zah.uni-heidelberg.de/__system__/adql/query'>TAP GAVO</a></li>"+
+  "</ul>"+
+"</div>"+
+"<input type='checkbox' id = 'top_gavo' >TOP 100"+
+
+"<div class='btn-group' style='padding-right:10px; padding-left:50px'>"+
+  "<button type='button' class='btn btn-primary'>VizieR</button>"+
+  "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+      "<span class='caret'></span>"+
+      "<span class='sr-only'></span>"+
+  "</button>"+
+  "<ul class='dropdown-menu' role='menu' style='margin-left:50px'>"+
+      "<li><a href='#' id='vizier'>schema: metaviz</a></li>"+
+      "<li class='divider'></li>"+
+      "<li><a href='http://tapvizier.u-strasbg.fr/TAPVizieR/'>TAP VizieR</a></li>"+
+  "</ul>"+
+"</div>"+
+"<input type='checkbox' id = 'top_vizier' >TOP 100"+
+
+"<div class='btn-group' style='padding-right:10px; padding-left:50px'>"+
+  "<button type='button' class='btn btn-primary'>CAOM</button>"+
+  "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+      "<span class='caret'></span>"+
+      "<span class='sr-only'></span>"+
+  "</button>"+
+  "<ul class='dropdown-menu' role='menu' style='margin-left:50px'>"+
+      "<li><a href='#' id='caom'>schema: dbo</a></li>"+
+      "<li class='divider'></li>"+
+      "<li><a href='http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/'>TAP CAOM</a></li>"+
+  "</ul>"+
+"</div>"+
+"<input type='checkbox' id = 'top_caom' >TOP 100"+
+"<br></br>"+
+"<input id='simbadCS' type='text' style = 'width: 100px;margin-left:400px' placeholder='public'>"+
+"<div class='btn-group' style=' padding-left:5px;padding-right:40px'>"+
+  "<button type='button' id = 'cs00' class='btn btn-primary'>Change</button>"+
+"</div>"+
+"<input id='gavoCS' type='text' style = 'width: 100px' placeholder='rr'>"+
+"<div class='btn-group' style=' padding-left:10px;padding-right:40px'> "+
+  "<button type='button' id = 'cs01' class='btn btn-primary'>Change</button>"+
+"</div>"+
+"<input id='vizierCS' type='text' style = 'width: 100px' placeholder='metaviz'>"+
+"<div class='btn-group' style=' padding-left:10px;padding-right:40px'>"+
+  "<button type='button' id = 'cs02' class='btn btn-primary'>Change</button>"+
+"</div>"+
+"<input id='caomCS' type='text' style = 'width: 100px' placeholder='dbo'>"+
+"<div class='btn-group' style=' padding-left:10px;padding-right:40px'>"+
+  "<button type='button' id = 'cs03' class='btn btn-primary'>Change</button>"+
+"</div>"+
+"<br></br>"+
+"<pre id='load1' style= 'background-color:white; overflow:scroll; width:800px; height:300px;margin-left:400px'></pre>"+
+"<div class='btn-group' style='text-align: center; padding-left:400px'>"+
+  "<button type='button' id = 'c00' class='btn btn-primary'>Change</button>"+
+"</div>"+
+"<div class='btn-group' style='text-align: center; padding-left:610px'>"+
+  "<button type='button' class='btn btn-primary'>RootTable</button>"+
+  "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>"+
+      "<span class='caret'></span>"+
+      "<span class='sr-only'></span>"+
+  "</button>"+
+  "<ul class='dropdown-menu' id = 'showRoot' role='menu' style='margin-left:590px'>"+
+  "</ul>"+
+"</div>"+
+
+"<br></br>"+
+"<pre id='load2' style= 'background-color:white; overflow:scroll; width:800px; height:700px;margin-left:400px; font-size:15px ;float:left'> </pre>"+
+"<div class='btn-group' style='text-align: center; padding-left:100px;float:left;top :350px'>"+
+      "<button type='button' id = 'test' class='btn btn-primary'>Génerer ADQL</button>"+
+  "</div>"+
+"<pre id='load3' style= 'background-color:white; overflow:scroll; width:1400px; height:900px;margin-left:200px; font-size:12px; line-height: 2.3'></pre>")
+$("body").append($initial);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="col-lg-2">
+List of database <br><hr>
+
+
+<div class='' style='padding-right:0px'>
+      <span class='caret'></span>
+      <span class='sr-only'></span>
+  <ul>
+      <li><a href='#' id='simbad'>schema: public</a></li>
+      
+  </ul>
+</div>
+
+
+
+
+
+</div>
+<div class="col-lg-8 ">
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#menu1">Database</a></li>
+    
+  </ul>
+  
+
+
+
+  <div class="tab-content">
+    
+
+    <div id="menu1" class="tab-pane fade">
+    
+      <div class='row' style='margin-left:-100px'>
+        <div class="col-lg-2">
+          <ul><li class='panel panel-success' id = 'showRoot' role='menu' style='margin-left:0px'></li></ul>
+        </div>
+       
+        <div class="col-lg-8">
+          <!--pre id='load3' style= 'background-color:white; overflow:scroll; width:1250px; height:400px;margin-left:0px; font-size:12px; line-height: 2.3'></pre-->
+          <pre id='' style= 'background-color:white; overflow:scroll; width:1250px; height:400px;margin-left:0px; font-size:12px; line-height: 2.3'></pre>
+          <div class='btn-group' style='text-align: center; padding-left:0px;float:left;top :0px'>
+            <button type='button' id = 'test' class='btn btn-primary' data-toggle="modal" data-target="#myModal">Run ADQL</button>
+           </div>
+            <div class="row">
+              <div class="col-lg-8">
+                <pre id='load2' class="mt-4" style= 'background-color:white; overflow:scroll; width:700px; height:400px;margin-left:0px; font-size:10px ;'> </pre>
+              </div>
+              <div class="col-lg-4 offset-6" style="margin-left: 850px; margin-top: -413px;">
+                <pre id='load4' class="" style= 'background-color:white; overflow:scroll; width:350px; height:400px;margin-left:200px; font-size:10px ;float: right;'>
+                   </pre>
+           
+              </div> 
+            </div> 
+            
+              </div>
+            
+        </div>
+        </div>
+       
+    </div>
+    </div>
+    <div id="menu2" class="tab-pane fade">
+      
+      
+     
+     <div class='page-header' >
+       <div class="hide">
+        <input id='simbadCS' type='text' style = 'width: 100px;margin-left:400px' placeholder='public'>
+        <div class='btn-group' style=' padding-left:5px;padding-right:40px'>
+            <button type='button' id = 'cs00' class='btn btn-primary'>Change</button>
+        </div>
+        
+       </div>
+      
+    
+      
+      <br>
+     
+  </div>
+</div>

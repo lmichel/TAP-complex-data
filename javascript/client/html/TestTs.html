@@ -7,9 +7,15 @@
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
 <title>test</title>
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.23.1.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="https://code.jquery.com/jquery-latest.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/qunit/qunit-1.23.1.js"></script>
+
 <link href="../css/main.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script type="text/javascript" src= "../../module/jsimports/jquery-3.4.1.js" ></script>
 <script type="text/javascript" src= "../../module/jsimports/votable.js" ></script>
 <script type="text/javascript" src= "../../module/js/jsonRead.js" ></script>
@@ -21,9 +27,227 @@
        main();
     }
 </script>
+
 </head>
 <body>
+    <h1 id="qunit-header">Table To Json Test Suite</h1>
+    <table id='example-table'>
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th data-override="Score">Points</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jill</td>
+          <td>Smith</td>
+          <td data-override="disqualified">50</td></tr>
+        <tr>
+          <td>Eve</td>
+          <td>Jackson</td>
+          <td>94</td></tr>
+        <tr>
+          <td>John</td>
+          <td>Doe</td>
+          <td>80</td></tr>
+        <tr>
+          <td>Adam</td>
+          <td>Johnson</td>
+          <td>67</td></tr>
+      </tbody>
+    </table>
+    <button class="btn btn-primary" id="convert-table">Convert!</button>
+  
+    <script>
+    $('#convert-table').click( function() {
+      //alert(JSON.stringify(table));
+      var table = $('#example-table').tableToJSON(); // Convert the table into a javascript object
+      console.log(table);
+      alert(JSON.stringify(table));
+    });
+    </script>
+  
+  
+    <script type="text/javascript" src="../src/tabletojson-cell.js"></script>
+    <script type="text/javascript" src="../src/tabletojson-row.js"></script>
+    <script type="text/javascript" src="../src/tabletojson.js"></script>
 
+    <div class="container-fluid mt-5">
+        <div class="row">
+            <div class="col-lg-2">
+                List of database <br><hr>
+               
+
+                <div class='btn-group' style='padding-right:0px'>
+                  <button type='button' class='btn btn-primary' >Simbad</button>
+                  <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
+                      <span class='caret'></span>
+                      <span class='sr-only'></span>
+                  </button>
+                  <ul class='dropdown-menu' role='menu' style='margin-left:0px'>
+                      <li><a href='#' id='simbad'>schema: public</a></li>
+                      <li class='divider'></li>
+                      <li><a href='http://simbad.u-strasbg.fr/simbad/sim-tap'>TAP Simbad</a></li>
+                  </ul>
+              </div>
+              
+              <input type='checkbox' id = 'top_simbad' style='margin-left:10px;'>TOP 100
+              <br>
+          
+              <div class='btn-group' style='padding-right:0px; padding-left:0px'>
+                  <button type='button' class='btn btn-primary'>GAVO</button>
+                  <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
+                      <span class='caret'></span>
+                      <span class='sr-only'></span>
+                  </button>
+                  <ul class='dropdown-menu' role='menu' style='margin-left:50px'>
+                      <li><a href='#' id='gavo'>schema: rr</a></li>
+                      <li class='divider'></li>
+                      <li><a href='http://dc.zah.uni-heidelberg.de/__system__/adql/query'>TAP GAVO</a></li>
+                  </ul>
+              </div>
+              <input type='checkbox' id = 'top_gavo' style='margin-left:10px;'>TOP 100
+              <br>
+          
+              <div class='btn-group' style='padding-right:0px; padding-left:0px'>
+                  <button type='button' class='btn btn-primary'>VizieR</button>
+                  <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
+                      <span class='caret'></span>
+                      <span class='sr-only'></span>
+                  </button>
+                  <ul class='dropdown-menu' role='menu' style='margin-left:0px'>
+                      <li><a href='#' id='vizier'>schema: metaviz</a></li>
+                      <li class='divider'></li>
+                      <li><a href='http://tapvizier.u-strasbg.fr/TAPVizieR/'>TAP VizieR</a></li>
+                  </ul>
+              </div>
+              <input type='checkbox' id = 'top_vizier' style='margin-left:10px;'>TOP 100 
+              <br>
+          
+              <div class='btn-group' style='padding-right:0px; padding-left:0px'>
+                  <button type='button' class='btn btn-primary'>CAOM</button>
+                  <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
+                      <span class='caret'></span>
+                      <span class='sr-only'></span>
+                  </button>
+                  <ul class='dropdown-menu' role='menu' style='margin-left:0px'>
+                      <li><a href='#' id='caom'>schema: dbo</a></li>
+                      <li class='divider'></li>
+                      <li><a href='http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/tap/'>TAP CAOM</a></li>
+                  </ul>
+              </div>
+              <input type='checkbox' id = 'top_caom' style='margin-left:10px;'>TOP 100
+              <br>
+              <br></br>
+
+
+
+            </div>
+            <div class="col-lg-8 ">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#home">Database</a></li>
+                    <li><a data-toggle="tab" href="#menu1">Database</a></li>
+                    <li><a data-toggle="tab" href="#menu2">View JSON OBJET</a></li>
+                  </ul>
+                  
+
+                  <div id="menu2" class="tab-pane fade">
+                    <pre id='loadJson' style= 'background-color:white; overflow:scroll; width:1250px; height:400px;margin-left:0px; font-size:12px; line-height: 2.3'></pre>
+                          
+                  </div>
+
+                  <div class="tab-content">
+                    
+
+
+
+
+                    <div id="menu1" class="tab-pane fade">
+                      <h3>Table</h3>
+                      <div class='row' style='margin-left:-100px'>
+                        <div class="col-lg-2">
+                          <ul><li class='panel panel-success' id = 'showRoot' role='menu' style='margin-left:0px'></li></ul>
+                        </div>
+                       
+                        <div class="col-lg-8">
+                          <pre id='load3' style= 'background-color:white; overflow:scroll; width:1250px; height:400px;margin-left:0px; font-size:12px; line-height: 2.3'></pre>
+                          <div class='btn-group' style='text-align: center; padding-left:0px;float:left;top :0px'>
+                            <button type='button' id = 'test' class='btn btn-primary' data-toggle="modal" data-target="#myModal">Run ADQL</button>
+                           </div>
+                            <div class="row">
+                              <div class="col-lg-8">
+                                <pre id='load2' class="mt-4" style= 'background-color:white; overflow:scroll; width:700px; height:400px;margin-left:0px; font-size:10px ;'> </pre>
+                              </div>
+                              <div class="col-lg-4 offset-6" style="margin-left: 850px; margin-top: -413px;">
+                                <pre id='load4' class="" style= 'background-color:white; overflow:scroll; width:350px; height:400px;margin-left:200px; font-size:10px ;float: right;'> </pre>
+                           
+                              </div> 
+                            </div> 
+                            
+                              </div>
+                            
+                        </div>
+                        </div>
+                       
+                    </div>
+                    </div>
+                    <div id="menu2" class="tab-pane fade">
+                      
+                      
+                     
+                     <div class='page-header' >
+                       <div class="hide">
+                        <input id='simbadCS' type='text' style = 'width: 100px;margin-left:400px' placeholder='public'>
+                        <div class='btn-group' style=' padding-left:5px;padding-right:40px'>
+                            <button type='button' id = 'cs00' class='btn btn-primary'>Change</button>
+                        </div>
+                        <input id='gavoCS' type='text' style = 'width: 100px' placeholder='rr'>
+                        <div class='btn-group' style=' padding-left:10px;padding-right:40px'> 
+                            <button type='button' id = 'cs01' class='btn btn-primary'>Change</button>
+                        </div>
+                        <input id='vizierCS' type='text' style = 'width: 100px' placeholder='metaviz'>
+                        <div class='btn-group' style=' padding-left:10px;padding-right:40px'>
+                            <button type='button' id = 'cs02' class='btn btn-primary'>Change</button>
+                        </div>
+                        <input id='caomCS' type='text' style = 'width: 100px' placeholder='dbo'>
+                        <div class='btn-group' style=' padding-left:10px;padding-right:40px'>
+                            <button type='button' id = 'cs03' class='btn btn-primary'>Change</button>
+                        </div>
+                        <br></br>
+                        <pre id='load1' style= 'background-color:white; overflow:scroll; width:800px; height:300px;margin-left:400px'></pre>
+                        <div class='btn-group' style='text-align: center; padding-left:400px'>
+                            <button type='button' id = 'c00' class='btn btn-primary'>Change</button>
+                        </div>
+                       </div>
+                      
+                      <!--div class='btn-group' style='text-align: center; padding-left:0px'>
+                          <button type='button' class='btn btn-primary'>RootTable</button>
+                          <button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
+                              <span class='caret'></span>
+                              <span class='sr-only'></span>
+                          </button>
+                          <ul class='dropdown-menu' id = 'showRoot' role='menu' style='margin-left:0px'>
+                          </ul>
+                      </div-->
+                      
+                      <br></br>
+                      <!--pre id='load2' style= 'background-color:white; overflow:scroll; width:800px; height:700px;margin-left:px; font-size:15px ;float:left'> </pre>
+                      <div class='btn-group' style='text-align: center; padding-left:100px;float:left;top :350px'>
+                              <button type='button' id = 'test' class='btn btn-primary'>Génerer ADQL</button>
+                          </div-->
+                     
+                  </div>
+                </div>
+            
+        </div>
+    </div>
+
+
+ 
+    <script type="text/javascript" src="../src/tabletojson-cell.js"></script>
+    <script type="text/javascript" src="../src/tabletojson-row.js"></script>
+    <script type="text/javascript" src="../src/tabletojson.js"></script>  
 <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
