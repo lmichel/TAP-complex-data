@@ -205,7 +205,7 @@ TapServiceConnector.prototype.selectTableToJoin = function(simbadService,tableCo
               var a = simbadService.getJoinTables(tableContentQueryField[i]);
               var out;
              //////////////////////////// //////////////// different selector //////////////////////////
-
+                var flag ;
               if(selector == tableContentQueryField[i]){
                   //alert(tableContentQuery[i])
                   if(tableContentQuery[i]!=undefined){
@@ -228,9 +228,18 @@ TapServiceConnector.prototype.selectTableToJoin = function(simbadService,tableCo
                         window.location.hash = "#loadJson"
                         $("#votableJson").html(JSON.stringify(dataTable,undefined,2));
                         window.location.hash = "#votableJson"*/
+                          var sj=new jsonRead(data);
+                          //s.createJson(data,"basic");
+                          var output = "";
+                          output = sj.json2Html(tableContentQueryField[i]);
+                          $("#load2").html(output);
+                          simbadService.Aide(sj,simbadService.tapService)
+                          simbadService.limitJson2data(sj,simbadService.tapService,simbadService);
+                          flag= 1
                       
                         $("#selectDiv").html(simbadService.selectTableToJoin_html(a))
                         window.location.hash = "#selectDiv"
+
                         textArea = $("#txtAreaAdql").val(tableContentQuery[i])
                         $("#executeAdql").click(function(){
                           var textArea = $("#txtAreaAdql").val()
@@ -513,6 +522,289 @@ TapServiceConnector.prototype.genererTable =function (Field,dataTable,json,root,
       out = out.slice(0,start)+" "+number +out.slice(start)
       return out;
   }
+
+
+
+
+  ///////////////////////////////////////////////////////////////////////// Constrains Functions //////////////////////////////////////////////////////////////
+
+TapServiceConnector.prototype.Aide = function (n,s){
+    var a = document.getElementsByName('Cbutton');
+    var b = document.getElementsByName('Cinput');
+
+
+
+    for(var i =0;i<a.length;i++){
+        a[i].onclick = (function closure(ii){
+            return function(){
+                var name = b[ii].id.slice(1);//the name of
+                var schema = n.json[name].schema;
+                var adql = n.AdqlAllColumn(name,schema)
+                var QObject = s.Query(adql);
+                var dataTable = VOTableTools.votable2Rows(QObject)
+                var contentText = QObject.responseText;
+                var Field =VOTableTools.genererField(QObject,contentText)
+                var nb = Field.length;
+                var out ="<div class = 'AIDE ' " +
+                    "id='light'>" +
+                    "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " +name +"</span>"+
+                    "<button class='delete_right' id='d_right' href = 'javascript:void(0)' "+
+                    "onclick = ' document.getElementById('light').style.display='none''><i class='fa fa-close' ></i></button><br></br>";//head
+                out += "<table  class = 'table'  role = 'grid' >";
+                out +="<thead><tr role='row'>";//head
+                //out +="<th/>";
+                for(var j=0;j<nb;j++){
+                    out +="<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>"+Field[j]+"</th>";
+                }
+                out +="</tr></thead>";
+                out +="<tbody>"
+                var column =0;
+                for(var j=0;j<dataTable.length;j++){//table  content
+                    if(column==0){
+                        var judge = (j+nb)/nb;
+                        if(judge%2==1){
+                            out+="<tr class = 'odd'>";
+                            //out+="<td><input type='checkbox'></td>";
+                        }
+                        else{
+                            out+="<tr class = 'even'>";
+                            //out+="<td><input type='checkbox'></td>";
+                        }
+                        //var row = j/6+1;
+                        out +="<td id = '"+dataTable[j]+"' style='text-align: center;vertical-align:bottom;text-decoration:underline' >"+dataTable[j]+"</td>";
+                    }
+                    else{
+                        out +="<td style='text-align: center;vertical-align:bottom'>"+dataTable[j]+"</td>";
+                    }
+                    column =column+1;
+                    if(column==nb){
+                        out +="</tr>";
+                        column=0;
+                    }
+
+                }
+                out+="</tbody>"
+                out += "</table>  </div>"
+                $("body").prepend(out);
+                var td = $("td");
+                for (var i = 0; i < td.length; i++) {
+                    $(td[i]).click(function () {
+                        var i = $(this).attr("id");
+                        if($("#"+b[ii].id).val().length!=0){
+                            var content = $("#"+b[ii].id).val();
+                            $("#"+b[ii].id).val(content + " AND " +name+"."+i+"=");
+                            document.getElementById('light').style.display='none';
+                        }else{
+                            $("#"+b[ii].id).val(name+"."+i+"=");
+                            document.getElementById('light').style.display='none';
+                        }
+
+                    });
+                }
+                document.getElementById('light').style.display='block';
+            }
+        })(i);
+    }
+}
+
+
+TapServiceConnector.prototype.genererTextArea=function (adql){
+    out = "<div id = 'dadql'>"
+    out += "<textarea rows='100' col='100'  id = 'textadql' style= ' width:500px; height:300px;margin-left:20px'>"+adql+"</textarea><br><br>"
+    out += " <button type='button' id = 'badql'class='btn btn-primary' style = 'width:auto;height:30px;position: relative;top: -8px;right: -8px'>Query ADQL</button>"
+    out +="</div>";
+    out +="<br></br>";
+    return out;
+}
+
+
+TapServiceConnector.prototype.checkAdql=function (listId){//@TODO special for simbad
+    var adql2 = $("#textadql").val()
+    var Myadql = $("#textadql").val();
+    console.log("------------------------")
+    console.log(adql2)
+    console.log(listId)
+    console.log("------------------------")
+    var col = adql2.slice(0,adql2.indexOf("FROM"))
+    var start1 = adql2.indexOf("FROM")+5;
+    var end = adql2.indexOf("JOIN")-1;
+    var root = adql2.slice(start1,end)+".";
+    console.log(root)
+    console.log(col);
+    for(var i=0;i<listId.length;i++){
+        //if(adql2.indexOf("*")!=-1){//adql has "*"
+        //adql2 = adql2;
+        //}
+        if(col.indexOf(listId[i])!=-1){//adql has "oid"
+            console.log(listId[i])
+            if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
+                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
+                    continue;
+                }
+                else{//adql has not "TOP 100"
+                    var start = adql2.indexOf("DISTINCT")+8;
+                    adql2 = adql2.slice(0, start) + "\nTOP 100 \n" + adql2.slice(start);
+                }
+
+            }
+            else{//adql has not "DISTINCT"
+                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
+                    var start = adql2.indexOf("TOP 100");
+                    aadql2 = adql2.slice(0, start) + "DISTINCT \n" + adql2.slice(start);
+                }
+                else{//adql has not "TOP 100"
+                    var start = adql2.indexOf("SELECT")+6;
+                    adql2 = adql2.slice(0, start) + "DISTINCT \nTOP 100 \n" + adql2.slice(start);
+                }
+            }
+        }
+        else{
+            console.log(listId[i])
+            if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
+                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
+                    if(i!=0&&i!=listId.length-1){//not the first key, not the last key, more than one key
+                        var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
+                        adql2 = adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
+                    }else if(i==0&&i!=listId.length-1){//the first key, not the last key, more than one key
+                        var start = adql2.indexOf("TOP 100")+7;
+                        adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
+                    }else if(i==0&&listId.length==1){//the first key, only one key
+                        var start = adql2.indexOf("TOP 100")+7;
+                        adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
+                    }else{
+                        var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
+                        adql2 =Myadql// adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
+                    }
+                }
+                else{//adql has not "TOP 100"
+                    var start = adql2.indexOf("DISTINCT")+8;
+                    adql2 = Myadql;//adql2.slice(0, start) + "\nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
+                }
+            }
+            else{//adql has not "DISTINCT"
+                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
+                    var start = adql2.indexOf("TOP 100");
+                    var adql2 = adql2.slice(0, start) + "DISTINCT \n" + adql2.slice(start);
+                    start = adql2.indexOf("TOP 100")+7;
+                    adql2 = Myadql;//adql2.slice(0, start) + "\n"+root+listId[i]+"," + adql2.slice(start);
+                }
+                else{//adql has not "TOP 100"
+                    var start = adql2.indexOf("SELECT")+6;
+                    adql2 = Myadql;//adql2.slice(0, start) + "\nDISTINCT \nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
+                }
+            }
+        }
+    }
+    if(adql2.indexOf("ORDER")==-1&&adql2.indexOf("order")==-1&&adql2.indexOf("basic")!=-1){
+        adql2 += " ORDER BY oid";
+    }
+    console.log(adql2)
+    $("#textadql").val(adql2);
+    return adql2;
+}
+
+TapServiceConnector.prototype.joinAndId=function (root,json){
+    var list = [];
+    for(var key in json){
+        if(key == root){
+            for(var join in json[key].join_tables){
+                list.push(json[key].join_tables[join].target);
+                list.push(join);
+            }
+        }
+    }
+    return list;
+}
+TapServiceConnector.prototype.limitJson2data=function (n,s,sc){//n: instance of the jsonRead; s: instance of TapService; sc instance of tapServiceConnector;
+    var jsont = n.json
+    var t;
+    $("button#test").on('click',{"json" : jsont},function(event){//@TODO
+        t=event.data.json
+        var keyConstraint=[]
+        var list=[]
+        var allList=[];
+        var listId =[];
+        var listJoinAndId = [];
+        var adqlMain;
+        var oidJson;
+        var niveau;
+        var rootName = $("input[name='Cinput']:first").attr("id").slice(1);
+        listJoinAndId = sc.joinAndId(rootName,t);//record all the keys linked to root table and the join table's name
+        console.log("aaaaaaaaaaaaaaaaaaaaa"+listJoinAndId+"************************"+rootName+"<br>tttttttttttttt  =>"+JSON.stringify(t,undefined,6));
+        for(var i = 0;i<listJoinAndId.length;i=i+2){
+            if(!json2Requete.isString(listJoinAndId[i])){
+                var temp = listJoinAndId[i][0];
+            }
+            else{
+                var temp = listJoinAndId[i];
+            }
+            if(listId.indexOf(temp)==-1){
+                listId.push(temp);//record the key linked to root table, No repeating
+            }
+        }
+        var countedNames = listJoinAndId.reduce(function (allNames, name) { if (name in allNames) { allNames[name]++; } else { allNames[name] = 1; } return allNames; }, {});
+        for(var i=0;i<listId.length;i++){
+            for(var j = 0;j<listId.length-i-1;j++){
+                if(countedNames[listId[j+1]]>countedNames[listId[j]]){
+                    var temp = listId[j];
+                    listId[j]=listId[j+1]
+                    listId[j+1]=temp;
+                }
+            }
+        }
+        //allList.push( $("input[name='Cinput']:first").attr("id"));//record the root table's niveau and name
+        var count = 0;
+        var p=-1;//position of the last constraints;if p=-1, it means no constraints on input
+        $("input[name='Cinput']").each(function(){
+            count++;
+            allList.push($(this).attr("id"));
+            if($(this).val().length!=0){//user entered the constraints
+                if(allList.indexOf($(this).attr("id"))==-1){
+                    allList.push($(this).attr("id"));
+                }
+                p = count;
+                var name = $(this).attr("id").slice(1);//the name of table
+                var constraints = $(this).val();
+                var temp=[];
+                temp.push(name,constraints);
+                keyConstraint.push(...temp);//record all constraints,[table name, constraints]
+                niveau = $(this).attr("id").slice(0,1);
+                //list.unshift(name);
+            }
+        })
+        if(p!=-1) {
+            for (var h = niveau; h > 0; h--) {
+                for (var j = p - 1; j >= 0; j--) {
+                    if (allList[j].slice(0, 1) == h) {
+                        list.unshift(allList[j].slice(1));
+                        break;
+                    }
+                }
+            }
+            var column = [];
+            for (var i = 0; i < listId.length; i++) {
+                column.push(rootName);
+                column.push(listId[i]);
+            }
+
+            var json = n.CreateJsonWithoutColumns(list, keyConstraint, 0, t);//normal json with constraints
+            var adql = json2Requete.getAdql(json);
+            //console.log("----------------> adql = +$$\n"+adql);
+
+            var out = sc.genererTextArea(adql);
+            $("#load4").html(out);
+            var f = $('#textadql').val();
+            var d = $('#txtAreaAdql').val(f)
+
+            // out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
+            // $("#load3").html(out3);
+
+        }
+        $("button#test").unbind('click');
+    });
+
+}
+
 
 
   

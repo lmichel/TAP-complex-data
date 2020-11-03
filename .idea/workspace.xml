@@ -1,54 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:feature" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/TAP-complex-data.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/css/style.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/css/main.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/css/normalize.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/images/126.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/img/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/img/img_tomatoes.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/js/main.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/js/vendor/jquery-1.9.1.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/js/vendor/modernizr-2.6.2.min.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/newIndex.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/BuildJson.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/brouillon" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/jquery.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/newMain.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/script.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/util.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/mainBrouillon.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/src/tabletojson-cell.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/src/tabletojson-row.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/src/tabletojson.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/tabletojson.jquery.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/html/TestTs.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/TestTs.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/TAP-complex-data.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TAP-complex-data.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/html/newIndex.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/newIndex.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/module/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/TapService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/module/js/VOTableTools.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/VOTableTools.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/module/js/json2Requete.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/json2Requete.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/newMain.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/newMain.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/JQuery.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/JQueryStatic.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/dist/jquery.slim.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/index.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/legacy.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/misc.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/jquery/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/sizzle/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/sizzle/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/sizzle/index.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/node_modules/@types/sizzle/package.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +41,13 @@
   </component>
   <component name="ComposerSettings">
     <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -69,10 +60,21 @@
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
     <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -82,7 +84,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1604054622371</updated>
-      <workItem from="1604054623471" duration="325000" />
+      <workItem from="1604054623471" duration="3347000" />
+      <workItem from="1604306705777" duration="38135000" />
     </task>
     <servers />
   </component>
@@ -99,5 +102,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

@@ -44,7 +44,7 @@ function main(){
             alert(mostUsedTable[0])
             $("#load2").empty();
             output = sj.json2Html(mostUsedTable[0]);
-            alert()
+            //alert()
             $("#load2").html(output);
             Aide(sj,s)
             limitJson2data(sj,s);
@@ -434,6 +434,7 @@ function limitJson2data(n,s){//n: instance of the jsonRead; s: instance of TapSe
         var oidJson;
         var niveau;
         var rootName = $("input[name='Cinput']:first").attr("id").slice(1);
+        alert(rootName);
         listJoinAndId = joinAndId(rootName,t);//record all the keys linked to root table and the join table's name
         console.log("aaaaaaaaaaaaaaaaaaaaa"+listJoinAndId+"************************"+rootName+"<br>tttttttttttttt  =>"+JSON.stringify(t,undefined,6));
         for(var i = 0;i<listJoinAndId.length;i=i+2){

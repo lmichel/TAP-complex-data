@@ -114,7 +114,7 @@ var jsonRead = /** @class */ (function () {
             for (var key in jsonAll[table].join_tables) {
                 if (list_exist.indexOf(key) == -1) {
                     joinTable.push(space + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>");
-                    joinTable.push(space + "<button type=\"button\" id = " + "\"b" + niveau + key + "\" name = \"Cbutton\" class=\"btn btn-primary\" >Aide</button>" + "<input id=\"" + niveau + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"constrains \">" + "<br/>");
+                    joinTable.push(space + "<button type=\"button\" id = " + "\"b" + niveau + key + "\" name = \"Cbutton\" class=\"btn btn-primary\" >Add Constrains</button>&nbsp;&nbsp;" + "<input id=\"" + niveau + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 300px\" placeholder=\"constrains \">" + "<br/>");
                     list_exist.push(key);
                     var table_1 = void 0;
                     var tableCut = void 0;
@@ -142,10 +142,10 @@ var jsonRead = /** @class */ (function () {
         var list_exist = [];
         list_exist.push(table);
         joinTable.push("<B>" + table + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(table) + "</font>" + "<br/>");
-        joinTable.push("<button type=\"button\" id = " + "\"b1" + table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=" + "\"1" + table + "\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"constrains\">" + "<br/>");
+        joinTable.push("<button type=\"button\" id = " + "\"b1" + table + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add Constrains</button> &nbsp;&nbsp;" + "<input id=" + "\"1" + table + "\" type=\"text\" name = \"Cinput\" style = \"width: 300px\" placeholder=\"constrains\">" + "<br/>");
         for (var key in jsonAll[table].join_tables) {
             joinTable.push("    " + "<B>" + key + "</B>" + ": " + "<font color = \"#545454\">" + this.getDescription(key) + "</font>" + "<br/>");
-            joinTable.push("    " + "<button type=\"button\" id = " + "\"b2" + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Aide</button>" + "<input id=\"2" + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 500px\" placeholder=\"constrains\">" + "<br/>");
+            joinTable.push("    " + "<button type=\"button\" id = " + "\"b2" + key + "\" name = \"Cbutton\" class=\"btn btn-primary\">Add Constrains</button>&nbsp;&nbsp;" + "<input id=\"2" + key + "\" type=\"text\" name = \"Cinput\" style = \"width: 300px\" placeholder=\"constrains\">" + "<br/>");
             if (list_exist.indexOf(key) == -1) {
                 list_exist.push(key);
                 joinTable.push(this.json2HtmlJoin(key, list_exist, 0));

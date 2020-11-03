@@ -8,7 +8,29 @@ const Simbadschema = "public";
 function newMain(){
 
    // initial();
+    var a = new TapApi();
+////////////////////////////// API ////////////////////////////////////////////
+    $("#btnApiConnect").click(function (){
+        var params ={
+            tapService : "http://simbad.u-strasbg.fr/simbad/sim-tap/sync",
+            schema     : Simbadschema,
+            table      : "basic",
+            shortName  : "Simbad"
+        }
 
+
+        a.connect(params);
+        console.log(JSON.stringify(a.getConnector(),undefined,2))
+        console.log(JSON.stringify(a.getObjectMap(),undefined,2))
+        console.log(JSON.stringify(a.getJoinedTables(params.table),undefined,2))
+        
+    });
+
+    $("#btnApiDisconnect").click(function (){
+        a.disconnect();
+    })
+
+    /////////////////////////// END API //////////////////////////
    
    var mainData,newMainData;
    var listJoinTable;
@@ -47,11 +69,7 @@ function newMain(){
     });
 
 ////////////////////////////// block service connection /////////////////////////////////////////////////////
-function showPage() {
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("myDiv").style.display = "block";
-    var myVar = setTimeout(showPage, 3000);
-  }
+
 $("#connectBasic").click(function(){ 
     var adql ="SELECT TOP 1* FROM \"public\".basic"
     const Schemas = "public";
@@ -62,7 +80,7 @@ $("#connectBasic").click(function(){
         $(".loader").fadeOut("1000"); })
     var simbadServices =connectDatabase(Url,Schemas,ShortName,adql,tableName);
 
-    showPage();
+
 });
 
 $("#connectResource").click(function(){
@@ -126,6 +144,7 @@ function showLoader(){
  * @param {*} adql      the request you want for choosing table. exemble : SELECT TOP 1* FROM rr.resource for gavo
  * @param {*} tableName the name of table in datable like resource table in gavo database
  */
+var flag;
 function connectDatabase(urlPath,schema,shortname,adql,tableName){
     showLoader();
     var databaseServices=new TapServiceConnector(urlPath,schema,shortname);
@@ -141,6 +160,7 @@ function connectDatabase(urlPath,schema,shortname,adql,tableName){
         }}
         //alert(JSON.stringify(joinTable,undefined,2))
     }
+
     $("#loadJson").html(JSON.stringify(data,undefined,2));
     window.location.hash = "#loadJson" 
     var listJoinAndId = databaseServices.getListJoinAndId(tableName,data);
@@ -479,3 +499,13 @@ function selectTableToJoin_html(tableContentJoinTable){
           
     return out;                                
 }
+
+
+
+
+
+
+
+
+
+

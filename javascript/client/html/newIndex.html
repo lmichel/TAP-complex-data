@@ -27,6 +27,7 @@
 <script type="text/javascript" src= "../js/jquery.js" ></script>
 <script type="text/javascript" src= "../js/util.js" ></script>
 <script type="text/javascript" src= "../js/TapService.js" ></script>
+  <script type="text/javascript" src= "../js/TapApi.js" ></script>
 <script type="text/javascript" src= "../js/TapServiceConnector.js" ></script>
 <script type="text/javascript" src= "../js/BuildJson.js" ></script>
 <!--script type="text/javascript" src= "../../module/js/TapService.js" ></script>
@@ -77,6 +78,9 @@
   li{
     font-size: 16px;
   }
+
+    .page_loader{display:table; width:100%;height:100%;position:absolute;top:0;left:0;}
+    #inner{display:table-cell;width:100%;height:100%;height:100vh;vertical-align:middle;}
   </style>
   
   
@@ -89,7 +93,12 @@
 
 
 <body class="">
-  
+
+<div class="page_loader">
+  <div id="inner">
+    <img src="images/126.gif" alt="loader" />
+  </div>
+</div>
 
 
 	<!-- Demo content -->			
@@ -118,6 +127,8 @@
     
   
   <div class="container-fluid">
+    <button class="btn btn-primary" id="btnApiConnect">Connect Simbad Api</button>
+    <button class="btn btn-primary" id="btnApiDisconnect">Connect Simbad Api</button>
     <div class="row">
       <div class="col-lg-2">
        
@@ -194,9 +205,6 @@
      
       </div>
       <div class="row">
-        <div class="col-lg-2">
-  
-        </div>
         <div class="col-lg-7">
           <button class="btn btn-warning" id="btnBuild" style="display: none;" >Build Query</button> <br>
           <button class="btn btn-success" id="btnJoin" style="display: none;">Join Table</button><BR></BR>
@@ -210,6 +218,14 @@
           </div>
          
       </div>
+        <div class="col-lg-5">
+          <pre id='load2' class="mt-4" style= 'background-color:white; overflow:scroll; width:700px; height:400px;margin-left:0px; font-size:10px ;'> </pre>
+          <hr>
+          <button type="button" id="test" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Run ADQL</button>
+          <hr>
+            <pre id='load4' class="" style= 'background-color:white; overflow:scroll; width:350px; height:400px;margin-left:200px; font-size:10px ;float: right;'> </pre>
+
+        </div>
      </div>
   
   </div>
@@ -243,8 +259,14 @@
   <script type="text/javascript" src="specs-legacy/content.test.js"></script>
   <script type="text/javascript" src="specs/core.test.js"></script>
   <script type="text/javascript" src="specs/content.test.js"></script-->
-    
-    <script>
+
+<script type="text/javascript">
+  $(window).load(function() {
+    $(".page_loader").fadeOut("slow").animate({top:-1600},1200);
+  });
+</script>
+
+<script>
       var toggl = document.getElementsByClassName("caret");
       var i;
       
