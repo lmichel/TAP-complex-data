@@ -8,11 +8,6 @@
       </path>
       <path>
         <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
-        <item name="GROUP_NODE:feature" type="e8cecc67:BranchNodeDescriptor" />
-      </path>
-      <path>
-        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
         <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
       </path>
       <path>
@@ -25,14 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/TAP-complex-data.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TAP-complex-data.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/html/newIndex.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/newIndex.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/main.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/newMain.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/newMain.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +75,7 @@
       <option name="presentableId" value="Default" />
       <updated>1604054622371</updated>
       <workItem from="1604054623471" duration="3347000" />
-      <workItem from="1604306705777" duration="38135000" />
+      <workItem from="1604306705777" duration="48081000" />
     </task>
     <servers />
   </component>

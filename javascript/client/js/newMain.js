@@ -20,9 +20,11 @@ function newMain(){
 
 
         a.connect(params);
-        console.log(JSON.stringify(a.getConnector(),undefined,2))
-        console.log(JSON.stringify(a.getObjectMap(),undefined,2))
-        console.log(JSON.stringify(a.getJoinedTables(params.table),undefined,2))
+        //console.log(JSON.stringify(a.getConnector(),undefined,2))
+        //console.log(JSON.stringify(a.getObjectMap(),undefined,2))
+        a.getJoinedTables(params.table)
+        console.log(a.getRootQuery());
+        console.log(a.getRootFields());
         
     });
 
