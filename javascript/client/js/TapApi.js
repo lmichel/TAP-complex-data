@@ -57,9 +57,9 @@ class TapApi{
  * */
 TapApi.prototype.connect = function ({tapService,schema,table,shortName}){
     var formatTableName =schema+"."+table;
-    alert(formatTableName);
+    //alert(formatTableName);
     var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-    var query = "SELECT TOP 1* FROM "+correctTableNameFormat;
+    var query = "SELECT TOP 5 * FROM "+correctTableNameFormat;
     this.tapService = new TapService(tapService,schema,shortName,true)
     this.correctService = new TapServiceConnector(tapService,schema,shortName);
     this.votableQueryResult = this.tapService.Query(query);
@@ -104,11 +104,13 @@ TapApi.prototype.disconnect = function (){
     if(this.correctService == null  && this.tapService==null && this.votableQueryResult==null){
         this.disconnectJsonStatu.success["DisconnectStatus"] = "OK";
         this.testDeconnection = true
+        this.testConnection = false
         return this.disconnectJsonStatu.success;
     }else {
         this.disconnectJsonStatu.faillure["faillure"] = "failled";
         this.disconnectJsonStatu.faillure["message"] = "disconnecting failled";
         this.testDeconnection = false;
+        this.testDeconnection = true;
         return this.disconnectJsonStatu.faillure;
     }
     //console.log(JSON.stringify(this.disconnectJsonStatu,undefined,2))
@@ -117,7 +119,11 @@ TapApi.prototype.disconnect = function (){
 }
 
 TapApi.prototype.getConnector = function (){
+    if(this.testConnection == true){
         return  this.connector;
+    }else {
+        alert("No Tap service connected");
+    }
 }
 
 TapApi.prototype.getObjectMap = function (){
@@ -135,6 +141,7 @@ TapApi.prototype.getObjectMap = function (){
         //return objectMap.failure
     }
 
+    //console.log(JSON.stringify(objectMap,undefined,3));
    return objectMap;
 }
 /**
@@ -209,6 +216,50 @@ TapApi.prototype.getRootFields=function(){
     }
 
 
+
+}
+
+TapApi.prototype.getRootFieldValues = function (){
+    let jsonContaintRootFieldValues = {
+        succes: {status: "", field_values: []},
+        failure:{
+            notConnected: {status:"", message: ""},
+            otherError: {status:"", message: ""}
+        }
+    }
+    let doubleArrayValue = [];
+    let singleArrayValue = [];
+    if(this.testConnection==true){
+
+        let Field = this.getRootFields().field_values;
+        let dataTable = VOTableTools.votable2Rows(this.votableQueryResult);
+        let tableName = this.getConnector().service["table"];
+
+        let nbCols = Field.length;
+        if (dataTable[dataTable.length - 1] == 0) {
+            dataTable.splice(dataTable.length - 1, 1);
+        }
+        for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
+            for (let col = 0; col < nbCols; col++) {
+                singleArrayValue.push(dataTable[rowNb + col]);
+            }
+            doubleArrayValue.push(singleArrayValue);
+            singleArrayValue=[];
+        }
+        //console.log(doubleArrayValue);
+        jsonContaintRootFieldValues.succes.status = "OK"
+        jsonContaintRootFieldValues.succes.field_values = doubleArrayValue;
+
+    }else {
+
+        jsonContaintRootFieldValues.failure.notConnected.status="Failed";
+        jsonContaintRootFieldValues.failure.notConnected.message="No active TAP connection"
+        jsonContaintRootFieldValues.failure.otherError.status = "failed"
+        jsonContaintRootFieldValues.failure.otherError.message = "error_message"
+        // alert('you are not connected');
+    }
+
+    return jsonContaintRootFieldValues;
 
 }
 

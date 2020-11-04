@@ -20,8 +20,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/javascript/client/html/testApi.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/brouillon" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/brouillon" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/newMain.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/newMain.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -36,6 +41,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -49,6 +55,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -58,6 +65,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -75,7 +83,7 @@
       <option name="presentableId" value="Default" />
       <updated>1604054622371</updated>
       <workItem from="1604054623471" duration="3347000" />
-      <workItem from="1604306705777" duration="48081000" />
+      <workItem from="1604306705777" duration="63817000" />
     </task>
     <servers />
   </component>
@@ -93,5 +101,15 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="687" y="162" width="618" height="783" key="find.popup" timestamp="1604477152953">
+      <screen x="72" y="27" width="1848" height="1053" />
+    </state>
+    <state x="687" y="162" width="618" height="783" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1604477152953" />
+    <state x="660" y="252" key="run.anything.popup" timestamp="1604485557540">
+      <screen x="72" y="27" width="1848" height="1053" />
+    </state>
+    <state x="660" y="252" key="run.anything.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1604485557540" />
   </component>
 </project>

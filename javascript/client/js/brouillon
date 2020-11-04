@@ -1,3 +1,127 @@
+/////////////////////////// api jsonrootvalue ///////////////////////////////////////
+
+
+
+TapApi.prototype.getRootFieldValues = function (){
+    let jsonContaintRootFieldValues = {
+        succes: {status: "", field_values: []},
+        failure:{
+            notConnected: {status:"", message: ""},
+            otherError: {status:"", message: ""}
+        }
+    }
+    let doubleArrayValue = [];
+    let singleArrayValue = [];
+    if(this.testConnection==true){
+
+        let Field = this.getRootFields().field_values;
+        let dataTable = VOTableTools.votable2Rows(this.votableQueryResult);
+        let tableName = this.getConnector().service["table"];
+        var out1 = "<table class='table table-bordered'>"
+        out1 += "<thead><tr role='row' style='text-align:center'>" + tableName;
+        +"</thead>"//head
+        //out +="<th/>";
+        var nbCols = Field.length;
+        for (var rowNb = 0; rowNb < nbCols; rowNb++) {
+            out1 += "<th rowspan='1' class='th-sm'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[rowNb] + "&nbsp&nbsp</th>";
+        }
+        out1 += "</tr></thead>";
+        out1 += "<tbody>";
+        if (dataTable[dataTable.length - 1] == 0) {
+            dataTable.splice(dataTable.length - 1, 1);
+        }
+        for (var rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
+            if (rowNb % 2) {
+                out1 += "<tr>";
+            } else {
+                out1 += "<tr class = 'even'>";
+            }
+            for (var col = 0; col < nbCols; col++) {
+                out1 += "<td id = '" + dataTable[rowNb + col] + "' >" + dataTable[rowNb + col] + "</td>";
+                singleArrayValue.push(dataTable[rowNb + col]);
+            }
+            doubleArrayValue.push(singleArrayValue);
+            singleArrayValue=[];
+            out1 += "</tr>";
+        }
+        out1 += "</tbody>";
+        out1 += "</table></div></td></tr>";
+
+        //console.log(doubleArrayValue);
+
+        jsonContaintRootFieldValues.succes.status = "OK"
+        jsonContaintRootFieldValues.succes.field_values = doubleArrayValue;
+
+    }else {
+
+        jsonContaintRootFieldValues.failure.notConnected.status="Failed";
+        jsonContaintRootFieldValues.failure.notConnected.message="No active TAP connection"
+        jsonContaintRootFieldValues.failure.otherError.status = "failed"
+        jsonContaintRootFieldValues.failure.otherError.message = "error_message"
+
+        // alert('you are not connected');
+    }
+
+    return jsonContaintRootFieldValues;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*************************************************** end jsonrootvalues
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var testBasic = false;
         if(selector=='basic'){
           

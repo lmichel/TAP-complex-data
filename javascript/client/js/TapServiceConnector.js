@@ -1,701 +1,685 @@
 class TapServiceConnector {
-      constructor(_serviceUrl, _schema, _shortname) {
+    constructor(_serviceUrl, _schema, _shortname) {
         //super();
-          let serviceUrl = _serviceUrl;
-          let schema = _schema;
-          let shortname = _shortname;
-          let  adqlQuery = "";
-          let rootTable= "";
-          this.tapService = new TapService(_serviceUrl,_schema,_shortname,true)
-          this.jsonSchema = {};
-        
-          // getteur and setteur for private parameters
-          this.setServiceUrl = function(myServiceUrl) {
+        let serviceUrl = _serviceUrl;
+        let schema = _schema;
+        let shortname = _shortname;
+        let adqlQuery = "";
+        let rootTable = "";
+        this.tapService = new TapService(_serviceUrl, _schema, _shortname, true)
+        this.jsonSchema = {};
+
+        // getteur and setteur for private parameters
+        this.setServiceUrl = function (myServiceUrl) {
             serviceUrl = myServiceUrl;
-          }
-          this.getServiceUrl = function() {
+        }
+        this.getServiceUrl = function () {
             return serviceUrl;
-          }
-          this.setSchema = function(mySchema) {
+        }
+        this.setSchema = function (mySchema) {
             schema = mySchema;
-          }
-          this.getSchema = function() {
+        }
+        this.getSchema = function () {
             return schema;
-          }
-          this.setShortname = function(myShortname) {
+        }
+        this.setShortname = function (myShortname) {
             shortname = myShortname;
-          }
-          this.getShortname = function() {
+        }
+        this.getShortname = function () {
             return shortname;
-          }
+        }
 
-          this.setAdqlQuery = function(myAdqlQuery) {
+        this.setAdqlQuery = function (myAdqlQuery) {
             adqlQuery = myAdqlQuery;
-          }
-          this.getAdqlQuery = function() {
+        }
+        this.getAdqlQuery = function () {
             return adqlQuery;
-          }
-          this.setRootTable = function(myRootTable) {
+        }
+        this.setRootTable = function (myRootTable) {
             rootTable = myRootTable;
-          }
-          this.getRootTable = function() {
+        }
+        this.getRootTable = function () {
             return rootTable;
-          }
-         
+        }
 
-          
-      }
 
     }
+
+}
 
 /**
  * @returns the votable objet: result of adql query
  */
-TapServiceConnector.prototype.connect=function(){ 
+TapServiceConnector.prototype.connect = function () {
     var votableQueryResult = this.tapService.Query(this.getAdqlQuery());
     return votableQueryResult;
-    }
+}
 
-    /**
-     * use this method to connect service
-     */
-TapServiceConnector.prototype.connectService=function() {
-      this.connect();
-    }
+/**
+ * use this method to connect service
+ */
+TapServiceConnector.prototype.connectService = function () {
+    this.connect();
+}
 
-TapServiceConnector.prototype.setRootTable=function(shema,table){
+TapServiceConnector.prototype.setRootTable = function (shema, table) {
 
-    }
+}
 
-    /**
-     * return the full json create by the method createJson()
-     */
-TapServiceConnector.prototype.loadJson=function() {  
-       return this.tapService.createJson();
-    }
+/**
+ * return the full json create by the method createJson()
+ */
+TapServiceConnector.prototype.loadJson = function () {
+    return this.tapService.createJson();
+}
 
-    /**
-     * 
-     * @param {*} root  represent the root table
-     * @param {*} json represent the main json create by the method createMainJson
-     * @returns return the list of id of join table
-     */
-TapServiceConnector.prototype.joinAndId=function(root,json){
+/**
+ *
+ * @param {*} root  represent the root table
+ * @param {*} json represent the main json create by the method createMainJson
+ * @returns return the list of id of join table
+ */
+TapServiceConnector.prototype.joinAndId = function (root, json) {
     var list = [];
-    for(var key in json){
-        if(key == root){
-            for(var join in json[key].join_tables){
+    for (var key in json) {
+        if (key == root) {
+            for (var join in json[key].join_tables) {
                 list.push(json[key].join_tables[join].target);
                 list.push(join);
             }
         }
     }
     return list;
-    }
-    /**
-    * 
-    * @param {*} listJoinAndId the list of id returned by TapServiceConnector.prototype.getListJoinAndId
-    * @return   list of all id
-    */
+}
+/**
+ *
+ * @param {*} listJoinAndId the list of id returned by TapServiceConnector.prototype.getListJoinAndId
+ * @return   list of all id
+ */
 
-TapServiceConnector.prototype.getListeId=function(listJoinAndId){
+TapServiceConnector.prototype.getListeId = function (listJoinAndId) {
     var listId = [];
-    for(var i = 0;i<listJoinAndId.length;i=i+2){
-        if(!json2Requete.isString(listJoinAndId[i])){
+    for (var i = 0; i < listJoinAndId.length; i = i + 2) {
+        if (!json2Requete.isString(listJoinAndId[i])) {
             var temp = listJoinAndId[i][0];
-        }
-        else{
+        } else {
             var temp = listJoinAndId[i];
         }
-        if(listId.indexOf(temp)==-1){
+        if (listId.indexOf(temp) == -1) {
             listId.push(temp);//record the key linked to root table, No repeating
         }
     }
     return listId;
-    }
+}
 
-    /**
-    * 
-    * @param {*} rootName |the root table names of tabservice
-    * @param {*} mainJsonData the main json generated by the  method createJson()
-    * @returns return array containing all join table with correct id
-    */
-TapServiceConnector.prototype.getListJoinAndId=function(rootName,mainJsonData){
-    var listJoinAndId=[];
-    listJoinAndId = this.joinAndId(rootName,mainJsonData)
+/**
+ *
+ * @param {*} rootName |the root table names of tabservice
+ * @param {*} mainJsonData the main json generated by the  method createJson()
+ * @returns return array containing all join table with correct id
+ */
+TapServiceConnector.prototype.getListJoinAndId = function (rootName, mainJsonData) {
+    var listJoinAndId = [];
+    listJoinAndId = this.joinAndId(rootName, mainJsonData)
     return listJoinAndId;
-    }
+}
 
-    /**
-     * 
-     * @param {*} baseTableName  the root table name 
-     * @returns return all join table of the root table name
-     */
-TapServiceConnector.prototype.getJoinTables=function(baseTableName){
+/**
+ *
+ * @param {*} baseTableName  the root table name
+ * @returns return all join table of the root table name
+ */
+TapServiceConnector.prototype.getJoinTables = function (baseTableName) {
     var data = this.loadJson();
-    var jsonread=new jsonRead(data);
+    var jsonread = new jsonRead(data);
 
     return jsonread.joinTable(baseTableName);
-    }
+}
 
-    /**
-     * 
-     * @param {*} mainJsonData  the main json create by the method createMainJson of Tapservice
-     * @returns return all the field of each join table of the mainJson
-     */
-TapServiceConnector.prototype.getCorrectFieldOfJoinTable=function(mainJsonData){
-    var tableContentQueryField=[]
-    Object.keys(mainJsonData).forEach(function(key) {
-      tableContentQueryField.push(key);
+/**
+ *
+ * @param {*} mainJsonData  the main json create by the method createMainJson of Tapservice
+ * @returns return all the field of each join table of the mainJson
+ */
+TapServiceConnector.prototype.getCorrectFieldOfJoinTable = function (mainJsonData) {
+    var tableContentQueryField = []
+    Object.keys(mainJsonData).forEach(function (key) {
+        tableContentQueryField.push(key);
     });
     return tableContentQueryField;
-    }
+}
 
-    /**
-     * 
-     * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
-     * @returns return all join request of each join table of the mainJson
-     */
-TapServiceConnector.prototype.getCorrectJoinQueryOfEachTableField=function(mainJsonData){
-    var tableContentQuery=[];
+/**
+ *
+ * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
+ * @returns return all join request of each join table of the mainJson
+ */
+TapServiceConnector.prototype.getCorrectJoinQueryOfEachTableField = function (mainJsonData) {
+    var tableContentQuery = [];
     var JsonValue;
     //console.log(JSON.stringify(mainJsonData,undefined,2))
-    Object.keys(mainJsonData).forEach(function(key) {
-      JsonValue = mainJsonData[key];
-    Object.keys(JsonValue).forEach(function(key) {
-        var  queryValue ;
-        if(key!="key"){
-          queryValue = JsonValue[key];
-          tableContentQuery.push(queryValue); 
-        }  
+    Object.keys(mainJsonData).forEach(function (key) {
+        JsonValue = mainJsonData[key];
+        Object.keys(JsonValue).forEach(function (key) {
+            var queryValue;
+            if (key != "key") {
+                queryValue = JsonValue[key];
+                tableContentQuery.push(queryValue);
+            }
+        });
     });
-   });
     return tableContentQuery;
-  }
+}
 
-    /**
-     * 
-     * @param {*} simbadService  your service : instance of TapService
-     * @param {*} tableContentQueryField all the field of each join table of the mainJson get by calling method getCorrectFieldOfJoinTable()
-     * @param {*} tableContentQuery all join request of each join table of the mainJson et by calling method getCorrectJoinQueryOfEachTableField()
-     * @param {*} baseTableName  root table name
-     */
-TapServiceConnector.prototype.selectTableToJoin = function(simbadService,tableContentQueryField,tableContentQuery,baseTableName){
-      var simbadService = new TapServiceConnector(this.getServiceUrl(),this.getSchema(),this.getShortname());
-      $(document).ready(function(){
-        $("select#selectToJoin").change(function(){
+/**
+ *
+ * @param {*} simbadService  your service : instance of TapService
+ * @param {*} tableContentQueryField all the field of each join table of the mainJson get by calling method getCorrectFieldOfJoinTable()
+ * @param {*} tableContentQuery all join request of each join table of the mainJson et by calling method getCorrectJoinQueryOfEachTableField()
+ * @param {*} baseTableName  root table name
+ */
+TapServiceConnector.prototype.selectTableToJoin = function (simbadService, tableContentQueryField, tableContentQuery, baseTableName) {
+    var simbadService = new TapServiceConnector(this.getServiceUrl(), this.getSchema(), this.getShortname());
+    $(document).ready(function () {
+        $("select#selectToJoin").change(function () {
             var selector = $(this).children("option:selected").val();
-            if(selector == baseTableName){
-              var adql ="SELECT  TOP 100  * FROM "+simbadService.getSchema()+"."+baseTableName;
-               adqlQuery = $("#txtAreaAdql").val(adql);
-               simbadService.setAdqlQuery(adqlQuery.val());
-               //var  QObject = simbadService.tapService.Query(textArea);
-               $("#executeAdql").click(function(){
-                      var textArea = $("#txtAreaAdql").val()
-                      //alert( "txt "+textArea);
-                      simbadService.setAdqlQuery(textArea)
-                      var jsonData = simbadService.createVoTableResultJson(simbadService.connect(),baseTableName)
-                      $("#votableJson").html(JSON.stringify(jsonData,undefined,2));
-                      window.location.hash = "#votableJson"   
+            if (selector == baseTableName) {
+                var adql = "SELECT  TOP 100  * FROM " + simbadService.getSchema() + "." + baseTableName;
+                adqlQuery = $("#txtAreaAdql").val(adql);
+                simbadService.setAdqlQuery(adqlQuery.val());
+                //var  QObject = simbadService.tapService.Query(textArea);
+                $("#executeAdql").click(function () {
+                    var textArea = $("#txtAreaAdql").val()
+                    //alert( "txt "+textArea);
+                    simbadService.setAdqlQuery(textArea)
+                    var jsonData = simbadService.createVoTableResultJson(simbadService.connect(), baseTableName)
+                    $("#votableJson").html(JSON.stringify(jsonData, undefined, 2));
+                    window.location.hash = "#votableJson"
                 })
             }
 
-            for(var i=0;i<tableContentQueryField.length;i++){
+            for (var i = 0; i < tableContentQueryField.length; i++) {
 
-              var a = simbadService.getJoinTables(tableContentQueryField[i]);
-              var out;
-             //////////////////////////// //////////////// different selector //////////////////////////
-                var flag ;
-              if(selector == tableContentQueryField[i]){
-                  //alert(tableContentQuery[i])
-                  if(tableContentQuery[i]!=undefined){
-                  }else{
-                    var sql ="SELECT  TOP 10  * FROM "+simbadService.getSchema()+"."+tableContentQueryField[i];
-                    tableContentQuery[i] =sql
-                  }
+                var a = simbadService.getJoinTables(tableContentQueryField[i]);
+                var out;
+                //////////////////////////// //////////////// different selector //////////////////////////
+                var flag;
+                if (selector == tableContentQueryField[i]) {
+                    //alert(tableContentQuery[i])
+                    if (tableContentQuery[i] != undefined) {
+                    } else {
+                        var sql = "SELECT  TOP 10  * FROM " + simbadService.getSchema() + "." + tableContentQueryField[i];
+                        tableContentQuery[i] = sql
+                    }
                     simbadService.setAdqlQuery(tableContentQuery[i]);
                     //alert(simbadService.getAdqlQuery())
                     var data = simbadService.loadJson();
-                    var listJoinAndId = simbadService.getListJoinAndId(tableContentQueryField[i],data);
+                    var listJoinAndId = simbadService.getListJoinAndId(tableContentQueryField[i], data);
                     var listId = simbadService.getListeId(listJoinAndId)
                     var textArea = $("#txtAreaAdql").val(tableContentQuery[i])
                     simbadService.setAdqlQuery($("#txtAreaAdql").val());
-                    out= simbadService.tapService.createMainJson(simbadService.getAdqlQuery(),data,tableContentQueryField[i],listId,listJoinAndId);
-                    var  QObject = simbadService.tapService.Query(textArea.val());
+                    out = simbadService.tapService.createMainJson(simbadService.getAdqlQuery(), data, tableContentQueryField[i], listId, listJoinAndId);
+                    var QObject = simbadService.tapService.Query(textArea.val());
                     //var dataTable = VOTableTools.votable2Rows(QObject);
                     //mainData = tapS.createMainJson(tableContentQueryField[i],data,'basic',listId,listJoinAndId);
-                      /* $("#loadJson").html(JSON.stringify(out,undefined,2));
-                        window.location.hash = "#loadJson"
-                        $("#votableJson").html(JSON.stringify(dataTable,undefined,2));
-                        window.location.hash = "#votableJson"*/
-                          var sj=new jsonRead(data);
-                          //s.createJson(data,"basic");
-                          var output = "";
-                          output = sj.json2Html(tableContentQueryField[i]);
-                          $("#load2").html(output);
-                          simbadService.Aide(sj,simbadService.tapService)
-                          simbadService.limitJson2data(sj,simbadService.tapService,simbadService);
-                          flag= 1
-                      
-                        $("#selectDiv").html(simbadService.selectTableToJoin_html(a))
-                        window.location.hash = "#selectDiv"
+                    /* $("#loadJson").html(JSON.stringify(out,undefined,2));
+                      window.location.hash = "#loadJson"
+                      $("#votableJson").html(JSON.stringify(dataTable,undefined,2));
+                      window.location.hash = "#votableJson"*/
+                    var sj = new jsonRead(data);
+                    //s.createJson(data,"basic");
+                    var output = "";
+                    output = sj.json2Html(tableContentQueryField[i]);
+                    $("#load2").html(output);
+                    simbadService.Aide(sj, simbadService.tapService)
+                    simbadService.limitJson2data(sj, simbadService.tapService, simbadService);
+                    flag = 1
 
-                        textArea = $("#txtAreaAdql").val(tableContentQuery[i])
-                        $("#executeAdql").click(function(){
-                          var textArea = $("#txtAreaAdql").val()
-                          simbadService.setAdqlQuery(textArea)
-                          out= simbadService.tapService.createMainJson(simbadService.getAdqlQuery(),data,tableContentQueryField[i],listId,listJoinAndId);;
-                
+                    $("#selectDiv").html(simbadService.selectTableToJoin_html(a))
+                    window.location.hash = "#selectDiv"
+
+                    textArea = $("#txtAreaAdql").val(tableContentQuery[i])
+                    $("#executeAdql").click(function () {
+                        var textArea = $("#txtAreaAdql").val()
+                        simbadService.setAdqlQuery(textArea)
+                        out = simbadService.tapService.createMainJson(simbadService.getAdqlQuery(), data, tableContentQueryField[i], listId, listJoinAndId);
+                        ;
+
                         // var  QObject = simbadService.tapService.Query(textArea);
                         // var dataTable = VOTableTools.votable2Rows(QObject) 
-                          $("#loadJson").html(JSON.stringify(out,undefined,2));
-                          window.location.hash = "#loadJson" 
-                          var jsonData = simbadService.createVoTableResultJson(simbadService.connect(),tableContentQueryField[i])
-                          $("#votableJson").html(JSON.stringify(jsonData,undefined,2));
-                          window.location.hash = "#votableJson"
-                          simbadService.joinTableByField(out,baseTableName)
+                        $("#loadJson").html(JSON.stringify(out, undefined, 2));
+                        window.location.hash = "#loadJson"
+                        var jsonData = simbadService.createVoTableResultJson(simbadService.connect(), tableContentQueryField[i])
+                        $("#votableJson").html(JSON.stringify(jsonData, undefined, 2));
+                        window.location.hash = "#votableJson"
+                        simbadService.joinTableByField(out, baseTableName)
 
                     })
 
                     break;
 
-                       }
-                    }
-        
-                });
- 
-            });
+                }
+            }
 
-       }
+        });
+
+    });
+
+}
 
 /**
- * 
+ *
  * @param {*} tableContentJoinTable : Array containing array of all join table
  * @returns return html object with select option that containt all join table as option
  */
-TapServiceConnector.prototype.selectTableToJoin_html = function(tableContentJoinTable){
-        var out ='<div class="card" id ="">'+
-        '<div class="card-body">'+
-          '<div class="row">'+
-              '<div class="col-lg-6">'+
-                  ' <div class="form-group">'+
-                  '<label for="selectToJoin">Select Table To Join &nbsp &nbsp &nbsp'+
-                  '</label>'+
-                  '<select class="form-control" id="selectToJoin">'+
-                  '<option seleted>...</option>'
-                      for(var i=0;i<tableContentJoinTable.length;i++){
-                          
-                          out +="<option id='"+i+"'>"+tableContentJoinTable[i]+"</option>"
-                      }
-                      out +='</select>'+
-                          '</div>'+'</div>'+'</div>'+
-                          '<hr class="btn-primary">'+
-                          '<div> '+
-                          '<textarea class="form-control" id="txtAreaAdql" value=""></textArea><br>'+
-                          '</div>'+
-                          '<button class="btn btn-success" id="executeAdql">Run Adql</button>'
-                          '</div>'+'</div>'      
-        return out;                                
+TapServiceConnector.prototype.selectTableToJoin_html = function (tableContentJoinTable) {
+    var out = '<div class="card" id ="">' +
+        '<div class="card-body">' +
+        '<div class="row">' +
+        '<div class="col-lg-6">' +
+        ' <div class="form-group">' +
+        '<label for="selectToJoin">Select Table To Join &nbsp &nbsp &nbsp' +
+        '</label>' +
+        '<select class="form-control" id="selectToJoin">' +
+        '<option seleted>...</option>'
+    for (var i = 0; i < tableContentJoinTable.length; i++) {
+
+        out += "<option id='" + i + "'>" + tableContentJoinTable[i] + "</option>"
     }
+    out += '</select>' +
+        '</div>' + '</div>' + '</div>' +
+        '<hr class="btn-primary">' +
+        '<div> ' +
+        '<textarea class="form-control" id="txtAreaAdql" value=""></textArea><br>' +
+        '</div>' +
+        '<button class="btn btn-success" id="executeAdql">Run Adql</button>'
+    '</div>' + '</div>'
+    return out;
+}
 
 
-      /**
-       * 
-       * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
-       * @param {*} baseTableName the root table name : String
-       * @param {*} url           the base url : String
-       * @param {*} schema        the schema of database : String
-       * @param {*} shortname     the short name of database : String
-       */
-TapServiceConnector.prototype.joinTableByField=function(mainJsonData,baseTableName,url,schema,shortname){
+/**
+ *
+ * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
+ * @param {*} baseTableName the root table name : String
+ * @param {*} url           the base url : String
+ * @param {*} schema        the schema of database : String
+ * @param {*} shortname     the short name of database : String
+ */
+TapServiceConnector.prototype.joinTableByField = function (mainJsonData, baseTableName, url, schema, shortname) {
     var data = this.loadJson();
     //var jsonread=new jsonRead(data);
-    var tableContentQueryField=this.getJoinTables(baseTableName);
-    tableContentQuery= this.getCorrectJoinQueryOfEachTableField(mainJsonData);
-    var tableContentQueryField=this.getCorrectFieldOfJoinTable(mainJsonData);
-  
+    var tableContentQueryField = this.getJoinTables(baseTableName);
+    tableContentQuery = this.getCorrectJoinQueryOfEachTableField(mainJsonData);
+    var tableContentQueryField = this.getCorrectFieldOfJoinTable(mainJsonData);
+
     var data = this.loadJson();
-    
-      if(shortname == "Simbad"){
+
+    if (shortname == "Simbad") {
         schema = "public";
         url = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync";
         baseTableName = "basic";
-      }else if(shortname == "Gavo" ){
-         schema = "rr";//alert(shortname)
-         url = "http://dc.zah.uni-heidelberg.de/tap/sync";
-         baseTableName ='resource';
-      }else if(shortname == "CAOM"){
-       // alert(shortname)
+    } else if (shortname == "Gavo") {
+        schema = "rr";//alert(shortname)
+        url = "http://dc.zah.uni-heidelberg.de/tap/sync";
+        baseTableName = 'resource';
+    } else if (shortname == "CAOM") {
+        // alert(shortname)
         schema = "dbo";
         url = "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync";
-        baseTableName ='CaomObservation'
-      }else if(shortname=="Vizier"){
+        baseTableName = 'CaomObservation'
+    } else if (shortname == "Vizier") {
         schema = "metaviz";
         url = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync";
-        baseTableName ='METAcat'
-      }else if(shortname=="3XMM"){
+        baseTableName = 'METAcat'
+    } else if (shortname == "3XMM") {
         schema = "EPIC";
         url = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync";
-        baseTableName ='EPIC_IMAGE'
-      }
-      var simbadService = new TapServiceConnector(url,schema,shortname);
-      this.selectTableToJoin(simbadService,tableContentQueryField,tableContentQuery,baseTableName);   
+        baseTableName = 'EPIC_IMAGE'
     }
+    var simbadService = new TapServiceConnector(url, schema, shortname);
+    this.selectTableToJoin(simbadService, tableContentQueryField, tableContentQuery, baseTableName);
+}
 
-    /**
-     * 
-     * @param {*} votableQueryResult : Object => the result of query is an object get by this.tapService.Query(this.getAdqlQuery());
-     *                                this.tapService = instance of TapService
-     *                                this.getAdqlQuery() return adql query : String
-     */
- TapServiceConnector.prototype.createVoTableResultJson=function(votableQueryResult,tableName){
-      var voTableData  = VOTableTools.votable2Rows(votableQueryResult);
-      //var data =votable2data(votableQueryResult)
-      var tableLength;
-      var votableField;
-      var contentText = votableQueryResult.responseText;
-      if(this.getServiceUrl()=="http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.getServiceUrl() == "http://dc.zah.uni-heidelberg.de/tap/sync"){
-         votableField = VOTableTools.getField (votableQueryResult);
-         tableLength = votableField.length;
-    }else{
-      
-      votableField =VOTableTools.genererField(votableQueryResult,contentText);
-    }
-      
-      var jsonData = { 
-          data: {
-                
-            }
-      }
-      var k=0;
-      
-      var out1 =this.genererDataTable(votableField,voTableData,tableName);
-      for(var i = 0; i<votableField.length;i++){ 
-        for(var j=0;j<votableField.length;j++){
-          if(i==j)
-          jsonData.data[votableField[i]]=voTableData[j] ;
-        }   
-        ;    
-    } 
-      return out1;
-  }
-
-  /**
-   * 
-   * @param {*} Field  : Array containing all the field of choosing table in the database 
-   * @param {*} dataTable : Array containing data of votable object get by calling the method votable2Row(votableObjet) of TabService 
-   * @returns return html table with result of adql query
-   */
-TapServiceConnector.prototype.genererDataTable=function (Field,dataTable,tableName){ 
-
-  var out1="<table class='table table-bordered'>"
-  out1 +="<thead><tr role='row' style='text-align:center'>"+tableName;+"</thead>"//head
-  //out +="<th/>";
-  var nbCols = Field.length;
-  for(var rowNb=0;rowNb<nbCols;rowNb++){
-  out1 +="<th rowspan='1' class='th-sm'  colspan='1' style='text-align:center;vertical-align:bottom'>"+Field[rowNb]+"&nbsp&nbsp</th>";
-  }
-  out1 +="</tr></thead>";
-  out1 +="<tbody>";
-  var column =0;
-  if(dataTable[dataTable.length-1]==0){
-    dataTable.splice(dataTable.length-1,1);
-  }
-  for(var rowNb=0;rowNb<dataTable.length;rowNb+=nbCols){//table  content
-    if ( rowNb%2 ) {
-      out1+="<tr>";
+/**
+ *
+ * @param {*} votableQueryResult : Object => the result of query is an object get by this.tapService.Query(this.getAdqlQuery());
+ *                                this.tapService = instance of TapService
+ *                                this.getAdqlQuery() return adql query : String
+ */
+TapServiceConnector.prototype.createVoTableResultJson = function (votableQueryResult, tableName) {
+    var voTableData = VOTableTools.votable2Rows(votableQueryResult);
+    //var data =votable2data(votableQueryResult)
+    var tableLength;
+    var votableField;
+    var contentText = votableQueryResult.responseText;
+    if (this.getServiceUrl() == "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.getServiceUrl() == "http://dc.zah.uni-heidelberg.de/tap/sync") {
+        votableField = VOTableTools.getField(votableQueryResult);
+        tableLength = votableField.length;
     } else {
-      out1+="<tr class = 'even'>";
+
+        votableField = VOTableTools.genererField(votableQueryResult, contentText);
     }
-    for(var col=0;col<nbCols;col++){
-      out1 +="<td id = '"+dataTable[rowNb + col]+"' >"+dataTable[rowNb + col]+"</td>";
+
+    var jsonData = {
+        data: {}
     }
-    out1 +="</tr>";
-  }
-  out1 +="</tbody>";
-  out1 += "</table></div></td></tr>";
-  
-  return out1;
-}
-      
-TapServiceConnector.prototype.mainJsonData=function (adql) {
-  var data = this.loadJson();
-  var QObject = this.connect();
-  var listJoinAndId = this.getListJoinAndId('basic',data);
-  var listId = this.getListeId(listJoinAndId);
-  return simbadService.tapService.createMainJson(adql,data,'basic',listId,listJoinAndId);;
-      
+    var k = 0;
+
+    var out1 = this.genererDataTable(votableField, voTableData, tableName);
+    for (var i = 0; i < votableField.length; i++) {
+        for (var j = 0; j < votableField.length; j++) {
+            if (i == j)
+                jsonData.data[votableField[i]] = voTableData[j];
+        }
+        ;
+    }
+    return out1;
 }
 
+/**
+ *
+ * @param {*} Field  : Array containing all the field of choosing table in the database
+ * @param {*} dataTable : Array containing data of votable object get by calling the method votable2Row(votableObjet) of TabService
+ * @returns return html table with result of adql query
+ */
+TapServiceConnector.prototype.genererDataTable = function (Field, dataTable, tableName) {
+
+    var out1 = "<table class='table table-bordered'>"
+    out1 += "<thead><tr role='row' style='text-align:center'>" + tableName;
+    +"</thead>"//head
+    //out +="<th/>";
+    var nbCols = Field.length;
+    for (var rowNb = 0; rowNb < nbCols; rowNb++) {
+        out1 += "<th rowspan='1' class='th-sm'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[rowNb] + "&nbsp&nbsp</th>";
+    }
+    out1 += "</tr></thead>";
+    out1 += "<tbody>";
+    var column = 0;
+    if (dataTable[dataTable.length - 1] == 0) {
+        dataTable.splice(dataTable.length - 1, 1);
+    }
+    for (var rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
+        if (rowNb % 2) {
+            out1 += "<tr>";
+        } else {
+            out1 += "<tr class = 'even'>";
+        }
+        for (var col = 0; col < nbCols; col++) {
+            out1 += "<td id = '" + dataTable[rowNb + col] + "' >" + dataTable[rowNb + col] + "</td>";
+        }
+        out1 += "</tr>";
+    }
+    out1 += "</tbody>";
+    out1 += "</table></div></td></tr>";
+
+    return out1;
+}
+
+TapServiceConnector.prototype.mainJsonData = function (adql) {
+    var data = this.loadJson();
+    var QObject = this.connect();
+    var listJoinAndId = this.getListJoinAndId('basic', data);
+    var listId = this.getListeId(listJoinAndId);
+    return simbadService.tapService.createMainJson(adql, data, 'basic', listId, listJoinAndId);
+    ;
+
+}
 
 
-TapServiceConnector.prototype.genererZone3 =function(adql,s,root,n,listJoinAndId){
-  var QObject = s.Query(adql);
-  var dataTable = VOTableTools.votable2Rows(QObject);
-  var contentText = QObject.responseText;
-  var Field =VOTableTools.genererField(QObject,contentText);
-  var nb = Field.length;
-  if(nb==0){
-      $(contentText).find('RESOURCE[type="results"]').each(function(){
-            if($(this).find("INFO").attr("name")=="QUERY_STATUS"){
+TapServiceConnector.prototype.genererZone3 = function (adql, s, root, n, listJoinAndId) {
+    var QObject = s.Query(adql);
+    var dataTable = VOTableTools.votable2Rows(QObject);
+    var contentText = QObject.responseText;
+    var Field = VOTableTools.genererField(QObject, contentText);
+    var nb = Field.length;
+    if (nb == 0) {
+        $(contentText).find('RESOURCE[type="results"]').each(function () {
+            if ($(this).find("INFO").attr("name") == "QUERY_STATUS") {
                 out = $(this).context.textContent;
                 return out;
             }
-          
+
         })
-    }
-    else{
-        out = genererTable(Field,dataTable,n.json,root,listJoinAndId);
+    } else {
+        out = genererTable(Field, dataTable, n.json, root, listJoinAndId);
     }
     return out;
+}
+
+TapServiceConnector.prototype.genererTable = function (Field, dataTable, json, root, listJoinAndId) {//include textarea
+    var listJoin = [];
+    var nb = Field.length;
+    for (var key in json[root].join_tables) {
+        listJoin.push(key);
     }
+    var out;
+    out = "<div id = 'ddata'><table class = 'table' id='example-table2' role = 'grid'>";
+    out += "<h4>The amount of data is: </h4>"
+    out += "<thead><tr role='row'>";//head
+    out += "<th>JoinTable</th>";
+    for (var j = 0; j < nb; j++) {
+        out += "<th class='sorting_disabled' rowspan='1' colspan='1' style='text-align: auto;'>" + Field[j] + "</th>";
+    }
+    out += "</tr></thead>";
+    var joinIdDic = {};
+    for (var i = 0; i < listJoinAndId.length; i = i + 2) {
+        if (!json2Requete.isString(listJoinAndId[i])) {
+            joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i][0];
+        } else {
+            joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i];
+        }
+    }
+    var jsonTable = {};
+    for (var key in joinIdDic) {
+        for (var j = 1; j < nb; j++) {
+            if (Field[j] == joinIdDic[key]) {
+                var temp = j;//save the position of key
+            }
+        }
+        jsonTable[key] = temp;
+    }
+    //console.log(listJoinAndId)
+    //console.log(joinIdDic)
+    //console.log(jsonTable)
+    out += "<tbody>"
+    var count = 0;
+    var number = 0;
+    for (var j = 0; j < dataTable.length; j++) {//table  content
+        if (count == 0) {
+            out += "<tr role='row'>";
+            out += "<td><div class='btn-group' style='width :100px'>" +
+                "<button type='button' class='btn btn-primary' >JOIN</button>" +
+                "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown' >" +
+                "<span class='caret'></span>" +
+                "<span class='sr-only'></span>" +
+                "</button>" +
+                "<ul class='dropdown-menu' role='menu'>";
+            for (var i = 0; i < listJoin.length; i++) {
+                var position = jsonTable[listJoin[i]];
+                out += "<li><a href='#' id='" + dataTable[j + position] + "|" + listJoin[i] + "'  name = 'boid'>" + listJoin[i] + " " + "</a></li>";
+            }
+            out += "</div></td>"
+        }
 
-TapServiceConnector.prototype.genererTable =function (Field,dataTable,json,root,listJoinAndId){//include textarea
-      var listJoin=[];
-      var nb = Field.length;
-      for(var key in json[root].join_tables){
-          listJoin.push(key);
-      }
-      var out ;
-      out = "<div id = 'ddata'><table class = 'table' id='example-table2' role = 'grid'>";
-      out += "<h4>The amount of data is: </h4>"
-      out +="<thead><tr role='row'>";//head
-      out +="<th>JoinTable</th>";
-      for(var j=0;j<nb;j++){
-          out +="<th class='sorting_disabled' rowspan='1' colspan='1' style='text-align: auto;'>"+Field[j]+"</th>";
-      }
-      out +="</tr></thead>";
-      var joinIdDic ={};
-      for(var i=0;i<listJoinAndId.length;i=i+2){
-          if(!json2Requete.isString(listJoinAndId[i])){
-              joinIdDic[listJoinAndId[i+1]]=listJoinAndId[i][0];
-          }else{
-              joinIdDic[listJoinAndId[i+1]]=listJoinAndId[i];
-          }
-      }
-      var jsonTable ={};
-      for(var key in joinIdDic){
-          for(var j=1;j<nb;j++){
-              if(Field[j]==joinIdDic[key]){
-                  var temp =j;//save the position of key
-              }
-          }
-          jsonTable[key]=temp;
-      }
-      //console.log(listJoinAndId)
-      //console.log(joinIdDic)
-      //console.log(jsonTable)
-      out +="<tbody>"
-      var count =0;
-      var number=0;
-      for(var j=0;j<dataTable.length;j++){//table  content
-          if(count==0){
-              out +="<tr role='row'>";
-              out +="<td><div class='btn-group' style='width :100px'>"+
-              "<button type='button' class='btn btn-primary' >JOIN</button>"+
-              "<button type='button' class='btn btn-primary dropdown-toggle' data-toggle='dropdown' >"+
-                  "<span class='caret'></span>"+
-                  "<span class='sr-only'></span>"+
-              "</button>"+
-              "<ul class='dropdown-menu' role='menu'>";
-              for(var i=0;i<listJoin.length;i++){
-                  var position = jsonTable[listJoin[i]];
-                  out+="<li><a href='#' id='"+ dataTable[j+position] +"|"+ listJoin[i] + "'  name = 'boid'>"+listJoin[i]+" "+"</a></li>";
-              }
-              out +="</div></td>"
-          }
-        
-              out +="<td style='text-align: auto;'>"+dataTable[j]+"</td>";
-          
-          
-        
-          count =count+1;
-          if(count==nb){
-              out +="</tr>";
-              number++;
-              count=0;
-          }
-      }
-      out+="</tbody>"
-      out += "</table></div>"
-      var start = out.indexOf("is:")+3;
-      out = out.slice(0,start)+" "+number +out.slice(start)
-      return out;
-  }
+        out += "<td style='text-align: auto;'>" + dataTable[j] + "</td>";
 
 
+        count = count + 1;
+        if (count == nb) {
+            out += "</tr>";
+            number++;
+            count = 0;
+        }
+    }
+    out += "</tbody>"
+    out += "</table></div>"
+    var start = out.indexOf("is:") + 3;
+    out = out.slice(0, start) + " " + number + out.slice(start)
+    return out;
+}
 
 
-  ///////////////////////////////////////////////////////////////////////// Constrains Functions //////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////// Constrains Functions //////////////////////////////////////////////////////////////
 
-TapServiceConnector.prototype.Aide = function (n,s){
+TapServiceConnector.prototype.Aide = function (n, s) {
     var a = document.getElementsByName('Cbutton');
     var b = document.getElementsByName('Cinput');
 
 
-
-    for(var i =0;i<a.length;i++){
-        a[i].onclick = (function closure(ii){
-            return function(){
+    for (var i = 0; i < a.length; i++) {
+        a[i].onclick = (function closure(ii) {
+            return function () {
                 var name = b[ii].id.slice(1);//the name of
                 var schema = n.json[name].schema;
-                var adql = n.AdqlAllColumn(name,schema)
+                var adql = n.AdqlAllColumn(name, schema)
                 var QObject = s.Query(adql);
                 var dataTable = VOTableTools.votable2Rows(QObject)
                 var contentText = QObject.responseText;
-                var Field =VOTableTools.genererField(QObject,contentText)
+                var Field = VOTableTools.genererField(QObject, contentText)
                 var nb = Field.length;
-                var out ="<div class = 'AIDE ' " +
+                var out = "<div class = 'AIDE ' " +
                     "id='light'>" +
-                    "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " +name +"</span>"+
-                    "<button class='delete_right' id='d_right' href = 'javascript:void(0)' "+
+                    "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + name + "</span>" +
+                    "<button class='delete_right' id='d_right' href = 'javascript:void(0)' " +
                     "onclick = ' document.getElementById('light').style.display='none''><i class='fa fa-close' ></i></button><br></br>";//head
                 out += "<table  class = 'table'  role = 'grid' >";
-                out +="<thead><tr role='row'>";//head
+                out += "<thead><tr role='row'>";//head
                 //out +="<th/>";
-                for(var j=0;j<nb;j++){
-                    out +="<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>"+Field[j]+"</th>";
+                for (var j = 0; j < nb; j++) {
+                    out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[j] + "</th>";
                 }
-                out +="</tr></thead>";
-                out +="<tbody>"
-                var column =0;
-                for(var j=0;j<dataTable.length;j++){//table  content
-                    if(column==0){
-                        var judge = (j+nb)/nb;
-                        if(judge%2==1){
-                            out+="<tr class = 'odd'>";
+                out += "</tr></thead>";
+                out += "<tbody>"
+                var column = 0;
+                for (var j = 0; j < dataTable.length; j++) {//table  content
+                    if (column == 0) {
+                        var judge = (j + nb) / nb;
+                        if (judge % 2 == 1) {
+                            out += "<tr class = 'odd'>";
                             //out+="<td><input type='checkbox'></td>";
-                        }
-                        else{
-                            out+="<tr class = 'even'>";
+                        } else {
+                            out += "<tr class = 'even'>";
                             //out+="<td><input type='checkbox'></td>";
                         }
                         //var row = j/6+1;
-                        out +="<td id = '"+dataTable[j]+"' style='text-align: center;vertical-align:bottom;text-decoration:underline' >"+dataTable[j]+"</td>";
+                        out += "<td id = '" + dataTable[j] + "' style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + dataTable[j] + "</td>";
+                    } else {
+                        out += "<td style='text-align: center;vertical-align:bottom'>" + dataTable[j] + "</td>";
                     }
-                    else{
-                        out +="<td style='text-align: center;vertical-align:bottom'>"+dataTable[j]+"</td>";
-                    }
-                    column =column+1;
-                    if(column==nb){
-                        out +="</tr>";
-                        column=0;
+                    column = column + 1;
+                    if (column == nb) {
+                        out += "</tr>";
+                        column = 0;
                     }
 
                 }
-                out+="</tbody>"
+                out += "</tbody>"
                 out += "</table>  </div>"
                 $("body").prepend(out);
                 var td = $("td");
                 for (var i = 0; i < td.length; i++) {
                     $(td[i]).click(function () {
                         var i = $(this).attr("id");
-                        if($("#"+b[ii].id).val().length!=0){
-                            var content = $("#"+b[ii].id).val();
-                            $("#"+b[ii].id).val(content + " AND " +name+"."+i+"=");
-                            document.getElementById('light').style.display='none';
-                        }else{
-                            $("#"+b[ii].id).val(name+"."+i+"=");
-                            document.getElementById('light').style.display='none';
+                        if ($("#" + b[ii].id).val().length != 0) {
+                            var content = $("#" + b[ii].id).val();
+                            $("#" + b[ii].id).val(content + " AND " + name + "." + i + "=");
+                            document.getElementById('light').style.display = 'none';
+                        } else {
+                            $("#" + b[ii].id).val(name + "." + i + "=");
+                            document.getElementById('light').style.display = 'none';
                         }
 
                     });
                 }
-                document.getElementById('light').style.display='block';
+                document.getElementById('light').style.display = 'block';
             }
         })(i);
     }
 }
 
 
-TapServiceConnector.prototype.genererTextArea=function (adql){
+TapServiceConnector.prototype.genererTextArea = function (adql) {
     out = "<div id = 'dadql'>"
-    out += "<textarea rows='100' col='100'  id = 'textadql' style= ' width:500px; height:300px;margin-left:20px'>"+adql+"</textarea><br><br>"
+    out += "<textarea rows='100' col='100'  id = 'textadql' style= ' width:500px; height:300px;margin-left:20px'>" + adql + "</textarea><br><br>"
     out += " <button type='button' id = 'badql'class='btn btn-primary' style = 'width:auto;height:30px;position: relative;top: -8px;right: -8px'>Query ADQL</button>"
-    out +="</div>";
-    out +="<br></br>";
+    out += "</div>";
+    out += "<br></br>";
     return out;
 }
 
 
-TapServiceConnector.prototype.checkAdql=function (listId){//@TODO special for simbad
+TapServiceConnector.prototype.checkAdql = function (listId) {//@TODO special for simbad
     var adql2 = $("#textadql").val()
     var Myadql = $("#textadql").val();
     console.log("------------------------")
     console.log(adql2)
     console.log(listId)
     console.log("------------------------")
-    var col = adql2.slice(0,adql2.indexOf("FROM"))
-    var start1 = adql2.indexOf("FROM")+5;
-    var end = adql2.indexOf("JOIN")-1;
-    var root = adql2.slice(start1,end)+".";
+    var col = adql2.slice(0, adql2.indexOf("FROM"))
+    var start1 = adql2.indexOf("FROM") + 5;
+    var end = adql2.indexOf("JOIN") - 1;
+    var root = adql2.slice(start1, end) + ".";
     console.log(root)
     console.log(col);
-    for(var i=0;i<listId.length;i++){
+    for (var i = 0; i < listId.length; i++) {
         //if(adql2.indexOf("*")!=-1){//adql has "*"
         //adql2 = adql2;
         //}
-        if(col.indexOf(listId[i])!=-1){//adql has "oid"
+        if (col.indexOf(listId[i]) != -1) {//adql has "oid"
             console.log(listId[i])
-            if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
-                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
+            if (adql2.indexOf("DISTINCT") != -1) {//adql has "DISTINCT"
+                if (adql2.indexOf("TOP 100") != -1) {//adql has "TOP 100"
                     continue;
-                }
-                else{//adql has not "TOP 100"
-                    var start = adql2.indexOf("DISTINCT")+8;
+                } else {//adql has not "TOP 100"
+                    var start = adql2.indexOf("DISTINCT") + 8;
                     adql2 = adql2.slice(0, start) + "\nTOP 100 \n" + adql2.slice(start);
                 }
 
-            }
-            else{//adql has not "DISTINCT"
-                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
+            } else {//adql has not "DISTINCT"
+                if (adql2.indexOf("TOP 100") != -1) {//adql has "TOP 100"
                     var start = adql2.indexOf("TOP 100");
                     aadql2 = adql2.slice(0, start) + "DISTINCT \n" + adql2.slice(start);
-                }
-                else{//adql has not "TOP 100"
-                    var start = adql2.indexOf("SELECT")+6;
+                } else {//adql has not "TOP 100"
+                    var start = adql2.indexOf("SELECT") + 6;
                     adql2 = adql2.slice(0, start) + "DISTINCT \nTOP 100 \n" + adql2.slice(start);
                 }
             }
-        }
-        else{
+        } else {
             console.log(listId[i])
-            if(adql2.indexOf("DISTINCT")!=-1){//adql has "DISTINCT"
-                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
-                    if(i!=0&&i!=listId.length-1){//not the first key, not the last key, more than one key
-                        var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
-                        adql2 = adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
-                    }else if(i==0&&i!=listId.length-1){//the first key, not the last key, more than one key
-                        var start = adql2.indexOf("TOP 100")+7;
-                        adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
-                    }else if(i==0&&listId.length==1){//the first key, only one key
-                        var start = adql2.indexOf("TOP 100")+7;
-                        adql2 = adql2.slice(0, start) + "\n"+root+listId[i] +","+ adql2.slice(start);
-                    }else{
-                        var start = adql2.indexOf(listId[i-1])+listId[i-1].length;
-                        adql2 =Myadql// adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
+            if (adql2.indexOf("DISTINCT") != -1) {//adql has "DISTINCT"
+                if (adql2.indexOf("TOP 100") != -1) {//adql has "TOP 100"
+                    if (i != 0 && i != listId.length - 1) {//not the first key, not the last key, more than one key
+                        var start = adql2.indexOf(listId[i - 1]) + listId[i - 1].length;
+                        adql2 = adql2.slice(0, start) + ",\n" + root + listId[i] + adql2.slice(start);
+                    } else if (i == 0 && i != listId.length - 1) {//the first key, not the last key, more than one key
+                        var start = adql2.indexOf("TOP 100") + 7;
+                        adql2 = adql2.slice(0, start) + "\n" + root + listId[i] + "," + adql2.slice(start);
+                    } else if (i == 0 && listId.length == 1) {//the first key, only one key
+                        var start = adql2.indexOf("TOP 100") + 7;
+                        adql2 = adql2.slice(0, start) + "\n" + root + listId[i] + "," + adql2.slice(start);
+                    } else {
+                        var start = adql2.indexOf(listId[i - 1]) + listId[i - 1].length;
+                        adql2 = Myadql// adql2.slice(0, start) + ",\n"+root+listId[i] + adql2.slice(start);
                     }
-                }
-                else{//adql has not "TOP 100"
-                    var start = adql2.indexOf("DISTINCT")+8;
+                } else {//adql has not "TOP 100"
+                    var start = adql2.indexOf("DISTINCT") + 8;
                     adql2 = Myadql;//adql2.slice(0, start) + "\nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
                 }
-            }
-            else{//adql has not "DISTINCT"
-                if(adql2.indexOf("TOP 100")!=-1){//adql has "TOP 100"
+            } else {//adql has not "DISTINCT"
+                if (adql2.indexOf("TOP 100") != -1) {//adql has "TOP 100"
                     var start = adql2.indexOf("TOP 100");
                     var adql2 = adql2.slice(0, start) + "DISTINCT \n" + adql2.slice(start);
-                    start = adql2.indexOf("TOP 100")+7;
+                    start = adql2.indexOf("TOP 100") + 7;
                     adql2 = Myadql;//adql2.slice(0, start) + "\n"+root+listId[i]+"," + adql2.slice(start);
-                }
-                else{//adql has not "TOP 100"
-                    var start = adql2.indexOf("SELECT")+6;
+                } else {//adql has not "TOP 100"
+                    var start = adql2.indexOf("SELECT") + 6;
                     adql2 = Myadql;//adql2.slice(0, start) + "\nDISTINCT \nTOP 100 \n"+root+listId[i]+"," + adql2.slice(start);
                 }
             }
         }
     }
-    if(adql2.indexOf("ORDER")==-1&&adql2.indexOf("order")==-1&&adql2.indexOf("basic")!=-1){
+    if (adql2.indexOf("ORDER") == -1 && adql2.indexOf("order") == -1 && adql2.indexOf("basic") != -1) {
         adql2 += " ORDER BY oid";
     }
     console.log(adql2)
@@ -703,11 +687,11 @@ TapServiceConnector.prototype.checkAdql=function (listId){//@TODO special for si
     return adql2;
 }
 
-TapServiceConnector.prototype.joinAndId=function (root,json){
+TapServiceConnector.prototype.joinAndId = function (root, json) {
     var list = [];
-    for(var key in json){
-        if(key == root){
-            for(var join in json[key].join_tables){
+    for (var key in json) {
+        if (key == root) {
+            for (var join in json[key].join_tables) {
                 list.push(json[key].join_tables[join].target);
                 list.push(join);
             }
@@ -715,64 +699,70 @@ TapServiceConnector.prototype.joinAndId=function (root,json){
     }
     return list;
 }
-TapServiceConnector.prototype.limitJson2data=function (n,s,sc){//n: instance of the jsonRead; s: instance of TapService; sc instance of tapServiceConnector;
+TapServiceConnector.prototype.limitJson2data = function (n, s, sc) {//n: instance of the jsonRead; s: instance of TapService; sc instance of tapServiceConnector;
     var jsont = n.json
     var t;
-    $("button#test").on('click',{"json" : jsont},function(event){//@TODO
-        t=event.data.json
-        var keyConstraint=[]
-        var list=[]
-        var allList=[];
-        var listId =[];
+    $("button#test").on('click', {"json": jsont}, function (event) {//@TODO
+        t = event.data.json
+        var keyConstraint = []
+        var list = []
+        var allList = [];
+        var listId = [];
         var listJoinAndId = [];
         var adqlMain;
         var oidJson;
         var niveau;
         var rootName = $("input[name='Cinput']:first").attr("id").slice(1);
-        listJoinAndId = sc.joinAndId(rootName,t);//record all the keys linked to root table and the join table's name
-        console.log("aaaaaaaaaaaaaaaaaaaaa"+listJoinAndId+"************************"+rootName+"<br>tttttttttttttt  =>"+JSON.stringify(t,undefined,6));
-        for(var i = 0;i<listJoinAndId.length;i=i+2){
-            if(!json2Requete.isString(listJoinAndId[i])){
+        listJoinAndId = sc.joinAndId(rootName, t);//record all the keys linked to root table and the join table's name
+        console.log("aaaaaaaaaaaaaaaaaaaaa" + listJoinAndId + "************************" + rootName + "<br>tttttttttttttt  =>" + JSON.stringify(t, undefined, 6));
+        for (var i = 0; i < listJoinAndId.length; i = i + 2) {
+            if (!json2Requete.isString(listJoinAndId[i])) {
                 var temp = listJoinAndId[i][0];
-            }
-            else{
+            } else {
                 var temp = listJoinAndId[i];
             }
-            if(listId.indexOf(temp)==-1){
+            if (listId.indexOf(temp) == -1) {
                 listId.push(temp);//record the key linked to root table, No repeating
             }
         }
-        var countedNames = listJoinAndId.reduce(function (allNames, name) { if (name in allNames) { allNames[name]++; } else { allNames[name] = 1; } return allNames; }, {});
-        for(var i=0;i<listId.length;i++){
-            for(var j = 0;j<listId.length-i-1;j++){
-                if(countedNames[listId[j+1]]>countedNames[listId[j]]){
+        var countedNames = listJoinAndId.reduce(function (allNames, name) {
+            if (name in allNames) {
+                allNames[name]++;
+            } else {
+                allNames[name] = 1;
+            }
+            return allNames;
+        }, {});
+        for (var i = 0; i < listId.length; i++) {
+            for (var j = 0; j < listId.length - i - 1; j++) {
+                if (countedNames[listId[j + 1]] > countedNames[listId[j]]) {
                     var temp = listId[j];
-                    listId[j]=listId[j+1]
-                    listId[j+1]=temp;
+                    listId[j] = listId[j + 1]
+                    listId[j + 1] = temp;
                 }
             }
         }
         //allList.push( $("input[name='Cinput']:first").attr("id"));//record the root table's niveau and name
         var count = 0;
-        var p=-1;//position of the last constraints;if p=-1, it means no constraints on input
-        $("input[name='Cinput']").each(function(){
+        var p = -1;//position of the last constraints;if p=-1, it means no constraints on input
+        $("input[name='Cinput']").each(function () {
             count++;
             allList.push($(this).attr("id"));
-            if($(this).val().length!=0){//user entered the constraints
-                if(allList.indexOf($(this).attr("id"))==-1){
+            if ($(this).val().length != 0) {//user entered the constraints
+                if (allList.indexOf($(this).attr("id")) == -1) {
                     allList.push($(this).attr("id"));
                 }
                 p = count;
                 var name = $(this).attr("id").slice(1);//the name of table
                 var constraints = $(this).val();
-                var temp=[];
-                temp.push(name,constraints);
+                var temp = [];
+                temp.push(name, constraints);
                 keyConstraint.push(...temp);//record all constraints,[table name, constraints]
-                niveau = $(this).attr("id").slice(0,1);
+                niveau = $(this).attr("id").slice(0, 1);
                 //list.unshift(name);
             }
         })
-        if(p!=-1) {
+        if (p != -1) {
             for (var h = niveau; h > 0; h--) {
                 for (var j = p - 1; j >= 0; j--) {
                     if (allList[j].slice(0, 1) == h) {
