@@ -105,7 +105,7 @@ function newMain(){
     $("#btnGetRootQuery").click(function (){
         if(a.testConnection==true){
 
-            let rootQuery = a.getRootQuery();
+            let rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
             display(rootQuery,"getJsonRootQuery")
         }else {
             alert("The service is disconnected ! connect service and try again ..." )

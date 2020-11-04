@@ -20,14 +20,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/javascript/client/html/testApi.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/brouillon" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/brouillon" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/newMain.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/newMain.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,7 +79,7 @@
       <option name="presentableId" value="Default" />
       <updated>1604054622371</updated>
       <workItem from="1604054623471" duration="3347000" />
-      <workItem from="1604306705777" duration="63817000" />
+      <workItem from="1604306705777" duration="69313000" />
     </task>
     <servers />
   </component>

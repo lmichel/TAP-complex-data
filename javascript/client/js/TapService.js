@@ -398,7 +398,6 @@ var TapService = /** @class */ (function () {
             rootTable :root,
             withSchema :VizierUrl||XmmUrl? false:true
         }*/
-
         for (var i = 0; i < listJoinAndId.length; i = i + 2) {
             if (!json2Requete.isString(listJoinAndId[i])) {
                 joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i][0];
@@ -439,14 +438,15 @@ var TapService = /** @class */ (function () {
                        // }else{
                            // schemaPrefix = "" ;
                        // }
-                       console.log("keyRoot " + keyRoot)
-                       console.log("key " + key)
-                       console.log(jsonAll[keyRoot].join_tables[key])
+                       //console.log("keyRoot " + keyRoot)
+                       //console.log("key " + key)
+                      // console.log(jsonAll[keyRoot].join_tables[key])
                         contentAdql = "SELECT TOP 100 " + schemaPrefix + key + "."+jsonAll[keyRoot].join_tables[key].from + " ";
                         contentAdql += " FROM " + schema + "." + keyRoot + " ";
                         contentAdql += "JOIN " + schema + "." + key + " ";
                         var k=0;
                         if (!json2Requete.isString(jsonAll[keyRoot].join_tables[key].target)) {
+                            console.log("fffffffffffffffff");
                             contentAdql += "ON " + schema + "." + keyRoot + "." + jsonAll[keyRoot].join_tables[key].target[0];
                             contentAdql += "=" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from[0];
                             var temp = IdDic[joinIdDic[key]];
@@ -465,7 +465,8 @@ var TapService = /** @class */ (function () {
                             }
                             contentTable[dataTable[i + temp]] = contentAdql;
                         }
-                        else { 
+                        else {
+                            //console.log("fhhhhhhhhhhhhhhhhhhhhhhhhhh");
                             contentAdql += "ON " + schema + "." + keyRoot + "." + jsonAll[keyRoot].join_tables[key].target;
                             contentAdql += "=" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from;
                             
@@ -484,10 +485,10 @@ var TapService = /** @class */ (function () {
                              }   
                                     ////console.log(k+"  iddic "+votableField[k]+" "+joinIdDic[key]+" "+dataTable[k])
                                     for(j=0;j<votableField.length;j++){
-                                        ////console.log(votableField[j]+" =>  "+dataTable[j])
+                                      //  console.log(votableField[j]+" =>  "+joinIdDic[key])
                                         if(votableField[j]==joinIdDic[key]){
                                             k=j;
-                                        
+                                        //alert(votableField[j]+" "+joinIdDic[key])
                                         // break
                                         }
                                     
@@ -523,6 +524,7 @@ var TapService = /** @class */ (function () {
                 break;
             }
         }
+      //  console.log(JSON.stringify(json,undefined,3))
         return json;
     };
 
