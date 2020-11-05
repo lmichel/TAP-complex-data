@@ -16,6 +16,8 @@ function reset(){
     display("","getJsonJoinTable")
     display("","getJsonRootFieldValue")
     display("","getJsonRootQuery")
+    display("","getStatu");
+    display("","getJsonAll")
 }
 function newMain(){
 
@@ -28,23 +30,84 @@ function newMain(){
         shortName  : ""
     }
 
+
 ////////////////////////////// API ////////////////////////////////////////////
+
+    $("#simbadService").click(function (){
+       // var adql = "SELECT TOP 1* FROM \"public\".basic"
+        if(a.testConnection==false){
+            params.tapService = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync"
+            params.schema = Simbadschema;
+            params.table = "basic" ;
+            params.shortName = "Simbad";
+            alert(params.shortName+" is now initialised")
+        }else {
+            alert("another service is currently connected ! Disconnect the service an try again")
+        }
+
+    });
+    $("#gavoService").click(function (){
+        //var adql = "SELECT TOP 1* FROM rr.resource "
+        if(a.testConnection==false){
+        params.tapService = "http://dc.zah.uni-heidelberg.de/tap/sync"
+        params.schema = "rr";
+        params.table = "resource" ;
+        params.shortName = "Gavo";
+        alert(params.shortName+" is now initialised")
+        }else {
+            alert("another service is currently connected ! Disconnect the service an try again")
+        }
+    });
+    $("#caomService").click(function (){
+        //var adql = "SELECT  TOP 1 dbo.CaomObservation.* FROM dbo.CaomObservation"
+        if(a.testConnection==false){
+        params.tapService = "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"
+        params.schema = "dbo";
+        params.table = "CaomObservation" ;
+        params.shortName = "CAOM";
+        alert(params.shortName+" is now initialised")
+        }else {
+            alert("another service is currently connected ! Disconnect the service an try again")
+        }
+    });
+    $("#xmmService").click(function (){
+        if(a.testConnection==false){
+        params.tapService = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync"
+        params.schema = "EPIC";
+        params.table = "EPIC_IMAGE" ;
+        params.shortName = "3XMM";
+        //var adql = "SELECT  TOP 1  * FROM EPIC.EPIC_IMAGE "
+        alert(params.shortName+" is now initialised")
+        }else {
+            alert("another service is currently connected ! Disconnect the service an try again")
+        }
+    });
+    $("#vizierService").click(function (){
+        if(a.testConnection==false){
+        params.tapService = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync"
+        params.schema = "metaviz";
+        params.table = "METAcat" ;
+        params.shortName = "Vizier";
+        //var adql = "SELECT  TOP 100  * FROM metaviz.METAcat"
+        alert(params.shortName+" is now initialised")
+        }else {
+            alert("another service is currently connected ! Disconnect the service an try again")
+        }
+
+    });
+
     $("#btnApiConnectS").click(function (){
-        params.tapService = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync"
-        params.schema = Simbadschema;
-        params.table = "basic" ;
-        params.shortName = "Simbad";
        // alert(a.testConnection);
         if(a.testConnection == false){
-            a.connect(params);
-            //console.log(JSON.stringify(a.getConnector(),undefined,2))
-           // console.log(JSON.stringify(a.getObjectMap(),undefined,2))
-            alert("you are now connected")
-            document.getElementById("testContent").style["display"] = "block";
-            reset();
-            //a.getJoinedTables(params.table)
-           // console.log(a.getRootQuery());
-            //console.log(a.getRootFields());
+            if(params.tapService !="" && params.schema !="" && params.table!="" && params.shortName !="") {
+                a.connect(params);
+                let status = a.connector.status;
+                alert("you are now connected")
+                document.getElementById("testContent").style["display"] = "none";
+                display(status, "getStatu");
+            }else {
+                alert(" no service selected... Choose service first and try again")
+            }
         }else {
             alert("the service is  already connected ! disconnect the service and try again ...")
         }
@@ -55,8 +118,10 @@ function newMain(){
     $("#btnGetConnector").click(function (){
         if(a.testConnection==true){
 
-            let connector = JSON.stringify(a.getConnector(),undefined,2);
-            display(connector,"getJsonConnector")
+            let connector = JSON.stringify(a.getConnector().service,undefined,2);
+            let status = a.getConnector().status;
+            display(status,"getStatu");
+            display(connector,"getJsonAll")
         }else {
             alert("The service is disconnected ! connect service and try again ..." )
         }
@@ -64,8 +129,10 @@ function newMain(){
 
     $("#btnGetObjectMap").click(function (){
         if(a.testConnection==true){
-            let objectMap  = JSON.stringify(a.getObjectMap().succes,undefined,2);
-            display(objectMap,"getJsonObjectMap")
+            let objectMap  = JSON.stringify(a.getObjectMap().succes.object_map,undefined,2);
+            let status = a.getObjectMap().succes.status;
+            display(status,"getStatu");
+            display(objectMap,"getJsonAll")
         }else {
             alert("The service is disconnected ! connect service and try again ..." )
         }
@@ -74,8 +141,10 @@ function newMain(){
     $("#btnGetJoinTable").click(function (){
         if(a.testConnection==true){
 
-            let joinTables = JSON.stringify(a.getJoinedTables(params.table),undefined,2);
-            display(joinTables,"getJsonJoinTable")
+            let joinTables = JSON.stringify(a.getJoinedTables(params.table).Succes,undefined,2);
+            let status = a.getJoinedTables(params.table).Succes.status;
+            display(status,"getStatu");
+            display(joinTables,"getJsonAll")
         }else {
             alert("The service is disconnected ! connect service and try again ..." )
         }
@@ -84,8 +153,9 @@ function newMain(){
         if(a.testConnection==true){
 
             let rootFields = JSON.stringify(a.getRootFields(),undefined,2);
-
-            display(rootFields,"getJsonRootField")
+            let status = a.getRootFields().status;
+            display(status,"getStatu");
+            display(rootFields,"getJsonAll")
         }else {
             alert("The service is disconnected ! connect service and try again ..." )
         }
@@ -95,10 +165,12 @@ function newMain(){
         if(a.testConnection==true){
 
             let rootFieldValues = JSON.stringify(a.getRootFieldValues().succes,undefined,3);
-            display(rootFieldValues,"getJsonRootFieldValue")
+            let status = a.getRootFieldValues().succes.status;
+            display(status,"getStatu");
+            display(rootFieldValues,"getJsonAll")
         }else {
             let rootFieldValues = JSON.stringify(a.getRootFieldValues().failure,undefined,3);
-            display(rootFieldValues,"getJsonRootFieldValue")
+            display(rootFieldValues,"getJsonAll")
             alert("The service is disconnected ! connect service and try again ..." )
         }
     })
@@ -106,7 +178,9 @@ function newMain(){
         if(a.testConnection==true){
 
             let rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
-            display(rootQuery,"getJsonRootQuery")
+            let status = a.getRootFieldValues().succes.status;
+            display(status,"getStatu");
+            display(rootQuery,"getJsonAll")
         }else {
             alert("The service is disconnected ! connect service and try again ..." )
         }
