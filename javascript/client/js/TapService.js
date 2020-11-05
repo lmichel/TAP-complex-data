@@ -8,6 +8,7 @@ var TapService = /** @class */ (function () {
         this.checkstatus = checkstatus;// the result
         this.allTables =undefined
         this.tableRemoveView = undefined;
+        this.relink = undefined;
     }
     /***
      * Receive adql, return votable objects
@@ -24,7 +25,7 @@ var TapService = /** @class */ (function () {
         }else{
             correctFormat ="votable";
         }
-       //console.log("AJAXurl: " + site + " query: " + adql)
+       console.log("AJAXurl: " + site + " query: " + adql)
 
         reTable = $.ajax({
             url: "" + site,
@@ -53,7 +54,7 @@ var TapService = /** @class */ (function () {
         if (checkstatus == true) {
             checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \'' + schema_name + '\' ';
         }
-       ////console.log("AJAXurl: " + site + " query: " + checkvalue)
+       console.log("AJAXurl: " + site + " query: " + checkvalue)
         reTable = $.ajax({
             url: "" + site,
             type: "GET",
@@ -78,18 +79,22 @@ var TapService = /** @class */ (function () {
             checkvalue = 'SELECT TOP 100 tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
         }
 
-       ////console.log("AJAXurl: " + site + " query: " + checkvalue)
+        if(this.relink == undefined){
 
-        reLink = $.ajax({
-            url: "" + site,
-            type: "GET",
-            data: { query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery' },
-            async: false
-        })
-            .done(function (result) {
-            return result;
-        });
-        return reLink;
+            console.log("AJAXurl: " + site + " query: " + checkvalue)
+
+            this.relink = $.ajax({
+                url: "" + site,
+                type: "GET",
+                data: { query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery' },
+                async: false
+            })
+                .done(function (result) {
+                    return result;
+                });
+
+        }
+        return this.relink;
     };
 
     /**
@@ -168,12 +173,15 @@ var TapService = /** @class */ (function () {
      * @return Return an array containing the names of the tables
      */
     TapService.prototype.allTable = function () {
-        
 
-            var allTableObject = this.allTableQuery(); //Get all the tables
-            var allTable = [];
-            allTable = VOTableTools.votable2Rows(allTableObject);
-            return allTable;
+            //var allTable = [];
+        if(this.allTables == undefined){
+            let allTableObject = this.allTableQuery(); //Get all the tables
+
+            this.allTables = VOTableTools.votable2Rows(allTableObject);
+        }
+
+            return this.allTables;
         
          
     };
