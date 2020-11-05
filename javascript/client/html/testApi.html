@@ -116,9 +116,11 @@
 
 
     <script type="text/javascript">
+
         window.onload = function () {
             newMain();
         }
+
     </script>
 </head>
 
@@ -160,19 +162,38 @@
         <div class="container-fluid">
             <div class="container">
 
-                <button class="btn btn-primary" id="simbadService">Simbad</button>
+                <input type="radio" name="sex" id="radio_simbad" value="Simbad" onclick="OnChangeRadio(this)" />
+                <label for="radio_simbad" class="btn badge-secondary">Simbad</label>
+
+                <input type="radio" name="sex" id="radio_gavo" value="Gavo" onclick="OnChangeRadio(this)" />
+                <label for="radio_gavo" class="btn btn-secondary">Gavo</label>
+
+                <input type="radio" name="sex" id="radio_caom" value="Caom" onclick="OnChangeRadio(this)" />
+                <label for="radio_caom" class="btn btn-secondary">CAOM</label>
+
+                <input type="radio" name="sex" id="radio_xmm" value="Xmm" onclick="OnChangeRadio(this)" />
+                <label for="radio_xmm" class="btn btn-secondary">3XMM</label>
+
+                <input type="radio" name="sex" id="radio_vizier" value="Vizier" onclick="OnChangeRadio(this)" />
+                <label for="radio_vizier" class="btn btn-secondary">Vizier</label>
+
+
+
+
+
+                <!--button class="btn btn-primary" id="simbadService">Simbad</--button>
                 <button class="btn btn-primary" id="gavoService">Gavo</button>
                 <button class="btn btn-primary" id="caomService">CAOM</button>
                 <button class="btn btn-primary" id="xmmService">3XMM</button>
-                <button class="btn btn-primary" id="vizierService">Vizier</button>
+                <button class="btn btn-primary" id="vizierService">Vizier</button-->
 
             </div>
             <hr>
             <div class="offset-1">
                 <div class="row">
                     <div class="col-lg-2">
-                        <button class="btn btn-primary" id="btnApiConnectS" style="margin-top: 7px">Connect Api</button>
-                        <button class="btn btn-danger" id="btnApiDisconnect" style="margin-top: 7px">Disconnect Api</button>
+                        <button class="btn btn-secondary" id="btnApiConnectS" style="margin-top: 7px">Connect Api</button>
+                        <button class="btn btn-secondary" id="btnApiDisconnect" style="margin-top: 7px">Disconnect Api</button>
                         <hr>
 
                         <button class="btn btn-success" id="btnGetConnector">Get Connector Params</button>

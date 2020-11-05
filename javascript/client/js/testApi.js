@@ -19,82 +19,118 @@ function reset(){
     display("","getStatu");
     display("","getJsonAll")
 }
+
+var a = new TapApi();
+var params ={
+    tapService : "",
+    schema     : "",
+    table      : "",
+    shortName  : ""
+}
+
+var statusf = "failed"
+var message = "The service is disconnected ! connect service and try again ..."
+function remouveAtive(g){
+    if(document.getElementById(""+g).classList.contains('btn-dark')){
+        document.getElementById(""+g).classList.add('btn-success');
+        document.getElementById(""+g).classList.remove('btn-dark');
+    }
+}
+function removeConnectActive(g){
+    if(document.getElementById(""+g).classList.contains('btn-success')){
+        document.getElementById(""+g).classList.remove('btn-success');
+        document.getElementById(""+g).classList.add('btn-secondary');
+    }
+}
+function  ConnectActive(a,b){
+
+    document.getElementById(""+a).classList.remove('btn-secondary');
+    document.getElementById(""+a).classList.add('btn-success');
+    removeConnectActive(b)
+}
+function setActive(btnId,g,c,x,v,a){
+
+
+        document.getElementById(""+btnId).classList.remove('btn-success');
+        document.getElementById(""+btnId).classList.add('btn-dark');
+        remouveAtive(g);
+        remouveAtive(c);
+        remouveAtive(x);
+        remouveAtive(v)
+        remouveAtive(a)
+
+}
+
+function OnChangeRadio (radio) {
+    alert ("The " + radio.value + " radio is selected.");
+    switch (radio.value){
+        case "Simbad":
+            if(a.testConnection==false){
+                params.tapService = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync"
+                params.schema = Simbadschema;
+                params.table = "basic" ;
+                params.shortName = "Simbad";
+                display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+            }else {
+                display("another service is currently connected ! Disconnect the service an try again",'getStatu')
+            };
+            break;
+        case "Gavo":
+            if(a.testConnection==false){
+                params.tapService = "http://dc.zah.uni-heidelberg.de/tap/sync"
+                params.schema = "rr";
+                params.table = "resource" ;
+                params.shortName = "Gavo";
+                display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+            }else {
+                display("another service is currently connected ! Disconnect the service an try again","getStatu")
+            };
+            break;
+
+        case "Caom":
+            if(a.testConnection==false){
+                params.tapService = "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"
+                params.schema = "dbo";
+                params.table = "CaomObservation" ;
+                params.shortName = "CAOM";
+                display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+            }else {
+                display("another service is currently connected ! Disconnect the service an try again","getStatu")
+            };
+            break;
+        case "Xmm":
+            if(a.testConnection==false){
+                params.tapService = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync"
+                params.schema = "EPIC";
+                params.table = "EPIC_IMAGE" ;
+                params.shortName = "3XMM";
+                //var adql = "SELECT  TOP 1  * FROM EPIC.EPIC_IMAGE "
+                display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+            }else {
+                display("another service is currently connected ! Disconnect the service an try again","getStatu")
+            };
+            break;
+
+        case "Vizier":
+            if(a.testConnection==false){
+                params.tapService = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync"
+                params.schema = "metaviz";
+                params.table = "METAcat" ;
+                params.shortName = "Vizier";
+                //var adql = "SELECT  TOP 100  * FROM metaviz.METAcat"
+                display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+            }else {
+                display("another service is currently connected ! Disconnect the service an try again","getStatu")
+            };
+            break;
+    }
+}
 function newMain(){
 
     // initial();
-    var a = new TapApi();
-    var params ={
-        tapService : "",
-        schema     : "",
-        table      : "",
-        shortName  : ""
-    }
-
 
 ////////////////////////////// API ////////////////////////////////////////////
 
-    $("#simbadService").click(function (){
-       // var adql = "SELECT TOP 1* FROM \"public\".basic"
-        if(a.testConnection==false){
-            params.tapService = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync"
-            params.schema = Simbadschema;
-            params.table = "basic" ;
-            params.shortName = "Simbad";
-            alert(params.shortName+" is now initialised")
-        }else {
-            alert("another service is currently connected ! Disconnect the service an try again")
-        }
-
-    });
-    $("#gavoService").click(function (){
-        //var adql = "SELECT TOP 1* FROM rr.resource "
-        if(a.testConnection==false){
-        params.tapService = "http://dc.zah.uni-heidelberg.de/tap/sync"
-        params.schema = "rr";
-        params.table = "resource" ;
-        params.shortName = "Gavo";
-        alert(params.shortName+" is now initialised")
-        }else {
-            alert("another service is currently connected ! Disconnect the service an try again")
-        }
-    });
-    $("#caomService").click(function (){
-        //var adql = "SELECT  TOP 1 dbo.CaomObservation.* FROM dbo.CaomObservation"
-        if(a.testConnection==false){
-        params.tapService = "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"
-        params.schema = "dbo";
-        params.table = "CaomObservation" ;
-        params.shortName = "CAOM";
-        alert(params.shortName+" is now initialised")
-        }else {
-            alert("another service is currently connected ! Disconnect the service an try again")
-        }
-    });
-    $("#xmmService").click(function (){
-        if(a.testConnection==false){
-        params.tapService = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync"
-        params.schema = "EPIC";
-        params.table = "EPIC_IMAGE" ;
-        params.shortName = "3XMM";
-        //var adql = "SELECT  TOP 1  * FROM EPIC.EPIC_IMAGE "
-        alert(params.shortName+" is now initialised")
-        }else {
-            alert("another service is currently connected ! Disconnect the service an try again")
-        }
-    });
-    $("#vizierService").click(function (){
-        if(a.testConnection==false){
-        params.tapService = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync"
-        params.schema = "metaviz";
-        params.table = "METAcat" ;
-        params.shortName = "Vizier";
-        //var adql = "SELECT  TOP 100  * FROM metaviz.METAcat"
-        alert(params.shortName+" is now initialised")
-        }else {
-            alert("another service is currently connected ! Disconnect the service an try again")
-        }
-
-    });
 
     $("#btnApiConnectS").click(function (){
        // alert(a.testConnection);
@@ -102,14 +138,18 @@ function newMain(){
             if(params.tapService !="" && params.schema !="" && params.table!="" && params.shortName !="") {
                 a.connect(params);
                 let status = a.connector.status;
-                alert("you are now connected")
+                //alert("you are now connected")
                 document.getElementById("testContent").style["display"] = "none";
                 display(status, "getStatu");
+                ConnectActive("btnApiConnectS","btnApiDisconnect")
             }else {
-                alert(" no service selected... Choose service first and try again")
+                display("no service selected... Choose service first and try again","getStatu");
+
             }
         }else {
-            alert("the service is  already connected ! disconnect the service and try again ...")
+            display("the service is  already connected ! disconnect the service and try again ...","getStatu");
+
+            //alert("the service is  already connected ! disconnect the service and try again ...")
         }
 
 
@@ -122,8 +162,11 @@ function newMain(){
             let status = a.getConnector().status;
             display(status,"getStatu");
             display(connector,"getJsonAll")
+            setActive("btnGetConnector","btnGetObjectMap","btnGetJoinTable","btnGetRootField","btnGetRootFieldValue","btnGetRootQuery")
         }else {
-            alert("The service is disconnected ! connect service and try again ..." )
+            display(statusf,"getStatu");
+            display(message,"getJsonAll")
+            //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
 
@@ -133,8 +176,12 @@ function newMain(){
             let status = a.getObjectMap().succes.status;
             display(status,"getStatu");
             display(objectMap,"getJsonAll")
+
+            setActive("btnGetObjectMap","btnGetConnector","btnGetJoinTable","btnGetRootField","btnGetRootFieldValue","btnGetRootQuery")
         }else {
-            alert("The service is disconnected ! connect service and try again ..." )
+            display(statusf,"getStatu");
+            display(message,"getJsonAll")
+           // alert("The service is disconnected ! connect service and try again ..." )
         }
     })
 
@@ -145,8 +192,11 @@ function newMain(){
             let status = a.getJoinedTables(params.table).Succes.status;
             display(status,"getStatu");
             display(joinTables,"getJsonAll")
+            setActive("btnGetJoinTable","btnGetObjectMap","btnGetConnector","btnGetRootField","btnGetRootFieldValue","btnGetRootQuery")
         }else {
-            alert("The service is disconnected ! connect service and try again ..." )
+            display(statusf,"getStatu");
+            display(message,"getJsonAll")
+            //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
     $("#btnGetRootField").click(function (){
@@ -156,8 +206,12 @@ function newMain(){
             let status = a.getRootFields().status;
             display(status,"getStatu");
             display(rootFields,"getJsonAll")
+            setActive("btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector","btnGetRootFieldValue","btnGetRootQuery")
         }else {
-            alert("The service is disconnected ! connect service and try again ..." )
+
+            display(statusf,"getStatu");
+            display(message,"getJsonAll")
+           // alert("The service is disconnected ! connect service and try again ...")
         }
     })
 
@@ -168,21 +222,26 @@ function newMain(){
             let status = a.getRootFieldValues().succes.status;
             display(status,"getStatu");
             display(rootFieldValues,"getJsonAll")
+
+            setActive("btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector","btnGetRootQuery")
         }else {
-            let rootFieldValues = JSON.stringify(a.getRootFieldValues().failure,undefined,3);
-            display(rootFieldValues,"getJsonAll")
-            alert("The service is disconnected ! connect service and try again ..." )
+            display(statusf,"getStatu");
+            display(message,"getJsonAll")
+            //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
     $("#btnGetRootQuery").click(function (){
         if(a.testConnection==true){
-
             let rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
             let status = a.getRootFieldValues().succes.status;
             display(status,"getStatu");
             display(rootQuery,"getJsonAll")
+
+            setActive("btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector")
         }else {
-            alert("The service is disconnected ! connect service and try again ..." )
+            display(statusf,"getStatu");
+            display(message,"getJsonAll")
+            //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
 
@@ -191,13 +250,15 @@ function newMain(){
         if(a.testConnection == true){
             if(a.testDeconnection == false){
                 a.disconnect();
-                alert("The service is now disconnected")
                 reset();
+                display("The service is now disconnected","getStatu")
+
+                ConnectActive("btnApiDisconnect","btnApiConnectS")
                 document.getElementById("testContent").style["display"] = "none";
             }
             a.testDeconnection =false;
         }else {
-            alert("The service are already disconnected")
+            display("The service are already disconnected","getStatu");
         }
 
     })
@@ -679,5 +740,67 @@ function selectTableToJoin_html(tableContentJoinTable){
 
 
 
+$("#simbadService").click(function (){
+    // var adql = "SELECT TOP 1* FROM \"public\".basic"
+    if(a.testConnection==false){
+        params.tapService = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync"
+        params.schema = Simbadschema;
+        params.table = "basic" ;
+        params.shortName = "Simbad";
+        display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+    }else {
+        display("another service is currently connected ! Disconnect the service an try again",'getStatu')
+    }
+
+});
+$("#gavoService").click(function (){
+    //var adql = "SELECT TOP 1* FROM rr.resource "
+    if(a.testConnection==false){
+        params.tapService = "http://dc.zah.uni-heidelberg.de/tap/sync"
+        params.schema = "rr";
+        params.table = "resource" ;
+        params.shortName = "Gavo";
+        display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+    }else {
+        display("another service is currently connected ! Disconnect the service an try again","getStatu")
+    }
+});
+$("#caomService").click(function (){
+    //var adql = "SELECT  TOP 1 dbo.CaomObservation.* FROM dbo.CaomObservation"
+    if(a.testConnection==false){
+        params.tapService = "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"
+        params.schema = "dbo";
+        params.table = "CaomObservation" ;
+        params.shortName = "CAOM";
+        display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+    }else {
+        display("another service is currently connected ! Disconnect the service an try again","getStatu")
+    }
+});
+$("#xmmService").click(function (){
+    if(a.testConnection==false){
+        params.tapService = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync"
+        params.schema = "EPIC";
+        params.table = "EPIC_IMAGE" ;
+        params.shortName = "3XMM";
+        //var adql = "SELECT  TOP 1  * FROM EPIC.EPIC_IMAGE "
+        display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+    }else {
+        display("another service is currently connected ! Disconnect the service an try again","getStatu")
+    }
+});
+$("#vizierService").click(function (){
+    if(a.testConnection==false){
+        params.tapService = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync"
+        params.schema = "metaviz";
+        params.table = "METAcat" ;
+        params.shortName = "Vizier";
+        //var adql = "SELECT  TOP 100  * FROM metaviz.METAcat"
+        display(params.shortName+" is now initialised click now to connect button to connect service","getStatu")
+    }else {
+        display("another service is currently connected ! Disconnect the service an try again","getStatu")
+    }
+
+});
 
 

@@ -309,12 +309,14 @@ TapApi.prototype.getRootQuery1 = function () {
 */
 TapApi.prototype.getRootQuery = function () {
     let out = "";
+    let query
     if (this.testConnection == true) {
         let listJoinAndId = this.getListJoinAndId(this.getConnector().service['table'], this.getObjectMap().succes.object_map);
         let listId = this.getListeId(listJoinAndId)
        // alert(listId);
         //alert(listJoinAndId)
         out = this.tapService.createMainJson(this.query, this.getObjectMap().succes.object_map, this.getConnector().service["table"], listId, listJoinAndId);
+         //query = json2Requete.getAdql(this.getObjectMap().succes.object_map);
     }
 
     return out;
@@ -370,4 +372,7 @@ TapApi.prototype.joinAndId = function (root, json) {
         }
     }
     return list;
+}
+TapApi.prototype.getRootQueryIds = function (){
+
 }
