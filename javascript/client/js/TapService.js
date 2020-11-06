@@ -8,7 +8,7 @@ var TapService = /** @class */ (function () {
         this.checkstatus = checkstatus;// the result
         this.allTables =undefined
         this.tableRemoveView = undefined;
-        this.relink = undefined;
+        this.rootQuery = '';
     }
     /***
      * Receive adql, return votable objects
@@ -79,11 +79,11 @@ var TapService = /** @class */ (function () {
             checkvalue = 'SELECT TOP 100 tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
         }
 
-        if(this.relink == undefined){
 
-            console.log("AJAXurl: " + site + " query: " + checkvalue)
 
-            this.relink = $.ajax({
+           // console.log("AJAXurl: " + site + " query: " + checkvalue)
+
+            reLink = $.ajax({
                 url: "" + site,
                 type: "GET",
                 data: { query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery' },
@@ -93,8 +93,8 @@ var TapService = /** @class */ (function () {
                     return result;
                 });
 
-        }
-        return this.relink;
+
+        return reLink;
     };
 
     /**
@@ -525,7 +525,9 @@ var TapService = /** @class */ (function () {
                           
                                 }
                         contentTable[dataTable[k]] = contentAdql;break;
+
                     }
+                    this.rootQuery = contentAdql;
                     contentTable["key"] = joinIdDic[key];
                     json[key] = contentTable;
                 }

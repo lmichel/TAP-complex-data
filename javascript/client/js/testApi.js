@@ -62,7 +62,7 @@ function setActive(btnId,g,c,x,v,a){
 }
 
 function OnChangeRadio (radio) {
-    alert ("The " + radio.value + " radio is selected.");
+   // alert ("The " + radio.value + " radio is selected.");
     switch (radio.value){
         case "Simbad":
             if(a.testConnection==false){
@@ -172,7 +172,7 @@ function newMain(){
 
     $("#btnGetObjectMap").click(function (){
         if(a.testConnection==true){
-            let objectMap  = JSON.stringify(a.getObjectMap().succes.object_map,undefined,2);
+            let objectMap  = JSON.stringify(a.getObjectMap(),undefined,2);
             let status = a.getObjectMap().succes.status;
             display(status,"getStatu");
             display(objectMap,"getJsonAll")
@@ -230,14 +230,54 @@ function newMain(){
             //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
+
     $("#btnGetRootQuery").click(function (){
         if(a.testConnection==true){
             let rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
             let status = a.getRootFieldValues().succes.status;
+            $("#rootQuery").val(rootQuery);
             display(status,"getStatu");
             display(rootQuery,"getJsonAll")
-
             setActive("btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector")
+            document.getElementById("btnConstraint").style.display ="block";
+            $("#btnConstraint").click(function (){
+                // +=a.tapJoinConstraint;
+                var test = false;
+                var f = rootQuery;
+                if(test==false){
+
+                       /* for(let k =0; k<a.tapJoinConstraint.length;k++){
+                            if(k<2){
+
+                                f += a.tapJoinConstraint[k]+" ";
+                            }
+                        }*/
+
+
+                    test = true;
+                }else {
+                    test=false;
+                   // a.testJoinConstraint = false;
+                }
+
+                display(rootQuery,"getJsonAll")
+                $("#rootQuery").val(rootQuery);
+                setActive("btnConstraint","btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap")
+            })
+        }else {
+            display(statusf,"getStatu");
+            display(message,"getJsonAll")
+            //alert("The service is disconnected ! connect service and try again ..." )
+        }
+    })
+
+    $("#btnGetRootQueryId").click(function (){
+        if(a.testConnection==true){
+            let rootValue = JSON.stringify(a.getRootQueryIds(),undefined,3);
+            let status = a.getRootQueryIds().succes.status;
+            display(status,"getStatu");
+            display(rootValue,"getJsonAll")
+            setActive("btnGetRootQueryId","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector")
         }else {
             display(statusf,"getStatu");
             display(message,"getJsonAll")

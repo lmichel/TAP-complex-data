@@ -9,6 +9,7 @@ class TapApi {
         this.correctService = "";
         this.votableQueryResult = "";
         this.query = ""
+        this.testJoinConstraint = false;
         this.connector = {status: "", message: "", service: {}}
         this.jsonContaintJoinTable = {
             Succes: {
@@ -21,6 +22,9 @@ class TapApi {
                 WrongTable: {status: "", message: ""}
             }
         }
+
+        this.tapJoinConstraint =[];
+        this.tapWhereConstraint = [];
 
         /**
          * @param votableQueryResult (Object) The return value of tabService.Query(query)
@@ -102,6 +106,8 @@ TapApi.prototype.disconnect = function () {
     this.tapService = null;
     this.correctService = null;
     this.votableQueryResult = null;
+    this.tapJoinConstraint =[];
+    this.tapWhereConstraint = [];
     if (this.correctService == null && this.tapService == null && this.votableQueryResult == null) {
         this.disconnectJsonStatu.success["DisconnectStatus"] = "OK";
         this.testDeconnection = true
@@ -264,50 +270,188 @@ TapApi.prototype.getRootFieldValues = function () {
 
 }
 
-/*
-TapApi.prototype.getRootQuery1 = function () {
-    var rootTable = this.jsonContaintJoinTable.Succes.base_table;
+TapApi.prototype.getRootQueryIds = function () {
+    let jsonContaintRootQueryIdsValues = {
+        succes: {status: "", field_ids: []},
+        failure: {
+            notConnected: {status: "", message: ""},
+            otherError: {status: "", message: ""}
+        }
+    }
+    let doubleArrayValue = [];
+    let singleArrayValue = [];
+    if (this.testConnection == true) {
+
+        let Field = this.getRootFields().field_values;
+        var query = $("#rootQuery").val();
+        var a = "\\"
+        let votableQueryResult
+        //alert(query.substr(1))
+        if (query.startsWith("\"SELECT TOP :60")) {
+            //console.log(this.getRootQuery())
+            votableQueryResult = this.tapService.Query(query.substr(1, query.length - 2).replaceAll("\\", ""));
+        } else {
+            votableQueryResult = this.tapService.Query(this.getRootQuery());
+        }
+        if (votableQueryResult.statusText == "OK") {
+            let dataTable = VOTableTools.votable2Rows(votableQueryResult);
+            //let tableName = this.getConnector().service["table"];
+
+            let nbCols = Field.length;
+            // alert(nbCols);
+            if (dataTable[dataTable.length - 1] == 0) {
+                dataTable.splice(dataTable.length - 1, 1);
+            }
+            for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
+                for (let col = 0; col < nbCols; col++) {
+                    singleArrayValue.push(dataTable[col]);
+                }
+                doubleArrayValue.push(singleArrayValue);
+                singleArrayValue = [];
+            }
+            //console.log(doubleArrayValue);
+            jsonContaintRootQueryIdsValues.succes.status = "OK"
+            jsonContaintRootQueryIdsValues.succes.field_ids = doubleArrayValue;
+
+        } else {
+
+            jsonContaintRootQueryIdsValues.failure.notConnected.status = "Failed";
+            jsonContaintRootQueryIdsValues.failure.notConnected.message = "No active TAP connection"
+            jsonContaintRootQueryIdsValues.failure.otherError.status = "failed"
+            jsonContaintRootQueryIdsValues.failure.otherError.message = "error_message"
+            // alert('you are not connected');
+        }
+    }
+
+    return jsonContaintRootQueryIdsValues;
+
+}
+
+TapApi.prototype.getRootQuery = function () {
+    var rootTable = this.connector.service["table"]// .jsonContaintJoinTable.Succes.base_table;
     var jsonAll = this.getObjectMap();
     var schema;
     var contentAdql = "";
+    let listJoinAndId = this.getListJoinAndId(this.getConnector().service['table'], this.getObjectMap().succes.object_map);
+    let listId = this.getListeId(listJoinAndId)
     // console.log(this.getJoinedTables())
     // console.log(rootTable)
-    for (var keyRoot in jsonAll.succes.object_map) {
-        // console.log(keyRoot);
 
+    var dataTable = VOTableTools.votable2Rows(this.votableQueryResult);
+    var joinIdDic = {};
+    /**
+     * @TODO JUSTE POUR BESOIN DE DEVELLOPEMENT
+     */
+    /* const VizierUrl = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync";
+     const XmmUrl = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync";
+     var jsonQuerySchema = {
+         url : this.url,
+         rootTable :root,
+         withSchema :VizierUrl||XmmUrl? false:true
+     }*/
+    for (var i = 0; i < listJoinAndId.length; i = i + 2) {
+        if (!json2Requete.isString(listJoinAndId[i])) {
+            joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i][0];
+        }
+        else {
+            joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i];
+        }
+    }
+
+    var textJoinConstraint = "";
+    var textWhereConstraint ="";
+    for (var keyRoot in jsonAll.succes.object_map) {
         if (keyRoot == rootTable) {
+
+            console.log(keyRoot+" "+rootTable );
             schema = jsonAll.succes.object_map[keyRoot].schema;
-            if (schema == 'public') {
-                schema = "\"" + "public" + "\"";
-            }
+
+                schema = schema.quotedTableName().qualifiedName;
+
             //var m = 0;
             for (var key in jsonAll.succes.object_map[keyRoot].join_tables) {
 
+                var schemaPrefix = "";
+                schemaPrefix = schema.quotedTableName().qualifiedName ;
+               // console.log(schemaPrefix);
 
-                /* if(this.url ==VizierUrl || this.url== XmmUrl){
-                     jsonQuerySchema.
-                 }*/
-                //var schemaPrefix = "";
-                // if( jsonQuerySchema.withSchema==true){
-                //schemaPrefix = schema + ".";
-                // }else{
-                // schemaPrefix = "" ;
-                // }
-               // contentAdql = "SELECT TOP 100 " + schemaPrefix + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + " ";
-               // contentAdql += " FROM " + schema + "." + keyRoot + " ";
-               // contentAdql += "JOIN " + schema + "." + key + " ";
+                contentAdql = "SELECT TOP 60 " + schemaPrefix +'.'+ keyRoot + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target + " ";
+                contentAdql += " FROM " + schema + "." + keyRoot + " ";
+                textJoinConstraint = "JOIN " + schema + "." + key + " ";
+                textJoinConstraint += "ON " + schema + "." + keyRoot + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
+                textJoinConstraint += "=" + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from;
+                this.tapJoinConstraint.push(textJoinConstraint);
+                textJoinConstraint="";
+                let votableFields = this.getRootFields().field_values;
 
-/*
+                ////console.log(k+"  iddic "+votableField[k]+" "+joinIdDic[key]+" "+dataTable[k])
+                var k=0;
+                for(j=0;j<votableFields.length;j++){
+                    //  console.log(votableField[j]+" =>  "+joinIdDic[key])
+                    if(votableFields[j]==joinIdDic[key]){
+                        k=j;
+                        //alert(votableField[j]+" "+joinIdDic[key])
+                        // break
+                    }
+
+                }
+
+                if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") != -1) {
+                    textWhereConstraint = " WHERE " + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + dataTable[k];
+                    this.tapWhereConstraint.push(textWhereConstraint);
+                }
+                else if (schema.indexOf("rr") != -1 && contentAdql.indexOf("ivoid=") == -1) {
+                    //alert(schema+'.'+key+'.'+jsonAll.succes.object_map[keyRoot].join_tables[key].from );
+                    textWhereConstraint = " WHERE " + schema+'.'+key+'.'+jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
+                    this.tapWhereConstraint.push(textWhereConstraint);
+                }
+                else if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") == -1) {
+                    if (json2Requete.isString(dataTable[k])) {
+                        textWhereConstraint += " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
+                        this.tapWhereConstraint.push(textWhereConstraint);
+                    }
+                    else {
+                        textWhereConstraint = " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + dataTable[k];
+                        this.tapWhereConstraint.push(textWhereConstraint);
+                    }
+                }
+                else {
+                    textWhereConstraint = " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
+                    this.tapWhereConstraint.push(textWhereConstraint);
+                }
+
+                //contentTable[dataTable[k]] = contentAdql;break;
+
             }
 
-            return contentAdql;
+            if(this.tapJoinConstraint.length==0){
+               return  contentAdql;
+            }else {
+                if(this.testJoinConstraint == false){
+                for(let k =0; k<this.tapJoinConstraint.length;k++) {
+
+                    if (k < 3) {
+                        contentAdql += this.tapJoinConstraint[k] + " ";
+                    }
+
+                    this.testJoinConstraint =true;
+                    //   break;
+
+                }
+                }
+                return contentAdql;
+            }
+
+            //console.log(this.tapJoinConstraint);
+           // console.log(this.tapWhereConstraint);
+           // return contentAdql;
         }
     }
 
 
 }
-*/
-TapApi.prototype.getRootQuery = function () {
+
+TapApi.prototype.getRootQuery1 = function () {
     let out = "";
     let query
     if (this.testConnection == true) {
@@ -316,10 +460,10 @@ TapApi.prototype.getRootQuery = function () {
        // alert(listId);
         //alert(listJoinAndId)
         out = this.tapService.createMainJson(this.query, this.getObjectMap().succes.object_map, this.getConnector().service["table"], listId, listJoinAndId);
-         //query = json2Requete.getAdql(this.getObjectMap().succes.object_map);
+         query = json2Requete.getAdql(this.getObjectMap().succes.object_map);
     }
 
-    return out;
+    return query;
 }
 
 
@@ -373,6 +517,4 @@ TapApi.prototype.joinAndId = function (root, json) {
     }
     return list;
 }
-TapApi.prototype.getRootQueryIds = function (){
 
-}
