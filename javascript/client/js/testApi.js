@@ -176,7 +176,8 @@ function newMain(){
             let status = a.getObjectMap().succes.status;
             display(status,"getStatu");
             display(objectMap,"getJsonAll")
-
+             a.joinTable("basic");
+            alert($("#btnGetObjectMap").val())
             setActive("btnGetObjectMap","btnGetConnector","btnGetJoinTable","btnGetRootField","btnGetRootFieldValue","btnGetRootQuery")
         }else {
             display(statusf,"getStatu");
@@ -230,38 +231,36 @@ function newMain(){
             //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
-
+    var temp ='';
+    var isCallRootQuery = false;
     $("#btnGetRootQuery").click(function (){
+
         if(a.testConnection==true){
-            let rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
+            let rootQuery;
+            if(isCallRootQuery == false){
+                rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
+                temp = rootQuery;
+               // alert(temp);
+                isCallRootQuery = true;
+            }else {
+                alert(temp);
+                rootQuery = temp;
+            }
+
             let status = a.getRootFieldValues().succes.status;
+            rootQuerys=[]
             $("#rootQuery").val(rootQuery);
             display(status,"getStatu");
             display(rootQuery,"getJsonAll")
+
             setActive("btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector")
             document.getElementById("btnConstraint").style.display ="block";
             $("#btnConstraint").click(function (){
-                // +=a.tapJoinConstraint;
-                var test = false;
-                var f = rootQuery;
-                if(test==false){
 
-                       /* for(let k =0; k<a.tapJoinConstraint.length;k++){
-                            if(k<2){
+             // let rootQuer= addConstraint(rootQuery,a.tapJoinConstraint);
+              //alert(rootQuer);
+                document.getElementById("loadButton").style.display="block"
 
-                                f += a.tapJoinConstraint[k]+" ";
-                            }
-                        }*/
-
-
-                    test = true;
-                }else {
-                    test=false;
-                   // a.testJoinConstraint = false;
-                }
-
-                display(rootQuery,"getJsonAll")
-                $("#rootQuery").val(rootQuery);
                 setActive("btnConstraint","btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap")
             })
         }else {
@@ -304,6 +303,50 @@ function newMain(){
     })
 
     /////////////////////////// END API //////////////////////////
+    var rootQuerys=[]
+    function addConstraint(rootQuery,table){
+        var buttons="";
+        var tapButton = [];
+
+        for (let i=0;i<table.length;i++){
+
+            buttons ="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+           // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+
+            tapButton.push(buttons);
+            $("#loadButton").append(tapButton[i]);
+            window.location.hash = "#loadButton";
+            $("#"+table[i][0]).click(function (){
+
+
+                    if(rootQuerys.indexOf(rootQuerys[i])>-1){
+                        alert( 'existe deja')
+                    }else {
+                        rootQuerys.push(table[i][1]);
+                        rootQuery +=" "+table[i][1];
+
+
+                        $("#getJsonAll").text(rootQuery);
+                        $("#getJsonAll").html(rootQuery);
+                        window.location.hash = "#loadJson";
+                        //display(rootQuery,"getJsonAll")
+
+                       // alert("join value "+table[i][1])
+                    }
+
+
+            })
+
+
+        }
+
+       // console.log(tapButton);
+        return rootQuery;
+    }
+
+
+
+
 
     var mainData,newMainData;
     var listJoinTable;
@@ -482,6 +525,8 @@ function newMain(){
     }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+
 
 
     $("#refresh").click(function(){

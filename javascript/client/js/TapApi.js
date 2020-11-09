@@ -9,6 +9,7 @@ class TapApi {
         this.correctService = "";
         this.votableQueryResult = "";
         this.query = ""
+        this.tapButton = undefined;
         this.testJoinConstraint = false;
         this.connector = {status: "", message: "", service: {}}
         this.jsonContaintJoinTable = {
@@ -283,15 +284,23 @@ TapApi.prototype.getRootQueryIds = function () {
     if (this.testConnection == true) {
 
         let Field = this.getRootFields().field_values;
-        var query = $("#rootQuery").val();
+        //var query = "SELECT TOP 60 \"public\".basic.oid   FROM  \"public\".basic  JOIN   \"public\".otypes ON  \"public\".basic.oid= \"public\".otypes.oidref";
+            var query = $("#getJsonAll").text();
         var a = "\\"
         let votableQueryResult
         //alert(query.substr(1))
-        if (query.startsWith("\"SELECT TOP :60")) {
+        if (query.startsWith("SELECT TOP 60")) {
             //console.log(this.getRootQuery())
-            votableQueryResult = this.tapService.Query(query.substr(1, query.length - 2).replaceAll("\\", ""));
+            //alert("dddddddddddd")
+            votableQueryResult  = this.tapService.Query(query);
         } else {
+            //alert(query);
+           // votableQueryResult = this.tapService.Query(query)
+
+
             votableQueryResult = this.tapService.Query(this.getRootQuery());
+            this.tapButton=[];
+
         }
         if (votableQueryResult.statusText == "OK") {
             let dataTable = VOTableTools.votable2Rows(votableQueryResult);
@@ -357,7 +366,7 @@ TapApi.prototype.getRootQuery = function () {
             joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i];
         }
     }
-
+    var i=0;
     var textJoinConstraint = "";
     var textWhereConstraint ="";
     for (var keyRoot in jsonAll.succes.object_map) {
@@ -371,17 +380,27 @@ TapApi.prototype.getRootQuery = function () {
             //var m = 0;
             for (var key in jsonAll.succes.object_map[keyRoot].join_tables) {
 
-                var schemaPrefix = "";
-                schemaPrefix = schema.quotedTableName().qualifiedName ;
+                var formatTableName = schema + "." + keyRoot;
+                var formatJoinTable = schema+"."+key;
+                var correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+                //alert(formatTableName);
+                var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+                //var schemaPrefix = "";
+                //schemaPrefix = schema.quotedTableName().qualifiedName ;
                // console.log(schemaPrefix);
+               // alert(correctTableNameFormat);
+                //var temp1=[],temp2=[];
+                contentAdql = "SELECT TOP 60 "+ correctTableNameFormat + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target ;
+                contentAdql += " FROM  " + correctTableNameFormat;
+                textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
+                //temp1.push(key);
 
-                contentAdql = "SELECT TOP 60 " + schemaPrefix +'.'+ keyRoot + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target + " ";
-                contentAdql += " FROM " + schema + "." + keyRoot + " ";
-                textJoinConstraint = "JOIN " + schema + "." + key + " ";
-                textJoinConstraint += "ON " + schema + "." + keyRoot + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
-                textJoinConstraint += "=" + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from;
-                this.tapJoinConstraint.push(textJoinConstraint);
+                textJoinConstraint += "ON " + correctTableNameFormat+ "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
+                textJoinConstraint += "=" + correctJoinFormaTable + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from;
+
+                this.tapJoinConstraint.push([key,textJoinConstraint]);
                 textJoinConstraint="";
+
                 let votableFields = this.getRootFields().field_values;
 
                 ////console.log(k+"  iddic "+votableField[k]+" "+joinIdDic[key]+" "+dataTable[k])
@@ -421,8 +440,11 @@ TapApi.prototype.getRootQuery = function () {
                 }
 
                 //contentTable[dataTable[k]] = contentAdql;break;
+                //break;
 
             }
+
+
 
             if(this.tapJoinConstraint.length==0){
                return  contentAdql;
@@ -430,15 +452,22 @@ TapApi.prototype.getRootQuery = function () {
                 if(this.testJoinConstraint == false){
                 for(let k =0; k<this.tapJoinConstraint.length;k++) {
 
-                    if (k < 3) {
-                        contentAdql += this.tapJoinConstraint[k] + " ";
+                    if (k < 1) {
+                       // contentAdql +=" "+ this.tapJoinConstraint[k][1] + "  ";
+
                     }
 
                     this.testJoinConstraint =true;
                     //   break;
 
                 }
+
                 }
+               // console.log(this.tapJoinConstraint[5][0])
+
+                   // alert('fffffffffffff')
+                    contentAdql = addConstraint(contentAdql,this.tapJoinConstraint,this.tapWhereConstraint);
+
                 return contentAdql;
             }
 
@@ -450,6 +479,62 @@ TapApi.prototype.getRootQuery = function () {
 
 
 }
+
+testButton = false;
+
+function addConstraint(rootQuery,table,whereTable){
+    var buttons="";
+    var rootQuerys=[]
+    this.tapButton =[]
+    for (let i=0;i<table.length;i++){
+
+        buttons ="<span>" +
+            "<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>" +
+            " <input type='text' class='form form-control' id='txt"+table[i][0]+"' value='"+whereTable[i]+"'></span>"
+        // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+
+        if(testButton==true){
+            //alert( 'existe deja')
+        }else {
+            this.tapButton.push(buttons);
+        }
+        $("#loadButton").append(this.tapButton[i]);
+        window.location.hash = "#loadButton";
+        $("#"+table[i][0]).click(function (){
+
+            rootQuerys;
+            //if(rootQuerys.indexOf(rootQuerys[i])>-1){
+                //alert( 'existe deja')
+                display("Has  been added ","getStatu")
+               // rootQuerys.splice(rootQuerys.indexOf(rootQuerys[i],1));
+                //rootQuery +=" "+table[i][1];
+            //}else {
+               // rootQuerys.push(table[i][1]);
+                //rootQuery +=" "+table[i][1]+" "+$("#txt"+table[i][0]).val();
+
+                $("#getJsonAll").text("");
+                $("#getJsonAll").append(rootQuery);
+                $("#getJsonAll").append(table[i][1]);
+                $("#getJsonAll").append($("#txt"+table[i][0]).val());
+                //display(rootQuery,"getJsonAll")
+
+                // alert("join value "+table[i][1])
+          //  }
+
+            $("#getJsonAll").html($("#getJsonAll").text());
+            window.location.hash = "#loadJson";
+
+        })
+
+
+    }
+    testButton = true
+
+    // console.log(this.tapButton);
+    return rootQuery;
+}
+
+
 
 TapApi.prototype.getRootQuery1 = function () {
     let out = "";
@@ -518,3 +603,29 @@ TapApi.prototype.joinAndId = function (root, json) {
     return list;
 }
 
+TapApi.prototype.joinTable = function (table) {
+     let jsonAll = this.getObjectMap().succes.object_map;
+    let joinTable = [];
+
+    //alert(jsonAll[table]);
+    if(jsonAll[table]==undefined){
+        let json={}
+        jsonAll= json;
+        joinTable.push(table);
+        //alert(JSON.stringify(joinTable,undefined,2))
+    }else{
+        // alert(table+ " has join table")
+        for (let key in jsonAll[table].join_tables) {
+            //alert(key)
+            if (key.indexOf("2") != -1) {
+                continue; //same rootTable and join_table, I made the second name of the repeat followed by a number 2//@TODO
+            }
+            else {
+                joinTable.push(key);
+            }
+        }
+    }
+
+    console.log(JSON.stringify(joinTable,undefined,2));
+    return joinTable;
+};

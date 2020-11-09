@@ -23,8 +23,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/html/testApi.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/testApi.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +82,8 @@
       <workItem from="1604054623471" duration="3347000" />
       <workItem from="1604306705777" duration="69858000" />
       <workItem from="1604564276241" duration="25030000" />
-      <workItem from="1604648486025" duration="27901000" />
+      <workItem from="1604648486025" duration="29813000" />
+      <workItem from="1604908309452" duration="33538000" />
     </task>
     <servers />
   </component>
@@ -106,9 +107,9 @@
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="687" y="162" width="618" height="783" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1604650528432" />
-    <state x="660" y="252" key="run.anything.popup" timestamp="1604677412916">
+    <state x="660" y="252" key="run.anything.popup" timestamp="1604938572733">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
-    <state x="660" y="252" key="run.anything.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1604677412916" />
+    <state x="660" y="252" key="run.anything.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1604938572733" />
   </component>
 </project>
