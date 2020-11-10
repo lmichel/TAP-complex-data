@@ -237,18 +237,19 @@ function newMain(){
 
         if(a.testConnection==true){
             let rootQuery;
-            if(isCallRootQuery == false){
+            //if(isCallRootQuery == false){
                 rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
-                temp = rootQuery;
+              //  temp = rootQuery;
                // alert(temp);
-                isCallRootQuery = true;
-            }else {
-                alert(temp);
-                rootQuery = temp;
-            }
+               // isCallRootQuery = true;
+          //  }else {
+               // alert(temp);
+               // rootQuery = temp;
+           // }
 
+            //rootQuery = a.addConstraint(rootQuery,this.tapJoinConstraint,this.tapWhereConstraint)
             let status = a.getRootFieldValues().succes.status;
-            rootQuerys=[]
+           // rootQuerys=[]
             $("#rootQuery").val(rootQuery);
             display(status,"getStatu");
             display(rootQuery,"getJsonAll")
@@ -260,6 +261,7 @@ function newMain(){
              // let rootQuer= addConstraint(rootQuery,a.tapJoinConstraint);
               //alert(rootQuer);
                 document.getElementById("loadButton").style.display="block"
+
 
                 setActive("btnConstraint","btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap")
             })

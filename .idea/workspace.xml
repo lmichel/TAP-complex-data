@@ -21,10 +21,9 @@
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/html/testApi.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/testApi.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/brouillon" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/brouillon" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,7 +82,7 @@
       <workItem from="1604306705777" duration="69858000" />
       <workItem from="1604564276241" duration="25030000" />
       <workItem from="1604648486025" duration="29813000" />
-      <workItem from="1604908309452" duration="33538000" />
+      <workItem from="1604908309452" duration="52771000" />
     </task>
     <servers />
   </component>
