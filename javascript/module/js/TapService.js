@@ -153,7 +153,7 @@ var TapService = /** @class */ (function () {
         var allTableObject = this.allTableQuery(); //Get all the tables
         var allTable = [];
         allTable = VOTableTools.votable2Rows(allTableObject);
-        return allTable; //Return an array containing the names of the tables
+        return allTable; //Return an array contaFining the names of the tables
     };
     /**
      * return all tables with the name of the join table.

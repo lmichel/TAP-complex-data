@@ -9,6 +9,7 @@ class TapApi {
         this.correctService = "";
         this.votableQueryResult = "";
         this.query = ""
+        this.handlerAttribut = new HandlerAttributs();
         this.tapButton = undefined;
         this.adqlContent = [];
         this.testJoinConstraint = false;
@@ -590,7 +591,10 @@ addConstraint=function(rootQuery,table,whereTable){
         final1 +=tabjoinEssai[k]+" ";
     }
     var final2 =final1;
-    final2 += " WHERE "+tabAllQuery2[0];
+    if(tabAllQuery2.length>0){
+
+        final2 += " WHERE "+tabAllQuery2[0];
+    }
     for(let c = 1;c<tabAllQuery2.length;c++){
         let m = tabAllQuery2[c]
         for(let k = 1;k<tabAllQuery2.length;k++) {
@@ -616,6 +620,108 @@ addConstraint=function(rootQuery,table,whereTable){
 }
 var finalQuery = "";
 
+TapApi.prototype.getTableAttributeHandlers = function (table){
+
+    let jsonContaintRootQueryIdsValues = {
+        succes: {status: "", field_ids: []},
+        failure: {
+            notConnected: {status: "", message: ""},
+            otherError: {status: "", message: ""}
+        }
+    }
+    let doubleArrayValue = [];
+    let singleArrayValue = [];
+    if (this.testConnection == true) {
+        var sj = new jsonRead(this.getObjectMap().succes.object_map);
+        var adql = this.handlerAttribut.addAllColumn(table, this.connector.service["schema"]);
+
+        var s = this.tapService;
+        var votableQueryResult = s.Query(adql);
+       // var dataTable = VOTableTools.votable2Rows(votableQueryResult)
+        console.log("///--------------------------------------------------------/////////////////");
+
+        //console.log(adql);
+        let dataTable;let contentText;let Field;let nbCols;
+        if (votableQueryResult.statusText == "OK") {
+             dataTable = VOTableTools.votable2Rows(votableQueryResult);
+            console.log("///-----------4444444444444444444444444444444---------------------------------------------/////////////////")
+            console.log(dataTable)
+            contentText = votableQueryResult.responseText;
+            Field = VOTableTools.genererField(votableQueryResult, contentText)
+            //let tableName = this.getConnector().service["table"];
+
+             nbCols = Field.length;
+            //console.log(nbCols);
+            // alert(nbCols);
+            let rowN
+            for ( rowN = 0; rowN < dataTable.length; rowN ++) {//table  content
+            if(rowN>0){
+                if(rowN % nbCols==0){
+                    singleArrayValue.unshift(dataTable[rowN]);
+                    doubleArrayValue.push(singleArrayValue);
+                    singleArrayValue=[]
+                }else {
+                    singleArrayValue.push(dataTable[rowN]);
+                }
+            }else {
+                singleArrayValue.push(dataTable[rowN]);
+            }
+
+
+                /*for (let col = 0; col < nbCols; col++) {
+                    if(nbCols % (col)!=0){
+                        singleArrayValue.push(dataTable[col]);
+                        console.log(nbCols /(col+1));
+                    }else {
+
+                        doubleArrayValue.push(singleArrayValue);
+                        singleArrayValue = [];
+                        console.log(singleArrayValue)
+                    }
+
+                }*/
+
+                //console.log(singleArrayValue);
+            }
+            doubleArrayValue.splice(doubleArrayValue[0][0],1);
+            //console.log(doubleArrayValue);
+            alert(doubleArrayValue);
+            jsonContaintRootQueryIdsValues.succes.status = "OK"
+            jsonContaintRootQueryIdsValues.succes.handle_value = doubleArrayValue;
+
+        } else {
+
+            jsonContaintRootQueryIdsValues.failure.otherError.status = "failed"
+            jsonContaintRootQueryIdsValues.failure.otherError.message = "error_message"
+            // alert('you are not connected');
+        }
+    }else {
+        jsonContaintRootQueryIdsValues.failure.notConnected.status = "Failed";
+        jsonContaintRootQueryIdsValues.failure.notConnected.message = "No active TAP connection"
+    }
+    //console.log(doubleArrayValue)
+   return jsonContaintRootQueryIdsValues;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+var buttonsHandler =[]
+var  buttons;
+TapApi.prototype.addAttribut = function (table){
+    for (let i=0;i<table.length;i++){
+
+        buttons ="<span>" +
+            "<button  type='button' class=\"btn btn-default\" id='btn"+table[i][0]+i+"' value='"+table[i][0]+"' style=\"margin-top: 7px\"> Get "+table[i][0]+" HanlerAttributs</button>"
+            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+
+
+            buttonsHandler.push(buttons);
+
+
+        $("#loadbuttonsHandler").append(buttonsHandler[i]);
+        window.location.hash = "#loadbuttonsHandler";
+
+    }
+}
 
 TapApi.prototype.getRootQuery1 = function () {
     let out = "";

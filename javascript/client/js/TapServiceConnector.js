@@ -532,6 +532,7 @@ TapServiceConnector.prototype.Aide = function (n, s) {
             return function () {
                 var name = b[ii].id.slice(1);//the name of
                 var schema = n.json[name].schema;
+               // alert(name +' '+schema);
                 var adql = n.AdqlAllColumn(name, schema)
                 var QObject = s.Query(adql);
                 var dataTable = VOTableTools.votable2Rows(QObject)
@@ -596,6 +597,7 @@ TapServiceConnector.prototype.Aide = function (n, s) {
             }
         })(i);
     }
+
 }
 
 

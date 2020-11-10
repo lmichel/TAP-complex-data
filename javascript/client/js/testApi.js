@@ -125,29 +125,29 @@ function OnChangeRadio (radio) {
             break;
     }
 }
-function newMain(){
+function newMain() {
 
     // initial();
 
 ////////////////////////////// API ////////////////////////////////////////////
 
 
-    $("#btnApiConnectS").click(function (){
-       // alert(a.testConnection);
-        if(a.testConnection == false){
-            if(params.tapService !="" && params.schema !="" && params.table!="" && params.shortName !="") {
+    $("#btnApiConnectS").click(function () {
+        // alert(a.testConnection);
+        if (a.testConnection == false) {
+            if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
                 a.connect(params);
                 let status = a.connector.status;
                 //alert("you are now connected")
                 document.getElementById("testContent").style["display"] = "none";
                 display(status, "getStatu");
-                ConnectActive("btnApiConnectS","btnApiDisconnect")
-            }else {
-                display("no service selected... Choose service first and try again","getStatu");
+                ConnectActive("btnApiConnectS", "btnApiDisconnect")
+            } else {
+                display("no service selected... Choose service first and try again", "getStatu");
 
             }
-        }else {
-            display("the service is  already connected ! disconnect the service and try again ...","getStatu");
+        } else {
+            display("the service is  already connected ! disconnect the service and try again ...", "getStatu");
 
             //alert("the service is  already connected ! disconnect the service and try again ...")
         }
@@ -155,126 +155,138 @@ function newMain(){
 
     });
 
-    $("#btnGetConnector").click(function (){
-        if(a.testConnection==true){
+    $("#btnGetConnector").click(function () {
+        if (a.testConnection == true) {
 
-            let connector = JSON.stringify(a.getConnector().service,undefined,2);
+            let connector = JSON.stringify(a.getConnector().service, undefined, 2);
             let status = a.getConnector().status;
-            display(status,"getStatu");
-            display(connector,"getJsonAll")
-            setActive("btnGetConnector","btnGetObjectMap","btnGetJoinTable","btnGetRootField","btnGetRootFieldValue","btnGetRootQuery")
-        }else {
-            display(statusf,"getStatu");
-            display(message,"getJsonAll")
+            display(status, "getStatu");
+            display(connector, "getJsonAll")
+            setActive("btnGetConnector", "btnGetObjectMap", "btnGetJoinTable", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")
+        } else {
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
             //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
 
-    $("#btnGetObjectMap").click(function (){
-        if(a.testConnection==true){
-            let objectMap  = JSON.stringify(a.getObjectMap(),undefined,2);
+    $("#btnGetObjectMap").click(function () {
+        if (a.testConnection == true) {
+            let objectMap = JSON.stringify(a.getObjectMap(), undefined, 2);
             let status = a.getObjectMap().succes.status;
-            display(status,"getStatu");
-            display(objectMap,"getJsonAll")
-             a.joinTable("basic");
+            display(status, "getStatu");
+            display(objectMap, "getJsonAll")
+            a.joinTable("basic");
             alert($("#btnGetObjectMap").val())
-            setActive("btnGetObjectMap","btnGetConnector","btnGetJoinTable","btnGetRootField","btnGetRootFieldValue","btnGetRootQuery")
-        }else {
-            display(statusf,"getStatu");
-            display(message,"getJsonAll")
-           // alert("The service is disconnected ! connect service and try again ..." )
+            setActive("btnGetObjectMap", "btnGetConnector", "btnGetJoinTable", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")
+        } else {
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
+            // alert("The service is disconnected ! connect service and try again ..." )
         }
     })
 
-    $("#btnGetJoinTable").click(function (){
-        if(a.testConnection==true){
+    $("#btnGetJoinTable").click(function () {
+        if (a.testConnection == true) {
 
-            let joinTables = JSON.stringify(a.getJoinedTables(params.table).Succes,undefined,2);
+            let joinTables = JSON.stringify(a.getJoinedTables(params.table).Succes, undefined, 2);
             let status = a.getJoinedTables(params.table).Succes.status;
-            display(status,"getStatu");
-            display(joinTables,"getJsonAll")
-            setActive("btnGetJoinTable","btnGetObjectMap","btnGetConnector","btnGetRootField","btnGetRootFieldValue","btnGetRootQuery")
-        }else {
-            display(statusf,"getStatu");
-            display(message,"getJsonAll")
+            display(status, "getStatu");
+            display(joinTables, "getJsonAll")
+            setActive("btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")
+        } else {
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
             //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
-    $("#btnGetRootField").click(function (){
-        if(a.testConnection==true){
+    $("#btnGetRootField").click(function () {
+        if (a.testConnection == true) {
 
-            let rootFields = JSON.stringify(a.getRootFields(),undefined,2);
+            let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
             let status = a.getRootFields().status;
-            display(status,"getStatu");
-            display(rootFields,"getJsonAll")
-            setActive("btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector","btnGetRootFieldValue","btnGetRootQuery")
-        }else {
+            display(status, "getStatu");
+            display(rootFields, "getJsonAll")
+            setActive("btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootFieldValue", "btnGetRootQuery")
+        } else {
 
-            display(statusf,"getStatu");
-            display(message,"getJsonAll")
-           // alert("The service is disconnected ! connect service and try again ...")
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
+            // alert("The service is disconnected ! connect service and try again ...")
         }
     })
 
-    $("#btnGetRootFieldValue").click(function (){
-        if(a.testConnection==true){
+    $("#btnGetRootFieldValue").click(function () {
+        if (a.testConnection == true) {
 
-            let rootFieldValues = JSON.stringify(a.getRootFieldValues().succes,undefined,3);
+            let rootFieldValues = JSON.stringify(a.getRootFieldValues().succes, undefined, 3);
             let status = a.getRootFieldValues().succes.status;
-            display(status,"getStatu");
-            display(rootFieldValues,"getJsonAll")
+            display(status, "getStatu");
+            display(rootFieldValues, "getJsonAll")
 
-            setActive("btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector","btnGetRootQuery")
-        }else {
-            display(statusf,"getStatu");
-            display(message,"getJsonAll")
+            setActive("btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootQuery")
+        } else {
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
             //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
-    var temp ='';
+    var temp = '';
     var isCallRootQuery = false;
-    $("#btnGetRootQuery").click(function (){
+    $("#btnGetRootQuery").click(function () {
 
-        if(a.testConnection==true){
+        if (a.testConnection == true) {
             let rootQuery;
             //if(isCallRootQuery == false){
-                rootQuery = JSON.stringify(a.getRootQuery(),undefined,3);
-              //  temp = rootQuery;
-               // alert(temp);
-               // isCallRootQuery = true;
-          //  }else {
-               // alert(temp);
-               // rootQuery = temp;
-           // }
+            rootQuery = JSON.stringify(a.getRootQuery(), undefined, 3);
+            //  temp = rootQuery;
+            // alert(temp);
+            // isCallRootQuery = true;
+            //  }else {
+            // alert(temp);
+            // rootQuery = temp;
+            // }
 
             //rootQuery = a.addConstraint(rootQuery,this.tapJoinConstraint,this.tapWhereConstraint)
             let status = a.getRootFieldValues().succes.status;
-           // rootQuerys=[]
+            // rootQuerys=[]
             $("#rootQuery").val(rootQuery);
-            display(status,"getStatu");
-            display(rootQuery,"getJsonAll")
+            display(status, "getStatu");
+            display(rootQuery, "getJsonAll")
 
-            setActive("btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap","btnGetConnector")
-            document.getElementById("btnConstraint").style.display ="block";
-            $("#btnConstraint").click(function (){
+            setActive("btnGetRootQuery", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector")
+            document.getElementById("btnConstraint").style.display = "block";
+            $("#btnConstraint").click(function () {
+                console.log(a.getTableAttributeHandlers("basic"));
+                // let rootQuer= addConstraint(rootQuery,a.tapJoinConstraint);
 
-             // let rootQuer= addConstraint(rootQuery,a.tapJoinConstraint);
-              //alert(rootQuer);
-                document.getElementById("loadButton").style.display="block"
+                document.getElementById("loadButton").style.display = "block"
 
 
-                setActive("btnConstraint","btnGetRootQuery","btnGetRootFieldValue","btnGetRootField","btnGetJoinTable","btnGetObjectMap")
+                setActive("btnConstraint", "btnGetRootQuery", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap")
             })
-        }else {
-            display(statusf,"getStatu");
-            display(message,"getJsonAll")
+        } else {
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
             //alert("The service is disconnected ! connect service and try again ..." )
         }
+    })
+
+    $("#btnLoadbuttonsHandler").click(function () {
+
+        var json = a.getTableAttributeHandlers('basic');
+
+        display(json.succes.status, "getStatu")
+
+       // document.getElementById("loadbuttonsHandler").style.display = "none"
+        display(JSON.stringify(json.succes, undefined, 2), "getJsonAll")
+
+
     })
 
     $("#btnGetRootQueryId").click(function (){
         if(a.testConnection==true){
-            let rootValue = JSON.stringify(a.getRootQueryIds(),undefined,3);
+            let rootValue = JSON.stringify(a.getRootQueryIds().succes,undefined,3);
             let status = a.getRootQueryIds().succes.status;
             display(status,"getStatu");
             display(rootValue,"getJsonAll")
