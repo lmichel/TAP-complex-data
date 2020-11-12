@@ -67,6 +67,7 @@ class TapApi {
  * */
 TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     var formatTableName = schema + "." + table;
+
     //alert(formatTableName);
     var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
     this.query = "SELECT TOP 5 * FROM " + correctTableNameFormat;
@@ -74,7 +75,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     this.correctService = new TapServiceConnector(tapService, schema, shortName);
     this.votableQueryResult = this.tapService.Query(this.query);
 
-    if (this.getJsonStatu(this.votableQueryResult).success.status =='OK') {
+    if (this.getJsonStatu(this.votableQueryResult).success.status == 'OK') {
         this.testConnection = true;
         this.connector.status = 'OK';
         this.connector.service["tapService"] = tapService;
@@ -94,7 +95,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
         // $("#votableJson").html(JSON.stringify(jsonData,undefined,2));
         // window.location.hash = "#votableJson"
 
-    }else if(this.getJsonStatu(this.votableQueryResult)!=undefined && shortName=="Vizier"){
+    } else if (this.getJsonStatu(this.votableQueryResult) != undefined && shortName == "Vizier") {
         this.testConnection = true;
         this.connector.status = 'OK';
         this.connector.service["tapService"] = tapService;
@@ -123,6 +124,9 @@ TapApi.prototype.disconnect = function () {
     this.votableQueryResult = null;
     this.tapJoinConstraint = [];
     this.tapWhereConstraint = [];
+    this.adqlContent = "";
+    $("#getJsonAll").text("");
+
     if (this.correctService == null && this.tapService == null && this.votableQueryResult == null) {
         this.disconnectJsonStatu.success["DisconnectStatus"] = "OK";
         this.testDeconnection = true
@@ -138,47 +142,6 @@ TapApi.prototype.disconnect = function () {
     }
     //console.log(JSON.stringify(this.disconnectJsonStatu,undefined,2))
 
-
-}
-
-
-function reset(){
-
-    this.query ="";
-    this.tapService="";
-    this.votableQueryResult ="";
-    this.correctService ="";
-    this.connector.service={};
-    this.testConnection = false;
-    this.testDeconnection = false;
-    this.correctService = "";
-    this.votableQueryResult = "";
-    this.query = ""
-    this.handlerAttribut = new HandlerAttributs();
-    this.tapButton = undefined;
-    this.adqlContent = [];
-    this.testJoinConstraint = false;
-    this.connector = {status: "", message: "", service: {}}
-    this.jsonContaintJoinTable = {
-        Succes: {
-            status: "",
-            base_table: "",
-            joined_tables: []
-        },
-        Failure: {
-            NotConnected: {status: "", message: ""},
-            WrongTable: {status: "", message: ""}
-        }
-    }
-    finalQuery ="";
-    this.tapJoinConstraint = [];
-    this.tapWhereConstraint = [];
-    contA = "";
-     testRoot = false;
-    testButton = false;
-     tabAllQuery = []
-    tab = []
-     allQuery = "";
 
 }
 
@@ -426,8 +389,8 @@ TapApi.prototype.getRootQuery = function () {
     var i = 0;
     var textJoinConstraint = "";
     var textWhereConstraint = "";
-    this.tapWhereConstraint =[];
-    this.tapJoinConstraint =[]
+    this.tapWhereConstraint = [];
+    this.tapJoinConstraint = []
     for (var keyRoot in jsonAll.succes.object_map) {
         if (keyRoot == rootTable) {
 
@@ -527,6 +490,7 @@ TapApi.prototype.getRootQuery = function () {
                     contA = contentAdql;
                     return contentAdql;
                 } else {
+                    console.log(finalQuery);
                     return finalQuery;
                 }
 
@@ -538,19 +502,27 @@ TapApi.prototype.getRootQuery = function () {
         }
     }
 
-
 }
-var contA = "";
-var testRoot = false;
+let contA = "";
+let testRoot = false;
 testButton = false;
-var tabAllQuery = []
-var tab = []
-var allQuery = "";
+let tabAllQuery = []
+let tab = []
+let allQuery = "";
+let finalQuery = "";
+let tabContaninBtnRemoveConstraint = [];
+
+let HtmltabContaninBtnRemoveConstraint = [];
+TapApi.prototype.getTanContaintBtnRemovrConstrain = function (){
+    alert(tabContaninBtnRemoveConstraint);
+    return tabContaninBtnRemoveConstraint;
+}
+var tempTab =[];
 addConstraint = function (rootQuery, table, whereTable) {
     var buttons = "";
     var rootQuerys = []
     this.tapButton = []
-
+    var removeBtn;
 
     for (let i = 0; i < table.length; i++) {
 
@@ -567,10 +539,28 @@ addConstraint = function (rootQuery, table, whereTable) {
 
         $("#loadButton").append(this.tapButton[i]);
         window.location.hash = "#loadButton";
-
+        //var btns =this.tapButton;
         $("#" + table[i][0]).click(function () {
 
-            rootQuerys;
+                if(tabContaninBtnRemoveConstraint.length >0) {
+                    for (r = 0; r < tabContaninBtnRemoveConstraint.length; r++) {
+                        if(tabContaninBtnRemoveConstraint[r]==table[i][0]){
+
+                        }else {
+                            tabContaninBtnRemoveConstraint.push(table[i][0])
+                        }
+                    }
+                }else {
+                    tabContaninBtnRemoveConstraint.push(table[i][0])
+                }
+
+
+               console.log(tabContaninBtnRemoveConstraint);
+
+           // addRemoveBtn(tabContaninBtnRemoveConstraint);
+
+
+            //rootQuerys;
             //if(rootQuerys.indexOf(rootQuerys[i])>-1){
             //alert( 'existe deja')
             display("Has  been added ", "getStatu")
@@ -666,11 +656,85 @@ addConstraint = function (rootQuery, table, whereTable) {
     testButton = true
 
     // console.log(this.tapButton);
-    return this.adqlContent
-}
-var finalQuery = "";
 
-TapApi.prototype.getTableAttributeHandlers = function (table){
+    // return finalQuery
+}
+var splitToJoin = [];
+var finalQueryRemouve="";
+TapApi.prototype.resetTableConstraint = function (table) {
+
+    //alert(table);
+    var schema = this.connector.service["schema"];
+    var formatTableName = schema + "." + table;
+
+    var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+    if (finalQuery != ""){
+        splitToJoin = finalQuery.split('JOIN')
+    }
+
+    for(let i =0; i<splitToJoin.length; i++){
+        if(splitToJoin[i].search(correctTableNameFormat)!=-1){
+            splitToJoin.splice(splitToJoin.indexOf(splitToJoin[i]),i);
+            finalQuery.replaceAll(splitToJoin[i].trim(),"");
+        }
+        console.log(splitToJoin)
+        if(splitToJoin[i] ==undefined){
+            splitToJoin[i]="";
+        }
+
+
+    }
+    var splitUndefine =
+    //finalQuery = finalQueryRemouve;
+    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    console.log(finalQuery);
+    console.log(finalQueryRemouve);
+}
+
+function reset() {
+    contA = "";
+    this.query = "";
+    this.tapService = "";
+    this.votableQueryResult = "";
+    this.correctService = "";
+    this.connector.service = {};
+    this.testConnection = false;
+    this.testDeconnection = false;
+    this.correctService = "";
+    this.votableQueryResult = "";
+    this.query = ""
+    this.handlerAttribut = new HandlerAttributs();
+    this.tapButton = [];
+    this.adqlContent = [];
+    this.testJoinConstraint = false;
+    this.connector = {status: "", message: "", service: {}}
+    this.jsonContaintJoinTable = {
+        Succes: {
+            status: "",
+            base_table: "",
+            joined_tables: []
+        },
+        Failure: {
+            NotConnected: {status: "", message: ""},
+            WrongTable: {status: "", message: ""}
+        }
+    }
+    finalQuery = "";
+    this.tapJoinConstraint = [];
+    this.tapWhereConstraint = [];
+    contA = "";
+    testRoot = false;
+    testButton = false;
+    tabAllQuery = []
+    tab = []
+    allQuery = "";
+    $(document).ajaxStop(function () {
+        window.location.reload();
+    });
+
+}
+
+TapApi.prototype.getTableAttributeHandlers = function (table) {
 
     return this.handlerAttribut.getTableAttributeHandler(table);
 }

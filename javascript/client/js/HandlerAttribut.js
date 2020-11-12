@@ -24,6 +24,8 @@ class HandlerAttributs {
 }
 
 HandlerAttributs.prototype.getTableAttributeHandler = function (table){
+    let doubleArrayValue = [];
+    let singleArrayValue = [];
       this.db_name = this.api.connector.service["table"]
         var api = this.api;
         let jsonContaintHandlerValues = {
@@ -46,8 +48,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table){
             }
         }
 
-        let doubleArrayValue = [];
-        let singleArrayValue = [];
+
 
         if (api.testConnection ==true) {
 
@@ -63,29 +64,43 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table){
             let nbCols;
             if (votableQueryResult != undefined) {
                 dataTable = VOTableTools.votable2Rows(votableQueryResult);
-
+                console.log(dataTable);
                 contentText = votableQueryResult.responseText;
                 Field = VOTableTools.genererField(votableQueryResult, contentText)
 
                 nbCols = Field.length;
 
                 let rowN
-                for (rowN = 0; rowN < dataTable.length; rowN++) {//table  content
+                /*for (rowN = 0; rowN < dataTable.length; rowN++) {//table  content
                     if (rowN > 0) {
                         if (rowN % nbCols == 0) {
                             singleArrayValue.unshift(dataTable[rowN]);
                             doubleArrayValue.push(singleArrayValue);
+
                             singleArrayValue = []
                         } else {
                             singleArrayValue.push(dataTable[rowN]);
+
                         }
                     } else {
                         singleArrayValue.push(dataTable[rowN]);
                     }
 
-                }
-                doubleArrayValue.splice(doubleArrayValue[0][0], 1);
-                //console.log(doubleArrayValue);
+                }*/
+
+
+                for (rowN = 0; rowN < dataTable.length; rowN+=nbCols) {//table  content
+                    for (let k=rowN;k<dataTable.length;k++){
+
+                            singleArrayValue.push(dataTable[k]);
+
+                        }
+                    doubleArrayValue.push(singleArrayValue);
+
+                    singleArrayValue = []
+                    }
+                //doubleArrayValue.splice(doubleArrayValue[0][0], 0);
+                console.log(doubleArrayValue);
                 //alert(doubleArrayValue);
                 jsonContaintHandlerValues.succes.status = "OK"
                 let jsonContaintHandlersValue=[]
