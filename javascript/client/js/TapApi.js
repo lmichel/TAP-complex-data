@@ -26,7 +26,7 @@ class TapApi {
             }
         }
 
-        this.tapJoinConstraint =[];
+        this.tapJoinConstraint = [];
         this.tapWhereConstraint = [];
 
         /**
@@ -73,7 +73,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     this.correctService = new TapServiceConnector(tapService, schema, shortName);
     this.votableQueryResult = this.tapService.Query(this.query);
 
-    if (this.getJsonStatu(this.votableQueryResult).success.status == "OK") {
+    if (this.getJsonStatu(this.votableQueryResult).success.status =='OK') {
         this.testConnection = true;
         this.connector.status = 'OK';
         this.connector.service["tapService"] = tapService;
@@ -107,15 +107,18 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
 
 
 TapApi.prototype.disconnect = function () {
+    reset();
+    //alert("disconnected")
     this.tapService = null;
     this.correctService = null;
     this.votableQueryResult = null;
-    this.tapJoinConstraint =[];
+    this.tapJoinConstraint = [];
     this.tapWhereConstraint = [];
     if (this.correctService == null && this.tapService == null && this.votableQueryResult == null) {
         this.disconnectJsonStatu.success["DisconnectStatus"] = "OK";
         this.testDeconnection = true
         this.testConnection = false
+
         return this.disconnectJsonStatu.success;
     } else {
         this.disconnectJsonStatu.faillure["faillure"] = "failled";
@@ -128,6 +131,48 @@ TapApi.prototype.disconnect = function () {
 
 
 }
+
+
+function reset(){
+
+    this.query ="";
+    this.tapService="";
+    this.votableQueryResult ="";
+    this.correctService ="";
+    this.connector.service={};
+    this.testConnection = false;
+    this.testDeconnection = false;
+    this.correctService = "";
+    this.votableQueryResult = "";
+    this.query = ""
+    this.handlerAttribut = new HandlerAttributs();
+    this.tapButton = undefined;
+    this.adqlContent = [];
+    this.testJoinConstraint = false;
+    this.connector = {status: "", message: "", service: {}}
+    this.jsonContaintJoinTable = {
+        Succes: {
+            status: "",
+            base_table: "",
+            joined_tables: []
+        },
+        Failure: {
+            NotConnected: {status: "", message: ""},
+            WrongTable: {status: "", message: ""}
+        }
+    }
+    finalQuery ="";
+    this.tapJoinConstraint = [];
+    this.tapWhereConstraint = [];
+    contA = "";
+     testRoot = false;
+    testButton = false;
+     tabAllQuery = []
+    tab = []
+     allQuery = "";
+
+}
+
 
 TapApi.prototype.getConnector = function () {
     if (this.testConnection == true) {
@@ -295,14 +340,14 @@ TapApi.prototype.getRootQueryIds = function () {
         if (query.startsWith("SELECT TOP 60")) {
             //console.log(this.getRootQuery())
             //alert("dddddddddddd")
-            votableQueryResult  = this.tapService.Query(query);
+            votableQueryResult = this.tapService.Query(query);
         } else {
             //alert(query);
             // votableQueryResult = this.tapService.Query(query)
 
 
             votableQueryResult = this.tapService.Query(this.getRootQuery());
-            this.tapButton=[];
+            this.tapButton = [];
 
         }
         if (votableQueryResult.statusText == "OK") {
@@ -350,6 +395,7 @@ TapApi.prototype.getRootQuery = function () {
     // console.log(rootTable)
 
     var dataTable = VOTableTools.votable2Rows(this.votableQueryResult);
+    console.log(dataTable);
     var joinIdDic = {};
     /**
      * @TODO JUSTE POUR BESOIN DE DEVELLOPEMENT
@@ -364,18 +410,19 @@ TapApi.prototype.getRootQuery = function () {
     for (var i = 0; i < listJoinAndId.length; i = i + 2) {
         if (!json2Requete.isString(listJoinAndId[i])) {
             joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i][0];
-        }
-        else {
+        } else {
             joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i];
         }
     }
-    var i=0;
+    var i = 0;
     var textJoinConstraint = "";
-    var textWhereConstraint ="";
+    var textWhereConstraint = "";
+    this.tapWhereConstraint =[];
+    this.tapJoinConstraint =[]
     for (var keyRoot in jsonAll.succes.object_map) {
         if (keyRoot == rootTable) {
 
-            console.log(keyRoot+" "+rootTable );
+            console.log(keyRoot + " " + rootTable);
             schema = jsonAll.succes.object_map[keyRoot].schema;
 
             schema = schema.quotedTableName().qualifiedName;
@@ -384,7 +431,7 @@ TapApi.prototype.getRootQuery = function () {
             for (var key in jsonAll.succes.object_map[keyRoot].join_tables) {
 
                 var formatTableName = schema + "." + keyRoot;
-                var formatJoinTable = schema+"."+key;
+                var formatJoinTable = schema + "." + key;
                 var correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
                 //alert(formatTableName);
                 var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
@@ -393,25 +440,25 @@ TapApi.prototype.getRootQuery = function () {
                 // console.log(schemaPrefix);
                 // alert(correctTableNameFormat);
                 //var temp1=[],temp2=[];
-                contentAdql = "SELECT TOP 60 "+ correctTableNameFormat + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target ;
+                contentAdql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
                 contentAdql += " FROM  " + correctTableNameFormat;
                 textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
                 //temp1.push(key);
 
-                textJoinConstraint += "ON " + correctTableNameFormat+ "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
+                textJoinConstraint += "ON " + correctTableNameFormat + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
                 textJoinConstraint += "=" + correctJoinFormaTable + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from;
 
-                this.tapJoinConstraint.push([key,textJoinConstraint]);
-                textJoinConstraint="";
+                this.tapJoinConstraint.push([key, textJoinConstraint]);
+                textJoinConstraint = "";
 
                 let votableFields = this.getRootFields().field_values;
 
                 ////console.log(k+"  iddic "+votableField[k]+" "+joinIdDic[key]+" "+dataTable[k])
-                var k=0;
-                for(j=0;j<votableFields.length;j++){
+                var k = 0;
+                for (j = 0; j < votableFields.length; j++) {
                     //  console.log(votableField[j]+" =>  "+joinIdDic[key])
-                    if(votableFields[j]==joinIdDic[key]){
-                        k=j;
+                    if (votableFields[j] == joinIdDic[key]) {
+                        k = j;
                         //alert(votableField[j]+" "+joinIdDic[key])
                         // break
                     }
@@ -421,23 +468,19 @@ TapApi.prototype.getRootQuery = function () {
                 if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") != -1) {
                     textWhereConstraint = " WHERE " + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + dataTable[k];
                     this.tapWhereConstraint.push(textWhereConstraint);
-                }
-                else if (schema.indexOf("rr") != -1 && contentAdql.indexOf("ivoid=") == -1) {
+                } else if (schema.indexOf("rr") != -1 && contentAdql.indexOf("ivoid=") == -1) {
                     //alert(schema+'.'+key+'.'+jsonAll.succes.object_map[keyRoot].join_tables[key].from );
-                    textWhereConstraint = " WHERE " + schema+'.'+key+'.'+jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
+                    textWhereConstraint = " WHERE " + schema + '.' + key + '.' + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
                     this.tapWhereConstraint.push(textWhereConstraint);
-                }
-                else if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") == -1) {
+                } else if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") == -1) {
                     if (json2Requete.isString(dataTable[k])) {
                         textWhereConstraint += " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
                         this.tapWhereConstraint.push(textWhereConstraint);
-                    }
-                    else {
+                    } else {
                         textWhereConstraint = " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + dataTable[k];
                         this.tapWhereConstraint.push(textWhereConstraint);
                     }
-                }
-                else {
+                } else {
                     textWhereConstraint = " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
                     this.tapWhereConstraint.push(textWhereConstraint);
                 }
@@ -448,19 +491,18 @@ TapApi.prototype.getRootQuery = function () {
             }
 
 
-
-            if(this.tapJoinConstraint.length==0){
-                return  contentAdql;
-            }else {
-                if(this.testJoinConstraint == false){
-                    for(let k =0; k<this.tapJoinConstraint.length;k++) {
+            if (this.tapJoinConstraint.length == 0) {
+                return contentAdql;
+            } else {
+                if (this.testJoinConstraint == false) {
+                    for (let k = 0; k < this.tapJoinConstraint.length; k++) {
 
                         if (k < 1) {
                             // contentAdql +=" "+ this.tapJoinConstraint[k][1] + "  ";
 
                         }
 
-                        this.testJoinConstraint =true;
+                        this.testJoinConstraint = true;
                         //   break;
 
                     }
@@ -470,12 +512,12 @@ TapApi.prototype.getRootQuery = function () {
 
                 // alert('fffffffffffff')
 
-                this.adqlContent = addConstraint(contentAdql,this.tapJoinConstraint,this.tapWhereConstraint);
-                if(testRoot==false){
-                    testRoot =true;
+                this.adqlContent = addConstraint(contentAdql, this.tapJoinConstraint, this.tapWhereConstraint);
+                if (testRoot == false) {
+                    testRoot = true;
                     contA = contentAdql;
                     return contentAdql;
-                }else{
+                } else {
                     return finalQuery;
                 }
 
@@ -489,40 +531,40 @@ TapApi.prototype.getRootQuery = function () {
 
 
 }
-var contA ="";
+var contA = "";
 var testRoot = false;
 testButton = false;
-var tabAllQuery =[]
-var  tab =[]
-var allQuery="";
-addConstraint=function(rootQuery,table,whereTable){
-    var buttons="";
-    var rootQuerys=[]
-    this.tapButton =[]
+var tabAllQuery = []
+var tab = []
+var allQuery = "";
+addConstraint = function (rootQuery, table, whereTable) {
+    var buttons = "";
+    var rootQuerys = []
+    this.tapButton = []
 
 
+    for (let i = 0; i < table.length; i++) {
 
-    for (let i=0;i<table.length;i++){
-
-        buttons ="<span>" +
-            "<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>" +
-            " <input type='text' class='form form-control' id='txt"+table[i][0]+"' value='"+whereTable[i]+"'></span>"
+        buttons = "<span>" +
+            "<button  type='button' class=\"btn btn-default\" id='" + table[i][0] + "' value='" + table[i][0] + "' style=\"margin-top: 7px\">Join '" + table[i][0] + "'</button>" +
+            " <input type='text' class='form form-control' id='txt" + table[i][0] + "' value='" + whereTable[i] + "'>"
         // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
 
-        if(testButton==true){
+        if (testButton == true) {
             //alert( 'existe deja')
-        }else {
+        } else {
             this.tapButton.push(buttons);
         }
 
         $("#loadButton").append(this.tapButton[i]);
         window.location.hash = "#loadButton";
-        $("#"+table[i][0]).click(function (){
+
+        $("#" + table[i][0]).click(function () {
 
             rootQuerys;
             //if(rootQuerys.indexOf(rootQuerys[i])>-1){
             //alert( 'existe deja')
-            display("Has  been added ","getStatu")
+            display("Has  been added ", "getStatu")
             // rootQuerys.splice(rootQuerys.indexOf(rootQuerys[i],1));
             //rootQuery +=" "+table[i][1];
             //}else {
@@ -532,52 +574,50 @@ addConstraint=function(rootQuery,table,whereTable){
             $("#getJsonAll").text("");
             $("#getJsonAll").append(rootQuery);
             $("#getJsonAll").append(table[i][1]);
-            $("#getJsonAll").append($("#txt"+table[i][0]).val());
+            $("#getJsonAll").append($("#txt" + table[i][0]).val());
             // rootQuery = $("#getJsonAll").text();
             //display(rootQuery,"getJsonAll")
 
             // alert("join value "+table[i][1])
             //  }
-            this.adqlContent =[];
+            this.adqlContent = [];
             $("#getJsonAll").html($("#getJsonAll").text());
             window.location.hash = "#loadJson";
             tab = []
-            tab.push(table[i][1] + " " +whereTable[i]);
+            tab.push(table[i][1] + " " + whereTable[i]);
 
             this.adqlContent.push($("#getJsonAll").text());
 
 
-            document.getElementById("loadButton").style.display="none"
-            document.getElementById("btnConstraint").style.display ="none";
-
-
+            document.getElementById("loadButton").style.display = "none"
+            document.getElementById("btnConstraint").style.display = "none";
 
 
         })
 
 
     }
-    contA+=tab
-    allQuery= contA;
-    tab=[]
+    contA += tab
+    allQuery = contA;
+    tab = []
     //console.log(this.adqlContent)
     var tabAllQuery2 = []
     console.log(allQuery);
     tabAllQuery = allQuery.split("WHERE");
-    let textTabAllQuery =[];
+    let textTabAllQuery = [];
     var joinEssai = "";
-    for(let i =1 ;i<tabAllQuery.length;i++){
-        joinEssai+=tabAllQuery[i];
+    for (let i = 1; i < tabAllQuery.length; i++) {
+        joinEssai += tabAllQuery[i];
         textTabAllQuery.push(tabAllQuery[i].split(" "));
     }
     var tabjoinEssai = joinEssai.split(" ");
 
-    for (let i =0 ; i<textTabAllQuery.length;i++){
+    for (let i = 0; i < textTabAllQuery.length; i++) {
         tabAllQuery2.push(textTabAllQuery[i][1]);
-        tabAllQuery[i+1].replaceAll(" "+tabAllQuery2[i]," ");
-        for(let j = 0;j<tabjoinEssai.length;j++){
-            if(tabjoinEssai[j].trim()==tabAllQuery2[i].trim()){
-                tabjoinEssai.splice(j,1);
+        tabAllQuery[i + 1].replaceAll(" " + tabAllQuery2[i], " ");
+        for (let j = 0; j < tabjoinEssai.length; j++) {
+            if (tabjoinEssai[j].trim() == tabAllQuery2[i].trim()) {
+                tabjoinEssai.splice(j, 1);
             }
             //joinEssai +=tabjoinEssai[j];
         }
@@ -586,23 +626,23 @@ addConstraint=function(rootQuery,table,whereTable){
     //var tabAllQuery2 = textTabAllQuery.split(" ");
 
     console.log(tabAllQuery);
-    var final1 = tabAllQuery[0]+" ";
-    for (let k=0;k<tabjoinEssai.length;k++){
-        final1 +=tabjoinEssai[k]+" ";
+    var final1 = tabAllQuery[0] + " ";
+    for (let k = 0; k < tabjoinEssai.length; k++) {
+        final1 += tabjoinEssai[k] + " ";
     }
-    var final2 =final1;
-    if(tabAllQuery2.length>0){
+    var final2 = final1;
+    if (tabAllQuery2.length > 0) {
 
-        final2 += " WHERE "+tabAllQuery2[0];
+        final2 += " WHERE " + tabAllQuery2[0];
     }
-    for(let c = 1;c<tabAllQuery2.length;c++){
+    for (let c = 1; c < tabAllQuery2.length; c++) {
         let m = tabAllQuery2[c]
-        for(let k = 1;k<tabAllQuery2.length;k++) {
-            if (m.trim()== tabAllQuery2[k].trim()) {
+        for (let k = 1; k < tabAllQuery2.length; k++) {
+            if (m.trim() == tabAllQuery2[k].trim()) {
 
-            }else {
-                if(m.trim()!=tabAllQuery2[0].trim()){
-                    final2 += " AND "+ tabAllQuery2[c]
+            } else {
+                if (m.trim() != tabAllQuery2[0].trim()) {
+                    final2 += " AND " + tabAllQuery2[c]
                 }
 
             }
@@ -610,9 +650,10 @@ addConstraint=function(rootQuery,table,whereTable){
 
     }
     finalQuery = final2;
-   //console.log("////////////////////////////////////////////////////////////////////////////////////");
+    $("#getJsonAll").text(finalQuery);
+    //console.log("////////////////////////////////////////////////////////////////////////////////////");
     //console.log(final1);
-   // console.log(final2);
+    // console.log(final2);
     testButton = true
 
     // console.log(this.tapButton);
@@ -620,52 +661,69 @@ addConstraint=function(rootQuery,table,whereTable){
 }
 var finalQuery = "";
 
-TapApi.prototype.getTableAttributeHandlers = function (table){
-
+TapApi.prototype.getTableAttributeHandlers = function (table) {
+    /*[{
+                    "name": table,
+                    "db_name": this.connector.service["table"],
+                    "column_name": "",
+                    "unit": "",
+                    "ucd": "",
+                    "utype": "",
+                    "dataType": "",
+                    "description": ""
+                }]*/
     let jsonContaintRootQueryIdsValues = {
-        succes: {status: "", field_ids: []},
+        succes: {
+            status: "",
+            attribute_handlers: []
+        },
         failure: {
             notConnected: {status: "", message: ""},
             otherError: {status: "", message: ""}
         }
     }
+
     let doubleArrayValue = [];
     let singleArrayValue = [];
     if (this.testConnection == true) {
+
         var sj = new jsonRead(this.getObjectMap().succes.object_map);
         var adql = this.handlerAttribut.addAllColumn(table, this.connector.service["schema"]);
 
         var s = this.tapService;
         var votableQueryResult = s.Query(adql);
-       // var dataTable = VOTableTools.votable2Rows(votableQueryResult)
+        // var dataTable = VOTableTools.votable2Rows(votableQueryResult)
         console.log("///--------------------------------------------------------/////////////////");
 
         //console.log(adql);
-        let dataTable;let contentText;let Field;let nbCols;
-        if (votableQueryResult.statusText == "OK") {
-             dataTable = VOTableTools.votable2Rows(votableQueryResult);
+        let dataTable;
+        let contentText;
+        let Field;
+        let nbCols;
+        if (votableQueryResult != undefined) {
+            dataTable = VOTableTools.votable2Rows(votableQueryResult);
             console.log("///-----------4444444444444444444444444444444---------------------------------------------/////////////////")
             console.log(dataTable)
             contentText = votableQueryResult.responseText;
             Field = VOTableTools.genererField(votableQueryResult, contentText)
             //let tableName = this.getConnector().service["table"];
-
-             nbCols = Field.length;
+//console.log(dataTable);
+            nbCols = Field.length;
             //console.log(nbCols);
             // alert(nbCols);
             let rowN
-            for ( rowN = 0; rowN < dataTable.length; rowN ++) {//table  content
-            if(rowN>0){
-                if(rowN % nbCols==0){
-                    singleArrayValue.unshift(dataTable[rowN]);
-                    doubleArrayValue.push(singleArrayValue);
-                    singleArrayValue=[]
-                }else {
+            for (rowN = 0; rowN < dataTable.length; rowN++) {//table  content
+                if (rowN > 0) {
+                    if (rowN % nbCols == 0) {
+                        singleArrayValue.unshift(dataTable[rowN]);
+                        doubleArrayValue.push(singleArrayValue);
+                        singleArrayValue = []
+                    } else {
+                        singleArrayValue.push(dataTable[rowN]);
+                    }
+                } else {
                     singleArrayValue.push(dataTable[rowN]);
                 }
-            }else {
-                singleArrayValue.push(dataTable[rowN]);
-            }
 
 
                 /*for (let col = 0; col < nbCols; col++) {
@@ -683,45 +741,54 @@ TapApi.prototype.getTableAttributeHandlers = function (table){
 
                 //console.log(singleArrayValue);
             }
-            doubleArrayValue.splice(doubleArrayValue[0][0],1);
+            doubleArrayValue.splice(doubleArrayValue[0][0], 1);
             //console.log(doubleArrayValue);
-            alert(doubleArrayValue);
+            //alert(doubleArrayValue);
             jsonContaintRootQueryIdsValues.succes.status = "OK"
-            jsonContaintRootQueryIdsValues.succes.handle_value = doubleArrayValue;
+            let jsonContaintHandlersValue=[]
+            for (let c = 0; c < doubleArrayValue.length; c++) {
+               /* jsonContaintRootQueryIdsValues.succes.attribute_handlers[0] .column_name = doubleArrayValue[c][0];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].unit = doubleArrayValue[c][1];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].ucd = doubleArrayValue[c][2];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].utype = doubleArrayValue[c][3];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].dataType = doubleArrayValue[c][4];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].description = doubleArrayValue[c][5];
+                jsonContaintHandlersValue.push(jsonContaintRootQueryIdsValues.succes.attribute_handlers);
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers =[{
+                    "name": table,
+                    "db_name": this.connector.service["table"],
+                    "column_name": "",
+                    "unit": "",
+                    "ucd": "",
+                    "utype": "",
+                    "dataType": "",
+                    "description": ""
+                }]*/
+            }
+             jsonContaintRootQueryIdsValues.succes.attribute_handlers= doubleArrayValue;//jsonContaintHandlersValue;
 
         } else {
 
-            jsonContaintRootQueryIdsValues.failure.otherError.status = "failed"
+            jsonContaintRootQueryIdsValues.failure.otherError.status = "Failed"
             jsonContaintRootQueryIdsValues.failure.otherError.message = "error_message"
             // alert('you are not connected');
         }
-    }else {
+    } else {
         jsonContaintRootQueryIdsValues.failure.notConnected.status = "Failed";
         jsonContaintRootQueryIdsValues.failure.notConnected.message = "No active TAP connection"
     }
+    if(jsonContaintRootQueryIdsValues.succes.status=="OK"){
+        return jsonContaintRootQueryIdsValues.succes
+    }else if ( jsonContaintRootQueryIdsValues.failure.notConnected.status=="Failed"){
+        return jsonContaintRootQueryIdsValues.failure.notConnected
+    }else {
+         return jsonContaintRootQueryIdsValues.failure.otherError;
+    }
     //console.log(doubleArrayValue)
-   return jsonContaintRootQueryIdsValues;
+
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var buttonsHandler =[]
-var  buttons;
-TapApi.prototype.addAttribut = function (table){
-    for (let i=0;i<table.length;i++){
-
-        buttons ="<span>" +
-            "<button  type='button' class=\"btn btn-default\" id='btn"+table[i][0]+i+"' value='"+table[i][0]+"' style=\"margin-top: 7px\"> Get "+table[i][0]+" HanlerAttributs</button>"
-            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
-
-
-            buttonsHandler.push(buttons);
-
-
-        $("#loadbuttonsHandler").append(buttonsHandler[i]);
-        window.location.hash = "#loadbuttonsHandler";
-
-    }
-}
 
 TapApi.prototype.getRootQuery1 = function () {
     let out = "";
@@ -795,24 +862,23 @@ TapApi.prototype.joinTable = function (table) {
     let joinTable = [];
 
     //alert(jsonAll[table]);
-    if(jsonAll[table]==undefined){
-        let json={}
-        jsonAll= json;
+    if (jsonAll[table] == undefined) {
+        let json = {}
+        jsonAll = json;
         joinTable.push(table);
         //alert(JSON.stringify(joinTable,undefined,2))
-    }else{
+    } else {
         // alert(table+ " has join table")
         for (let key in jsonAll[table].join_tables) {
             //alert(key)
             if (key.indexOf("2") != -1) {
                 continue; //same rootTable and join_table, I made the second name of the repeat followed by a number 2//@TODO
-            }
-            else {
+            } else {
                 joinTable.push(key);
             }
         }
     }
 
-    console.log(JSON.stringify(joinTable,undefined,2));
+    console.log(JSON.stringify(joinTable, undefined, 2));
     return joinTable;
 };

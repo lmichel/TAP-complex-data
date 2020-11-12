@@ -7,7 +7,7 @@ var test = false;
 function newMain() {
 
     // initial();
-    var a = new TapApi();
+    var a //= new TapApi();
 ////////////////////////////// API ////////////////////////////////////////////
     $("#btnApiConnect").click(function () {
         var params = {

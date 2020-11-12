@@ -238,6 +238,8 @@ function newMain() {
         if (a.testConnection == true) {
             let rootQuery;
             //if(isCallRootQuery == false){
+            this.tapWhereConstraint =[];
+            this.tapJoinConstraint =[]
             rootQuery = JSON.stringify(a.getRootQuery(), undefined, 3);
             //  temp = rootQuery;
             // alert(temp);
@@ -257,7 +259,7 @@ function newMain() {
             setActive("btnGetRootQuery", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector")
             document.getElementById("btnConstraint").style.display = "block";
             $("#btnConstraint").click(function () {
-                console.log(a.getTableAttributeHandlers("basic"));
+                //console.log(a.getTableAttributeHandlers("basic"));
                 // let rootQuer= addConstraint(rootQuery,a.tapJoinConstraint);
 
                 document.getElementById("loadButton").style.display = "block"
@@ -271,15 +273,44 @@ function newMain() {
             //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
-
+var testButton =false;
+    var tapButton = [];
     $("#btnLoadbuttonsHandler").click(function () {
+        this.tapWhereConstraint =[];
+        this.tapJoinConstraint =[]
+    a.getRootQuery();
+    var table = a.tapJoinConstraint;
+    //alert(table.length)
+        for (let i=0;i<table.length;i++) {
+            var buttons = "<button  type='button' class=\"btn btn-warning\" id='b" + table[i][0] + i + "' value='" + table[i][0] + "' style=\"margin-top: 7px\">handler '" + table[i][0] + "'</button></span>"
+            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
 
-        var json = a.getTableAttributeHandlers('basic');
+            if (testButton == true) {
+                //alert( 'existe deja')
+            } else {
+                tapButton.push(buttons);
+            }
+            document.getElementById("loadbuttonsHandler").style.display = "block"
 
+            $("#loadbuttonsHandler").append(tapButton[i]);
+            window.location.hash = "#loadbuttonsHandler";
+            $("#b" + table[i][0] + i).click(function () {
+                //alert(table[i][0])
+                var json = a.getTableAttributeHandlers(table[i][0]);
+                console.log(json);
+                display(json.status, "getStatu")
+
+                // document.getElementById("loadbuttonsHandler").style.display = "none"
+                display(JSON.stringify(json, undefined, 2), "getJsonAll")
+
+            })
+        }
+       /*var json = a.getTableAttributeHandlers('otypes');
+       console.log(json);
         display(json.succes.status, "getStatu")
 
        // document.getElementById("loadbuttonsHandler").style.display = "none"
-        display(JSON.stringify(json.succes, undefined, 2), "getJsonAll")
+        display(JSON.stringify(json.succes, undefined, 2), "getJsonAll")*/
 
 
     })
