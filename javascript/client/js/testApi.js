@@ -274,10 +274,12 @@ function newMain() {
         }
     })
 var testButton =false;
+//var h = new HandlerAttributs();
     var tapButton = [];
     $("#btnLoadbuttonsHandler").click(function () {
         this.tapWhereConstraint =[];
         this.tapJoinConstraint =[]
+        tapButton = [];
     a.getRootQuery();
     var table = a.tapJoinConstraint;
     //alert(table.length)
@@ -296,6 +298,7 @@ var testButton =false;
             window.location.hash = "#loadbuttonsHandler";
             $("#b" + table[i][0] + i).click(function () {
                 //alert(table[i][0])
+                document.getElementById("loadbuttonsHandler").style.display = "none"
                 var json = a.getTableAttributeHandlers(table[i][0]);
                 console.log(json);
                 display(json.status, "getStatu")
@@ -305,6 +308,7 @@ var testButton =false;
 
             })
         }
+        testButton = true;
        /*var json = a.getTableAttributeHandlers('otypes');
        console.log(json);
         display(json.succes.status, "getStatu")

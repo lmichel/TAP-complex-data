@@ -768,6 +768,142 @@ TapApi.prototype.joinTable = function (table) {
 
 
 
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhlllllllllllllllllllllllllllll
+TapApi.prototype.getTableAttributeHandlers = function (table) {
+    /**/
+    let jsonContaintRootQueryIdsValues = {
+        succes: {
+            status: "",
+            attribute_handlers: [{
+                "name": table,
+                "db_name": this.connector.service["table"],
+                "column_name": "",
+                "unit": "",
+                "ucd": "",
+                "utype": "",
+                "dataType": "",
+                "description": ""
+            }]
+        },
+        failure: {
+            notConnected: {status: "", message: ""},
+            otherError: {status: "", message: ""}
+        }
+    }
+
+    let doubleArrayValue = [];
+    let singleArrayValue = [];
+    if (this.testConnection == true) {
+
+        var sj = new jsonRead(this.getObjectMap().succes.object_map);
+        var adql = this.handlerAttribut.addAllColumn(table, this.connector.service["schema"]);
+
+        var s = this.tapService;
+        var votableQueryResult = s.Query(adql);
+        // var dataTable = VOTableTools.votable2Rows(votableQueryResult)
+        console.log("///--------------------------------------------------------/////////////////");
+
+        //console.log(adql);
+        let dataTable;
+        let contentText;
+        let Field;
+        let nbCols;
+        if (votableQueryResult != undefined) {
+            dataTable = VOTableTools.votable2Rows(votableQueryResult);
+            console.log("///-----------4444444444444444444444444444444---------------------------------------------/////////////////")
+            console.log(dataTable)
+            contentText = votableQueryResult.responseText;
+            Field = VOTableTools.genererField(votableQueryResult, contentText)
+            //let tableName = this.getConnector().service["table"];
+//console.log(dataTable);
+            nbCols = Field.length;
+            //console.log(nbCols);
+            // alert(nbCols);
+            let rowN
+            for (rowN = 0; rowN < dataTable.length; rowN++) {//table  content
+                if (rowN > 0) {
+                    if (rowN % nbCols == 0) {
+                        singleArrayValue.unshift(dataTable[rowN]);
+                        doubleArrayValue.push(singleArrayValue);
+                        singleArrayValue = []
+                    } else {
+                        singleArrayValue.push(dataTable[rowN]);
+                    }
+                } else {
+                    singleArrayValue.push(dataTable[rowN]);
+                }
+
+
+                /*for (let col = 0; col < nbCols; col++) {
+                    if(nbCols % (col)!=0){
+                        singleArrayValue.push(dataTable[col]);
+                        console.log(nbCols /(col+1));
+                    }else {
+
+                        doubleArrayValue.push(singleArrayValue);
+                        singleArrayValue = [];
+                        console.log(singleArrayValue)
+                    }
+
+                }*/
+
+                //console.log(singleArrayValue);
+            }
+            doubleArrayValue.splice(doubleArrayValue[0][0], 1);
+            //console.log(doubleArrayValue);
+            //alert(doubleArrayValue);
+            jsonContaintRootQueryIdsValues.succes.status = "OK"
+            let jsonContaintHandlersValue=[]
+            for (let c = 0; c < doubleArrayValue.length; c++) {
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0] .column_name = doubleArrayValue[c][0];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].unit = doubleArrayValue[c][1];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].ucd = doubleArrayValue[c][2];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].utype = doubleArrayValue[c][3];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].dataType = doubleArrayValue[c][4];
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers[0].description = doubleArrayValue[c][5];
+                jsonContaintHandlersValue.push(jsonContaintRootQueryIdsValues.succes.attribute_handlers);
+                jsonContaintRootQueryIdsValues.succes.attribute_handlers =[{
+                    "name": table,
+                    "db_name": this.connector.service["table"],
+                    "column_name": "",
+                    "unit": "",
+                    "ucd": "",
+                    "utype": "",
+                    "dataType": "",
+                    "description": ""
+                }]
+            }
+             jsonContaintRootQueryIdsValues.succes.attribute_handlers= jsonContaintHandlersValue;
+
+        } else {
+
+            jsonContaintRootQueryIdsValues.failure.otherError.status = "Failed"
+            jsonContaintRootQueryIdsValues.failure.otherError.message = "error_message"
+            // alert('you are not connected');
+        }
+    } else {
+        jsonContaintRootQueryIdsValues.failure.notConnected.status = "Failed";
+        jsonContaintRootQueryIdsValues.failure.notConnected.message = "No active TAP connection"
+    }
+    if(jsonContaintRootQueryIdsValues.succes.status=="OK"){
+        return jsonContaintRootQueryIdsValues.succes
+    }else if ( jsonContaintRootQueryIdsValues.failure.notConnected.status=="Failed"){
+        return jsonContaintRootQueryIdsValues.failure.notConnected
+    }else {
+         return jsonContaintRootQueryIdsValues.failure.otherError;
+    }
+    //console.log(doubleArrayValue)
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
