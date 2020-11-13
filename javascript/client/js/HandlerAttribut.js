@@ -29,7 +29,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
         succes: {
             status: "",
             "table": table,
-            attribute_handlers: 
+            attribute_handlers:
                 [{
                     "db_name": this.db_name,
                     "column_name": this.name,

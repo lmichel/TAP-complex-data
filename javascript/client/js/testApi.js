@@ -253,7 +253,7 @@ function newMain() {
             //if(isCallRootQuery == false){
             //t//his.tapWhereConstraint =[];
             // this.tapJoinConstraint =[]
-            rootQuery = JSON.stringify(a.getRootQuery(), undefined, 3);
+            rootQuery = JSON.stringify(a.getRootQuery(), undefined, 2);
             //  temp = rootQuery;
             // alert(temp);
             // isCallRootQuery = true;
@@ -261,14 +261,10 @@ function newMain() {
             // alert(temp);
             // rootQuery = temp;
             // }
-            for (let x = 0; x < a.tapJoinConstraint.length; x++) {
-                if (tesTabCRQ == false) {
-                    tabContainRemoveQuery.push(a.tapJoinConstraint[x][0]);
-                }
-                tesTabCRQ = true;
-            }
+
+            tesTabCRQ = true;
             //rootQuery = a.addConstraint(rootQuery,this.tapJoinConstraint,this.tapWhereConstraint)
-            let status = a.getRootFieldValues().succes.status;
+            let status = a.getRootQuery().status;
             // rootQuerys=[]
             $("#rootQuery").val(rootQuery);
             display(status, "getStatu");
@@ -277,17 +273,24 @@ function newMain() {
 
             setActive("btnGetRootQuery", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector")
             document.getElementById("btnConstraint").style.display = "block";
+
             document.getElementById("btnRemoveConstraint").style.display = "block";
+            let table
             $("#btnRemoveConstraint").click(function () {
                 document.getElementById("loadRemoveButton").style.display = "block"
 
                 var HtmlRemoveBtn = "";
-                let table = tabContainRemoveQuery;
-                for (let i = 0; i < table.length; i++) {
-                    // var t = table[i];
 
-                    HtmlRemoveBtn = "<span>" +
-                        "<button  type='button' class=\"btn btn-danger\" id='rbtn" + table[i] + "' value='" + table[i] + "' style=\"margin-top: 7px\">Remove " + table[i] + " Join</button>"
+                table = Array.from(new Set(tabContaninBtnRemoveConstraint));
+                console.log(table.length);
+
+
+                var k =0;
+
+
+                    // var t = table[i];
+                    HtmlRemoveBtn += " <button  type='button' class=\"btn btn-danger\" id='rbtnConstraint' value='" + table[i] + "' style=\"margin-top: 7px\">Remove Join Table</button>" +
+                        "<input type='text' class='form form-control' id='txtConstraint' value= '' placeholder='name of table : exp,otypes'>"
                     // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
 
                     if (testRemoveButton == true) {
@@ -295,16 +298,37 @@ function newMain() {
                     } else {
                         HtmltabContaninBtnRemoveConstraint.push(HtmlRemoveBtn);
                     }
-                    $("#loadRemoveButton").append(HtmltabContaninBtnRemoveConstraint[i]);
+                    HtmltabContaninBtnRemoveConstraint = Array.from(new Set(HtmltabContaninBtnRemoveConstraint));
+                    //$("#loadRemoveButton").html("");
+                   $("#loadRemoveButton").html(HtmlRemoveBtn);
                     window.location.hash = "#loadRemoveButton";
 
-                    $("#rbtn" + table[i]).click(function () {
+                    $("#rbtnConstraint").click(function () {
+                        for (let i = 0; i < table.length; i++) {
+                            if ($("#txtConstraint").val() == "") {
+                                display("Faille", "getStatu");
+                                display("Inter the name of table you want ton remove constraint", "getJsonAll")
 
-                        display(status, "getStatu");
-                        display(a.resetTableConstraint(table[i]), "getJsonAll")
+                                //document.getElementById("loadRemoveButton").style.display = "block"
+                            } else if ($("#txtConstraint").val() == table[i]) {
+
+                                document.getElementById("loadRemoveButton").style.display = "none"
+                                display(status, "getStatu");
+                                display(a.resetTableConstraint(table[i]), "getJsonAll")
+                            }else {
+
+                            }
+                        }
+
+                       /* tabContaninBtnRemoveConstraint.splice(table.indexOf(tabContaninBtnRemoveConstraint.indexOf(tabContaninBtnRemoveConstraint[i]),1));
+                        console.log(tabContaninBtnRemoveConstraint)
+                        $("#loadRemoveButton").html("");
+                        window.location.hash = "#loadRemoveButton";
+                        document.getElementById("loadRemoveButton").style.display = "none";*/
                     })
 
-                }
+
+
                 testRemoveButton = true;
                 setActive("btnRemoveConstraint", "btnGetRootQuery", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap")
 
@@ -314,7 +338,9 @@ function newMain() {
                 // let rootQuer= addConstraint(rootQuery,a.tapJoinConstraint);
 
 
+
                 document.getElementById("loadButton").style.display = "block"
+
 
                 setActive("btnConstraint", "btnGetRootQuery", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap")
             })
@@ -325,30 +351,14 @@ function newMain() {
         }
     })
 
-    function addRemoveBtn(tabContainRemoveBtn) {
-        var HtmlRemoveBtn = "";
-        let table = tabContainRemoveBtn;
-        for (let i = 0; i < table.length; i++) {
-            // var t = table[i];
-
-            HtmlRemoveBtn = "<span>" +
-                "<button  type='button' class=\"btn btn-danger\" id='rbtn" + table[i] + "' value='" + table[i] + "' style=\"margin-top: 7px\">Remove " + table[i] + " Join</button>"
-            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
-
-            if (testRemoveButton == true) {
-                //alert( 'existe deja')
-            } else {
-                HtmltabContaninBtnRemoveConstraint.push(HtmlRemoveBtn);
-            }
-            $("#loadRemoveButton").append(HtmltabContaninBtnRemoveConstraint[i]);
-            window.location.hash = "#loadRemoveButton";
-
-            $("#rbtn" + table[i]).click(function () {
-                a.resetTableConstraint(table[i]);
-            })
-
-        }
-        testRemoveButton = true;
+    function addRemoveBtn(table) {
+        display(status, "getStatu");
+        display(a.resetTableConstraint(table[i]), "getJsonAll")
+        tabContaninBtnRemoveConstraint.splice(table.indexOf(tabContaninBtnRemoveConstraint[i],1));
+        console.log(tabContaninBtnRemoveConstraint)
+        $("#loadRemoveButton").html("");
+        window.location.hash = "#loadRemoveButton";
+        document.getElementById("loadRemoveButton").style.display = "none";
     }
 
     var testButton = false;
