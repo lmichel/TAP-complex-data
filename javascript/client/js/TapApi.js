@@ -67,6 +67,7 @@ class TapApi {
  * */
 TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     var formatTableName = schema + "." + table;
+
     //alert(formatTableName);
     var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
     this.query = "SELECT TOP 5 * FROM " + correctTableNameFormat;
@@ -74,7 +75,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     this.correctService = new TapServiceConnector(tapService, schema, shortName);
     this.votableQueryResult = this.tapService.Query(this.query);
 
-    if (this.getJsonStatu(this.votableQueryResult).success.status =='OK') {
+    if (this.getJsonStatu(this.votableQueryResult).success.status == 'OK') {
         this.testConnection = true;
         this.connector.status = 'OK';
         this.connector.service["tapService"] = tapService;
@@ -94,7 +95,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
         // $("#votableJson").html(JSON.stringify(jsonData,undefined,2));
         // window.location.hash = "#votableJson"
 
-    }else if(this.getJsonStatu(this.votableQueryResult)!=undefined && shortName=="Vizier"){
+    } else if (this.getJsonStatu(this.votableQueryResult) != undefined && shortName == "Vizier") {
         this.testConnection = true;
         this.connector.status = 'OK';
         this.connector.service["tapService"] = tapService;
@@ -123,6 +124,9 @@ TapApi.prototype.disconnect = function () {
     this.votableQueryResult = null;
     this.tapJoinConstraint = [];
     this.tapWhereConstraint = [];
+    this.adqlContent = "";
+    $("#getJsonAll").text("");
+
     if (this.correctService == null && this.tapService == null && this.votableQueryResult == null) {
         this.disconnectJsonStatu.success["DisconnectStatus"] = "OK";
         this.testDeconnection = true
@@ -138,47 +142,6 @@ TapApi.prototype.disconnect = function () {
     }
     //console.log(JSON.stringify(this.disconnectJsonStatu,undefined,2))
 
-
-}
-
-
-function reset(){
-
-    this.query ="";
-    this.tapService="";
-    this.votableQueryResult ="";
-    this.correctService ="";
-    this.connector.service={};
-    this.testConnection = false;
-    this.testDeconnection = false;
-    this.correctService = "";
-    this.votableQueryResult = "";
-    this.query = ""
-    this.handlerAttribut = new HandlerAttributs();
-    this.tapButton = undefined;
-    this.adqlContent = [];
-    this.testJoinConstraint = false;
-    this.connector = {status: "", message: "", service: {}}
-    this.jsonContaintJoinTable = {
-        Succes: {
-            status: "",
-            base_table: "",
-            joined_tables: []
-        },
-        Failure: {
-            NotConnected: {status: "", message: ""},
-            WrongTable: {status: "", message: ""}
-        }
-    }
-    finalQuery ="";
-    this.tapJoinConstraint = [];
-    this.tapWhereConstraint = [];
-    contA = "";
-     testRoot = false;
-    testButton = false;
-     tabAllQuery = []
-    tab = []
-     allQuery = "";
 
 }
 
@@ -394,6 +357,7 @@ TapApi.prototype.getRootQueryIds = function () {
 }
 
 TapApi.prototype.getRootQuery = function () {
+    var rootQueyJson = {status: "", query: "query"}
     var rootTable = this.connector.service["table"]// .jsonContaintJoinTable.Succes.base_table;
     var jsonAll = this.getObjectMap();
     var schema;
@@ -426,8 +390,8 @@ TapApi.prototype.getRootQuery = function () {
     var i = 0;
     var textJoinConstraint = "";
     var textWhereConstraint = "";
-    this.tapWhereConstraint =[];
-    this.tapJoinConstraint =[]
+    this.tapWhereConstraint = [];
+    this.tapJoinConstraint = []
     for (var keyRoot in jsonAll.succes.object_map) {
         if (keyRoot == rootTable) {
 
@@ -501,33 +465,32 @@ TapApi.prototype.getRootQuery = function () {
 
 
             if (this.tapJoinConstraint.length == 0) {
+                rootQueyJson.status = "OK";
+                rootQueyJson.query = contentAdql;
                 return contentAdql;
             } else {
-                if (this.testJoinConstraint == false) {
-                    for (let k = 0; k < this.tapJoinConstraint.length; k++) {
-
-                        if (k < 1) {
-                            // contentAdql +=" "+ this.tapJoinConstraint[k][1] + "  ";
-
-                        }
-
-                        this.testJoinConstraint = true;
-                        //   break;
-
-                    }
-
-                }
-                // console.log(this.tapJoinConstraint[5][0])
-
-                // alert('fffffffffffff')
 
                 this.adqlContent = addConstraint(contentAdql, this.tapJoinConstraint, this.tapWhereConstraint);
                 if (testRoot == false) {
                     testRoot = true;
                     contA = contentAdql;
+                    rootQueyJson.status = "OK";
+                    rootQueyJson.query = contentAdql;
                     return contentAdql;
+
                 } else {
-                    return finalQuery;
+                    //console.log(finalQuery);
+                    if (splitToJoin[0] != " " || splitToJoin[0] != undefined) {
+                        rootQueyJson.status = "OK";
+                        rootQueyJson.query = splitToJoin[0];;
+                        return splitToJoin[0];
+                        //return splitToJoin[0];
+                    } else {
+                        rootQueyJson.status = "OK";
+                        rootQueyJson.query = finalQuery;
+                        return finalQuery ;
+                    }
+
                 }
 
             }
@@ -538,25 +501,31 @@ TapApi.prototype.getRootQuery = function () {
         }
     }
 
-
 }
-var contA = "";
-var testRoot = false;
+let contA = "";
+let testRoot = false;
 testButton = false;
-var tabAllQuery = []
-var tab = []
-var allQuery = "";
+let tabAllQuery = []
+let tab = []
+let allQuery = "";
+let finalQuery = "";
+let tabContaninBtnRemoveConstraint = [];
+
+let HtmltabContaninBtnRemoveConstraint = [];
+
+var tempTab = [];
 addConstraint = function (rootQuery, table, whereTable) {
     var buttons = "";
     var rootQuerys = []
     this.tapButton = []
-
-
+    var removeBtn;
+    var HtmlRemoveBtn;
     for (let i = 0; i < table.length; i++) {
 
         buttons = "<span>" +
             "<button  type='button' class=\"btn btn-default\" id='" + table[i][0] + "' value='" + table[i][0] + "' style=\"margin-top: 7px\">Join '" + table[i][0] + "'</button>" +
             " <input type='text' class='form form-control' id='txt" + table[i][0] + "' value='" + whereTable[i] + "'>"
+
         // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
 
         if (testButton == true) {
@@ -567,10 +536,29 @@ addConstraint = function (rootQuery, table, whereTable) {
 
         $("#loadButton").append(this.tapButton[i]);
         window.location.hash = "#loadButton";
-
+        //var btns =this.tapButton;
         $("#" + table[i][0]).click(function () {
 
-            rootQuerys;
+
+            for (let r = 0; r <= tabContaninBtnRemoveConstraint.length; r++) {
+                if (tabContaninBtnRemoveConstraint.indexOf(tabContaninBtnRemoveConstraint[r]) > -1) {
+
+                } else {
+
+                    tabContaninBtnRemoveConstraint.push(table[i][0])
+                    break;
+                }
+
+            }
+            tabContaninBtnRemoveConstraint = Array.from(new Set(tabContaninBtnRemoveConstraint));
+
+
+            //console.log(tabContaninBtnRemoveConstraint);
+
+            // addRemoveBtn(tabContaninBtnRemoveConstraint);
+
+
+            //rootQuerys;
             //if(rootQuerys.indexOf(rootQuerys[i])>-1){
             //alert( 'existe deja')
             display("Has  been added ", "getStatu")
@@ -666,11 +654,95 @@ addConstraint = function (rootQuery, table, whereTable) {
     testButton = true
 
     // console.log(this.tapButton);
-    return this.adqlContent
-}
-var finalQuery = "";
 
-TapApi.prototype.getTableAttributeHandlers = function (table){
+    // return finalQuery
+}
+var splitToJoin = [];
+var finalQueryRemouve = "";
+TapApi.prototype.resetTableConstraint = function (table) {
+
+    //alert(table);
+    var schema = this.connector.service["schema"];
+    var formatTableName = schema + "." + table;
+
+    var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+    if (finalQuery != "") {
+        splitToJoin = finalQuery.split('JOIN')
+    }
+
+    for (let i = 1; i < splitToJoin.length; i++) {
+        if (splitToJoin[i].search(table) != -1) {
+            splitToJoin.splice(splitToJoin.indexOf(splitToJoin[i]), 1);
+            // finalQuery.replaceAll(splitToJoin[i].trim(), "");
+        } else if (splitToJoin.length > 1) {
+
+            splitToJoin[0] += " JOIN " + splitToJoin[i]
+
+        }
+        //console.log(splitToJoin)
+        if (splitToJoin[i] == undefined) {
+            //splitToJoin[i] = "";
+        }
+
+
+    }
+    //  splitUndefine = splitToJoin[0];
+
+
+    //finalQuery = finalQueryRemouve;
+    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$ " + splitToJoin[0])
+    //finalQuery =splitToJoin[0];
+    //$("#getJsonAll").text(splitToJoin[0]);
+    console.log(splitToJoin[0]);
+    tab = [];
+    return splitToJoin[0];
+}
+
+//var splitUndefine;
+function reset() {
+    contA = "";
+    this.query = "";
+    this.tapService = "";
+    this.votableQueryResult = "";
+    this.correctService = "";
+    this.connector.service = {};
+    this.testConnection = false;
+    this.testDeconnection = false;
+    this.correctService = "";
+    this.votableQueryResult = "";
+    this.query = ""
+    this.handlerAttribut = new HandlerAttributs();
+    this.tapButton = [];
+    this.adqlContent = [];
+    this.testJoinConstraint = false;
+    this.connector = {status: "", message: "", service: {}}
+    this.jsonContaintJoinTable = {
+        Succes: {
+            status: "",
+            base_table: "",
+            joined_tables: []
+        },
+        Failure: {
+            NotConnected: {status: "", message: ""},
+            WrongTable: {status: "", message: ""}
+        }
+    }
+    finalQuery = "";
+    this.tapJoinConstraint = [];
+    this.tapWhereConstraint = [];
+    contA = "";
+    testRoot = false;
+    testButton = false;
+    tabAllQuery = []
+    tab = []
+    allQuery = "";
+    $(document).ajaxStop(function () {
+        window.location.reload();
+    });
+
+}
+
+TapApi.prototype.getTableAttributeHandlers = function (table) {
 
     return this.handlerAttribut.getTableAttributeHandler(table);
 }
