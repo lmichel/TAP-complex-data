@@ -672,25 +672,32 @@ TapApi.prototype.resetTableConstraint = function (table) {
         splitToJoin = finalQuery.split('JOIN')
     }
 
-    for(let i =0; i<splitToJoin.length; i++){
+    for(let i =1; i<splitToJoin.length; i++){
         if(splitToJoin[i].search(correctTableNameFormat)!=-1){
-            splitToJoin.splice(splitToJoin.indexOf(splitToJoin[i]),i);
+            splitToJoin.splice(splitToJoin.indexOf(splitToJoin[i]),1);
             finalQuery.replaceAll(splitToJoin[i].trim(),"");
         }
-        console.log(splitToJoin)
+        //console.log(splitToJoin)
         if(splitToJoin[i] ==undefined){
             splitToJoin[i]="";
         }
 
 
     }
-    var splitUndefine =
-    //finalQuery = finalQueryRemouve;
-    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    console.log(finalQuery);
-    console.log(finalQueryRemouve);
-}
+  //  splitUndefine = splitToJoin[0];
+    if(splitToJoin.length>1) {
+        for (let i = 1; i < splitToJoin.length; i++) {
+            splitToJoin[0] += " JOIN " + splitToJoin[1]
+        }
+    }
 
+    //finalQuery = finalQueryRemouve;
+    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$ "+ splitToJoin[0])
+    finalQuery =splitToJoin[0];
+    $("#getJsonAll").text(splitToJoin[0]);
+    console.log(splitToJoin[0]);
+}
+//var splitUndefine;
 function reset() {
     contA = "";
     this.query = "";
