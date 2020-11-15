@@ -13,6 +13,7 @@ class TapApi {
         this.handlerAttribut.api = this;
         this.tapButton = undefined;
         this.adqlContent = [];
+        this.jsonAdqlContent = {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {},"status":{"status":"",'orderErros':""}}
         this.testJoinConstraint = false;
         this.connector = {status: "", message: "", service: {}}
         this.jsonContaintJoinTable = {
@@ -74,6 +75,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     this.tapService = new TapService(tapService, schema, shortName, true)
     this.correctService = new TapServiceConnector(tapService, schema, shortName);
     this.votableQueryResult = this.tapService.Query(this.query);
+
 
     if (this.getJsonStatu(this.votableQueryResult).success.status == 'OK') {
         this.testConnection = true;
@@ -415,11 +417,13 @@ TapApi.prototype.getRootQuery = function () {
                 //var temp1=[],temp2=[];
                 contentAdql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
                 contentAdql += " FROM  " + correctTableNameFormat;
+                this.jsonAdqlContent.rootQuery = contentAdql;
                 textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
                 //temp1.push(key);
 
                 textJoinConstraint += "ON " + correctTableNameFormat + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
                 textJoinConstraint += "=" + correctJoinFormaTable + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from;
+                this.jsonAdqlContent.constraint[correctJoinFormaTable] = textJoinConstraint
 
                 this.tapJoinConstraint.push([key, textJoinConstraint]);
                 textJoinConstraint = "";
@@ -437,24 +441,40 @@ TapApi.prototype.getRootQuery = function () {
                     }
 
                 }
-
+                var value = '';
                 if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") != -1) {
+
                     textWhereConstraint = " WHERE " + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + dataTable[k];
+                    this.jsonAdqlContent.constraint["value " + correctJoinFormaTable] = dataTable[k];
+                    value = this.jsonAdqlContent.constraint["value " + correctJoinFormaTable]
+                    this.jsonAdqlContent.constraint["condition " + correctJoinFormaTable] = " "+ schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + value;
                     this.tapWhereConstraint.push(textWhereConstraint);
                 } else if (schema.indexOf("rr") != -1 && contentAdql.indexOf("ivoid=") == -1) {
                     //alert(schema+'.'+key+'.'+jsonAll.succes.object_map[keyRoot].join_tables[key].from );
                     textWhereConstraint = " WHERE " + schema + '.' + key + '.' + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
+                    this.jsonAdqlContent.constraint["value " + correctJoinFormaTable] = dataTable[k];
+                    value = this.jsonAdqlContent.constraint["value " + correctJoinFormaTable]
+                    this.jsonAdqlContent.constraint["condition " + correctJoinFormaTable] = "  "+ schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + value;
                     this.tapWhereConstraint.push(textWhereConstraint);
                 } else if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") == -1) {
                     if (json2Requete.isString(dataTable[k])) {
                         textWhereConstraint += " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
+                        this.jsonAdqlContent.constraint["value " + correctJoinFormaTable] = dataTable[k];
+                        value = this.jsonAdqlContent.constraint["value " + correctJoinFormaTable]
+                        this.jsonAdqlContent.constraint["condition " + correctJoinFormaTable] = "  "+ schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + value;
                         this.tapWhereConstraint.push(textWhereConstraint);
                     } else {
                         textWhereConstraint = " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + dataTable[k];
+                        this.jsonAdqlContent.constraint["value " + correctJoinFormaTable] = dataTable[k];
+                        value = this.jsonAdqlContent.constraint["value " + correctJoinFormaTable]
+                        this.jsonAdqlContent.constraint["condition " + correctJoinFormaTable] = "  "+ schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + value;
                         this.tapWhereConstraint.push(textWhereConstraint);
                     }
                 } else {
                     textWhereConstraint = " WHERE " + schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
+                    this.jsonAdqlContent.constraint["value " + correctJoinFormaTable] = dataTable[k];
+                    var value = this.jsonAdqlContent.constraint["value " + correctJoinFormaTable]
+                    this.jsonAdqlContent.constraint["condition " + correctJoinFormaTable] = "  "+ schema + "." + key + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].from + "=" + value;
                     this.tapWhereConstraint.push(textWhereConstraint);
                 }
 
@@ -463,42 +483,46 @@ TapApi.prototype.getRootQuery = function () {
 
             }
 
+            // console.log(JSON.stringify(this.jsonAdqlContent,undefined,2));
 
-            if (this.tapJoinConstraint.length == 0) {
-                rootQueyJson.status = "OK";
-                rootQueyJson.query = contentAdql;
-                return contentAdql;
-            } else {
-
-                this.adqlContent = addConstraint(contentAdql, this.tapJoinConstraint, this.tapWhereConstraint);
-                if (testRoot == false) {
-                    testRoot = true;
-                    contA = contentAdql;
-                    rootQueyJson.status = "OK";
-                    rootQueyJson.query = contentAdql;
-                    return contentAdql;
-
-                } else {
-                    //console.log(finalQuery);
-                    if (splitToJoin[0] != " " || splitToJoin[0] != undefined) {
-                        rootQueyJson.status = "OK";
-                        rootQueyJson.query = splitToJoin[0];;
-                        return splitToJoin[0];
-                        //return splitToJoin[0];
-                    } else {
-                        rootQueyJson.status = "OK";
-                        rootQueyJson.query = finalQuery;
-                        return finalQuery ;
-                    }
-
-                }
-
-            }
 
             //console.log(this.tapJoinConstraint);
             // console.log(this.tapWhereConstraint);
             // return contentAdql;
         }
+    }
+    if (this.tapJoinConstraint.length == 0) {
+        rootQueyJson.status = "OK";
+        rootQueyJson.query = contentAdql;
+        return contentAdql;
+    } else {
+
+        this.addConstraint(contentAdql, this.tapJoinConstraint, this.tapWhereConstraint);
+
+        return this.jsonAdqlContent.rootQuery;
+       /* if (testRoot == false) {
+            testRoot = true;
+            contA = contentAdql;
+            rootQueyJson.status = "OK";
+            rootQueyJson.query = contentAdql;
+            return contentAdql;
+
+        } else {
+            //console.log(finalQuery);
+            if (splitToJoin[0] != " " || splitToJoin[0] != undefined) {
+                rootQueyJson.status = "OK";
+                rootQueyJson.query = splitToJoin[0];
+                ;
+                return splitToJoin[0];
+                //return splitToJoin[0];
+            } else {
+                rootQueyJson.status = "OK";
+                rootQueyJson.query = finalQuery;
+                return finalQuery;
+            }
+
+        }*/
+
     }
 
 }
@@ -514,231 +538,163 @@ let tabContaninBtnRemoveConstraint = [];
 let HtmltabContaninBtnRemoveConstraint = [];
 
 var tempTab = [];
-addConstraint = function (rootQuery, table, whereTable) {
-    var buttons = "";
-    var rootQuerys = []
-    this.tapButton = []
-    var removeBtn;
-    var HtmlRemoveBtn;
-    for (let i = 0; i < table.length; i++) {
 
-        buttons = "<span>" +
-            "<button  type='button' class=\"btn btn-default\" id='" + table[i][0] + "' value='" + table[i][0] + "' style=\"margin-top: 7px\">Join '" + table[i][0] + "'</button>" +
-            " <input type='text' class='form form-control' id='txt" + table[i][0] + "' value='" + whereTable[i] + "'>"
-
-        // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
-
-        if (testButton == true) {
-            //alert( 'existe deja')
-        } else {
-            this.tapButton.push(buttons);
-        }
-
-        $("#loadButton").append(this.tapButton[i]);
-        window.location.hash = "#loadButton";
-        //var btns =this.tapButton;
-        $("#" + table[i][0]).click(function () {
-
-
-            for (let r = 0; r <= tabContaninBtnRemoveConstraint.length; r++) {
-                if (tabContaninBtnRemoveConstraint.indexOf(tabContaninBtnRemoveConstraint[r]) > -1) {
-
-                } else {
-
-                    tabContaninBtnRemoveConstraint.push(table[i][0])
-                    break;
-                }
-
-            }
-            tabContaninBtnRemoveConstraint = Array.from(new Set(tabContaninBtnRemoveConstraint));
-
-
-            //console.log(tabContaninBtnRemoveConstraint);
-
-            // addRemoveBtn(tabContaninBtnRemoveConstraint);
-
-
-            //rootQuerys;
-            //if(rootQuerys.indexOf(rootQuerys[i])>-1){
-            //alert( 'existe deja')
-            display("Has  been added ", "getStatu")
-            // rootQuerys.splice(rootQuerys.indexOf(rootQuerys[i],1));
-            //rootQuery +=" "+table[i][1];
-            //}else {
-            // rootQuerys.push(table[i][1]);
-            //rootQuery +=" "+table[i][1]+" "+$("#txt"+table[i][0]).val();
-
-            $("#getJsonAll").text("");
-            $("#getJsonAll").append(rootQuery);
-            $("#getJsonAll").append(table[i][1]);
-            $("#getJsonAll").append($("#txt" + table[i][0]).val());
-            // rootQuery = $("#getJsonAll").text();
-            //display(rootQuery,"getJsonAll")
-
-            // alert("join value "+table[i][1])
-            //  }
-            this.adqlContent = [];
-            $("#getJsonAll").html($("#getJsonAll").text());
-            window.location.hash = "#loadJson";
-            tab = []
-            tab.push(table[i][1] + " " + whereTable[i]);
-
-            this.adqlContent.push($("#getJsonAll").text());
-
-
-            document.getElementById("loadButton").style.display = "none"
-            document.getElementById("btnConstraint").style.display = "none";
-
-
-        })
-
-
-    }
-    contA += tab
-    allQuery = contA;
-    tab = []
-    //console.log(this.adqlContent)
-    var tabAllQuery2 = []
-    console.log(allQuery);
-    tabAllQuery = allQuery.split("WHERE");
-    let textTabAllQuery = [];
-    var joinEssai = "";
-    for (let i = 1; i < tabAllQuery.length; i++) {
-        joinEssai += tabAllQuery[i];
-        textTabAllQuery.push(tabAllQuery[i].split(" "));
-    }
-    var tabjoinEssai = joinEssai.split(" ");
-
-    for (let i = 0; i < textTabAllQuery.length; i++) {
-        tabAllQuery2.push(textTabAllQuery[i][1]);
-        tabAllQuery[i + 1].replaceAll(" " + tabAllQuery2[i], " ");
-        for (let j = 0; j < tabjoinEssai.length; j++) {
-            if (tabjoinEssai[j].trim() == tabAllQuery2[i].trim()) {
-                tabjoinEssai.splice(j, 1);
-            }
-            //joinEssai +=tabjoinEssai[j];
-        }
-
-    }
-    //var tabAllQuery2 = textTabAllQuery.split(" ");
-
-    console.log(tabAllQuery);
-    var final1 = tabAllQuery[0] + " ";
-    for (let k = 0; k < tabjoinEssai.length; k++) {
-        final1 += tabjoinEssai[k] + " ";
-    }
-    var final2 = final1;
-    if (tabAllQuery2.length > 0) {
-
-        final2 += " WHERE " + tabAllQuery2[0];
-    }
-    for (let c = 1; c < tabAllQuery2.length; c++) {
-        let m = tabAllQuery2[c]
-        for (let k = 1; k < tabAllQuery2.length; k++) {
-            if (m.trim() == tabAllQuery2[k].trim()) {
-
-            } else {
-                if (m.trim() != tabAllQuery2[0].trim()) {
-                    final2 += " AND " + tabAllQuery2[c]
-                }
-
-            }
-        }
-
-    }
-    finalQuery = final2;
-    $("#getJsonAll").text(finalQuery);
-    //console.log("////////////////////////////////////////////////////////////////////////////////////");
-    //console.log(final1);
-    // console.log(final2);
-    testButton = true
-
-    // console.log(this.tapButton);
-
-    // return finalQuery
+function getJsonAdqlQuery() {
+    //return this.jsonAdqlContent;
 }
-var splitToJoin = [];
-var finalQueryRemouve = "";
-TapApi.prototype.resetTableConstraint = function (table) {
 
-    //alert(table);
+var jsonTempJoinTap = [];
+var jsonTempWhereTap = [];
+var countCondition = 0;
+var testfor = false
+TapApi.prototype.addConstraint = function (rootQuery, table, whereTable) {
+    var buttons = "";
+    this.tapButton = []
+    var jsonAdqlContent = this.jsonAdqlContent;
+    let mytest = false;
+    var schema = this.connector.service["schema"];
+    if(testfor==false) {
+        for (let i = 0; i < table.length; i++) {
+
+            buttons = "<span>" +
+                "<button  type='button' class=\"btn btn-default\" id='" + table[i][0] + "' value='" + table[i][0] + "' style=\"margin-top: 7px\">Join '" + table[i][0] + "'</button>" +
+                " <input type='text' class='form form-control' id='txt" + table[i][0] + "' value='" + whereTable[i] + "'>"
+
+            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+
+            if (testButton == true) {
+                //alert( 'existe deja')
+            } else {
+                this.tapButton.push(buttons);
+            }
+            $("#loadButton").append(this.tapButton[i]);
+            window.location.hash = "#loadButton";
+            //var btns =this.tapButton;
+            $("#" + table[i][0]).click(function () {
+
+
+                let format = schema + '.' + table[i][0];
+                let correctTable = format.quotedTableName().qualifiedName;
+                for (let r = 0; r <= tabContaninBtnRemoveConstraint.length; r++) {
+                    if (tabContaninBtnRemoveConstraint.indexOf(tabContaninBtnRemoveConstraint[r]) > -1) {
+
+                    } else {
+
+                        tabContaninBtnRemoveConstraint.push(table[i][0])
+                        break;
+                    }
+
+                }
+                tabContaninBtnRemoveConstraint = Array.from(new Set(tabContaninBtnRemoveConstraint));
+
+                for (let key in jsonAdqlContent.constraint) {
+                    if (key == correctTable) {
+                        jsonAdqlContent.allJoin[key] = jsonAdqlContent.constraint[key]
+                        //countCondition++;
+                        for (let keyConst in jsonAdqlContent.constraint) {
+                            if (keyConst == "condition " + correctTable) {
+                                //if(jsonAdqlContent.allCondition ==""){
+                                jsonAdqlContent.constraint[keyConst] =$("#txt" + table[i][0]).val().replaceAll("WHERE","");
+                                    if(mytest==false){
+                                        jsonAdqlContent.allCondition[key]=jsonAdqlContent.constraint[keyConst];
+                                        mytest =true;
+                                    }else {
+                                        jsonAdqlContent.allCondition[key]=" AND "+ jsonAdqlContent.constraint[keyConst];
+                                    }
+
+                                //alert(jsonAdqlContent.constraint[keyConst]);
+                            }
+                        }
+                    }
+                }
+
+                document.getElementById("loadButton").style.display = "none"
+                document.getElementById("btnConstraint").style.display = "none";
+                 $("#getJsonAll").text(jsonAdqlContent.rootQuery);
+                console.log(jsonAdqlContent.rootQuery);
+            })
+
+            testfor = true;
+        }
+
+    }
+    //alert(JSON.stringify(jsonAdqlContent.allJoin.length))
+    var testWhere = false; var testFistAnd = false;var testEndAnd = false
+    if(JSON.stringify(jsonAdqlContent.allJoin)!=="{}") {
+
+        for (let key in jsonAdqlContent.allJoin) {
+            jsonAdqlContent.rootQuery += jsonAdqlContent.allJoin[key] ;
+        }
+        for (let keyconst in jsonAdqlContent.allCondition) {
+            if(testWhere==false){
+                //jsonAdqlContent.rootQuery=jsonAdqlContent.rootQuery+" WHERE "
+                jsonAdqlContent.rootQuery+=" WHERE "+jsonAdqlContent.allCondition[keyconst]+' ';
+                testWhere = true;
+            }else {
+
+                jsonAdqlContent.rootQuery+=jsonAdqlContent.allCondition[keyconst];
+            }
+
+        }
+    }
+
+    /**
+     * if you remouve a constrain we verified that there is not a duplication of WHERE OR AND condition
+     * */
+    if(jsonAdqlContent.rootQuery.search("WHERE   AND")>-1){
+        let g = jsonAdqlContent.rootQuery.slice(0,jsonAdqlContent.rootQuery.search("WHERE   AND"))
+        let g2 = jsonAdqlContent.rootQuery.slice(jsonAdqlContent.rootQuery.search("WHERE   AND"),jsonAdqlContent.rootQuery.length);
+        g2 = g2.replaceAll("WHERE   AND","WHERE");
+       //alert(g+' '+g2);
+        g+=" "+g2;
+        jsonAdqlContent.rootQuery=g;
+    }
+    if(jsonAdqlContent.rootQuery.search("WHERE  AND")>-1){
+        var g = jsonAdqlContent.rootQuery.slice(0,jsonAdqlContent.rootQuery.search("WWHERE  AND"))
+        var g2 = jsonAdqlContent.rootQuery.slice(jsonAdqlContent.rootQuery.search("WHERE  AND"),jsonAdqlContent.rootQuery.length);
+        g2 = g2.replaceAll("WHERE  AND"," WHERE ");
+        //alert(g+' '+g2);
+        g+=" "+g2;
+        jsonAdqlContent.rootQuery=g;
+    }
+
+
+    if(jsonAdqlContent.rootQuery.trim().endsWith("WHERE") ==true){
+        jsonAdqlContent.rootQuery = jsonAdqlContent.rootQuery.trim().replaceAll("WHERE","");
+    }
+    this.jsonAdqlContent = jsonAdqlContent;
+    testButton = true
+    return this.jsonAdqlContent;
+}
+
+//var splitToJoin = [];
+//var finalQueryRemouve = "";
+TapApi.prototype.resetTableConstraint = function (table) {
+;
     var schema = this.connector.service["schema"];
     var formatTableName = schema + "." + table;
 
     var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-    if (finalQuery != "") {
-        splitToJoin = finalQuery.split('JOIN')
-    }
-
-    for (let i = 1; i < splitToJoin.length; i++) {
-        if (splitToJoin[i].search(table) != -1) {
-            splitToJoin.splice(splitToJoin.indexOf(splitToJoin[i]), 1);
-            // finalQuery.replaceAll(splitToJoin[i].trim(), "");
-        } else if (splitToJoin.length > 1) {
-
-            splitToJoin[0] += " JOIN " + splitToJoin[i]
-
+    for (let key in this.jsonAdqlContent.allJoin) {
+        if(key==correctTableNameFormat){
+            this.jsonAdqlContent.allJoin[key]="";
+            this.jsonAdqlContent.allCondition[key]="";
+            this.jsonAdqlContent.rootQuery.replaceAll("AND   AND","AND")
+            this.jsonAdqlContent.rootQuery.replaceAll("WHERE   AND ","WHERE")
+            this.jsonAdqlContent.status.status="OK";
+        }else {
+            this.jsonAdqlContent.status.status="Failed";
+            //this.jsonAdqlContent.status.orderErros="The join table query not exist in rootQuery";
         }
-        //console.log(splitToJoin)
-        if (splitToJoin[i] == undefined) {
-            //splitToJoin[i] = "";
-        }
-
-
+        //jsonAdqlContent.rootQuery += " " + jsonAdqlContent.allJoin[key] + " ";
     }
-    //  splitUndefine = splitToJoin[0];
+    //$("#getJsonAll").text(this.jsonAdqlContent.rootQuery);
+    return this.jsonAdqlContent;
 
-
-    //finalQuery = finalQueryRemouve;
-    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$ " + splitToJoin[0])
-    //finalQuery =splitToJoin[0];
-    //$("#getJsonAll").text(splitToJoin[0]);
-    console.log(splitToJoin[0]);
-    tab = [];
-    return splitToJoin[0];
 }
 
 //var splitUndefine;
 function reset() {
-    contA = "";
-    this.query = "";
-    this.tapService = "";
-    this.votableQueryResult = "";
-    this.correctService = "";
-    this.connector.service = {};
-    this.testConnection = false;
-    this.testDeconnection = false;
-    this.correctService = "";
-    this.votableQueryResult = "";
-    this.query = ""
-    this.handlerAttribut = new HandlerAttributs();
-    this.tapButton = [];
-    this.adqlContent = [];
-    this.testJoinConstraint = false;
-    this.connector = {status: "", message: "", service: {}}
-    this.jsonContaintJoinTable = {
-        Succes: {
-            status: "",
-            base_table: "",
-            joined_tables: []
-        },
-        Failure: {
-            NotConnected: {status: "", message: ""},
-            WrongTable: {status: "", message: ""}
-        }
-    }
-    finalQuery = "";
-    this.tapJoinConstraint = [];
-    this.tapWhereConstraint = [];
-    contA = "";
-    testRoot = false;
-    testButton = false;
-    tabAllQuery = []
-    tab = []
-    allQuery = "";
-    $(document).ajaxStop(function () {
-        window.location.reload();
-    });
 
 }
 

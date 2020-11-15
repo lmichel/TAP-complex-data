@@ -21,7 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/HandlerAttribut.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/HandlerAttribut.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
     </list>
@@ -84,7 +83,9 @@
       <workItem from="1604648486025" duration="29813000" />
       <workItem from="1604908309452" duration="80519000" />
       <workItem from="1605167840088" duration="45814000" />
-      <workItem from="1605251820174" duration="30674000" />
+      <workItem from="1605251820174" duration="31591000" />
+      <workItem from="1605332054150" duration="15523000" />
+      <workItem from="1605391474926" duration="34837000" />
     </task>
     <servers />
   </component>
@@ -104,6 +105,10 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="691" y="355" width="600" height="403" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605332134776">
+      <screen x="72" y="27" width="1848" height="1053" />
+    </state>
+    <state x="691" y="355" width="600" height="403" key="#com.intellij.fileTypes.FileTypeChooser/72.27.1848.1053@72.27.1848.1053" timestamp="1605332134776" />
     <state x="687" y="162" width="618" height="783" key="find.popup" timestamp="1604650528432">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
