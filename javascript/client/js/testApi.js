@@ -196,6 +196,27 @@ function newMain() {
         }
     })
 
+    $("#btnGetObjectMap2").click(function () {
+        if (a.testConnection == true) {
+           /* let objectMap = JSON.stringify(a.getObjectMap(), undefined, 2);
+            let status = a.getObjectMap().succes.status;
+            display(status, "getStatu");
+            display(objectMap, "getJsonAll")
+            a.joinTable("basic");
+            alert($("#btnGetObjectMap").val())
+            setActive("btnGetObjectMap", "btnGetConnector", "btnGetJoinTable", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")*/
+
+            display('ok', "getStatu");
+            display(JSON.stringify(a.getObjectMapWithAllDescriptions(),undefined,2), "getJsonAll")
+        } else {
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
+            // alert("The service is disconnected ! connect service and try again ..." )
+        }
+    })
+
+
+
     $("#btnGetJoinTable").click(function () {
         if (a.testConnection == true) {
 

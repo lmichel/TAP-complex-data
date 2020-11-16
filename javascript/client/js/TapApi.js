@@ -702,6 +702,9 @@ TapApi.prototype.getTableAttributeHandlers = function (table) {
 
     return this.handlerAttribut.getTableAttributeHandler(table);
 }
+TapApi.prototype.getObjectMapWithAllDescriptions =function (){
+    return  this.handlerAttribut.getObjectMapWithAllDescription();
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

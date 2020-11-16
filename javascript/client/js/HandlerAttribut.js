@@ -6,6 +6,7 @@ class HandlerAttributs {
          let ucd; //Unified Content Descriptor
          let utype; //Model binding
          let descriptor; //Text descriptor*/
+        //this.tapApi = new TapApi();
         this.api = "";
         this.ucd = ''
         this.name = '';
@@ -14,11 +15,143 @@ class HandlerAttributs {
         this.utype = '';
         this.description = '';
         this.range = '';
-        //api.connect();
+        this.schema ="";
+        this.objectMapWithAllDescription = {
+            "root_table": {
+                "name": "root_table_name",
+                "schema": "schema"
+            },
+            "tables": {
+               
+            },
+            "map": {
+
+            }
+        }
     }
+}
+
+HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
+    let api = this.api;
+    let objectMapWithAllDescription;
+    let attributHanler;
+    let allTables = api.tapService.allTable();
+    let jsonWithaoutDescription = api.correctService.loadJson();
+    api.getRootQuery();
+    let jsonAdqlContent = api.jsonAdqlContent;
+    let rootTable = api.connector.service["table"]
+    this.objectMapWithAllDescription.root_table.name = rootTable;
+    this.objectMapWithAllDescription.root_table.schema = api.connector.service["schema"];
+    let column =[];
+
+    this.db_name = this.api.connector.service["table"];
+    this.schema = this.api.connector.service["schema"];
+    let formatJoinTable = "";
+    let correctJoinFormaTable = "";
+    let correctTableConstraint = "";
+    let correctWhereClose = "";
+    for (let tableKey in jsonWithaoutDescription) {
+        for (let k = 0; k < allTables.length; k++) {
+            if (tableKey == allTables[k]) {
+                formatJoinTable = this.schema + "." + tableKey;
+                correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+                for(let keyConstraint in jsonAdqlContent.constraint){
+                    if (keyConstraint==correctJoinFormaTable){
+                       // console.log(keyConstraint+" =++++= "+correctJoinFormaTable)
+                        correctTableConstraint = api.jsonAdqlContent.constraint[correctJoinFormaTable];
+                    }
+                    if(keyConstraint == "condition "+correctJoinFormaTable){
+                        correctWhereClose = api.jsonAdqlContent.constraint[keyConstraint];
+                    }
+                }
+                attributHanler = this.getTableAttributeHandler(tableKey);
+                this.objectMapWithAllDescription.tables[tableKey] = {
+                    "description": allTables[k+1],
+                    "constraints": correctTableConstraint+" WHERE "+correctWhereClose,
+                    "columns": attributHanler.attribute_handlers,
+                }
+
+
+            }
+
+        }
+
+    }
+
+    //console.log(JSON.stringify(this.objectMapWithAllDescription.tables, undefined, 2));
+   // console.log(JSON.stringify(this.objectMapWithAllDescription.tables, undefined, 2));
+
+
+    let joinTables= api.correctService.getJoinTables(rootTable);
+
+    //var arr = [5, 6, 7, 8];
+    let joinTablesToString = JSON.stringify(Object.assign({}, joinTables));  // convert array to string
+    let joinTablesJsonObject = JSON.parse(joinTablesToString);  // convert string to json object
+    modifyKeys(joinTablesJsonObject);
+    this.objectMapWithAllDescription.map[rootTable] ={}
+
+let otherJoinTables=[];
+let joinTemp = []
+    for(let joinTableKey in joinTablesJsonObject){
+        otherJoinTables = api.correctService.getJoinTables(joinTablesJsonObject[joinTableKey])
+        let otherJoinTablesToString = JSON.stringify(Object.assign({}, otherJoinTables));  // convert array to string
+        let otheJoinTablesJsonObject = JSON.parse(otherJoinTablesToString);
+        modifyKeys(otheJoinTablesJsonObject);
+        this.objectMapWithAllDescription.map[rootTable][joinTableKey] ={
+            "from": "oid",
+            "target": "oidref",
+
+        }
+        for(let otherJoinTableKey in otheJoinTablesJsonObject){
+
+
+            this.objectMapWithAllDescription.map[rootTable][joinTableKey]["join_tables"]=otheJoinTablesJsonObject
+
+            /*this.objectMapWithAllDescription.map[rootTable].join_tables[joinTableKey][otherJoinTableKey]=
+                {
+                "from": "oid",
+                "target": "oidref",
+            }*/
+        }
+       this.objectMapWithAllDescription.map[rootTable]['join_tables']= this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
+       // this.objectMapWithAllDescription.map[rootTable].join_tables[joinTableKey].join_tables =this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
+    }
+    console.log(joinTemp);
+    for(let join_table_key in this.objectMapWithAllDescription.map[rootTable]){
+        if(join_table_key == "join_tables"){
+            delete this.objectMapWithAllDescription.map[rootTable].join_tables;
+        }
+
+        //this.objectMapWithAllDescription.map[rootTable]['join_tables'][join_table_key] = this.objectMapWithAllDescription.map[rootTable][join_table_key]
+    }
+
+    let tempJson = {
+        "map": {
+            "join_tables": {
+
+            }
+        }
+    }
+    tempJson.map.join_tables = this.objectMapWithAllDescription.map[rootTable]
+    this.objectMapWithAllDescription.map[rootTable] =tempJson.map;
+
+   // console.log(JSON.stringify(this.objectMapWithAllDescription.map[rootTable], undefined, 4));
+
+    return this.objectMapWithAllDescription;
 
 
 }
+
+function modifyKeys(obj){
+    Object.keys(obj).forEach(key => {
+        obj[`${obj[key]}`] = obj[key];
+        delete obj[key];
+        if(typeof obj[`${obj[key]}`] === "object"){
+            modifyKeys(obj[`${obj[key]}`]);
+        }
+    });
+}
+
 
 HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     let doubleArrayValue = [];
@@ -30,7 +163,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
             status: "",
             "table": table,
             attribute_handlers:
-                [{
+                {
                     "db_name": this.db_name,
                     "column_name": this.name,
                     "unit": this.range,
@@ -38,7 +171,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
                     "utype": this.utype,
                     "dataType": this.type,
                     "description": this.description
-                }]
+                }
 
         },
         failure: {
@@ -62,30 +195,13 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
         let nbCols;
         if (votableQueryResult != undefined) {
             dataTable = VOTableTools.votable2Rows(votableQueryResult);
-            console.log(dataTable);
+           // console.log(dataTable);
             contentText = votableQueryResult.responseText;
             Field = VOTableTools.genererField(votableQueryResult, contentText)
 
             nbCols = Field.length;
 
             let rowN
-            /*for (rowN = 0; rowN < dataTable.length; rowN++) {//table  content
-                if (rowN > 0) {
-                    if (rowN % nbCols == 0) {
-                        singleArrayValue.unshift(dataTable[rowN]);
-                        doubleArrayValue.push(singleArrayValue);
-
-                        singleArrayValue = []
-                    } else {
-                        singleArrayValue.push(dataTable[rowN]);
-
-                    }
-                } else {
-                    singleArrayValue.push(dataTable[rowN]);
-                }
-
-            }*/
-
 
             for (rowN = 0; rowN < dataTable.length; rowN += nbCols) {//table  content
                 for (let k = rowN; k < dataTable.length; k++) {
@@ -98,19 +214,19 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
                 singleArrayValue = []
             }
             //doubleArrayValue.splice(doubleArrayValue[0][0], 0);
-            console.log(doubleArrayValue);
+           // console.log(doubleArrayValue);
             //alert(doubleArrayValue);
             jsonContaintHandlerValues.succes.status = "OK"
             let jsonContaintHandlersValue = []
             for (let c = 0; c < doubleArrayValue.length; c++) {
-                jsonContaintHandlerValues.succes.attribute_handlers[0].column_name = doubleArrayValue[c][0];
-                jsonContaintHandlerValues.succes.attribute_handlers[0].unit = doubleArrayValue[c][1];
-                jsonContaintHandlerValues.succes.attribute_handlers[0].ucd = doubleArrayValue[c][2];
-                jsonContaintHandlerValues.succes.attribute_handlers[0].utype = doubleArrayValue[c][3];
-                jsonContaintHandlerValues.succes.attribute_handlers[0].dataType = doubleArrayValue[c][4];
-                jsonContaintHandlerValues.succes.attribute_handlers[0].description = doubleArrayValue[c][5];
+                jsonContaintHandlerValues.succes.attribute_handlers.column_name = doubleArrayValue[c][0];
+                jsonContaintHandlerValues.succes.attribute_handlers.unit = doubleArrayValue[c][1];
+                jsonContaintHandlerValues.succes.attribute_handlers.ucd = doubleArrayValue[c][2];
+                jsonContaintHandlerValues.succes.attribute_handlers.utype = doubleArrayValue[c][3];
+                jsonContaintHandlerValues.succes.attribute_handlers.dataType = doubleArrayValue[c][4];
+                jsonContaintHandlerValues.succes.attribute_handlers.description = doubleArrayValue[c][5];
                 jsonContaintHandlersValue.push(jsonContaintHandlerValues.succes.attribute_handlers);
-                jsonContaintHandlerValues.succes.attribute_handlers = [{
+                jsonContaintHandlerValues.succes.attribute_handlers = {
                     "name": table,
                     "db_name": api.connector.service["table"],
                     "column_name": "",
@@ -119,7 +235,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
                     "utype": "",
                     "dataType": "",
                     "description": ""
-                }]
+                }
             }
             jsonContaintHandlerValues.succes.attribute_handlers = jsonContaintHandlersValue;
 
@@ -141,6 +257,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
         return jsonContaintHandlerValues.failure.otherError;
     }
 }
+
 
 HandlerAttributs.prototype.addAllColumn = function (table, schema) {
     //alert(schema)

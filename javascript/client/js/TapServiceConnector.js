@@ -427,25 +427,7 @@ TapServiceConnector.prototype.mainJsonData = function (adql) {
 }
 
 
-TapServiceConnector.prototype.genererZone3 = function (adql, s, root, n, listJoinAndId) {
-    var QObject = s.Query(adql);
-    var dataTable = VOTableTools.votable2Rows(QObject);
-    var contentText = QObject.responseText;
-    var Field = VOTableTools.genererField(QObject, contentText);
-    var nb = Field.length;
-    if (nb == 0) {
-        $(contentText).find('RESOURCE[type="results"]').each(function () {
-            if ($(this).find("INFO").attr("name") == "QUERY_STATUS") {
-                out = $(this).context.textContent;
-                return out;
-            }
 
-        })
-    } else {
-        out = genererTable(Field, dataTable, n.json, root, listJoinAndId);
-    }
-    return out;
-}
 
 TapServiceConnector.prototype.genererTable = function (Field, dataTable, json, root, listJoinAndId) {//include textarea
     var listJoin = [];
@@ -796,6 +778,8 @@ TapServiceConnector.prototype.limitJson2data = function (n, s, sc) {//n: instanc
     });
 
 }
+
+
 
 
 
