@@ -22,7 +22,7 @@ class HandlerAttributs {
                 "schema": "schema"
             },
             "tables": {
-               
+
             },
             "map": {
 
@@ -92,16 +92,25 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
 
 let otherJoinTables=[];
 let joinTemp = []
-    for(let joinTableKey in joinTablesJsonObject){
+    for(let joinTableKey in joinTablesJsonObject) {
         otherJoinTables = api.correctService.getJoinTables(joinTablesJsonObject[joinTableKey])
         let otherJoinTablesToString = JSON.stringify(Object.assign({}, otherJoinTables));  // convert array to string
         let otheJoinTablesJsonObject = JSON.parse(otherJoinTablesToString);
         modifyKeys(otheJoinTablesJsonObject);
-        this.objectMapWithAllDescription.map[rootTable][joinTableKey] ={
-            "from": "oid",
-            "target": "oidref",
 
-        }
+        for (let tableKey in jsonWithaoutDescription) {
+                if (joinTableKey == tableKey) {
+                    formatJoinTable = this.schema + "." + tableKey;
+                    correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+                   // jsonAll[keyRoot].join_tables[key].target
+                this.objectMapWithAllDescription.map[rootTable][joinTableKey] = {
+                    "from":jsonWithaoutDescription[rootTable].join_tables[joinTableKey].from,
+                    "target": jsonWithaoutDescription[rootTable].join_tables[joinTableKey].target,
+
+                }
+            }
+
+    }
         for(let otherJoinTableKey in otheJoinTablesJsonObject){
 
 
