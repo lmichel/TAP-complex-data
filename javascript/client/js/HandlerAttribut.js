@@ -34,7 +34,7 @@ class HandlerAttributs {
 HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     let api = this.api;
     let objectMapWithAllDescription;
-    let attributHanler;
+    let attributHanler=[];
     let allTables = api.tapService.allTable();
     let jsonWithaoutDescription = api.correctService.loadJson();
     api.getRootQuery();
@@ -55,23 +55,33 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
             if (tableKey == allTables[k]) {
                 formatJoinTable = this.schema + "." + tableKey;
                 correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+
+                console.log(tableKey+" =++++= "+correctJoinFormaTable)
+                console.log(api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable])
+                attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
                 for(let keyConstraint in jsonAdqlContent.constraint){
                     if (keyConstraint==correctJoinFormaTable){
-                       // console.log(keyConstraint+" =++++= "+correctJoinFormaTable)
-                        correctTableConstraint = api.jsonAdqlContent.constraint[correctJoinFormaTable];
-                    }
-                    if(keyConstraint == "condition "+correctJoinFormaTable){
-                        correctWhereClose = api.jsonAdqlContent.constraint[keyConstraint];
+                        correctTableConstraint = api.jsonAdqlContent.allJoin[correctJoinFormaTable];
+                        for (let keyConst in jsonAdqlContent.constraint) {
+                            if (keyConst == "condition " + correctJoinFormaTable) {
+                                correctWhereClose = api.jsonAdqlContent.allCondition[keyConstraint];
+                            }
+                            }
                     }
                 }
-                attributHanler = this.getTableAttributeHandler(tableKey);
+                //attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn//this.getTableAttributeHandler(tableKey);
+
+                let correctConstraint = replaceAll(correctTableConstraint+" WHERE "+correctWhereClose,"WHERE   AND"," WHERE");
+                correctConstraint = replaceAll(correctTableConstraint+" WHERE "+correctWhereClose,"WHERE  AND"," WHERE");
                 this.objectMapWithAllDescription.tables[tableKey] = {
                     "description": allTables[k+1],
-                    "constraints": correctTableConstraint+" WHERE "+correctWhereClose,
-                    "columns": attributHanler.attribute_handlers,
+                    "constraints": correctTableConstraint!=undefined && correctWhereClose!=undefined ?correctConstraint:"",
+                    "columns": attributHanler!=undefined?attributHanler:[],
                 }
 
 
+            }else {
+                console.log(tableKey+" =----= "+allTables[k]);
             }
 
         }
@@ -91,7 +101,7 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     this.objectMapWithAllDescription.map[rootTable] ={}
 
 let otherJoinTables=[];
-let joinTemp = []
+
     for(let joinTableKey in joinTablesJsonObject) {
         otherJoinTables = api.correctService.getJoinTables(joinTablesJsonObject[joinTableKey])
         let otherJoinTablesToString = JSON.stringify(Object.assign({}, otherJoinTables));  // convert array to string
@@ -125,7 +135,7 @@ let joinTemp = []
        this.objectMapWithAllDescription.map[rootTable]['join_tables']= this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
        // this.objectMapWithAllDescription.map[rootTable].join_tables[joinTableKey].join_tables =this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
     }
-    console.log(joinTemp);
+
     for(let join_table_key in this.objectMapWithAllDescription.map[rootTable]){
         if(join_table_key == "join_tables"){
             delete this.objectMapWithAllDescription.map[rootTable].join_tables;
@@ -151,6 +161,10 @@ let joinTemp = []
 
 }
 
+function replaceAll(str, find, replace) {
+    var escapedFind=find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    return str.replace(new RegExp(escapedFind, 'g'), replace);
+}
 function modifyKeys(obj){
     Object.keys(obj).forEach(key => {
         obj[`${obj[key]}`] = obj[key];
