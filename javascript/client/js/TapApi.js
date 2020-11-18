@@ -818,16 +818,22 @@ var testforConstrain = false
 /**
  * @return{*} : Json the json containing all detail about every singel table join to the root table with hadler atribut of choosing table you want to get it handler attribut
  * */
+var testApiRooQuery = false;
+let api = "";
+let table=[]
 TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function (){
     var testButton = false;
 //var h = new HandlerAttributs();
     var tapButton = [];
-    let api = this;
+    api= this;
         //this.tapWhereConstraint = [];
         // this.tapJoinConstraint = []
         tapButton = [];
-        a.getRootQuery();
-        let table = api.tapService.allTable();
+        if(testApiRooQuery == false){
+            api.getRootQuery();
+            table = api.tapService.allTable();
+            testApiRooQuery = true;
+        }
         let schema = api.connector.service["schema"];
     if (testforConstrain == false) {
         for (let i = 0; i < table.length; i=i+2) {
@@ -858,17 +864,18 @@ TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function (){
                 let correctTable = format.quotedTableName().qualifiedName;
 
                 document.getElementById("loadbuttonsHandler").style.display = "none"
-                var json = api.getTableAttributeHandlers(table[i]);
-                console.log(json);
-                display(json.status, "getStatu")
+                var json ="";
+                //console.log(json);
+
                 //alert(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] )
                 // document.getElementById("loadbuttonsHandler").style.display = "none"
                 if(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] == undefined){
-
+                    json = api.getTableAttributeHandlers(table[i]);
                     api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
                 }
 
                 display(JSON.stringify(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable], undefined, 2), "getJsonAll")
+                display(json.status, "getStatu")
                 //return api.jsonCorrectTableColumnDescription;
 
             })

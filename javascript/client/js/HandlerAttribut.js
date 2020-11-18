@@ -208,7 +208,8 @@ function modifyKeys(obj){
     });
 }
 
-
+var testJsonRead = false
+var sj='';
 HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     let doubleArrayValue = [];
     let singleArrayValue = [];
@@ -239,7 +240,10 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
 
     if (api.testConnection == true) {
 
-        var sj = new jsonRead(api.getObjectMap().succes.object_map);
+        if(testJsonRead == false){
+            sj = new jsonRead(api.getObjectMap().succes.object_map);
+            testJsonRead =true;
+        }
         var adql = this.addAllColumn(table, api.connector.service["schema"]);
 
         var s = api.tapService;
