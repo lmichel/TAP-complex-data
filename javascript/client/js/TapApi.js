@@ -221,6 +221,8 @@ TapApi.prototype.getCorrectFieldOfJoinTable = function (mainJsonData) {
  * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
  * @returns return all join request of each join table of the mainJson
  */
+let rootFields = []
+var testLoadRootField=false;
 TapApi.prototype.getRootFields = function () {
 
     let jsonContaintRootFields = {
@@ -231,10 +233,11 @@ TapApi.prototype.getRootFields = function () {
         }
     }
 
-    let rootFields = [];
+   // let rootFields = [];
     if (this.testConnection === true) {
         let contentText = this.votableQueryResult.responseText;
         if (this.getConnector().service.tapService === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.getConnector().service.tapService === "http://dc.zah.uni-heidelberg.de/tap/sync") {
+
             rootFields = VOTableTools.getField(this.votableQueryResult);
         } else {
             rootFields = VOTableTools.genererField(this.votableQueryResult, contentText);
@@ -365,10 +368,15 @@ TapApi.prototype.getRootQueryIds = function () {
 
 }
 
+var testGetObjectMap = false;
+var jsonAll
 TapApi.prototype.getRootQuery = function () {
     var rootQueyJson = {status: "", query: "query"}
     var rootTable = this.connector.service["table"]// .jsonContaintJoinTable.Succes.base_table;
-    var jsonAll = this.getObjectMap();
+    if(testGetObjectMap == false){
+        jsonAll  = this.getObjectMap();
+        testGetObjectMap = true;
+    }
     var schema;
     var contentAdql = "";
     let listJoinAndId = this.getListJoinAndId(this.getConnector().service['table'], this.getObjectMap().succes.object_map);
@@ -796,8 +804,15 @@ TapApi.prototype.getTableAttributeHandlers = function (table) {
 /**
  *@return{*} : Json the json containing all detail about every singel table join to the root table with all join table of each table and all condition of each table
  **/
+var testLoadObjectMapWithAllDesc = false;
+var getObjectMapWithAllDescription
 TapApi.prototype.getObjectMapWithAllDescriptions = function () {
-    return this.handlerAttribut.getObjectMapWithAllDescription();
+
+    //if(testLoadObjectMapWithAllDesc==false){
+        getObjectMapWithAllDescription = this.handlerAttribut.getObjectMapWithAllDescription();
+       // testLoadObjectMapWithAllDesc = true;
+  //  }
+    return getObjectMapWithAllDescription;
 }
 var testforConstrain = false
 /**

@@ -228,6 +228,7 @@ TapServiceConnector.prototype.selectTableToJoin = function (simbadService, table
                       window.location.hash = "#votableJson"*/
                     var sj = new jsonRead(data);
                     //s.createJson(data,"basic");
+
                     var output = "";
                     output = sj.json2Html(tableContentQueryField[i]);
                     $("#load2").html(output);
@@ -503,7 +504,7 @@ TapServiceConnector.prototype.genererTable = function (Field, dataTable, json, r
 
 
 ///////////////////////////////////////////////////////////////////////// Constrains Functions //////////////////////////////////////////////////////////////
-
+// n : instance of jsonread(data) data =simbadService.loadJson(), s instance of tapservice : api.tapService
 TapServiceConnector.prototype.Aide = function (n, s) {
     var a = document.getElementsByName('Cbutton');
     var b = document.getElementsByName('Cinput');

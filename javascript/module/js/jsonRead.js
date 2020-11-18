@@ -64,7 +64,7 @@ var jsonRead = /** @class */ (function () {
     jsonRead.prototype.joinTable = function (table) {
         var jsonAll = this.json;
         var joinTable = [];
-        console.log(JSON.stringify(jsonAll,undefined,2));
+       // console.log(JSON.stringify(jsonAll,undefined,2));
         //alert(jsonAll[table]);
         if(jsonAll[table]==undefined){
             this.json={}

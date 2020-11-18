@@ -31,13 +31,25 @@ class HandlerAttributs {
     }
 }
 
+var testLoadJson = false;
+var testLoadallTable= false;
+var testJoinRootTable = false
+var testOtherJoinTables = false;
+let jsonWithaoutDescription ="";
+let allTables ="";
 HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     let api = this.api;
     let objectMapWithAllDescription;
     let attributHanler=[];
-    let allTables = api.tapService.allTable();
-    let jsonWithaoutDescription = api.correctService.loadJson();
-    api.getRootQuery();
+    if(testLoadallTable == false){
+       allTables = api.tapService.allTable();
+        testLoadallTable= true
+    }
+    if(testLoadJson == false){
+        jsonWithaoutDescription = api.correctService.loadJson();
+        testLoadJson =true;
+    }
+    //api.getRootQuery();
     let jsonAdqlContent = api.jsonAdqlContent;
     let rootTable = api.connector.service["table"]
     this.objectMapWithAllDescription.root_table.name = rootTable;
@@ -61,12 +73,12 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                 correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
 
                 //console.log(tableKey+" =++++= "+correctJoinFormaTable)
-                console.log(api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable])
+               // console.log(api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable])
                 attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
                 for(let keyConstraint in jsonAdqlContent.constraint){
 
                     if (keyConstraint==correctJoinFormaTable){
-                        console.log(jsonAdqlContent.constraint)
+                       // console.log(jsonAdqlContent.constraint)
                         correctTableConstraint = api.jsonAdqlContent.allJoin[correctJoinFormaTable];
                         for (let keyConst in jsonAdqlContent.constraint) {
                             if (keyConst == "condition " + correctJoinFormaTable) {
@@ -86,7 +98,7 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                 }
                 for(let keyConstraint in jsonAdqlContent.constraint) {
                     if (keyConstraint == correctJoinFormaTable) {
-                        let correctCondition = replaceAll(" WHERE "+correctWhereClose,"WHERE  AND ","WHERE")
+                        let correctCondition = replaceAll(" WHERE "+correctWhereClose,"WHERE  AND ","")
                         this.objectMapWithAllDescription.tables[tableKey].constraints =
                             correctTableConstraint != undefined && correctWhereClose != undefined && correctConstraint.trim() != "WHERE" ? correctCondition : "";
 
@@ -105,8 +117,11 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     //console.log(JSON.stringify(this.objectMapWithAllDescription.tables, undefined, 2));
    // console.log(JSON.stringify(this.objectMapWithAllDescription.tables, undefined, 2));
 
-
-    let joinTables= api.correctService.getJoinTables(rootTable);
+    let joinTables =[];
+    if(testJoinRootTable == false){
+         joinTables= api.correctService.getJoinTables(rootTable);
+        testJoinRootTable = true;
+    }
 
     //var arr = [5, 6, 7, 8];
     let joinTablesToString = JSON.stringify(Object.assign({}, joinTables));  // convert array to string
@@ -117,7 +132,9 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
 let otherJoinTables=[];
 
     for(let joinTableKey in joinTablesJsonObject) {
-        otherJoinTables = api.correctService.getJoinTables(joinTablesJsonObject[joinTableKey])
+        if(testOtherJoinTables == false){
+            otherJoinTables = api.correctService.getJoinTables(joinTablesJsonObject[joinTableKey])
+        }
         console.log(otherJoinTables);
         let otherJoinTablesToString = JSON.stringify(Object.assign({}, otherJoinTables));  // convert array to string
         let otheJoinTablesJsonObject = JSON.parse(otherJoinTablesToString);
@@ -136,7 +153,7 @@ let otherJoinTables=[];
             }
 
     }
-        for(let otherJoinTableKey in otheJoinTablesJsonObject){
+      for(let otherJoinTableKey in otheJoinTablesJsonObject){
 
 
            this.objectMapWithAllDescription.map[rootTable][joinTableKey]["join_tables"]=otheJoinTablesJsonObject
@@ -150,6 +167,7 @@ let otherJoinTables=[];
        this.objectMapWithAllDescription.map[rootTable]['join_tables']= this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
        // this.objectMapWithAllDescription.map[rootTable].join_tables[joinTableKey].join_tables =this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
     }
+    testOtherJoinTables = true;
 
     for(let join_table_key in this.objectMapWithAllDescription.map[rootTable]){
         if(join_table_key == "join_tables"){
