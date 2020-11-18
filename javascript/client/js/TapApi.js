@@ -752,6 +752,33 @@ TapApi.prototype.resetTableConstraint = function (table) {
     return this.jsonAdqlContent;
 
 }
+/**
+ *@param{*} table : String the name of table you want to remove the contraint associeted with
+ * @return{*} : Json the json containing root Query with all join table and all condition of each table
+ **/
+TapApi.prototype.resetAll = function () {
+    ;
+
+    //var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+    for (let key in this.jsonAdqlContent.allJoin) {
+        if (key) {
+            delete this.jsonAdqlContent.allJoin[key] //= "";
+            delete this.jsonAdqlContent.allCondition[key] //= "";
+            this.jsonAdqlContent.rootQuery.replaceAll("AND   AND", "AND")
+            this.jsonAdqlContent.rootQuery.replaceAll("WHERE   AND ", "WHERE")
+            this.jsonAdqlContent.rootQuery.replaceAll("WHERE  AND ", "WHERE")
+            this.jsonAdqlContent.rootQuery.replaceAll("WHERE   AND ", "WHERE")
+            this.jsonAdqlContent.status.status = "OK";
+        } else {
+            this.jsonAdqlContent.status.status = "Failed";
+            //this.jsonAdqlContent.status.orderErros="The join table query not exist in rootQuery";
+        }
+        //jsonAdqlContent.rootQuery += " " + jsonAdqlContent.allJoin[key] + " ";
+    }
+    //$("#getJsonAll").text(this.jsonAdqlContent.rootQuery);
+    return this.jsonAdqlContent;
+
+}
 
 //var splitUndefine;
 function reset() {

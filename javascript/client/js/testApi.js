@@ -262,11 +262,26 @@ function newMain() {
             //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
+    $("#btnRemoveAllConstraint").click(function (){
+        let rootq = a.resetAll()
+        alert(rootq.status.status);
+        var statu=rootq.status.status!=""?rootq.status.status:"NO constraint yet"
+        display(statu, "getStatu");
+        //$("#getJsonAll").text("Constraint removed successful");
+        if(rootq.status.orderErros!=""){
+
+            display(""+JSON.stringify(rootq.status,undefined,2), "getJsonAll")
+        }else {
+            statu=rootq.status.status!=""?rootq.status.status:"Failed"
+            display("{ status : "+JSON.stringify(statu,undefined,2)+" }", "getJsonAll")
+        }
+    });
     var temp = '';
     var isCallRootQuery = false;
     var tabContainRemoveQuery = []
     var tesTabCRQ = false;
     let testRemoveButton = false;
+
     $("#btnGetRootQuery").click(function () {
 
         if (a.testConnection == true) {
@@ -296,6 +311,7 @@ function newMain() {
             document.getElementById("btnConstraint").style.display = "block";
 
             document.getElementById("btnRemoveConstraint").style.display = "block";
+
             let table
             $("#btnRemoveConstraint").click(function () {
                 document.getElementById("loadRemoveButton").style.display = "block"
@@ -325,6 +341,7 @@ function newMain() {
                     window.location.hash = "#loadRemoveButton";
 
                     $("#rbtnConstraint").click(function () {
+
                         for (let i = 0; i < table.length; i++) {
                             if ($("#txtConstraint").val() == "") {
                                 display("Failed", "getStatu");

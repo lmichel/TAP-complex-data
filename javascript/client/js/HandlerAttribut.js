@@ -86,8 +86,9 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                 }
                 for(let keyConstraint in jsonAdqlContent.constraint) {
                     if (keyConstraint == correctJoinFormaTable) {
+                        let correctCondition = replaceAll(" WHERE "+correctWhereClose,"WHERE  AND ","WHERE")
                         this.objectMapWithAllDescription.tables[tableKey].constraints =
-                            correctTableConstraint != undefined && correctWhereClose != undefined && correctConstraint.trim() != "WHERE" ? correctConstraint : "";
+                            correctTableConstraint != undefined && correctWhereClose != undefined && correctConstraint.trim() != "WHERE" ? correctCondition : "";
 
                     }
                 }
