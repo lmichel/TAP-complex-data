@@ -50,17 +50,23 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     let correctJoinFormaTable = "";
     let correctTableConstraint = "";
     let correctWhereClose = "";
+    //console.log(allTables);
+    for (let k = 0; k < allTables.length; k++) {
     for (let tableKey in jsonWithaoutDescription) {
-        for (let k = 0; k < allTables.length; k++) {
-            if (tableKey == allTables[k]) {
+
+
+            //console.log(tableKey+" =++++= "+allTables[k].replaceAll(this.schema,"") )
+            if (tableKey == allTables[k] || this.schema+"."+tableKey ==allTables[k] ) {
                 formatJoinTable = this.schema + "." + tableKey;
                 correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
 
-                console.log(tableKey+" =++++= "+correctJoinFormaTable)
+                //console.log(tableKey+" =++++= "+correctJoinFormaTable)
                 console.log(api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable])
                 attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
                 for(let keyConstraint in jsonAdqlContent.constraint){
+
                     if (keyConstraint==correctJoinFormaTable){
+                        console.log(jsonAdqlContent.constraint)
                         correctTableConstraint = api.jsonAdqlContent.allJoin[correctJoinFormaTable];
                         for (let keyConst in jsonAdqlContent.constraint) {
                             if (keyConst == "condition " + correctJoinFormaTable) {
@@ -75,13 +81,20 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                 correctConstraint = replaceAll(correctTableConstraint+" WHERE "+correctWhereClose,"WHERE  AND"," WHERE");
                 this.objectMapWithAllDescription.tables[tableKey] = {
                     "description": allTables[k+1],
-                    "constraints": correctTableConstraint!=undefined && correctWhereClose!=undefined ?correctConstraint:"",
+                    "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
                     "columns": attributHanler!=undefined?attributHanler:[],
+                }
+                for(let keyConstraint in jsonAdqlContent.constraint) {
+                    if (keyConstraint == correctJoinFormaTable) {
+                        this.objectMapWithAllDescription.tables[tableKey].constraints =
+                            correctTableConstraint != undefined && correctWhereClose != undefined && correctConstraint.trim() != "WHERE" ? correctConstraint : "";
+
+                    }
                 }
 
 
             }else {
-                console.log(tableKey+" =----= "+allTables[k]);
+                //console.log(tableKey+" =----= "+allTables[k]);
             }
 
         }
@@ -104,6 +117,7 @@ let otherJoinTables=[];
 
     for(let joinTableKey in joinTablesJsonObject) {
         otherJoinTables = api.correctService.getJoinTables(joinTablesJsonObject[joinTableKey])
+        console.log(otherJoinTables);
         let otherJoinTablesToString = JSON.stringify(Object.assign({}, otherJoinTables));  // convert array to string
         let otheJoinTablesJsonObject = JSON.parse(otherJoinTablesToString);
         modifyKeys(otheJoinTablesJsonObject);
@@ -124,7 +138,7 @@ let otherJoinTables=[];
         for(let otherJoinTableKey in otheJoinTablesJsonObject){
 
 
-            this.objectMapWithAllDescription.map[rootTable][joinTableKey]["join_tables"]=otheJoinTablesJsonObject
+           this.objectMapWithAllDescription.map[rootTable][joinTableKey]["join_tables"]=otheJoinTablesJsonObject
 
             /*this.objectMapWithAllDescription.map[rootTable].join_tables[joinTableKey][otherJoinTableKey]=
                 {

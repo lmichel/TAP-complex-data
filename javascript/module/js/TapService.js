@@ -57,6 +57,7 @@ var TapService = /** @class */ (function () {
         return reTable;
     };
     /**
+     * tap_schema_quotes
      * Get the from_table, target_table, from_column, target_column
      * @returns :votavle object
      */
@@ -64,7 +65,9 @@ var TapService = /** @class */ (function () {
         var site = this.url;
         var checkstatus = this.checkstatus;
         var reLink;
+
         var checkvalue = 'SELECT tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
+
         if (checkstatus == true) {
             checkvalue = 'SELECT TOP 100 tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
         }
