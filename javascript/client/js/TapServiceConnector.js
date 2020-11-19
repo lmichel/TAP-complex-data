@@ -770,6 +770,7 @@ TapServiceConnector.prototype.limitJson2data = function (n, s, sc) {//n: instanc
             $("#load4").html(out);
             var f = $('#textadql').val();
             var d = $('#txtAreaAdql').val(f)
+            var r = $('#getJsonAll').val(f)
 
             // out += genererTable(Field,dataTable,t,rootName,listJoinAndId);
             // $("#load3").html(out3);

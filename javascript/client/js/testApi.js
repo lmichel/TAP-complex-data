@@ -135,6 +135,72 @@ function OnChangeRadio(radio) {
     }
 }
 
+function connectDatabase(urlPath, schema, shortname, adql, tableName) {
+    showLoader();
+    var databaseServices = new TapServiceConnector(urlPath, schema, shortname);
+    var value = $("#selectToJoin").val()
+    var adqlQuery = $("#txtArea").val(adql);
+    databaseServices.setAdqlQuery(adqlQuery.val());
+    //alert(urlPath)
+    var data = databaseServices.loadJson();
+    if (data[tableName] == undefined) {
+        data = {
+            tables: {
+                "base_table": tableName,
+                "join_table": {}
+            }
+        }
+        //alert(JSON.stringify(joinTable,undefined,2))
+    }
+
+    $("#loadJson").html(JSON.stringify(data, undefined, 2));
+    window.location.hash = "#loadJson"
+    var listJoinAndId = databaseServices.getListJoinAndId(tableName, data);
+    var listId = databaseServices.getListeId(listJoinAndId);
+    // alert(adqlQuery.val());
+    var mainData = databaseServices.tapService.createMainJson(databaseServices.getAdqlQuery(), data, tableName, listId, listJoinAndId);
+
+    getTableJsonQueryValue(mainData, databaseServices, tableName);
+    var tableContentJoinTable = getJoinTable(mainData);
+    if (tableContentJoinTable.length == 0) {
+        tableContentJoinTable.push(tableName);
+        mainData = databaseServices.tapService.createMainJson(databaseServices.getAdqlQuery(), data, tableName, listId, listJoinAndId);
+
+
+    }
+    $("#selectDiv").html(selectTableToJoin_html(tableContentJoinTable))
+    window.location.hash = "#selectDiv"
+    var out = databaseServices.joinTableByField(mainData, tableName, urlPath, schema, shortname);
+
+    return databaseServices;
+}
+function selectTableToJoin_html(tableContentJoinTable) {
+    var out = '<div class="card" id ="">' +
+        '<div class="card-body">' +
+        '<div class="row">' +
+        '<div class="col-lg-6">' +
+        ' <div class="form-group">' +
+        '<label for="selectToJoin">Select Table To Join &nbsp &nbsp &nbsp' +
+        '</label>' +
+        '<select class="form-control" id="selectToJoin">' +
+        '<option seleted>...</option>'
+    for (var i = 0; i < tableContentJoinTable.length; i++) {
+
+        out += "<option id='" + i + "'>" + tableContentJoinTable[i] + "</option>"
+    }
+    out += '</select>' +
+        '</div>' + '</div>' + '</div>' +
+        '<hr class="btn-primary">' +
+        '<div> ' +
+        '<textarea class="form-control" id="txtAreaAdql" value=""></textArea><br>' +
+        '</div>' +
+        '<button class="btn btn-success" id="executeAdql">Run Adql</button>'
+    '</div>' + '</div>'
+
+
+    return out;
+}
+
 function newMain() {
 
     // initial();
@@ -147,8 +213,10 @@ function newMain() {
         if (a.testConnection == false) {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
                 a.connect(params);
+              //  var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
                 let status = a.connector.status;
                 //alert("you are now connected")
+                a.getObjectMapWithAllDescriptions();
                 document.getElementById("testContent").style["display"] = "none";
                 display(status, "getStatu");
                 ConnectActive("btnApiConnectS", "btnApiDisconnect")
