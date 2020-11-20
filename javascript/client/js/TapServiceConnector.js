@@ -233,7 +233,7 @@ TapServiceConnector.prototype.selectTableToJoin = function (simbadService, table
                     output = sj.json2Html(tableContentQueryField[i]);
                     $("#load2").html(output);
                     simbadService.Aide(sj, simbadService.tapService)
-                    simbadService.limitJson2data(sj, simbadService.tapService, simbadService);
+                    //simbadService.limitJson2data(sj, simbadService.tapService, simbadService);
                     flag = 1
 
                     $("#selectDiv").html(simbadService.selectTableToJoin_html(a))
@@ -512,6 +512,7 @@ TapServiceConnector.prototype.Aide = function (n, s) {
 
     for (var i = 0; i < a.length; i++) {
         a[i].onclick = (function closure(ii) {
+            //alert("dffff")
             return function () {
                 var name = b[ii].id.slice(1);//the name of
                 var schema = n.json[name].schema;

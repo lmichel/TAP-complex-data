@@ -567,6 +567,80 @@ function getJsonAdqlQuery() {
     //return this.jsonAdqlContent;
 }
 
+TapApi.prototype.selecConstraints=function(tableName,txtImput) {
+    var name = tableName //b[ii].id.slice(1);//the name of
+    var schema = this.connector.service["schema"];
+    // alert(name +' '+schema);
+    var adql = this.handlerAttribut.addAllColumn(name, schema)
+    var QObject = this.tapService.Query(adql);
+    var dataTable = VOTableTools.votable2Rows(QObject)
+    var contentText = QObject.responseText;
+    var Field = VOTableTools.genererField(QObject, contentText)
+    var nb = Field.length;
+    var out = "<div class = 'AIDE ' " +
+        "id='light'>" +
+        "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + name + "</span>" +
+        "<button class='delete_right' id='d_right'><i class='fa fa-close' ></i></button><br></br>";//head
+    out += "<table  class = 'table table-bordered table-striped table-hover'  role = 'grid' >";
+    out += "<thead class='thead-dark'><tr role='row'>";//head
+    //out +="<th/>";
+
+
+    for (var j = 0; j < nb; j++) {
+        out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[j] + "</th>";
+    }
+    out += "</tr></thead>";
+    out += "<tbody>"
+    var column = 0;
+    for (var j = 0; j < dataTable.length; j++) {//table  content
+        if (column == 0) {
+            var judge = (j + nb) / nb;
+            if (judge % 2 == 1) {
+                out += "<tr class = 'odd table-primary' >";
+                //out+="<td><input type='checkbox'></td>";
+            } else {
+                out += "<tr class = 'even table-primary'>";
+                //out+="<td><input type='checkbox'></td>";
+            }
+            //var row = j/6+1;
+            out += "<td id = '" + dataTable[j] + "' style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + dataTable[j] + "</td>";
+        } else {
+            out += "<td style='text-align: center;vertical-align:bottom'>" + dataTable[j] + "</td>";
+        }
+        column = column + 1;
+        if (column == nb) {
+            out += "</tr>";
+            column = 0;
+        }
+
+    }
+    out += "</tbody>"
+    out += "</table>  </div>"
+    $("body").prepend(out);
+    var td = $("td");
+    for (var i = 0; i < td.length; i++) {
+        $(td[i]).click(function () {
+            var i = $(this).attr("id");
+            if ($("#" + txtImput).val().length != 0) {
+                var content = $("#" + txtImput).val();
+                $("#" + txtImput).val(content + " AND " + name + "." + i + "=");
+                document.getElementById('light').style.display = 'none';
+            } else {
+                $("#" + txtImput).val(name + "." + i + "=");
+                document.getElementById('light').style.display = 'none';
+            }
+
+        });
+    }
+
+        $("#d_right").click(function (){
+            document.getElementById("light").style.display="none";
+        })
+
+    document.getElementById('light').style.display = 'block';
+
+}
+
 var jsonTempJoinTap = [];
 var jsonTempWhereTap = [];
 var countCondition = 0;
@@ -579,11 +653,11 @@ TapApi.prototype.addConstraint = function (rootQuery, table, whereTable) {
     let mytest = false;
     var schema = this.connector.service["schema"];
     //this.getObjectMapWithAllDescriptions();
-    var data = api.correctService.loadJson();
-    var sj = new jsonRead(data);
+   // var data = api.correctService.loadJson();
+    //var sj = new jsonRead(data);
 
-    api.correctService.Aide(sj, api.tapService)
-    api.correctService.limitJson2data(sj, api.tapService, api.correctService);
+  //  api.correctService.Aide(sj, api.tapService)
+    //api.correctService.limitJson2data(sj, api.tapService, api.correctService);
 
 
     if (testfor == false) {
@@ -597,11 +671,11 @@ TapApi.prototype.addConstraint = function (rootQuery, table, whereTable) {
 
             let formats = schema + '.' + key;
             let correctTables = formats.quotedTableName().qualifiedName;
-            buttons = "<span>" +
-                "<button  type='button' class=\"btn btn-default\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Join '" + key + "'</button>" +
-                " <input type='text' class='form form-control' id='txt" + key + "' value='" +this.jsonAdqlContent.constraint["condition " + correctTables]+ "'>"
+            buttons = "<span>" +"<button  type='button' class=\"btn btn-primary\" id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">Click to select "+key+" constraints</button>"+
+                "<button  type='button' class=\"btn btn-default\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
+                " <input type='text' class='form form-control' id='txt" + key + "' value=' ' placeholder='Enter condition' name='Cinputs'> <hr>"
 
-
+            //this.jsonAdqlContent.constraint["condition " + correctTables]
             // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
 
             if (testButton == true) {
@@ -611,14 +685,17 @@ TapApi.prototype.addConstraint = function (rootQuery, table, whereTable) {
             }
 
         }
+
         $("#loadButton").append(this.tapButton);
         window.location.hash = "#loadButton";
 
         //var btns =this.tapButton;
         for (let key in this.handlerAttribut.objectMapWithAllDescription.tables) {
+            $("#"+"bbb"+key).click(function (){
+                api.selecConstraints(key, "txt"+key);
+            })
+
             $("#" + key).click(function () {
-
-
                 let format = schema + '.' + key;
                 let correctTable = format.quotedTableName().qualifiedName;
 
@@ -660,7 +737,7 @@ TapApi.prototype.addConstraint = function (rootQuery, table, whereTable) {
                         for (let keyConst in jsonAdqlContent.constraint) {
                             if (keyConst == "condition " + correctTable) {
                                 //if(jsonAdqlContent.allCondition ==""){
-                                 //jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().replaceAll("WHERE", "");
+                                 jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().replaceAll("WHERE", "")!=" "?jsonAdqlContent.constraint[keyConst]+" "+$("#txt" + key).val().replaceAll("WHERE", ""):jsonAdqlContent.constraint[keyConst];
                                 if (mytest == false) {
                                     jsonAdqlContent.allCondition[keys] = jsonAdqlContent.constraint[keyConst];
                                     mytest = true;
@@ -745,7 +822,7 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
                                             console.log(myJsonJion[key].join_tables[ajoin[h]]);
                                             console.log(api.jsonAdqlContent.constraint[correctNameFormat]);
                                             let fistJoinConstrain = api.jsonAdqlContent.constraint[correctNameFormat]
-                                            let condition = api.jsonAdqlContent.constraint["condition "+correctNameFormat]
+                                            let condition = $("#txt" + key).val().replaceAll("WHERE", "")!=" "?api.jsonAdqlContent.constraint["condition "+correctNameFormat]+" "+$("#txt" + key).val().replaceAll("WHERE", ""):api.jsonAdqlContent.constraint["condition "+correctNameFormat]
                                             // let formatTableName = schema + "." + keyRoot;
                                              //let correctTableNameFormat =formatTableName.quotedTableName().qualifiedName;
                                              let format = schema + '.' + ajoin[h];
@@ -771,7 +848,7 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
                                             }
 
                                             jsonAdqlContent.allJoin[correctKeyFormat] = api.jsonAdqlContent.constraint[correctKeyFormat];
-                                            jsonAdqlContent.allCondition[correctKeyFormat] =api.jsonAdqlContent.constraint["condition "+correctKeyFormat]!=undefined? " AND " + api.jsonAdqlContent.constraint["condition "+correctKeyFormat]:""
+                                            jsonAdqlContent.allCondition[correctKeyFormat] =api.jsonAdqlContent.constraint["condition "+correctKeyFormat]!=undefined? " " + api.jsonAdqlContent.constraint["condition "+correctKeyFormat]:""
                                             //console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
                                              console.log(api.jsonAdqlContent.constraint["condition "+correctKeyFormat]);
                                             console.log(api.jsonAdqlContent.constraint[correctKeyFormat]);
@@ -792,7 +869,7 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
                                                         console.log(myJsonJion[key].join_tables[ajoin[h]]);
                                                         console.log(api.jsonAdqlContent.constraint[correctNameFormat1]);
                                                         let fistJoinConstrain1 = api.jsonAdqlContent.constraint[correctNameFormat1]
-                                                        let condition1 = api.jsonAdqlContent.constraint["condition " + correctNameFormat1]
+                                                        let condition1 =  $("#txt" + key).val().replaceAll("WHERE", "")!=" "?api.jsonAdqlContent.constraint["condition "+correctNameFormat1]+" AND "+$("#txt" + key).val().replaceAll("WHERE", ""):api.jsonAdqlContent.constraint["condition "+correctNameFormat1]
                                                         // let formatTableName = schema + "." + keyRoot;
                                                         //let correctTableNameFormat =formatTableName.quotedTableName().qualifiedName;
                                                         let format1 = schema + '.' + ajoin1[h1];
