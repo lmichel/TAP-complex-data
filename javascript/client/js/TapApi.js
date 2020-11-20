@@ -1053,6 +1053,7 @@ TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function () {
     //this.tapWhereConstraint = [];
     // this.tapJoinConstraint = []
     tapButton = [];
+    let tempTable =[]
     if (testApiRooQuery == false) {
         api.getRootQuery();
         table = api.tapService.allTable();
@@ -1060,7 +1061,13 @@ TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function () {
     }
     let schema = api.connector.service["schema"];
     if (testforConstrain == false) {
-        for (let i = 0; i < table.length; i = i + 2) {
+
+       /* for (let key in this.handlerAttribut.objectMapWithAllDescription.tables) {
+            tempTable.push(key)
+        }
+        tempTable = Array.from(new Set(tempTable));*/
+        table = allJoinRootTable
+        for (let i = 0; i < table.length; i = i + 1) {
             if (table[i].search(schema + ".") > -1) {
                 table[i] = table[i].replaceAll(schema + ".", "")
             }
@@ -1079,7 +1086,7 @@ TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function () {
         $("#loadbuttonsHandler").append(tapButton);
 
         window.location.hash = "#loadbuttonsHandler";
-        for (let i = 0; i < table.length; i = i + 2) {
+        for (let i = 0; i < table.length; i = i + 1) {
 
             //document.getElementById("loadbuttonsHandler").style.display = "block"
             $("#b" + table[i] + i).click(function () {
