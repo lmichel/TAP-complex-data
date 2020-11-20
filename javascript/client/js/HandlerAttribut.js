@@ -269,13 +269,8 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                     }
                 }
             })*/
-
             this.objectMapWithAllDescription.map[rootTable][joinTableKey]["join_tables"] = otheJoinTablesJsonObject
-            for (let tableKey in jsonWithaoutDescription) {
-                if (tableKey == otherJoinTableKey) {
-
-                }
-            }
+            
         }
         this.objectMapWithAllDescription.map[rootTable]['join_tables'] = this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
         // this.objectMapWithAllDescription.map[rootTable].join_tables[joinTableKey].join_tables =this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
