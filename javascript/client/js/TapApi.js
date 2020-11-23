@@ -262,6 +262,7 @@ TapApi.prototype.getRootFields = function () {
 
 let testSecondJson = false;
 let jsonContaintHandlersValue1 =[]
+let dataTable1 =[];
 TapApi.prototype.getRootFieldValues = function () {
     let jsonContaintRootFieldValues = {
         succes: {status: "", field_values: []},
@@ -300,42 +301,50 @@ TapApi.prototype.getRootFieldValues = function () {
         ////////////////////////////////////////////////////////////
         let singleArrayValue1 = [];
         let doubleArrayValue1 = []
-       // let dataTable1 = '';
+         ;
         let adql1 = "";
 
 
         //jsonContaintHandlerValues.attribute_handlers.db_name = this.connector.service["table"]
-       // if (testSecondJson == false) {
+        if (testSecondJson == false) {
 
             //adql1 = this.tapService.Query(this.handlerAttribut.addAllColumn(rootable));
-          let  dataTable1 =this.handlerAttribut.getTableAttributeHandler(rootable,schema)// VOTableTools.votable2Rows(adql1);
+            dataTable1 =this.handlerAttribut.getTableAttributeHandler(rootable,schema)// VOTableTools.votable2Rows(adql1);
             testSecondJson = true;
-       // }
-        for (let col = 0; col < Field.length; col++) {
-            //let dataTableAhs = VOTableTools.votable2Rows(ahs);
-            let val =Field[col]
-            let cc=0;
-            for (let ke in dataTable1.attribute_handlers) {
+       }
+        let tabQuery = this.jsonAdqlContent.rootQuery.split("JOIN");
+        let query  = tabQuery[0];
 
-               // modifyKeys(dataTable1.attribute_handlers[ke])
-                if (dataTable1.attribute_handlers[ke].column_name.trim() === val.trim()) {
-                     jsonContaintHandlersValue1=dataTable1.attribute_handlers[ke]
-                    //jsonContaintHandlersValue1 = Array.from(new Set(jsonContaintHandlersValue1));
-                    cc++
-                    console.log(dataTable1.attribute_handlers[ke]);
-                    console.log(jsonContaintHandlersValue1);
-                    // this.handlerAttribut.objectMapWithAllDescription.map[this.connector.service["table"]]["handler_attributs"]=jsonContaintHandlerValues.attribute_handlers[ke];
-                    this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs']=jsonContaintHandlersValue1;
+            let cc = 0;
+            for (let b = 0; b < dataTable1.attribute_handlers.length; b++) {
+                for (let ke in dataTable1.attribute_handlers[b]) {
+                    //console.log(dataTable1.attribute_handlers[b][ke]);
+                    // modifyKeys(dataTable1.attribute_handlers[ke])
+                    for (let col = 0; col < Field.length; col++) {
+                        //let dataTableAhs = VOTableTools.votable2Rows(ahs);
+                       // console.log(Field.length);
+                    if (dataTable1.attribute_handlers[b][ke] === Field[col] && query.indexOf(Field[col])!==-1) {
+                        jsonContaintHandlersValue1.push(dataTable1.attribute_handlers[b])
+                        jsonContaintHandlersValue1 = Array.from(new Set(jsonContaintHandlersValue1));
+                        // cc++
+                        //console.log(dataTable1.attribute_handlers[b]);
+                        //console.log(jsonContaintHandlersValue1);
+                        // this.handlerAttribut.objectMapWithAllDescription.map[this.connector.service["table"]]["handler_attributs"]=jsonContaintHandlerValues.attribute_handlers[ke];
+                        //this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1;
 
-                }else {
+                    } else {
 
-                    //console.log(dataTable1.attribute_handlers[ke].column_name !== val)
+                        //console.log(dataTable1.attribute_handlers[ke].column_name !== val)
 
+                    }
                 }
+                //  console.log(val);
             }
-            //  console.log(val);
         }
-        ///console.log(dataTable1.attribute_handlers[ke]);
+        jsonContaintHandlersValue1 = Array.from(new Set(jsonContaintHandlersValue1));
+        this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1;
+
+        alert(jsonContaintHandlersValue1.length);
         // let f = modifyKeys(dataTable1.attribute_handlers)
         jsonContaintRootFieldValues.succes.status = "OK"
         jsonContaintRootFieldValues.succes.field_values = doubleArrayValue;
