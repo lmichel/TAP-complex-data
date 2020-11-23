@@ -23,7 +23,9 @@ class HandlerAttributs {
             },
             //"table": {},
             "tables": {},
-            "map": {}
+            "map": {
+                "handler_attributs":{}
+            }
         }
     }
 }
@@ -115,6 +117,7 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
 //////////////////////////////////////////////////// end get  allJoin table of Join ////////////////////////////////////////////
 
 
+    //this.objectMapWithAllDescription.map.handler_attributs = jsonContaintHandlersValue1
 
 
     // ----------------------------------------------- created json begin with alltables -------------------------------------------------------------------------
@@ -155,6 +158,7 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                 for (let keyConstraint in jsonAdqlContent.constraint) {
                     if (keyConstraint == correctJoinFormaTable) {
                         correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
+                        correctCondition = correctCondition.replaceAll("WHERE".trim()," ");
                         this.objectMapWithAllDescription.tables[tableKey].constraints =
                             correctTableConstraint != undefined && correctWhereClose != undefined && correctConstraint.trim() != "WHERE" ? correctCondition : "";
 
@@ -184,7 +188,11 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     let joinTablesToString = JSON.stringify(Object.assign({}, joinTables));  // convert array to string
     let joinTablesJsonObject = JSON.parse(joinTablesToString);  // convert string to json object
     modifyKeys(joinTablesJsonObject);
+
     this.objectMapWithAllDescription.map[rootTable] = {}
+    //this.objectMapWithAllDescription.map[rootTable]["handler_attributs"] =jsonContaintHandlersValue1
+
+    //this.objectMapWithAllDescription.map ["handler_attribut"]=jsonContaintHandlerValues.attribute_handlers
 
     let otherJoinTables = [];
 
@@ -211,45 +219,7 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                     "target": jsonWithaoutDescription[rootTable].join_tables[joinTableKey].target,
 
                 }
-                // my tabableeee///////////////////////////////////////////////////////////////////////////////////
 
-                /*  this.objectMapWithAllDescription.table[rootTable]={
-
-                      "description": this.objectMapWithAllDescription.tables[rootTable].description,
-                      "constraints": this.objectMapWithAllDescription.tables[rootTable].constraints,//"",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
-                      "columns": this.objectMapWithAllDescription.tables[rootTable].columns,
-
-                  }
-                  this.objectMapWithAllDescription.table[tableKey]={
-                  "description": this.objectMapWithAllDescription.tables[tableKey].description,
-                      "constraints": correctCondition,//"",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
-                      "columns": attributHanler
-
-              }
-                 let  ajoin = api.correctService.getJoinTables(tableKey);
-                  this.objectMapWithAllDescription.table[tableKey]["join_tables"]={
-
-                  };this.objectMapWithAllDescription.table[tableKey]["constraint"]={
-
-                  };
-                  for (let h = 0; h < ajoin.length; h++) {
-                       this.objectMapWithAllDescription.table[tableKey]["join_tables"][ajoin[h]]=ajoin[h]
-                          let api = this;
-                     this.objectMapWithAllDescription.table[tableKey]["constraint"][ajoin[h]]='fdddddddddddddddddd'
-                      for(let k in this.objectMapWithAllDescription.tables){
-                         // console.log(k+" ++++++++++++ "+ajoin[h]);
-                          if (ajoin[h].trim() === k.trim()) {
-                              console.log(k);
-
-                              if(this.objectMapWithAllDescription.table[tableKey]!=undefined) {
-                                  this.objectMapWithAllDescription.table[tableKey]["constraint"][ajoin[h]] = correctCondition
-                                  console.log(this.objectMapWithAllDescription.table[tableKey]["constraint"][ajoin[h]]);
-                              }
-                          }
-
-                      }
-                          }*/
-                //////////////////////////////////////////////////////////////////////////////////////////
             } else {
 
 
@@ -292,6 +262,8 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
 
 
     this.objectMapWithAllDescription.map[rootTable] = tempJson.map;
+
+    //this.objectMapWithAllDescription.map[rootTable]["handler_attributs"] =jsonContaintHandlersValue1
 
     // console.log(JSON.stringify(this.objectMapWithAllDescription.map[rootTable], undefined, 4));
 
@@ -351,7 +323,8 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
             sj = new jsonRead(api.getObjectMap().succes.object_map);
             testJsonRead = true;
         }
-        var adql = this.addAllColumn(table, api.connector.service["schema"]);
+
+        var adql =  this.addAllColumn(table, api.connector.service["schema"]);
 
         var s = api.tapService;
         var votableQueryResult = s.Query(adql);
@@ -444,5 +417,20 @@ HandlerAttributs.prototype.addAllColumn = function (table, schema) {
 
     }
     return adql;
+
+}
+
+HandlerAttributs.prototype.addSingelColumn = function () {
+    //alert(schema)
+    let adql1 = "SELECT "
+        + "TAP_SCHEMA.columns.column_name"
+        + ",TAP_SCHEMA.columns.unit"
+        + ",TAP_SCHEMA.columns.ucd"
+        + ",TAP_SCHEMA.columns.utype"
+        + ",TAP_SCHEMA.columns.dataType"
+        + ",TAP_SCHEMA.columns.description"
+        + " FROM TAP_SCHEMA.columns";
+
+    return adql1;
 
 }
