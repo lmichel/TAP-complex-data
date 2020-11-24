@@ -190,7 +190,7 @@ TapApi.prototype.getJoinedTables = function (baseTable) {
     if (this.testConnection == true) {
         this.jsonContaintJoinTable.Succes.status = "OK";
         this.jsonContaintJoinTable.Succes.base_table = baseTable;
-        this.jsonContaintJoinTable.Succes.joined_tables = this.correctService.getJoinTables(baseTable);
+        this.jsonContaintJoinTable.Succes.joined_tables = this.handlerAttribut.objectMapWithAllDescription.map[baseTable].join_tables//this.correctService.getJoinTables(baseTable);
         ;
     } else {
         this.jsonContaintJoinTable.Failure.NotConnected.status = "Failed";
@@ -235,12 +235,15 @@ TapApi.prototype.getRootFields = function () {
 
     // let rootFields = [];
     if (this.testConnection === true) {
-        let contentText = this.votableQueryResult.responseText;
+        //
+       // alert(this.jsonAdqlContent.rootQuery);
+        let votableQueryResult = this.tapService.Query(this.getRootQuery());
+        let contentText = votableQueryResult.responseText;
         if (this.getConnector().service.tapService === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.getConnector().service.tapService === "http://dc.zah.uni-heidelberg.de/tap/sync") {
 
-            rootFields = VOTableTools.getField(this.votableQueryResult);
+            rootFields = VOTableTools.getField(votableQueryResult);
         } else {
-            rootFields = VOTableTools.genererField(this.votableQueryResult, contentText);
+            rootFields = VOTableTools.genererField(votableQueryResult, contentText);
         }
         jsonContaintRootFields.succes.status = "OK"
         jsonContaintRootFields.succes.field_values = rootFields;
@@ -298,54 +301,30 @@ TapApi.prototype.getRootFieldValues = function () {
         }
 
 
-        ////////////////////////////////////////////////////////////
-        let singleArrayValue1 = [];
-        let doubleArrayValue1 = []
-         ;
-        let adql1 = "";
+        /////////////////////////////BEGIN PART TO CREATE TABLE CONTENT AHS AFTER RUNING ROOT QUERY TO PU IN THE MAP/////////////////////////////
 
-
-        //jsonContaintHandlerValues.attribute_handlers.db_name = this.connector.service["table"]
         if (testSecondJson == false) {
-
-            //adql1 = this.tapService.Query(this.handlerAttribut.addAllColumn(rootable));
             dataTable1 =this.handlerAttribut.getTableAttributeHandler(rootable,schema)// VOTableTools.votable2Rows(adql1);
             testSecondJson = true;
        }
-        let tabQuery = this.jsonAdqlContent.rootQuery.split("JOIN");
-        let query  = tabQuery[0];
-
-            let cc = 0;
             for (let b = 0; b < dataTable1.attribute_handlers.length; b++) {
                 for (let ke in dataTable1.attribute_handlers[b]) {
-                    //console.log(dataTable1.attribute_handlers[b][ke]);
-                    // modifyKeys(dataTable1.attribute_handlers[ke])
                     for (let col = 0; col < Field.length; col++) {
-                        //let dataTableAhs = VOTableTools.votable2Rows(ahs);
-                       // console.log(Field.length);
-                    if (dataTable1.attribute_handlers[b][ke] === Field[col] && query.indexOf(Field[col])!==-1) {
+                    if (dataTable1.attribute_handlers[b][ke] === Field[col]) {
                         jsonContaintHandlersValue1.push(dataTable1.attribute_handlers[b])
                         jsonContaintHandlersValue1 = Array.from(new Set(jsonContaintHandlersValue1));
-                        // cc++
-                        //console.log(dataTable1.attribute_handlers[b]);
-                        //console.log(jsonContaintHandlersValue1);
-                        // this.handlerAttribut.objectMapWithAllDescription.map[this.connector.service["table"]]["handler_attributs"]=jsonContaintHandlerValues.attribute_handlers[ke];
-                        //this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1;
 
                     } else {
 
-                        //console.log(dataTable1.attribute_handlers[ke].column_name !== val)
-
                     }
                 }
-                //  console.log(val);
             }
         }
         jsonContaintHandlersValue1 = Array.from(new Set(jsonContaintHandlersValue1));
-        this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1;
+       // this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1;
 
-        alert(jsonContaintHandlersValue1.length);
-        // let f = modifyKeys(dataTable1.attribute_handlers)
+        ////////////////////////////////////END PART TO CREATE TABLE CONTENT AHS AFTER RUNING ROOT QUERY TO PU IN THE MAP////////////////////////
+
         jsonContaintRootFieldValues.succes.status = "OK"
         jsonContaintRootFieldValues.succes.field_values = doubleArrayValue;
 
@@ -355,7 +334,7 @@ TapApi.prototype.getRootFieldValues = function () {
         jsonContaintRootFieldValues.failure.notConnected.message = "No active TAP connection"
         jsonContaintRootFieldValues.failure.otherError.status = "failed"
         jsonContaintRootFieldValues.failure.otherError.message = "error_message"
-        // alert('you are not connected');
+
     }
 
     return jsonContaintRootFieldValues;
@@ -452,7 +431,7 @@ TapApi.prototype.getRootQuery = function () {
     // console.log(rootTable)
 
     var dataTable = VOTableTools.votable2Rows(this.votableQueryResult);
-    console.log(dataTable);
+    //console.log(dataTable);
     var joinIdDic = {};
     /**
      * @TODO JUSTE POUR BESOIN DE DEVELLOPEMENT
@@ -510,7 +489,17 @@ TapApi.prototype.getRootQuery = function () {
                 this.tapJoinConstraint.push([key, textJoinConstraint]);
                 textJoinConstraint = "";
 
-                let votableFields = this.getRootFields().field_values;
+                let votableFields = []//this.getRootFields().field_values;
+
+
+                let contentText = this.votableQueryResult.responseText;
+                if (this.getConnector().service.tapService === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.getConnector().service.tapService === "http://dc.zah.uni-heidelberg.de/tap/sync") {
+
+                    votableFields = VOTableTools.getField(this.votableQueryResult);
+                } else {
+                    votableFields = VOTableTools.genererField(this.votableQueryResult, contentText);
+                }
+
 
                 ////console.log(k+"  iddic "+votableField[k]+" "+joinIdDic[key]+" "+dataTable[k])
                 var k = 0;
