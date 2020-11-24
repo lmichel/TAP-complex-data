@@ -321,7 +321,7 @@ TapApi.prototype.getRootFieldValues = function () {
             }
         }
         jsonContaintHandlersValue1 = Array.from(new Set(jsonContaintHandlersValue1));
-       // this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1;
+        this.handlerAttribut.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1;
 
         ////////////////////////////////////END PART TO CREATE TABLE CONTENT AHS AFTER RUNING ROOT QUERY TO PU IN THE MAP////////////////////////
 
@@ -362,42 +362,29 @@ TapApi.prototype.getRootQueryIds = function () {
     if (this.testConnection == true) {
 
         let Field = this.getRootFields().field_values;
-        //var query = "SELECT TOP 60 \"public\".basic.oid   FROM  \"public\".basic  JOIN   \"public\".otypes ON  \"public\".basic.oid= \"public\".otypes.oidref";
-        var query = $("#getJsonAll").text();
-        var a = "\\"
-        let votableQueryResult
-        //alert(query.substr(1))
-        if (query.startsWith("SELECT TOP 60")) {
-            //console.log(this.getRootQuery())
-            //alert("dddddddddddd")
-            votableQueryResult = this.tapService.Query(query);
-        } else {
-            //alert(query);
-            // votableQueryResult = this.tapService.Query(query)
 
+        this.votableQueryResult = this.tapService.Query(this.getRootQuery());
+        let rootable = this.connector.service["table"];
+        let schema = this.connector.service["schema"];
+        let dataTable =[]
+        if (this.votableQueryResult.statusText == "OK") {
+        dataTable = VOTableTools.votable2Rows(this.votableQueryResult);
+        let tableName = this.getConnector().service["table"];
 
-            votableQueryResult = this.tapService.Query(this.getRootQuery());
-            this.tapButton = [];
-
+        let nbCols = Field.length;
+        if (dataTable[dataTable.length - 1] == 0) {
+            dataTable.splice(dataTable.length - 1, 1);
         }
-        if (votableQueryResult.statusText == "OK") {
-            let dataTable = VOTableTools.votable2Rows(votableQueryResult);
-            //let tableName = this.getConnector().service["table"];
-
-            let nbCols = Field.length;
-            // alert(nbCols);
-            if (dataTable[dataTable.length - 1] == 0) {
-                dataTable.splice(dataTable.length - 1, 1);
+        for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
+            for (let col = 0; col < nbCols; col++) {
+                if (dataTable[rowNb + col] != null)
+                    singleArrayValue.push(dataTable[rowNb + col]);
             }
-            for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
-                for (let col = 0; col < nbCols; col++) {
-                    singleArrayValue.push(dataTable[col]);
-                }
-                doubleArrayValue.push(singleArrayValue);
-                singleArrayValue = [];
-            }
-            //console.log(doubleArrayValue);
-            jsonContaintRootQueryIdsValues.succes.status = "OK"
+            doubleArrayValue.push(singleArrayValue);
+            singleArrayValue = [];
+        }
+        //var query = "SELECT TOP 60 \"public\".basic.oid   FROM  \"public\".basic  JOIN   \"public\".otypes ON  \"public\".basic.oid= \"public\".otypes.oidref";
+        jsonContaintRootQueryIdsValues.succes.status = "OK"
             jsonContaintRootQueryIdsValues.succes.field_ids = doubleArrayValue;
 
         } else {
@@ -477,7 +464,7 @@ TapApi.prototype.getRootQuery = function () {
                 // alert(correctTableNameFormat);
                 //var temp1=[],temp2=[];
                 contentAdql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + jsonAll.succes.object_map[keyRoot].join_tables[key].target;
-                contentAdql += " FROM  " + correctTableNameFormat;
+                contentAdql +='\n'+ " FROM  " + correctTableNameFormat;
                 this.jsonAdqlContent.rootQuery = contentAdql;
                 textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
                 //temp1.push(key);
@@ -673,16 +660,21 @@ TapApi.prototype.selecConstraints = function (tableName, txtImput) {
     out += "</tbody>"
     out += "</table>  </div>"
     $("body").prepend(out);
+    //let schema = this.connector.service["schema"];
     var td = $("td");
     for (var i = 0; i < td.length; i++) {
         $(td[i]).click(function () {
             var i = $(this).attr("id");
             if ($("#" + txtImput).val().length != 0) {
                 var content = $("#" + txtImput).val();
-                $("#" + txtImput).val(content + " AND " + name + "." + i + "=");
+                let formatValue = schema+"."+name;
+                let correctValue = formatValue.quotedTableName().qualifiedName
+                $("#" + txtImput).val(content + " AND " + correctValue + "." + i + "=");
                 document.getElementById('light').style.display = 'none';
             } else {
-                $("#" + txtImput).val(name + "." + i + "=");
+                let formatValue = schema+"."+name;
+                let correctValue = formatValue.quotedTableName().qualifiedName
+                $("#" + txtImput).val(correctValue + "." + i + "=");
                 document.getElementById('light').style.display = 'none';
             }
 
@@ -793,7 +785,7 @@ TapApi.prototype.addConstraint = function (rootQuery, table, whereTable) {
                         for (let keyConst in jsonAdqlContent.constraint) {
                             if (keyConst == "condition " + correctTable) {
                                 //if(jsonAdqlContent.allCondition ==""){
-                                jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().replaceAll("WHERE", "") != " " ? jsonAdqlContent.constraint[keyConst] + " " + $("#txt" + key).val().replaceAll("WHERE", "") : jsonAdqlContent.constraint[keyConst];
+                                jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().replaceAll("WHERE", "") != " " ? jsonAdqlContent.constraint[keyConst] + '\n'+" " + $("#txt" + key).val().replaceAll("WHERE", "") : jsonAdqlContent.constraint[keyConst];
                                 if (mytest == false) {
                                     jsonAdqlContent.allCondition[keys] = jsonAdqlContent.constraint[keyConst];
                                     mytest = true;
@@ -863,7 +855,7 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
                                             console.log(myJsonJion[key].join_tables[ajoin[h]]);
                                             console.log(api.jsonAdqlContent.constraint[correctNameFormat]);
                                             let fistJoinConstrain = api.jsonAdqlContent.constraint[correctNameFormat]
-                                            let condition = $("#txt" + key).val().replaceAll("WHERE", "") != " " ? api.jsonAdqlContent.constraint["condition " + correctNameFormat] + " " + $("#txt" + key).val().replaceAll("WHERE", "") : api.jsonAdqlContent.constraint["condition " + correctNameFormat]
+                                            let condition = $("#txt" + key).val().replaceAll("WHERE", "") != " " ? api.jsonAdqlContent.constraint["condition " + correctNameFormat] +'\n'+ " " + $("#txt" + key).val().replaceAll("WHERE", "") : api.jsonAdqlContent.constraint["condition " + correctNameFormat]
                                             // let formatTableName = schema + "." + keyRoot;
                                             //let correctTableNameFormat =formatTableName.quotedTableName().qualifiedName;
                                             let format = schema + '.' + ajoin[h];
@@ -877,14 +869,16 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
                                                 api.jsonAdqlContent.constraint[correctKeyFormat] = " " + textJoinConstraint
                                             } else {
 
-                                                api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain + " " + textJoinConstraint
+                                                api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain +'\n'+ " " + textJoinConstraint
                                             }
                                             // je fais pareil pour la condition
                                             if (jsonAdqlContent.rootQuery.indexOf(condition) !== -1) {
 
                                                 //api.jsonAdqlContent.constraint[correctKeyFormat] =" "+ textJoinConstraint
                                             } else {
-
+                                                if(jsonAdqlContent.rootQuery.indexOf("WHERE")!==-1){
+                                                    condition =" AND "+condition
+                                                }
                                                 api.jsonAdqlContent.constraint["condition " + correctKeyFormat] = condition;
                                             }
 
@@ -909,7 +903,7 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
                                                     console.log(myJsonJion[key].join_tables[ajoin[h]]);
                                                     console.log(api.jsonAdqlContent.constraint[correctNameFormat1]);
                                                     let fistJoinConstrain1 = api.jsonAdqlContent.constraint[correctNameFormat1]
-                                                    let condition1 = $("#txt" + key).val().replaceAll("WHERE", "") != " " ? api.jsonAdqlContent.constraint["condition " + correctNameFormat1] + " AND " + $("#txt" + key).val().replaceAll("WHERE", "") : api.jsonAdqlContent.constraint["condition " + correctNameFormat1]
+                                                    let condition1 = $("#txt" + key).val().replaceAll("WHERE", "") != " " ? api.jsonAdqlContent.constraint["condition " + correctNameFormat1] +'\n'+ " AND " + $("#txt" + key).val().replaceAll("WHERE", "") : api.jsonAdqlContent.constraint["condition " + correctNameFormat1]
                                                     // let formatTableName = schema + "." + keyRoot;
                                                     //let correctTableNameFormat =formatTableName.quotedTableName().qualifiedName;
                                                     let format1 = schema + '.' + ajoin1[h1];
@@ -924,14 +918,16 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
                                                         api.jsonAdqlContent.constraint[correctKeyFormat] = " " + textJoinConstraint1
                                                     } else {
 
-                                                        api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain1 + " " + textJoinConstraint1
+                                                        api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain1+'\n' + " " + textJoinConstraint1
                                                     }
                                                     // je fais pareil pour la condition
                                                     if (jsonAdqlContent.rootQuery.indexOf(condition1) !== -1) {
 
                                                         //api.jsonAdqlContent.constraint[correctKeyFormat] =" "+ textJoinConstraint
                                                     } else {
-
+                                                        if(jsonAdqlContent.rootQuery.indexOf("WHERE")!==-1){
+                                                            condition1 =" AND "+condition1
+                                                        }
                                                         api.jsonAdqlContent.constraint["condition " + correctKeyFormat] = condition1;
                                                     }
 
@@ -1004,19 +1000,19 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
 
             } else {
 
-                jsonAdqlContent.rootQuery += jsonAdqlContent.allJoin[key];
+                jsonAdqlContent.rootQuery +='\n'+ jsonAdqlContent.allJoin[key];
             }
         }
         for (let keyconst in jsonAdqlContent.allCondition) {
             if (testWhere == false) {
                 //jsonAdqlContent.rootQuery=jsonAdqlContent.rootQuery+" WHERE "
-                jsonAdqlContent.rootQuery += " WHERE " + jsonAdqlContent.allCondition[keyconst] + ' ';
+                jsonAdqlContent.rootQuery += '\n'+" WHERE " + jsonAdqlContent.allCondition[keyconst] + ' ';
                 testWhere = true;
             } else {
                 if (jsonAdqlContent.rootQuery.indexOf(jsonAdqlContent.allCondition[keyconst]) !== -1) {
 
                 } else {
-                    jsonAdqlContent.rootQuery += jsonAdqlContent.allCondition[keyconst];
+                    jsonAdqlContent.rootQuery +='\n'+ jsonAdqlContent.allCondition[keyconst];
                 }
             }
 
@@ -1045,6 +1041,8 @@ FROM "public".basic join  "public".has_ref  on "public".basic.oid = "public".has
     }*/
     jsonAdqlContent.rootQuery = replaceAll(jsonAdqlContent.rootQuery, "WHERE   AND", " WHERE ");
     jsonAdqlContent.rootQuery = replaceAll(jsonAdqlContent.rootQuery, "WHERE  AND", " WHERE ");
+    jsonAdqlContent.rootQuery = replaceAll(jsonAdqlContent.rootQuery,"AND AND"," AND ")
+    jsonAdqlContent.rootQuery = replaceAll(jsonAdqlContent.rootQuery,"AND  AND"," AND ")
     /**
      * when we are removing all constraint, we verified if rootQuery end with WHERE close.
      * if so, we remove the WHERE close to rootQuery

@@ -210,6 +210,7 @@ function newMain() {
 
     $("#btnApiConnectS").click(function () {
         // alert(a.testConnection);
+
         if (a.testConnection == false) {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
                 a.connect(params);
@@ -357,7 +358,9 @@ function newMain() {
             //if(isCallRootQuery == false){
             //t//his.tapWhereConstraint =[];
             // this.tapJoinConstraint =[]
-            rootQuery = JSON.stringify(a.getRootQuery(), undefined, 2);
+            var f = "\\"
+           // alert(f)
+            rootQuery =a.getRootQuery() // JSON.stringify(a.getRootQuery(), undefined, 2);
             //  temp = rootQuery;
             // alert(temp);
             // isCallRootQuery = true;
