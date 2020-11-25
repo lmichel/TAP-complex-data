@@ -780,10 +780,403 @@ TapServiceConnector.prototype.limitJson2data = function (n, s, sc) {//n: instanc
         $("button#test").unbind('click');
     });
 
+
+
+
+
+
+}
+function replaceAll(str, find, replace) {
+
+    var escapedFind = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    return str.replace(new RegExp(escapedFind, 'g'), replace);
+}
+TapServiceConnector.prototype.replaceWhereAnd = function (jsonAdqlContent){
+
+    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE     AND", " WHERE ");
+    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE    AND", " WHERE ");
+    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE   AND", " WHERE ");
+    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE  AND", " WHERE ");
+    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE   "+'\n'+"  AND", " WHERE ");
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND AND"," AND ")
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND  AND"," AND ")
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND   AND"," AND ")
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND    AND"," AND ")
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND     AND"," AND ")
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND      AND"," AND ")
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND       AND"," AND ")
+    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND        AND"," AND ")
+    if(jsonAdqlContent.indexOf("WHERE")===-1 && jsonAdqlContent.indexOf("AND") !==-1){
+        jsonAdqlContent =replaceAll(jsonAdqlContent,"AND","WHERE");
+    }
+    return jsonAdqlContent;
+
+}
+
+TapServiceConnector.prototype.selecConstraints = function (tableName, txtImput,api) {
+    var name = tableName //b[ii].id.slice(1);//the name of
+    var schema = api.connector.service["schema"];
+    // alert(name +' '+schema);
+    var adql = api.handlerAttribut.addAllColumn(name, schema)
+    var QObject = api.tapService.Query(adql);
+    var dataTable = VOTableTools.votable2Rows(QObject)
+    var contentText = QObject.responseText;
+    var Field = VOTableTools.genererField(QObject, contentText)
+    var nb = Field.length;
+    var out = "\n" +
+        "  <!-- The Modal -->\n" +
+        "  <div class=\"modal fade\" id=\"myModal\">\n" +
+        "    <div class=\"modal-dialog modal-xl\">\n" +
+        "      <div class=\"modal-content\">"+
+        "    <div class=\"modal-content\">\n" +
+        "      <div class=\"modal-body\">\n"+
+       "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + name + "</span>" +
+       "<button class='delete_right btn btn-danger'  data-dismiss=\"modal\" id='d_right'><i class='fa fa-close ' ></i></button><br></br>";//head
+    out += "<table  class = 'table table-bordered table-striped table-hover'  role = 'grid' >";
+    out += "<thead class='thead-dark'><tr role='row'>"
+    for (var j = 0; j < nb; j++) {
+        out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[j] + "</th>";
+    }
+    out += "</tr></thead>";
+    out += "<tbody>"
+    var column = 0;
+    for (var j = 0; j < dataTable.length; j++) {//table  content
+        if (column == 0) {
+            var judge = (j + nb) / nb;
+            if (judge % 2 == 1) {
+                out += "<tr class = 'odd table-primary' >";
+                //out+="<td><input type='checkbox'></td>";
+            } else {
+                out += "<tr class = 'even table-primary'>";
+                //out+="<td><input type='checkbox'></td>";
+            }
+            //var row = j/6+1;
+            out += "<td id = '" + dataTable[j] + "' style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + dataTable[j] + "</td>";
+        } else {
+            out += "<td style='text-align: center;vertical-align:bottom'>" + dataTable[j] + "</td>";
+        }
+        column = column + 1;
+        if (column == nb) {
+            out += "</tr>";
+            column = 0;
+        }
+
+    }
+    out += "</tbody>"
+    out += "</table>  </div>"
+    out+=    "</div>\n" +
+        "      <div class=\"modal-footer\">\n" +
+        "        <button type=\"button\" class=\"btn btn-danger\" data-dismiss=\"modal\">Close</button>\n" +
+        "      </div>\n" +
+        "    </div>\n" +
+        "\n" +
+        "  </div>\n" +
+        "</div>"
+
+        ;//head
+    $("body").prepend(out);
+    //let schema = this.connector.service["schema"];
+    var td = $("td");
+    for (var i = 0; i < td.length; i++) {
+        $(td[i]).click(function () {
+           // alert($("#" + txtImput).val().length);
+            var i = $(this).attr("id");
+            if ($("#" + txtImput).val().length !==1) {
+                var content = $("#" + txtImput).val();
+                let formatValue = schema+"."+name;
+                let correctValue = formatValue.quotedTableName().qualifiedName
+                if($("#" + txtImput).val().indexOf(" AND " + correctValue + "." + i)!==-1){
+                    alert(i+" already added")
+                }else{
+                    $("#" + txtImput).val(content + " AND " + correctValue + "." + i + "=");
+                   // document.getElementById('light').style.display = 'none';
+                    alert(i+" is added to constraint")
+                }
+            } else {
+                let formatValue = schema+"."+name;
+                let correctValue = formatValue.quotedTableName().qualifiedName
+                $("#" + txtImput).val(correctValue + "." + i + "=");
+               // document.getElementById('light').style.display = 'none';
+                alert(i+" is added to constraint")
+            }
+
+        });
+    }
+
+    /* $("#d_right").click(function () {
+         $("#light").hide()
+          console.log("dddddddddddd")
+      })*/
+
+    //$('#d_right').bind("click", );
+
+
+
+    //out +="<th/>";
+
+
+
+
 }
 
 
 
+
+function fun_btnRemoveConstraint(tabContaninBtnRemoveConstraint,key){
+    for (let r = 0; r <= tabContaninBtnRemoveConstraint.length; r++) {
+        if (tabContaninBtnRemoveConstraint.indexOf(tabContaninBtnRemoveConstraint[r]) > -1) {
+        } else {
+
+            tabContaninBtnRemoveConstraint.push(key)
+            break;
+        }
+
+    }
+    tabContaninBtnRemoveConstraint = Array.from(new Set(tabContaninBtnRemoveConstraint));
+
+    return tabContaninBtnRemoveConstraint;
+}
+
+function createTabContaintAllJoinTable(api){
+    let  mytabContainFistjoin = [];
+    let JsonValue ='';
+    Object.keys(api.handlerAttribut.objectMapWithAllDescription.map).forEach(function (key) {
+        console.log(key);
+        JsonValue = api.handlerAttribut.objectMapWithAllDescription.map[key];
+        Object.keys(JsonValue).forEach(function (keyss) {
+            var queryValue = JsonValue[keyss]
+            Object.keys(queryValue).forEach(function (k) {
+                mytabContainFistjoin.push(k);
+                mytabContainFistjoin = Array.from(new Set(mytabContainFistjoin));
+                // console.log(k);
+                //console.log(api.handlerAttribut.objectMapWithAllDescription.tables.indexOf(key))
+                // }
+            });
+        });
+    });
+    return mytabContainFistjoin
+}
+
+TapServiceConnector.prototype.createCorrectJoin = function (api) {
+
+    var testfor = false
+    var buttons = "";
+    //let api = this;
+    api.tapButton = []
+    var jsonAdqlContent = api.jsonAdqlContent;
+    let mytest = false;
+    var schema = api.connector.service["schema"];
+
+
+    let value = api.handlerAttribut.getObjectMapWithAllDescription()
+    if (testfor == false) {
+
+        for (let key in api.handlerAttribut.objectMapWithAllDescription.tables) {
+
+            $("#" + key).click(function () {
+                let format = schema + '.' + key;
+                let correctTable = format.quotedTableName().qualifiedName;
+
+                /**
+                 *
+                 * when we add one constraint we create a button containing represent this join table
+                 * we will use this each buttun added to remove each constraint when we want.
+                 * */
+                fun_btnRemoveConstraint(tabContaninBtnRemoveConstraint,key);
+                /**
+                 *
+                 * when we add one constraint we add correct join close  to our dic call son AdqlContent.allJoin[key]
+                 * when we add one constraint we add where close  to our dic call son AdqlContent.allCondition[key]
+                 * */
+                for (let keys in jsonAdqlContent.constraint) {
+                    if (keys == correctTable) {
+                        jsonAdqlContent.allJoin[keys] = jsonAdqlContent.constraint[keys]
+                        //countCondition++;
+                        for (let keyConst in jsonAdqlContent.constraint) {
+                            if (keyConst == "condition " + correctTable) {
+                                //if(jsonAdqlContent.allCondition ==""){
+                                jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().length!==1?$("#txt" + key).val():"";
+                                if (mytest == false) {
+                                    jsonAdqlContent.allCondition[keys] = jsonAdqlContent.constraint[keyConst];
+                                    mytest = true;
+                                } else {
+                                    jsonAdqlContent.allCondition[keys] =  jsonAdqlContent.constraint[keyConst];
+                                }
+                            }
+                        }
+                    } else {
+
+                    }
+                }
+                let mytabContainFistjoin = createTabContaintAllJoinTable(api);
+                var ajoin = []
+                // je parcoure la liste des tables si un element existe deja dans la listes des tables (mytabContainFistjoin) jointe à la route je ne fais rien
+                // sinon si la tables correspond a la tables sur laquelle j'ai cliquer je recupere les tables jointes (ajoint) à la tales en question et je recupere le grand json
+                // je parcours le grand json (myJsonJion)si je trouve une cle qui correspond à la table cliquer, je parcours mon ajoin et je verifie si mon mytabContainFistjoin)
+                // qui contient les table directement connecter à la root table contient une table de mon ajoin si oui, je recuper les from et target column que je mais
+                // en liaison avec les autre table de ajoin
+
+                let keyFormat = schema + '.' + key;
+                let correctKeyFormat = keyFormat.quotedTableName().qualifiedName;
+                Object.keys(api.handlerAttribut.objectMapWithAllDescription.tables).forEach(function (k2) {
+                    var jsonk21 = api.handlerAttribut.objectMapWithAllDescription.tables[k2];
+                    if (mytabContainFistjoin.indexOf(k2) !== -1) {
+
+                    } else {
+                        if (k2 == key) {
+                            ajoin = api.correctService.getJoinTables(key);
+                            let myJsonJion = api.tapService.createJson();
+                            console.log(myJsonJion);
+                            Object.keys(myJsonJion).forEach(function (keyOfKey) {
+                                if (keyOfKey == key) {
+
+                                    for (let h = 0; h < ajoin.length; h++) {
+                                        if (mytabContainFistjoin.indexOf(ajoin[h]) !== -1) {
+                                            let nameFormat = schema + '.' + ajoin[h];
+                                            let correctNameFormat = nameFormat.quotedTableName().qualifiedName;
+                                            let fistJoinConstrain = api.jsonAdqlContent.constraint[correctNameFormat]
+                                            let condition = $("#txt" + key).val()
+                                            let format = schema + '.' + ajoin[h];
+                                            let correctJoinFormaTable = format.quotedTableName().qualifiedName;
+                                            let textJoinConstraint = " JOIN  " + correctKeyFormat + " ";
+                                            textJoinConstraint += "ON " + correctKeyFormat + "." + myJsonJion[key].join_tables[ajoin[h]].target;
+                                            textJoinConstraint += "=" + correctJoinFormaTable + "." + myJsonJion[key].join_tables[ajoin[h]].from;
+                                            // je verifie si la table possede deja jointure de la jointure
+                                            if (jsonAdqlContent.rootQuery.indexOf(fistJoinConstrain) !== -1) {
+
+                                                api.jsonAdqlContent.constraint[correctKeyFormat] = " " + textJoinConstraint
+                                            } else {
+
+                                                api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain +'\n'+ " " + textJoinConstraint
+                                            }
+                                            // je fais pareil pour la condition
+                                            if (jsonAdqlContent.rootQuery.indexOf(condition) !== -1) {
+
+                                                //api.jsonAdqlContent.constraint[correctKeyFormat] =" "+ textJoinConstraint
+                                            } else {
+                                                if(jsonAdqlContent.rootQuery.indexOf("WHERE")!==-1){
+                                                    condition =condition
+                                                }
+                                                api.jsonAdqlContent.constraint["condition " + correctKeyFormat] = condition;
+                                            }
+
+                                            jsonAdqlContent.allJoin[correctKeyFormat] = api.jsonAdqlContent.constraint[correctKeyFormat];
+                                            jsonAdqlContent.allCondition[correctKeyFormat] = api.jsonAdqlContent.constraint["condition " + correctKeyFormat] != undefined ? " " + api.jsonAdqlContent.constraint["condition " + correctKeyFormat] : ""
+                                            console.log(api.jsonAdqlContent.constraint["condition " + correctKeyFormat]);
+                                            console.log(api.jsonAdqlContent.constraint[correctKeyFormat]);
+                                        } else {
+                                            let ajoin1 = api.correctService.getJoinTables(ajoin[h]);
+                                            for (let h1 = 0; h1 < ajoin1.length; h1++) {
+                                                if (mytabContainFistjoin.indexOf(ajoin1[h1]) !== -1) {
+                                                    let nameFormat1 = schema + '.' + ajoin1[h1];
+                                                    let correctNameFormat1 = nameFormat1.quotedTableName().qualifiedName;
+                                                    console.log(myJsonJion[key].join_tables[ajoin[h]]);
+                                                    console.log(api.jsonAdqlContent.constraint[correctNameFormat1]);
+                                                    let fistJoinConstrain1 = api.jsonAdqlContent.constraint[correctNameFormat1]
+                                                    let condition1 = $("#txt" + key).val()
+                                                    let format1 = schema + '.' + ajoin1[h1];
+                                                    let correctJoinFormaTable1 = format1.quotedTableName().qualifiedName;
+                                                    let textJoinConstraint1 = " JOIN  " + correctKeyFormat + " ";
+                                                    textJoinConstraint1 += "ON " + correctKeyFormat + "." + myJsonJion[key].join_tables[ajoin[h]].target;
+                                                    textJoinConstraint1 += "=" + correctJoinFormaTable1 + "." + myJsonJion[key].join_tables[ajoin[h]].target;
+                                                    if (jsonAdqlContent.rootQuery.indexOf(fistJoinConstrain1) !== -1) {
+                                                        api.jsonAdqlContent.constraint[correctKeyFormat] = " " + textJoinConstraint1
+                                                    } else {
+                                                        api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain1+'\n' + " " + textJoinConstraint1
+                                                    }
+                                                    // je fais pareil pour la condition
+                                                    if (jsonAdqlContent.rootQuery.indexOf(condition1) !== -1) {
+                                                    } else {
+                                                        if(jsonAdqlContent.rootQuery.indexOf("WHERE")!==-1){
+                                                            condition1 =condition1
+                                                        }
+                                                        api.jsonAdqlContent.constraint["condition " + correctKeyFormat] = condition1;
+                                                    }
+                                                    jsonAdqlContent.allJoin[correctKeyFormat] = api.jsonAdqlContent.constraint[correctKeyFormat];
+                                                    jsonAdqlContent.allCondition[correctKeyFormat] = api.jsonAdqlContent.constraint["condition " + correctKeyFormat] != undefined ? " AND " + api.jsonAdqlContent.constraint["condition " + correctKeyFormat] : ""
+                                                    console.log(api.jsonAdqlContent.constraint["condition " + correctKeyFormat]);
+                                                    console.log(api.jsonAdqlContent.constraint[correctKeyFormat]);
+                                                }
+                                            }
+                                            ///////////////////////////////////////////////
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+                document.getElementById("loadButton").style.display = "none"
+                document.getElementById("btnConstraint").style.display = "none";
+                $("#getJsonAll").text(jsonAdqlContent.rootQuery);
+                console.log(jsonAdqlContent.rootQuery);
+            })
+        }
+        testfor = true;
+    }
+    testButton = true
+    api.jsonAdqlContent = jsonAdqlContent
+    return api.jsonAdqlContent;
+}
+
+function recursive(allJoinRootTable,tableKey,testJoinTableOfJoin){
+    for (let tableKey in jsonWithaoutDescription) {
+
+        if(allJoinRootTable.indexOf(tableKey)!==-1){
+
+        }else{
+        if (testJoinTableOfJoin === false) {
+            let joinTableOfJoin = api.correctService.getJoinTables(tableKey)
+            for (let h = 0; h < joinTableOfJoin.length; h++) {
+                if (allJoinRootTable.indexOf(joinTableOfJoin[h]) !== -1) {
+                    allJoinRootTable.push(tableKey);
+                }else {
+                    recursive()
+                }
+            }
+            }
+            }
+        }
+}
+
+TapServiceConnector.prototype.createAllJoinTable = function (api,jsonWithaoutDescription,allJoinRootTable,testJoinTableOfJoin){
+    for (let tableKey in jsonWithaoutDescription) {
+
+        if(allJoinRootTable.indexOf(tableKey)!==-1){
+
+        }else {
+            if (testJoinTableOfJoin === false) {
+                let joinTableOfJoin = api.correctService.getJoinTables(tableKey)
+                for (let h = 0; h < joinTableOfJoin.length; h++) {
+                    if (allJoinRootTable.indexOf(joinTableOfJoin[h]) !== -1) {
+                        allJoinRootTable.push(tableKey);
+                    } else {
+                        let g = api.correctService.getJoinTables(tableKey);
+                        for (let c = 0; c < g.length; c++) {
+                            if (allJoinRootTable.indexOf(g[c]) !== -1) {
+                                allJoinRootTable.push(tableKey);
+                            } else {
+                                let g1 = api.correctService.getJoinTables(g[c])
+                               // console.log(g1);
+                                for (let c1 = 0; c1 < g1.length; c1++) {
+                                    if (allJoinRootTable.indexOf(g1[c1]) !== -1) {
+                                        allJoinRootTable.push(tableKey);
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+
+    }
+    testJoinTableOfJoin = true;
+    allJoinRootTable = Array.from(new Set(allJoinRootTable))
+    return allJoinRootTable;
+}
 
 
   

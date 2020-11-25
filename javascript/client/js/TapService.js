@@ -312,6 +312,9 @@ var TapService = /** @class */ (function () {
         return jsonAll;
     };
 
+
+
+
     /**
    * In order to create the json with all join table
    * @param data :json the return json file of createJson()
@@ -351,6 +354,69 @@ var TapService = /** @class */ (function () {
             }
         }
         return reJson;
+    };
+
+
+    /**
+     * In order to create the json with all join table
+     * @param data :json the return json file of createJson()
+     * @param root :the main table: root table
+     * @return the json with all join table
+     */
+    TapService.prototype.map = function (data, root) {
+        var reJson = {};
+        for (var key in data) {
+            var list_exist = [];
+            list_exist.push(key);
+            var joinJson = {};
+            if (root == key) {
+                var joinJsonJoin = {};
+                for (var join in data[key].join_tables) {
+                    var joinJsonJoin1 = {};
+                    list_exist.push(join);
+                    joinJsonJoin1["from"] = data[key].join_tables[join].from;
+                    joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                    var a = this.verifiedJoin(data, list_exist, join);
+                    if (JSON.stringify(a) != '{}') {
+                        joinJsonJoin1["join_tables"] = a;
+                       // console.log(a);
+                    }
+                    joinJsonJoin[join] = joinJsonJoin1;
+                    joinJson["join_tables"] = joinJsonJoin;
+                }
+                reJson[key] = joinJson;
+                break;
+            }
+        }
+        return reJson;
+    };
+
+    /***
+     * @param data: the main json
+     * @param list_exist:list of tables who are already recorded
+     * @param root: the root table
+     */
+    TapService.prototype.verifiedJoin = function (data, list_exist, root) {
+        var joinJsonJoin = {};
+        for (var key in data) {
+            if (key == root) {
+                for (var join in data[key].join_tables) {
+                    if (list_exist.indexOf(join) == -1) {
+                        list_exist.push(join);
+                        var joinJsonJoin1 = {};
+                        joinJsonJoin1["from"] = data[key].join_tables[join].from;
+                        joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                        var a = this.verifiedJoin(data, list_exist, join);
+                        if (JSON.stringify(a) != '{}') {
+                            joinJsonJoin1["join_tables"] = a;
+                        }
+                        joinJsonJoin[join] = joinJsonJoin1;
+                    }
+                }
+                break;
+            }
+        }
+        return joinJsonJoin;
     };
 
     /***

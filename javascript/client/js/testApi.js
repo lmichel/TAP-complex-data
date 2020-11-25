@@ -21,6 +21,57 @@ function reset() {
 }
 
 var a = new TapApi();
+let handlerApi = new HandlerAttributs();
+let testfor = false;
+let tapButton=[];
+function createButton() {
+     let buttons ="";
+    let api = a;
+    let schema = a.connector.service["schema"];
+    if (testfor == false) {
+        let j = 0;
+
+        // for (let i = 0; i < table.length; i++) {
+        let value = ""
+        for (let key in api.handlerAttribut.objectMapWithAllDescription.tables) {
+            value = api.handlerAttribut.getObjectMapWithAllDescription()//.tables[key].constraints
+            let formats = schema + '.' + key;
+            let correctTables = formats.quotedTableName().qualifiedName;
+            buttons = "<span>" + "<button data-toggle=\"modal\" data-target=\"#myModal\" type='button' class=\"btn btn-primary\" id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">Click to select " + key + " constraints</button>" +
+                "<button  type='button' class=\"btn btn-default\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
+                " <input type='text' class='form form-control' id='txt" + key + "' value='' placeholder='Enter condition' name='Cinputs'> <hr>"
+
+            //this.jsonAdqlContent.constraint["condition " + correctTables]
+            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+
+            if (testButton == true) {
+                //alert( 'existe deja')
+            } else {
+                tapButton.push(buttons);
+            }
+
+
+        }
+
+        $("#loadButton").append(tapButton);
+
+        window.location.hash = "#loadButton";
+
+        testfor = true;
+
+
+    }
+    for (let key in api.handlerAttribut.objectMapWithAllDescription.tables) {
+       // api.correctService.selecConstraints(key, "txt" + key, api);
+        $("#" + "bbb" + key).click(function () {
+
+            api.correctService.selecConstraints(key, "txt" + key, api);
+
+            //document.getElementById('light').style.display = 'block';
+        })
+    }
+
+}
 var params = {
     tapService: "",
     schema: "",
@@ -206,7 +257,9 @@ function newMain() {
     // initial();
 
 ////////////////////////////// API ////////////////////////////////////////////
-
+    $("#d_right").click(function () {
+        document.getElementById("light").style.display = "none";
+    })
 
     $("#btnApiConnectS").click(function () {
         // alert(a.testConnection);
@@ -360,6 +413,7 @@ function newMain() {
             // this.tapJoinConstraint =[]
             var f = "\\"
            // alert(f)
+            createButton();
             rootQuery =a.getRootQuery() // JSON.stringify(a.getRootQuery(), undefined, 2);
             //  temp = rootQuery;
             // alert(temp);
@@ -462,7 +516,7 @@ function newMain() {
                 //console.log(a.getTableAttributeHandlers("basic"));
                 // let rootQuer= addConstraint(rootQuery,a.tapJoinConstraint);
 
-
+               // createButton();
 
                 document.getElementById("loadButton").style.display = "block"
 

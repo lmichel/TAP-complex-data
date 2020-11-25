@@ -34,16 +34,13 @@ var testLoadJson = false;
 var testLoadallTable = false;
 var testJoinRootTable = false
 var testOtherJoinTables = false;
+var testMap = false;
 let jsonWithaoutDescription = "";
 let allTables = "";
 let allJoinRootTable =[];
 let testJoinTableOfJoin = false;
-let tempJson = {
-    "map": {
-        "join_tables": {}
-    }
-}
-var testTempJoinMap = false
+let map={};
+
 HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     let api = this.api;
     let objectMapWithAllDescription;
@@ -72,84 +69,28 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
     let correctTableConstraint = "";
     let correctWhereClose = "";
 
-
-
-//console.log(jsonWithaoutDescription);
 //////////////////////////////////////////////////// begin  get correct allJoin table of Join ////////////////////////////////////////////
-        for (let tableKey in jsonWithaoutDescription) {
-
-            if(allJoinRootTable.indexOf(tableKey)!==-1){
-
-            }else {
-                if (testJoinTableOfJoin === false) {
-                    let joinTableOfJoin = api.correctService.getJoinTables(tableKey)
-                    for (let h = 0; h < joinTableOfJoin.length; h++) {
-                        if (allJoinRootTable.indexOf(joinTableOfJoin[h]) !== -1) {
-                            allJoinRootTable.push(tableKey);
-                        } else {
-                            let g = api.correctService.getJoinTables(tableKey);
-                            for (let c = 0; c < g.length; c++) {
-                                if (allJoinRootTable.indexOf(g[c]) !== -1) {
-                                    allJoinRootTable.push(tableKey);
-                                } else {
-                                    let g1 = api.correctService.getJoinTables(g[c])
-                                    console.log(g1);
-                                    for (let c1 = 0; c1 < g1.length; c1++) {
-                                        if (allJoinRootTable.indexOf(g1[c1]) !== -1) {
-                                            allJoinRootTable.push(tableKey);
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-
-
-        }
-        testJoinTableOfJoin = true;
-    allJoinRootTable = Array.from(new Set(allJoinRootTable))
-    //console.log(allJoinRootTable.length)
-   // console.log(allJoinRootTable)
-
-//////////////////////////////////////////////////// end get  allJoin table of Join ////////////////////////////////////////////
-
-
-    //this.objectMapWithAllDescription.map.handler_attributs = jsonContaintHandlersValue1
-
-
+   //console.log(jsonWithaoutDescription)
+  //  console.log(api.tapService.createNewJson(jsonWithaoutDescription,rootTable))
+    allJoinRootTable =  api.correctService.createAllJoinTable(api,jsonWithaoutDescription,allJoinRootTable,testJoinTableOfJoin)
     // ----------------------------------------------- created json begin with alltables -------------------------------------------------------------------------
     allTables = allJoinRootTable;
     for (let k = 0; k < allTables.length; k++) {
         for (let tableKey in jsonWithaoutDescription) {
-
-
-            //console.log(tableKey+" =++++= "+allTables[k].replaceAll(this.schema,"") )
             if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
                 formatJoinTable = this.schema + "." + tableKey;
                 correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-
-                //console.log(tableKey+" =++++= "+correctJoinFormaTable)
-                // console.log(api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable])
                 attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
                 for (let keyConstraint in jsonAdqlContent.constraint) {
-
                     if (keyConstraint == correctJoinFormaTable) {
-                        // console.log(jsonAdqlContent.constraint)
-                        correctTableConstraint = api.jsonAdqlContent.allJoin[correctJoinFormaTable];
                         for (let keyConst in jsonAdqlContent.constraint) {
                             if (keyConst == "condition " + correctJoinFormaTable) {
                                 correctWhereClose = api.jsonAdqlContent.allCondition[keyConstraint];
+
                             }
                         }
                     }
                 }
-                //attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn//this.getTableAttributeHandler(tableKey);
-
-                let correctConstraint = replaceAll(correctTableConstraint + " WHERE " + correctWhereClose, "WHERE   AND", " ");
-                correctConstraint = replaceAll(correctTableConstraint + " WHERE " + correctWhereClose, "WHERE  AND", " ");
                 this.objectMapWithAllDescription.tables[tableKey] = {
                     "description": jsonWithaoutDescription[tableKey].description,
                     "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
@@ -159,117 +100,23 @@ HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
                     if (keyConstraint == correctJoinFormaTable) {
                         correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
                         correctCondition = correctCondition.replaceAll("WHERE".trim()," ");
-                        this.objectMapWithAllDescription.tables[tableKey].constraints =
-                            correctTableConstraint != undefined && correctWhereClose != undefined && correctConstraint.trim() != "WHERE" ? correctCondition : "";
-
+                        this.objectMapWithAllDescription.tables[tableKey].constraints =  correctTableConstraint != undefined && correctWhereClose != undefined ? correctCondition : "";
                     }
                 }
 
-
             } else {
-                //console.log(tableKey+" =----= "+allTables[k]);
             }
 
         }
 
     }
-    //----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //console.log(JSON.stringify(this.objectMapWithAllDescription.tables, undefined, 2));
-    // console.log(JSON.stringify(this.objectMapWithAllDescription.tables, undefined, 2));
-
-    let joinTables = [];
-    if (testJoinRootTable == false) {
-        joinTables = api.correctService.getJoinTables(rootTable);
-        testJoinRootTable = true;
+    if(testMap == false){
+        map = api.tapService.map(jsonWithaoutDescription,rootTable);
     }
 
-    //var arr = [5, 6, 7, 8];
-    let joinTablesToString = JSON.stringify(Object.assign({}, joinTables));  // convert array to string
-    let joinTablesJsonObject = JSON.parse(joinTablesToString);  // convert string to json object
-    modifyKeys(joinTablesJsonObject);
-
-    this.objectMapWithAllDescription.map[rootTable] = {}
-    //this.objectMapWithAllDescription.map[rootTable]["handler_attributs"] =jsonContaintHandlersValue1
-
-    //this.objectMapWithAllDescription.map ["handler_attribut"]=jsonContaintHandlerValues.attribute_handlers
-
-    let otherJoinTables = [];
-
-    for (let joinTableKey in joinTablesJsonObject) {
-        if (testOtherJoinTables == false) {
-            otherJoinTables = api.correctService.getJoinTables(joinTablesJsonObject[joinTableKey])
-        }
-        // console.log(otherJoinTables);
-        let otherJoinTablesToString = JSON.stringify(Object.assign({}, otherJoinTables));  // convert array to string
-        let otheJoinTablesJsonObject = JSON.parse(otherJoinTablesToString);
-        modifyKeys(otheJoinTablesJsonObject);
-        let mytabContainFistjoin = []
-        for (let tableKey in jsonWithaoutDescription) {
-            // co
-            if (joinTableKey == tableKey) {
-
-                mytabContainFistjoin.push(tableKey);
-                mytabContainFistjoin = Array.from(new Set(mytabContainFistjoin));
-                formatJoinTable = this.schema + "." + tableKey;
-                correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-                // jsonAll[keyRoot].join_tables[key].target
-                this.objectMapWithAllDescription.map[rootTable][joinTableKey] = {
-                    "from": jsonWithaoutDescription[rootTable].join_tables[joinTableKey].from,
-                    "target": jsonWithaoutDescription[rootTable].join_tables[joinTableKey].target,
-
-                }
-
-            } else {
-
-
-            }
-
-            ///////////////////////////////////////////////////////
-        }
-        for (let otherJoinTableKey in otheJoinTablesJsonObject) {
-
-            /*Object.keys(this.objectMapWithAllDescription.tables).forEach(function (k) {
-                if (otherJoinTableKey == k) {
-                    console.log(k);
-                    /*this.objectMapWithAllDescription.table[k] = {
-                        "description": this.objectMapWithAllDescription.tables[k].description,
-                        "constraints": this.objectMapWithAllDescription.tables[k].constraints,//"",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
-                        "columns": this.objectMapWithAllDescription.tables[k].columns,
-                    }
-                }
-            })*/
-            this.objectMapWithAllDescription.map[rootTable][joinTableKey]["join_tables"] = otheJoinTablesJsonObject
-            
-        }
-        this.objectMapWithAllDescription.map[rootTable]['join_tables'] = this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
-        // this.objectMapWithAllDescription.map[rootTable].join_tables[joinTableKey].join_tables =this.objectMapWithAllDescription.map[rootTable][joinTableKey].join_tables;
-        if (testTempJoinMap == false) {
-
-            tempJson.map.join_tables = this.objectMapWithAllDescription.map[rootTable]
-
-        }
-    }
-    testOtherJoinTables = true;
-    TestTempJoinMap = true;
-    for (let join_table_key in this.objectMapWithAllDescription.map[rootTable]) {
-        if (join_table_key == "join_tables") {
-            delete this.objectMapWithAllDescription.map[rootTable].join_tables;
-        }
-
-        //this.objectMapWithAllDescription.map[rootTable]['join_tables'][join_table_key] = this.objectMapWithAllDescription.map[rootTable][join_table_key]
-    }
-
-
-    this.objectMapWithAllDescription.map[rootTable] = tempJson.map;
-
-    //this.objectMapWithAllDescription.map[rootTable]["handler_attributs"] =jsonContaintHandlersValue1
-
-    // console.log(JSON.stringify(this.objectMapWithAllDescription.map[rootTable], undefined, 4));
-
+    this.objectMapWithAllDescription.map = map
     return this.objectMapWithAllDescription;
-
-
 }
 
 function replaceAll(str, find, replace) {
