@@ -34,6 +34,7 @@ class TapApi {
             }
         }
         this.attributsHandler = new HandlerAttributs();
+        this.attributsHandler.api =this;
         this.tapJoinConstraint = [];
         this.tapWhereConstraint = [];
         this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
@@ -313,7 +314,7 @@ TapApi.prototype.getRootFieldValues = function () {
         /////////////////////////////BEGIN PART TO CREATE TABLE CONTENT AHS AFTER RUNING ROOT QUERY TO PU IN THE MAP/////////////////////////////
 
         if (testSecondJson == false) {
-            dataTable1 =this.handlerAttribut.getTableAttributeHandler(rootable,schema)// VOTableTools.votable2Rows(adql1);
+            dataTable1 =this.attributsHandler.getTableAttributeHandler(rootable,schema)// VOTableTools.votable2Rows(adql1);
             testSecondJson = true;
        }
             for (let b = 0; b < dataTable1.attribute_handlers.length; b++) {
@@ -473,7 +474,15 @@ TapApi.prototype.getRootQuery = function () {
             }
         }
     }
-   // console.log(this.jsonAdqlContent.constraint);
+    for (let key in this.jsonAdqlContent.allJoin) {
+
+        if (this.jsonAdqlContent.rootQuery.indexOf(this.jsonAdqlContent.allJoin[key]) !== -1) {
+
+        } else {
+
+            this.jsonAdqlContent.rootQuery += '\n' + this.jsonAdqlContent.allJoin[key];
+        }
+    }
         this.addConstraint();
         return this.jsonAdqlContent.rootQuery;
 }
@@ -485,18 +494,10 @@ TapApi.prototype.addConstraint = function (){
      * Search a good place to put where and AND close to adql query
      * */
     var testWhere = false;
-    if (JSON.stringify(jsonAdqlContent.allJoin) !== "{}") {
+   // if (JSON.stringify(jsonAdqlContent.allJoin) !== "{}") {
 
 
-        for (let key in jsonAdqlContent.allJoin) {
 
-            if (jsonAdqlContent.rootQuery.indexOf(jsonAdqlContent.allJoin[key]) !== -1) {
-
-            } else {
-
-                jsonAdqlContent.rootQuery += '\n' + jsonAdqlContent.allJoin[key];
-            }
-        }
         for (let keyconst in objectMapWithAllDescription.tables) {
             if (testWhere == false) {
                 //jsonAdqlContent.rootQuery=jsonAdqlContent.rootQuery+" WHERE "
@@ -516,7 +517,7 @@ TapApi.prototype.addConstraint = function (){
         }
 
 
-    }
+    //}
 
     /**
      * if you remouve a constrain we verified that there is not a duplication of WHERE OR AND condition

@@ -966,43 +966,22 @@ function createTabContaintAllJoinTable(api){
 }
 
 TapServiceConnector.prototype.createCorrectJoin = function (api) {
-
     var testfor = false
-    var buttons = "";
-    //let api = this;
     api.tapButton = []
     var jsonAdqlContent = api.jsonAdqlContent;
     let mytest = false;
     var schema = api.connector.service["schema"];
-
-
-    //let value = api.handlerAttribut.getObjectMapWithAllDescription()
     if (testfor == false) {
-
         for (let key in api.getObjectMapWithAllDescriptions().tables) {
-
             $("#" + key).click(function () {
                 let format = schema + '.' + key;
                 let correctTable = format.quotedTableName().qualifiedName;
-
-                /**
-                 *
-                 * when we add one constraint we create a button containing represent this join table
-                 * we will use this each buttun added to remove each constraint when we want.
-                 * */
                 fun_btnRemoveConstraint(tabContaninBtnRemoveConstraint,key);
-                /**
-                 *
-                 * when we add one constraint we add correct join close  to our dic call son AdqlContent.allJoin[key]
-                 * when we add one constraint we add where close  to our dic call son AdqlContent.allCondition[key]
-                 * */
                 for (let keys in jsonAdqlContent.constraint) {
                     if (keys == correctTable) {
                         jsonAdqlContent.allJoin[keys] = jsonAdqlContent.constraint[keys]
-                        //countCondition++;
                         for (let keyConst in jsonAdqlContent.constraint) {
                             if (keyConst == "condition " + correctTable) {
-                                //if(jsonAdqlContent.allCondition ==""){
                                 jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().length!==1?$("#txt" + key).val():"";
                                 if (mytest == false) {
                                     jsonAdqlContent.allCondition[keys] = jsonAdqlContent.constraint[keyConst];
@@ -1012,112 +991,11 @@ TapServiceConnector.prototype.createCorrectJoin = function (api) {
                                 }
                             }
                         }
-                    } else {
-
                     }
                 }
-               // let mytabContainFistjoin = createTabContaintAllJoinTable(api);
-               // var ajoin = []
-                // je parcoure la liste des tables si un element existe deja dans la listes des tables (mytabContainFistjoin) jointe à la route je ne fais rien
-                // sinon si la tables correspond a la tables sur laquelle j'ai cliquer je recupere les tables jointes (ajoint) à la tales en question et je recupere le grand json
-                // je parcours le grand json (myJsonJion)si je trouve une cle qui correspond à la table cliquer, je parcours mon ajoin et je verifie si mon mytabContainFistjoin)
-                // qui contient les table directement connecter à la root table contient une table de mon ajoin si oui, je recuper les from et target column que je mais
-                // en liaison avec les autre table de ajoin
-
-               // let keyFormat = schema + '.' + key;
-                //let correctKeyFormat = keyFormat.quotedTableName().qualifiedName;
-              /*  Object.keys(api.handlerAttribut.objectMapWithAllDescription.tables).forEach(function (k2) {
-                    var jsonk21 = api.handlerAttribut.objectMapWithAllDescription.tables[k2];
-                    if (mytabContainFistjoin.indexOf(k2) !== -1) {
-
-                    } else {
-                        if (k2 == key) {
-                            ajoin = api.correctService.getJoinTables(key);
-                            let myJsonJion = api.tapService.createJson();
-                            console.log(myJsonJion);
-                            Object.keys(myJsonJion).forEach(function (keyOfKey) {
-                                if (keyOfKey == key) {
-
-                                    for (let h = 0; h < ajoin.length; h++) {
-                                        if (mytabContainFistjoin.indexOf(ajoin[h]) !== -1) {
-                                            let nameFormat = schema + '.' + ajoin[h];
-                                            let correctNameFormat = nameFormat.quotedTableName().qualifiedName;
-                                            let fistJoinConstrain = api.jsonAdqlContent.constraint[correctNameFormat]
-                                            let condition = $("#txt" + key).val()
-                                            let format = schema + '.' + ajoin[h];
-                                            let correctJoinFormaTable = format.quotedTableName().qualifiedName;
-                                            let textJoinConstraint = " JOIN  " + correctKeyFormat + " ";
-                                            textJoinConstraint += "ON " + correctKeyFormat + "." + myJsonJion[key].join_tables[ajoin[h]].target;
-                                            textJoinConstraint += "=" + correctJoinFormaTable + "." + myJsonJion[key].join_tables[ajoin[h]].from;
-                                            // je verifie si la table possede deja jointure de la jointure
-                                            if (jsonAdqlContent.rootQuery.indexOf(fistJoinConstrain) !== -1) {
-
-                                                api.jsonAdqlContent.constraint[correctKeyFormat] = " " + textJoinConstraint
-                                            } else {
-
-                                                api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain +'\n'+ " " + textJoinConstraint
-                                            }
-                                            // je fais pareil pour la condition
-                                            if (jsonAdqlContent.rootQuery.indexOf(condition) !== -1) {
-
-                                                //api.jsonAdqlContent.constraint[correctKeyFormat] =" "+ textJoinConstraint
-                                            } else {
-                                                if(jsonAdqlContent.rootQuery.indexOf("WHERE")!==-1){
-                                                    condition =condition
-                                                }
-                                                api.jsonAdqlContent.constraint["condition " + correctKeyFormat] = condition;
-                                            }
-
-                                            jsonAdqlContent.allJoin[correctKeyFormat] = api.jsonAdqlContent.constraint[correctKeyFormat];
-                                            jsonAdqlContent.allCondition[correctKeyFormat] = api.jsonAdqlContent.constraint["condition " + correctKeyFormat] != undefined ? " " + api.jsonAdqlContent.constraint["condition " + correctKeyFormat] : ""
-                                            console.log(api.jsonAdqlContent.constraint["condition " + correctKeyFormat]);
-                                            console.log(api.jsonAdqlContent.constraint[correctKeyFormat]);
-                                        } else {
-                                            let ajoin1 = api.correctService.getJoinTables(ajoin[h]);
-                                            for (let h1 = 0; h1 < ajoin1.length; h1++) {
-                                                if (mytabContainFistjoin.indexOf(ajoin1[h1]) !== -1) {
-                                                    let nameFormat1 = schema + '.' + ajoin1[h1];
-                                                    let correctNameFormat1 = nameFormat1.quotedTableName().qualifiedName;
-                                                    console.log(myJsonJion[key].join_tables[ajoin[h]]);
-                                                    console.log(api.jsonAdqlContent.constraint[correctNameFormat1]);
-                                                    let fistJoinConstrain1 = api.jsonAdqlContent.constraint[correctNameFormat1]
-                                                    let condition1 = $("#txt" + key).val()
-                                                    let format1 = schema + '.' + ajoin1[h1];
-                                                    let correctJoinFormaTable1 = format1.quotedTableName().qualifiedName;
-                                                    let textJoinConstraint1 = " JOIN  " + correctKeyFormat + " ";
-                                                    textJoinConstraint1 += "ON " + correctKeyFormat + "." + myJsonJion[key].join_tables[ajoin[h]].target;
-                                                    textJoinConstraint1 += "=" + correctJoinFormaTable1 + "." + myJsonJion[key].join_tables[ajoin[h]].target;
-                                                    if (jsonAdqlContent.rootQuery.indexOf(fistJoinConstrain1) !== -1) {
-                                                        api.jsonAdqlContent.constraint[correctKeyFormat] = " " + textJoinConstraint1
-                                                    } else {
-                                                        api.jsonAdqlContent.constraint[correctKeyFormat] = fistJoinConstrain1+'\n' + " " + textJoinConstraint1
-                                                    }
-                                                    // je fais pareil pour la condition
-                                                    if (jsonAdqlContent.rootQuery.indexOf(condition1) !== -1) {
-                                                    } else {
-                                                        if(jsonAdqlContent.rootQuery.indexOf("WHERE")!==-1){
-                                                            condition1 =condition1
-                                                        }
-                                                        api.jsonAdqlContent.constraint["condition " + correctKeyFormat] = condition1;
-                                                    }
-                                                    jsonAdqlContent.allJoin[correctKeyFormat] = api.jsonAdqlContent.constraint[correctKeyFormat];
-                                                    jsonAdqlContent.allCondition[correctKeyFormat] = api.jsonAdqlContent.constraint["condition " + correctKeyFormat] != undefined ? " AND " + api.jsonAdqlContent.constraint["condition " + correctKeyFormat] : ""
-                                                    console.log(api.jsonAdqlContent.constraint["condition " + correctKeyFormat]);
-                                                    console.log(api.jsonAdqlContent.constraint[correctKeyFormat]);
-                                                }
-                                            }
-                                            ///////////////////////////////////////////////
-                                        }
-                                    }
-                                }
-                            })
-                        }
-                    }
-                })*/
                 document.getElementById("loadButton").style.display = "none"
                 document.getElementById("btnConstraint").style.display = "none";
                 $("#getJsonAll").text(jsonAdqlContent.rootQuery);
-               // console.log(jsonAdqlContent.rootQuery);
             })
         }
         testfor = true;
@@ -1127,25 +1005,6 @@ TapServiceConnector.prototype.createCorrectJoin = function (api) {
     return api.jsonAdqlContent;
 }
 
-function recursive(allJoinRootTable,tableKey,testJoinTableOfJoin){
-    for (let tableKey in jsonWithaoutDescription) {
-
-        if(allJoinRootTable.indexOf(tableKey)!==-1){
-
-        }else{
-        if (testJoinTableOfJoin === false) {
-            let joinTableOfJoin = api.correctService.getJoinTables(tableKey)
-            for (let h = 0; h < joinTableOfJoin.length; h++) {
-                if (allJoinRootTable.indexOf(joinTableOfJoin[h]) !== -1) {
-                    allJoinRootTable.push(tableKey);
-                }else {
-                    recursive()
-                }
-            }
-            }
-            }
-        }
-}
 
 TapServiceConnector.prototype.createAllJoinTable = function (map){
     let table = []
