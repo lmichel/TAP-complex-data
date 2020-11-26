@@ -9,6 +9,19 @@ var TapService = /** @class */ (function () {
         this.allTables =undefined
         this.tableRemoveView = undefined;
         this.rootQuery = '';
+        this.objectMapWithAllDescription = {
+            "root_table": {
+                "name": "root_table_name",
+                "schema": "schema"
+            },
+            //"table": {},
+            "tables": {},
+            "map": {
+                "handler_attributs": {}
+            }
+        }
+
+        this.api ="";
     }
     /***
      * Receive adql, return votable objects
@@ -363,7 +376,7 @@ var TapService = /** @class */ (function () {
      * @param root :the main table: root table
      * @return the json with all join table
      */
-    TapService.prototype.map = function (data, root) {
+    TapService.prototype.getObjectMapAndConstraint = function (data, root) {
         var reJson = {};
         for (var key in data) {
             var list_exist = [];
@@ -683,5 +696,83 @@ var TapService = /** @class */ (function () {
             return allLinkRe;
         }
     };
-    return TapService;
+
+
+
+    var testLoadJson = false;
+    var testLoadallTable = false;
+    var testJoinRootTable = false
+    var testOtherJoinTables = false;
+    var testMap = false;
+    let jsonWithaoutDescription = "";
+    let allTables = "";
+    let allJoinRootTable = [];
+    let testJoinTableOfJoin = false;
+    let map = {};
+
+    TapService.prototype.getObjectMapAndConstraints = function () {
+        let api = this.api;
+       // let objectMapWithAllDescription;
+        let attributHanler = [];
+
+        let rootTable = api.getConnector().service["table"]
+        jsonWithaoutDescription = api.correctService.loadJson();
+        let jsonAdqlContent = api.jsonAdqlContent;
+        this.objectMapWithAllDescription.root_table.name = rootTable;
+        this.schema = api.getConnector().service["schema"];
+        this.objectMapWithAllDescription.root_table.schema = this.schema;
+        let correctCondition
+        let formatJoinTable = "";
+        let correctJoinFormaTable = "";
+        let correctTableConstraint = "";
+        let correctWhereClose = "";
+
+     if (testMap == false) {
+            map = api.tapService.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
+        }
+        allJoinRootTable = api.correctService.createAllJoinTable(map)
+        allTables = allJoinRootTable;
+        for (let k = 0; k < allTables.length; k++) {
+            for (let tableKey in jsonWithaoutDescription) {
+                if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
+                    formatJoinTable = this.schema + "." + tableKey;
+                    correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+                    attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
+                    for (let keyConstraint in jsonAdqlContent.constraint) {
+                        if (keyConstraint == correctJoinFormaTable) {
+                            for (let keyConst in jsonAdqlContent.constraint) {
+                                if (keyConst == "condition " + correctJoinFormaTable) {
+                                    correctWhereClose = api.jsonAdqlContent.allCondition[keyConstraint];
+                                }
+                            }
+                        }
+                    }
+                    this.objectMapWithAllDescription.tables[tableKey] = {
+                        "description": jsonWithaoutDescription[tableKey].description,
+                        "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
+                        "columns": attributHanler != undefined ? attributHanler : [],
+                    }
+                    for (let keyConstraint in jsonAdqlContent.constraint) {
+                        if (keyConstraint == correctJoinFormaTable) {
+                            correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
+                            correctCondition = correctCondition.replaceAll("WHERE".trim(), " ");
+                            this.objectMapWithAllDescription.tables[tableKey].constraints = correctTableConstraint != undefined && correctWhereClose != undefined ? correctCondition : "";
+                        }
+                    }
+
+                } else {
+                }
+
+            }
+
+        }
+
+this.objectMapWithAllDescription.map = map
+return this.objectMapWithAllDescription;
+}
+
+
+return TapService;
 }());
+
+

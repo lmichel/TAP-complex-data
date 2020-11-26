@@ -16,107 +16,8 @@ class HandlerAttributs {
         this.description = '';
         this.range = '';
         this.schema = "";
-        this.objectMapWithAllDescription = {
-            "root_table": {
-                "name": "root_table_name",
-                "schema": "schema"
-            },
-            //"table": {},
-            "tables": {},
-            "map": {
-                "handler_attributs":{}
-            }
-        }
-    }
-}
-
-var testLoadJson = false;
-var testLoadallTable = false;
-var testJoinRootTable = false
-var testOtherJoinTables = false;
-var testMap = false;
-let jsonWithaoutDescription = "";
-let allTables = "";
-let allJoinRootTable =[];
-let testJoinTableOfJoin = false;
-let map={};
-
-HandlerAttributs.prototype.getObjectMapWithAllDescription = function () {
-    let api = this.api;
-    let objectMapWithAllDescription;
-    let attributHanler = [];
-
-    let rootTable = api.connector.service["table"]
-    if (testLoadallTable == false) {
-        allTables = api.tapService.allTable();
-        testLoadallTable = true
-    }
-    if (testLoadJson == false) {
-        jsonWithaoutDescription = api.correctService.loadJson();
-        allJoinRootTable = api.correctService.getJoinTables(rootTable);
-        testLoadJson = true;
-    }
-    //api.getRootQuery();
-    let jsonAdqlContent = api.jsonAdqlContent;
-    this.objectMapWithAllDescription.root_table.name = rootTable;
-    this.objectMapWithAllDescription.root_table.schema = api.connector.service["schema"];
-    let column = [];
-    let correctCondition
-    this.db_name = this.api.connector.service["table"];
-    this.schema = this.api.connector.service["schema"];
-    let formatJoinTable = "";
-    let correctJoinFormaTable = "";
-    let correctTableConstraint = "";
-    let correctWhereClose = "";
-
-//////////////////////////////////////////////////// begin  get correct allJoin table of Join ////////////////////////////////////////////
-   //console.log(jsonWithaoutDescription)
-  //  console.log(api.tapService.createNewJson(jsonWithaoutDescription,rootTable))
-    allJoinRootTable =  api.correctService.createAllJoinTable(api,jsonWithaoutDescription,allJoinRootTable,testJoinTableOfJoin)
-    // ----------------------------------------------- created json begin with alltables -------------------------------------------------------------------------
-    allTables = allJoinRootTable;
-    for (let k = 0; k < allTables.length; k++) {
-        for (let tableKey in jsonWithaoutDescription) {
-            if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
-                formatJoinTable = this.schema + "." + tableKey;
-                correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-                attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
-                for (let keyConstraint in jsonAdqlContent.constraint) {
-                    if (keyConstraint == correctJoinFormaTable) {
-                        for (let keyConst in jsonAdqlContent.constraint) {
-                            if (keyConst == "condition " + correctJoinFormaTable) {
-                                correctWhereClose = api.jsonAdqlContent.allCondition[keyConstraint];
-
-                            }
-                        }
-                    }
-                }
-                this.objectMapWithAllDescription.tables[tableKey] = {
-                    "description": jsonWithaoutDescription[tableKey].description,
-                    "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
-                    "columns": attributHanler != undefined ? attributHanler : [],
-                }
-                for (let keyConstraint in jsonAdqlContent.constraint) {
-                    if (keyConstraint == correctJoinFormaTable) {
-                        correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
-                        correctCondition = correctCondition.replaceAll("WHERE".trim()," ");
-                        this.objectMapWithAllDescription.tables[tableKey].constraints =  correctTableConstraint != undefined && correctWhereClose != undefined ? correctCondition : "";
-                    }
-                }
-
-            } else {
-            }
-
-        }
 
     }
-
-    if(testMap == false){
-        map = api.tapService.map(jsonWithaoutDescription,rootTable);
-    }
-
-    this.objectMapWithAllDescription.map = map
-    return this.objectMapWithAllDescription;
 }
 
 function replaceAll(str, find, replace) {
@@ -171,7 +72,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
             testJsonRead = true;
         }
 
-        var adql =  this.addAllColumn(table, api.connector.service["schema"]);
+        var adql = this.addAllColumn(table, api.connector.service["schema"]);
 
         var s = api.tapService;
         var votableQueryResult = s.Query(adql);

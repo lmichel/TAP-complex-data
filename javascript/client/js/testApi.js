@@ -27,14 +27,14 @@ let tapButton=[];
 function createButton() {
      let buttons ="";
     let api = a;
-    let schema = a.connector.service["schema"];
+    let schema = a.getConnector().service["schema"];
     if (testfor == false) {
         let j = 0;
 
         // for (let i = 0; i < table.length; i++) {
         let value = ""
-        for (let key in api.handlerAttribut.objectMapWithAllDescription.tables) {
-            value = api.handlerAttribut.getObjectMapWithAllDescription()//.tables[key].constraints
+        for (let key in a.getObjectMapWithAllDescriptions().tables) {
+            value = a.getObjectMapWithAllDescriptions()//.tables[key].constraints
             let formats = schema + '.' + key;
             let correctTables = formats.quotedTableName().qualifiedName;
             buttons = "<span>" + "<button data-toggle=\"modal\" data-target=\"#myModal\" type='button' class=\"btn btn-primary\" id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">Click to select " + key + " constraints</button>" +

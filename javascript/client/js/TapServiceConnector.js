@@ -8,7 +8,7 @@ class TapServiceConnector {
         let rootTable = "";
         this.tapService = new TapService(_serviceUrl, _schema, _shortname, true)
         this.jsonSchema = {};
-
+        this.isLoadJson = false;
         // getteur and setteur for private parameters
         this.setServiceUrl = function (myServiceUrl) {
             serviceUrl = myServiceUrl;
@@ -69,8 +69,12 @@ TapServiceConnector.prototype.setRootTable = function (shema, table) {
 /**
  * return the full json create by the method createJson()
  */
+var jsonLoad = "";
 TapServiceConnector.prototype.loadJson = function () {
-    return this.tapService.createJson();
+    if(!this.isLoadJson){
+        jsonLoad = this.tapService.createJson();
+    }
+    return jsonLoad;
 }
 
 /**
@@ -821,7 +825,7 @@ TapServiceConnector.prototype.selecConstraints = function (tableName, txtImput,a
     var name = tableName //b[ii].id.slice(1);//the name of
     var schema = api.connector.service["schema"];
     // alert(name +' '+schema);
-    var adql = api.handlerAttribut.addAllColumn(name, schema)
+    var adql = api.attributsHandler.addAllColumn(name, schema)
     var QObject = api.tapService.Query(adql);
     var dataTable = VOTableTools.votable2Rows(QObject)
     var contentText = QObject.responseText;
@@ -972,10 +976,10 @@ TapServiceConnector.prototype.createCorrectJoin = function (api) {
     var schema = api.connector.service["schema"];
 
 
-    let value = api.handlerAttribut.getObjectMapWithAllDescription()
+    //let value = api.handlerAttribut.getObjectMapWithAllDescription()
     if (testfor == false) {
 
-        for (let key in api.handlerAttribut.objectMapWithAllDescription.tables) {
+        for (let key in api.getObjectMapWithAllDescriptions().tables) {
 
             $("#" + key).click(function () {
                 let format = schema + '.' + key;
@@ -1012,17 +1016,17 @@ TapServiceConnector.prototype.createCorrectJoin = function (api) {
 
                     }
                 }
-                let mytabContainFistjoin = createTabContaintAllJoinTable(api);
-                var ajoin = []
+               // let mytabContainFistjoin = createTabContaintAllJoinTable(api);
+               // var ajoin = []
                 // je parcoure la liste des tables si un element existe deja dans la listes des tables (mytabContainFistjoin) jointe à la route je ne fais rien
                 // sinon si la tables correspond a la tables sur laquelle j'ai cliquer je recupere les tables jointes (ajoint) à la tales en question et je recupere le grand json
                 // je parcours le grand json (myJsonJion)si je trouve une cle qui correspond à la table cliquer, je parcours mon ajoin et je verifie si mon mytabContainFistjoin)
                 // qui contient les table directement connecter à la root table contient une table de mon ajoin si oui, je recuper les from et target column que je mais
                 // en liaison avec les autre table de ajoin
 
-                let keyFormat = schema + '.' + key;
-                let correctKeyFormat = keyFormat.quotedTableName().qualifiedName;
-                Object.keys(api.handlerAttribut.objectMapWithAllDescription.tables).forEach(function (k2) {
+               // let keyFormat = schema + '.' + key;
+                //let correctKeyFormat = keyFormat.quotedTableName().qualifiedName;
+              /*  Object.keys(api.handlerAttribut.objectMapWithAllDescription.tables).forEach(function (k2) {
                     var jsonk21 = api.handlerAttribut.objectMapWithAllDescription.tables[k2];
                     if (mytabContainFistjoin.indexOf(k2) !== -1) {
 
@@ -1109,11 +1113,11 @@ TapServiceConnector.prototype.createCorrectJoin = function (api) {
                             })
                         }
                     }
-                })
+                })*/
                 document.getElementById("loadButton").style.display = "none"
                 document.getElementById("btnConstraint").style.display = "none";
                 $("#getJsonAll").text(jsonAdqlContent.rootQuery);
-                console.log(jsonAdqlContent.rootQuery);
+               // console.log(jsonAdqlContent.rootQuery);
             })
         }
         testfor = true;
@@ -1143,43 +1147,31 @@ function recursive(allJoinRootTable,tableKey,testJoinTableOfJoin){
         }
 }
 
-TapServiceConnector.prototype.createAllJoinTable = function (api,jsonWithaoutDescription,allJoinRootTable,testJoinTableOfJoin){
-    for (let tableKey in jsonWithaoutDescription) {
-
-        if(allJoinRootTable.indexOf(tableKey)!==-1){
-
-        }else {
-            if (testJoinTableOfJoin === false) {
-                let joinTableOfJoin = api.correctService.getJoinTables(tableKey)
-                for (let h = 0; h < joinTableOfJoin.length; h++) {
-                    if (allJoinRootTable.indexOf(joinTableOfJoin[h]) !== -1) {
-                        allJoinRootTable.push(tableKey);
-                    } else {
-                        let g = api.correctService.getJoinTables(tableKey);
-                        for (let c = 0; c < g.length; c++) {
-                            if (allJoinRootTable.indexOf(g[c]) !== -1) {
-                                allJoinRootTable.push(tableKey);
-                            } else {
-                                let g1 = api.correctService.getJoinTables(g[c])
-                               // console.log(g1);
-                                for (let c1 = 0; c1 < g1.length; c1++) {
-                                    if (allJoinRootTable.indexOf(g1[c1]) !== -1) {
-                                        allJoinRootTable.push(tableKey);
-                                    }
-                                }
+TapServiceConnector.prototype.createAllJoinTable = function (map){
+    let table = []
+    Object.keys(map).forEach(function (k) {
+        let json = map[k];
+        Object.keys(json.join_tables).forEach(function (k2) {
+            table.push(k2);
+            let json2 = json.join_tables[k2]
+            if (json2.join_tables !== undefined) {
+                for (let f in json2.join_tables) {
+                    table.push(f);
+                    for (let c in json2.join_tables[f]) {
+                        let json3 = json2.join_tables[f].join_tables
+                        if (json3 !== undefined) {;
+                            for (let c1 in json3) {
+                                table.push(c1);
                             }
                         }
-
                     }
                 }
             }
-        }
 
-
-    }
-    testJoinTableOfJoin = true;
-    allJoinRootTable = Array.from(new Set(allJoinRootTable))
-    return allJoinRootTable;
+        })
+        table= Array.from(new Set(table));
+    })
+    return table;
 }
 
 
