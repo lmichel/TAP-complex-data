@@ -673,6 +673,10 @@ TapServiceConnector.prototype.checkAdql = function (listId) {//@TODO special for
     return adql2;
 }
 
+TapServiceConnector.prototype.createB=function (name,i){
+    return "<button  type='button' class=\"btn btn-warning\" id='b" + name + i + "' value='" + name + "' style=\"margin-top: 7px\">handler '" + name+ "'</button></span>"
+}
+
 TapServiceConnector.prototype.joinAndId = function (root, json) {
     var list = [];
     for (var key in json) {

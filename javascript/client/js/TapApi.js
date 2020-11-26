@@ -91,6 +91,14 @@ var testLoadRootField = false;
 var testGetObjectMap = false;
 var jsonAll
 
+// for getObjectWhith all description
+var testLoadObjectMapWithAllDesc = false;
+let getObjectMapWithAllDescription
+
+var testApiRooQuery = false;
+let api = "";
+let table = []
+
 /**
  * @param params (Json) with parameters (tapService,schema,table,shortName)
  * @param tapService (String) The URL of the Tap Servie
@@ -710,8 +718,7 @@ TapApi.prototype.getTableAttributeHandlers = function (table) {
 /**
  *@return{*} : Json the json containing all detail about every singel table join to the root table with all join table of each table and all condition of each table
  **/
-var testLoadObjectMapWithAllDesc = false;
-var getObjectMapWithAllDescription
+
 TapApi.prototype.getObjectMapWithAllDescriptions = function () {
 
     //if(testLoadObjectMapWithAllDesc==false){
@@ -724,9 +731,6 @@ var testforConstrain = false
 /**
  * @return{*} : Json the json containing all detail about every singel table join to the root table with hadler atribut of choosing table you want to get it handler attribut
  * */
-var testApiRooQuery = false;
-let api = "";
-let table = []
 TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function () {
     var testButton = false;
 //var h = new HandlerAttributs();
@@ -753,7 +757,7 @@ TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function () {
             if (table[i].search(schema + ".") > -1) {
                 table[i] = table[i].replaceAll(schema + ".", "")
             }
-            var buttons = "<button  type='button' class=\"btn btn-warning\" id='b" + table[i] + i + "' value='" + table[i] + "' style=\"margin-top: 7px\">handler '" + table[i] + "'</button></span>"
+            var buttons =this.correctService.createB(table[i],i) // "<button  type='button' class=\"btn btn-warning\" id='b" + table[i] + i + "' value='" + table[i] + "' style=\"margin-top: 7px\">handler '" + table[i] + "'</button></span>"
             // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
 
             if (testButton == true) {
