@@ -730,6 +730,7 @@ var TapService = /** @class */ (function () {
      if (testMap == false) {
             map = api.tapService.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
         }
+
         allJoinRootTable = api.correctService.createAllJoinTable(map)
         allTables = allJoinRootTable;
         for (let k = 0; k < allTables.length; k++) {

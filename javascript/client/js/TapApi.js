@@ -198,7 +198,7 @@ TapApi.prototype.getObjectMap = function () {
     if (this.testConnection == true) {
 
         objectMap.succes.status = "OK"
-        objectMap.succes.object_map = this.correctService.loadJson();
+        objectMap.succes.object_map = this.getObjectMapWithAllDescriptions();
          return objectMap;
     } else {
         objectMap.failure.status = "Failed"
@@ -416,12 +416,12 @@ TapApi.prototype.getRootQueryIds = function () {
 TapApi.prototype.getRootQuery = function () {
     //var rootQueyJson = {status: "", query: "query"}
     let rootTable = this.getConnector().service["table"]// .jsonContaintJoinTable.Succes.base_table;
-     jsonAll = this.getObjectMap().succes.object_map;
+    // jsonAll = this.getObjectMap().succes.object_map;
     let schema;
     let contentAdql = "";
     let textJoinConstraint = "";
-    let map = this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
-
+    let objectMap =  this.getObjectMap().succes.object_map //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
+    let map = objectMap.map
     for (var keyRoot in map) {
         console.log(keyRoot +'  '+rootTable)
         if (keyRoot == rootTable) {
@@ -488,30 +488,28 @@ TapApi.prototype.getRootQuery = function () {
 }
 
 TapApi.prototype.addConstraint = function (){
-   let jsonAdqlContent = this.correctService.createCorrectJoin(this);
-   let objectMapWithAllDescription= this.getObjectMapWithAllDescriptions() ;
+    this.jsonAdqlContent = this.correctService.createCorrectJoin(this);
+   let objectMapWithAllDescription= this.getObjectMap().succes.object_map ;
     /**
      * Search a good place to put where and AND close to adql query
      * */
-    var testWhere = false;
+    //var testWhere = false;
    // if (JSON.stringify(jsonAdqlContent.allJoin) !== "{}") {
 
-
-
         for (let keyconst in objectMapWithAllDescription.tables) {
-            if (testWhere == false) {
+            if (this.jsonAdqlContent.rootQuery.indexOf("WHERE")===-1) {
                 //jsonAdqlContent.rootQuery=jsonAdqlContent.rootQuery+" WHERE "
                 if(objectMapWithAllDescription.tables[keyconst].constraints.length===0){
 
                 }else {
-                    jsonAdqlContent.rootQuery += '\n' + " WHERE " + objectMapWithAllDescription.tables[keyconst].constraints + ' ';
+                    this.jsonAdqlContent.rootQuery += '\n' + " WHERE " + objectMapWithAllDescription.tables[keyconst].constraints + ' ';
                 }
-                testWhere = true;
+               /// testWhere = true;
             } else {
-                if (jsonAdqlContent.rootQuery.indexOf(objectMapWithAllDescription.tables[keyconst].constraints) !== -1) {
+                if (this.jsonAdqlContent.rootQuery.indexOf(objectMapWithAllDescription.tables[keyconst].constraints) !== -1) {
 
                 } else {
-                    jsonAdqlContent.rootQuery += '\n'+" AND "+  objectMapWithAllDescription.tables[keyconst].constraints;
+                    this.jsonAdqlContent.rootQuery += '\n'+" AND "+  objectMapWithAllDescription.tables[keyconst].constraints;
                 }
             }
         }
@@ -523,16 +521,16 @@ TapApi.prototype.addConstraint = function (){
      * if you remouve a constrain we verified that there is not a duplication of WHERE OR AND condition
      * */
 
-    jsonAdqlContent.rootQuery = this.correctService.replaceWhereAnd(jsonAdqlContent.rootQuery);
+    this.jsonAdqlContent.rootQuery = this.correctService.replaceWhereAnd(this.jsonAdqlContent.rootQuery);
 
     /**
      * when we are removing all constraint, we verified if rootQuery end with WHERE close.
      * if so, we remove the WHERE close to rootQuery
      * */
-    if (jsonAdqlContent.rootQuery.trim().endsWith("WHERE") == true) {
-        jsonAdqlContent.rootQuery = jsonAdqlContent.rootQuery.trim().replaceAll("WHERE", "");
+    if (this.jsonAdqlContent.rootQuery.trim().endsWith("WHERE") == true) {
+        this.jsonAdqlContent.rootQuery = this.jsonAdqlContent.rootQuery.trim().replaceAll("WHERE", "");
     }
-    this.jsonAdqlContent = jsonAdqlContent;
+   // this.jsonAdqlContent = this.jsonAdqlContent;
 }
 
 
@@ -618,7 +616,6 @@ TapApi.prototype.getTableAttributeHandlers = function (table) {
  **/
 
 TapApi.prototype.getObjectMapWithAllDescriptions = function () {
-
     //if(testLoadObjectMapWithAllDesc==false){
     getObjectMapWithAllDescription = this.handlerAttribut.getObjectMapAndConstraints();
     // testLoadObjectMapWithAllDesc = true;
