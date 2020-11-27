@@ -559,6 +559,24 @@ TapApi.prototype.resetTableConstraint = function (table) {
     var formatTableName = schema + "." + table;
 
     var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+    for (let key in this.getObjectMap().succes.object_map.tables) {
+        if (key == table) {
+            this.getObjectMap().succes.object_map.tables[key].constraints = ""//= "";
+            delete  this.jsonAdqlContent.allJoin[correctTableNameFormat];
+            delete this.jsonAdqlContent.allCondition[correctTableNameFormat];
+            this.jsonAdqlContent.status.status = "OK";
+        } else {
+            this.jsonAdqlContent.status.status = "Failed";
+        }
+    }
+    return this.jsonAdqlContent;
+}
+/*TapApi.prototype.resetTableConstraint = function (table) {
+    ;
+    var schema = this.connector.service["schema"];
+    var formatTableName = schema + "." + table;
+
+    var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
     for (let key in this.jsonAdqlContent.allJoin) {
         if (key == correctTableNameFormat) {
            delete this.jsonAdqlContent.allJoin[key] //= "";
@@ -572,8 +590,7 @@ TapApi.prototype.resetTableConstraint = function (table) {
     }
     //$("#getJsonAll").text(this.jsonAdqlContent.rootQuery);
     return this.jsonAdqlContent;
-
-}
+}*/
 /**
  *@param{*} table : String the name of table you want to remove the contraint associeted with
  * @return{*} : Json the json containing root Query with all join table and all condition of each table
@@ -584,21 +601,7 @@ TapApi.prototype.resetAll = function () {
         this.resetTableConstraint(key);
         this.jsonAdqlContent.status.status = "OK";
     }
-
-    /*for (let key in this.jsonAdqlContent.allJoin) {
-        if (key) {
-            //delete this.jsonAdqlContent.allJoin[key] //= "";
-           // delete this.jsonAdqlContent.allCondition[key] //= "";
-            this.jsonAdqlContent.status.status = "OK";
-        } else {
-            this.jsonAdqlContent.status.status = "Failed";
-            //this.jsonAdqlContent.status.orderErros="The join table query not exist in rootQuery";
-        }
-        //jsonAdqlContent.rootQuery += " " + jsonAdqlContent.allJoin[key] + " ";
-    }*/
-    //$("#getJsonAll").text(this.jsonAdqlContent.rootQuery);
     return this.jsonAdqlContent;
-
 }
 
 
