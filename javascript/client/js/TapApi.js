@@ -235,6 +235,8 @@ TapApi.prototype.getJoinedTables = function (baseTable) {
  * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
  * @returns return all join request of each join table of the mainJson
  */
+let isloadRootQuery = false;
+let votableQueryResult = ""
 TapApi.prototype.getRootFields = function () {
 
     let jsonContaintRootFields = {
@@ -249,7 +251,11 @@ TapApi.prototype.getRootFields = function () {
     if (this.testConnection === true) {
         //
         // alert(this.jsonAdqlContent.rootQuery);
-        let votableQueryResult = this.tapService.Query(this.getRootQuery());
+        //let votableQueryResult = ""//this.tapService.Query(this.getRootQuery());
+        if(isloadRootQuery == false){
+            votableQueryResult = this.tapService.Query(this.getRootQuery());
+            isloadRootQuery = true;
+        }
         let contentText = votableQueryResult.responseText;
         if (this.getConnector().service.tapService === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.getConnector().service.tapService === "http://dc.zah.uni-heidelberg.de/tap/sync") {
 
@@ -424,7 +430,7 @@ TapApi.prototype.getRootQuery = function () {
     let objectMap = this.getObjectMap().succes.object_map //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
     let map = objectMap.map
     for (var keyRoot in map) {
-        console.log(keyRoot + '  ' + rootTable)
+       // console.log(keyRoot + '  ' + rootTable)
         if (keyRoot == rootTable) {
             schema = this.connector.service["schema"];
             schema = schema.quotedTableName().qualifiedName;
