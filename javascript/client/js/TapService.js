@@ -190,7 +190,6 @@ var TapService = /** @class */ (function () {
             //var allTable = [];
         if(this.allTables == undefined){
             let allTableObject = this.allTableQuery(); //Get all the tables
-
             this.allTables = VOTableTools.votable2Rows(allTableObject);
         }
 
