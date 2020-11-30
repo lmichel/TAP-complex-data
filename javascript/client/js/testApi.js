@@ -543,7 +543,7 @@ function newMain() {
     $("#btnLoadbuttonsHandler").click(function () {
 
         document.getElementById("loadbuttonsHandler").style.display = "block"
-        a.setObjectMapWithAllDescriptionConstraint();
+        a.correctService.setObjectMapWithAllDescriptionConstraint(a);
     })
 
 

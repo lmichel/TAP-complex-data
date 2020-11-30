@@ -1034,4 +1034,82 @@ TapServiceConnector.prototype.createAllJoinTable = function (map){
 }
 
 
+
+var testforConstrain = false
+/**
+ * @return{*} : Json the json containing all detail about every singel table join to the root table with hadler atribut of choosing table you want to get it handler attribut
+ * */
+TapServiceConnector.prototype.setObjectMapWithAllDescriptionConstraint = function (api) {
+    var testButton = false;
+//var h = new HandlerAttributs();
+    var tapButton = [];
+    //api = this;
+    //this.tapWhereConstraint = [];
+    // this.tapJoinConstraint = []
+    tapButton = [];
+    let tempTable = []
+    if (testApiRooQuery == false) {
+        api.getRootQuery();
+        table = api.tapService.allTable();
+        testApiRooQuery = true;
+    }
+    let schema = api.connector.service["schema"];
+    if (testforConstrain == false) {
+
+        /* for (let key in this.handlerAttribut.objectMapWithAllDescription.tables) {
+             tempTable.push(key)
+         }
+         tempTable = Array.from(new Set(tempTable));*/
+        table = this.createAllJoinTable(api.getObjectMapWithAllDescriptions().map)
+        for (let i = 0; i < table.length; i = i + 1) {
+            if (table[i].search(schema + ".") > -1) {
+                table[i] = table[i].replaceAll(schema + ".", "")
+            }
+            var buttons = this.createB(table[i], i) // "<button  type='button' class=\"btn btn-warning\" id='b" + table[i] + i + "' value='" + table[i] + "' style=\"margin-top: 7px\">handler '" + table[i] + "'</button></span>"
+            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+
+            if (testButton == true) {
+                //alert( 'existe deja')
+            } else {
+                tapButton.push(buttons);
+            }
+            document.getElementById("loadbuttonsHandler").style.display = "block"
+
+        }
+
+        $("#loadbuttonsHandler").append(tapButton);
+
+        window.location.hash = "#loadbuttonsHandler";
+        for (let i = 0; i < table.length; i = i + 1) {
+
+            //document.getElementById("loadbuttonsHandler").style.display = "block"
+            $("#b" + table[i] + i).click(function () {
+
+                let format = schema + '.' + table[i];
+                let correctTable = format.quotedTableName().qualifiedName;
+
+                document.getElementById("loadbuttonsHandler").style.display = "none"
+                var json = "";
+                //console.log(json);
+
+                //alert(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] )
+                // document.getElementById("loadbuttonsHandler").style.display = "none"
+                if (api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] == undefined) {
+                    json = api.getTableAttributeHandlers(table[i]);
+                    api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
+                }
+
+                display(JSON.stringify(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable], undefined, 2), "getJsonAll")
+                display(json.status, "getStatu")
+                //return api.jsonCorrectTableColumnDescription;
+
+            })
+        }
+    }
+    testforConstrain = true;
+    testButton = true;
+
+}
+
+
   

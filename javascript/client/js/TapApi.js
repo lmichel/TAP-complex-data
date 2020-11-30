@@ -99,6 +99,9 @@ var testApiRooQuery = false;
 let api = "";
 let table = []
 
+let isloadRootQuery = false;
+let votableQueryResult = ""
+
 /**
  * @param params (Json) with parameters (tapService,schema,table,shortName)
  * @param tapService (String) The URL of the Tap Servie
@@ -235,8 +238,6 @@ TapApi.prototype.getJoinedTables = function (baseTable) {
  * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
  * @returns return all join request of each join table of the mainJson
  */
-let isloadRootQuery = false;
-let votableQueryResult = ""
 TapApi.prototype.getRootFields = function () {
 
     let jsonContaintRootFields = {
@@ -429,7 +430,7 @@ TapApi.prototype.getRootQuery = function () {
     let textJoinConstraint = "";
     let objectMap = this.getObjectMap().succes.object_map //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
     let map = objectMap.map
-    for (var keyRoot in map) {
+    for (var keyRoot in map) {//jou
        // console.log(keyRoot + '  ' + rootTable)
         if (keyRoot == rootTable) {
             schema = this.connector.service["schema"];
@@ -613,7 +614,7 @@ TapApi.prototype.resetAll = function () {
  * */
 TapApi.prototype.getTableAttributeHandlers = function (table) {
 
-    return this.handlerAttribut.getTableAttributeHandler(table);
+    return this.attributsHandler.getTableAttributeHandler(table);
 }
 /**
  *@return{*} : Json the json containing all detail about every singel table join to the root table with all join table of each table and all condition of each table
@@ -626,82 +627,6 @@ TapApi.prototype.getObjectMapWithAllDescriptions = function () {
     //  }
     return getObjectMapWithAllDescription;
 }
-var testforConstrain = false
-/**
- * @return{*} : Json the json containing all detail about every singel table join to the root table with hadler atribut of choosing table you want to get it handler attribut
- * */
-TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function () {
-    var testButton = false;
-//var h = new HandlerAttributs();
-    var tapButton = [];
-    api = this;
-    //this.tapWhereConstraint = [];
-    // this.tapJoinConstraint = []
-    tapButton = [];
-    let tempTable = []
-    if (testApiRooQuery == false) {
-        api.getRootQuery();
-        table = api.tapService.allTable();
-        testApiRooQuery = true;
-    }
-    let schema = api.connector.service["schema"];
-    if (testforConstrain == false) {
-
-        /* for (let key in this.handlerAttribut.objectMapWithAllDescription.tables) {
-             tempTable.push(key)
-         }
-         tempTable = Array.from(new Set(tempTable));*/
-        table = allJoinRootTable
-        for (let i = 0; i < table.length; i = i + 1) {
-            if (table[i].search(schema + ".") > -1) {
-                table[i] = table[i].replaceAll(schema + ".", "")
-            }
-            var buttons = this.correctService.createB(table[i], i) // "<button  type='button' class=\"btn btn-warning\" id='b" + table[i] + i + "' value='" + table[i] + "' style=\"margin-top: 7px\">handler '" + table[i] + "'</button></span>"
-            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
-
-            if (testButton == true) {
-                //alert( 'existe deja')
-            } else {
-                tapButton.push(buttons);
-            }
-            document.getElementById("loadbuttonsHandler").style.display = "block"
-
-        }
-
-        $("#loadbuttonsHandler").append(tapButton);
-
-        window.location.hash = "#loadbuttonsHandler";
-        for (let i = 0; i < table.length; i = i + 1) {
-
-            //document.getElementById("loadbuttonsHandler").style.display = "block"
-            $("#b" + table[i] + i).click(function () {
-
-                let format = schema + '.' + table[i];
-                let correctTable = format.quotedTableName().qualifiedName;
-
-                document.getElementById("loadbuttonsHandler").style.display = "none"
-                var json = "";
-                //console.log(json);
-
-                //alert(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] )
-                // document.getElementById("loadbuttonsHandler").style.display = "none"
-                if (api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] == undefined) {
-                    json = api.getTableAttributeHandlers(table[i]);
-                    api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
-                }
-
-                display(JSON.stringify(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable], undefined, 2), "getJsonAll")
-                display(json.status, "getStatu")
-                //return api.jsonCorrectTableColumnDescription;
-
-            })
-        }
-    }
-    testforConstrain = true;
-    testButton = true;
-
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  *
@@ -709,7 +634,7 @@ TapApi.prototype.setObjectMapWithAllDescriptionConstraint = function () {
  * @return   list of all id
  */
 
-TapApi.prototype.getListeId = function (listJoinAndId) {
+/*TapApi.prototype.getListeId = function (listJoinAndId) {
     var listId = [];
     for (var i = 0; i < listJoinAndId.length; i = i + 2) {
         if (!json2Requete.isString(listJoinAndId[i])) {
@@ -722,25 +647,27 @@ TapApi.prototype.getListeId = function (listJoinAndId) {
         }
     }
     return listId;
-}
+}*/
 /**
  *
  *  @param {*} rootName |the root table names of tabservice
  * @param {*} mainJsonData the main json generated by the  method createJson()
  * @returns return array containing all join table with correct id
  */
+/*
 TapApi.prototype.getListJoinAndId = function (rootName, mainJsonData) {
     //alert(rootName);
     var listJoinAndId = [];
     listJoinAndId = this.joinAndId(rootName, mainJsonData)
     return listJoinAndId;
-}
+}*/
 /**
  *
  * @param {*} root  represent the root table
  * @param {*} json represent the main json create by the method createMainJson
  * @returns return the list of id of join table
  */
+/*
 TapApi.prototype.joinAndId = function (root, json) {
     var list = [];
     for (var key in json) {
@@ -752,5 +679,5 @@ TapApi.prototype.joinAndId = function (root, json) {
         }
     }
     return list;
-}
+}*/
 

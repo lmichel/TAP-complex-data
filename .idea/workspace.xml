@@ -22,6 +22,8 @@
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,6 +93,8 @@
       <workItem from="1605946338219" duration="600000" />
       <workItem from="1606116885464" duration="94645000" />
       <workItem from="1606375810834" duration="43202000" />
+      <workItem from="1606721869636" duration="1212000" />
+      <workItem from="1606723248848" duration="2340000" />
     </task>
     <servers />
   </component>
