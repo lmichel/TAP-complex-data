@@ -639,9 +639,18 @@ function createHtmlTable(tableName) {
         let jsonAll = a.getObjectMapWithAllDescriptions().map[root].join_tables
         let tesl = false;
         let tesl2 = false
+        let tableIdTD = [];
+        let tableIndex= []
+        //tableIdTD=td;
+
+        //
         for (let i = 0; i < td.length; i++) {
+            tableIdTD.push(td[i])
+            tableIdTD = Array.from(new Set(tableIdTD));
             $(td[i]).click(function () {
+
                 // alert($("#" + txtImput).val().length);
+                //$(this).html('')
                 var i = $(this).attr("id");
                 let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
 
@@ -652,72 +661,85 @@ function createHtmlTable(tableName) {
                 }
                 markup += "</tbody></table>"
 
-                //let   tableBody = $("table tbody tr ");
-
-                if (tesl === false && $(this)) {
-                    val = $(this).append(markup);
-                    tesl = true
+                //  console.log(tableIdTD)
+                if (tableIdTD.indexOf(td[i]) !== -1) {
+                    $(this).append(markup);
+                    tableIdTD[i] = ""
+                    //console.log(tableIdTD)
+                    //tesl = true
                 }
-                $('.record > tbody  > tr>td').each(function (index, td) {
-                    // console.log(index);
-                    $("#b" + index).click(function () {
-                        let value = $("#b" + index).text()
-                        let v = 0;
-                        for (let key in jsonAll) {
-                            v++;
-                            if (key == value) {
-                                let markup2 = "<table class='table record2 table-striped table-bordered' id='secondTable2'><th style='cursor: pointer'> " + key + " Keys</th><tbody>";
-                                markup2 += "<tr> <td>Target ID</td><td style='cursor: pointer' id='c" + v + "'>" + jsonAll[key].target + "</td></td>"
-                               // v++
-                                markup2 += "<tr><td>From ID</td><td style='cursor: pointer' id='c1" + v+ "'>" + jsonAll[key].from + "</td></td>"
+                $(this).find('#secondTable').toggle()
 
-                                markup2 += "</tbody></table>"
-                                ;
-                                console.log(v);
-                                if (tesl2 === false) {
-                                    $("#b" + index).append(markup2);
-                                    //tesl2 = true
-                                }
-                                $('.record2 > tbody  > tr>td').each(function (index2, td) {
-                                    console.log(index2);
-                                    $("#c" + index2).click(function () {
-                                        alert($("#c" + index2).text())
-                                        console.log($("#c" + index2).text());
-                                    })
-                                    $("#c1" + index2).click(function () {
-                                        alert($("#c1" + index2).text());
-                                        console.log($("#c1" + index2).text());
-                                    })
-                                })
-                            }
+                    $(this).find('#secondTable > tbody  > tr>td').each(function (index, td) {
+                        // console.log(index);
+                        tableIndex.push("#b" + index)
+                        tableIndex = Array.from(new Set(tableIndex));
 
-                        }
-                        // alert($("#b"+index).text())
-                        //console.log($("#b"+index).text());
-                    })
-                });
-                /* let td = $("td");
-                 for (let i = 0; i < td.length; i++) {
-                     $(td[i]).click(function () {
-                         let i = $(this).attr("id");
-                         alert($(td[i]).text())
-                     })
-                 }*/
+                           $("#b" + index).click(function () {
+                               let value = $("#b" + index).text()
+                               let v = 0;
+                               for (let key in jsonAll) {
+                                   v++;
+                                   if (key == value) {
+                                       let markup2 = "<table class='table record2 table-striped table-bordered' id='secondTable2'><th style='cursor: pointer'> " + key + " Keys</th><tbody>";
+                                       markup2 += "<tr> <td>Target ID</td><td style='cursor: pointer' id='c" + v + "'>" + jsonAll[key].target + "</td></td>"
+                                       // v++
+                                       markup2 += "<tr><td>From ID</td><td style='cursor: pointer' id='c1" + v + "'>" + jsonAll[key].from + "</td></td>"
+                                       markup2 += "</tbody></table>"
+                                       ;
+                                       if (tableIndex.indexOf("#b" + index) !== -1) {
+                                           $("#b" + index).append(markup2);
+                                           tableIndex[index] = "";
+                                       }
+                                       $('.record2 > tbody  > tr>td').each(function (index2, td) {
+                                           console.log(index2);
+                                           $("#c" + index2).click(function () {
+                                               alert($("#c" + index2).text())
+                                               console.log($("#c" + index2).text());
+                                           })
+                                           $("#c1" + index2).click(function () {
+                                               alert($("#c1" + index2).text());
+                                               console.log($("#c1" + index2).text());
+                                           })
+                                       })
+                                   }
+                               }
 
-                //$('.record td').toggle()
-                //
-                /* if(document.getElementById('secondTable').style.display==="none"){
-                     document.getElementById('secondTable').style.display="block"
-                 }else {
-                     document.getElementById('secondTable').style.display="none";
-                 }*/
-                // generate_table(td[i]);
-                //alert(i + " is added to constraint")
-                /* $("button").click(function(){
-                     $("p").toggle();
-                 });*/
+                               // alert($("#b"+index).text())
+                               //console.log($("#b"+index).text());
+                           })
+
+
+                    });
+
+
 
             });
+
+            /* let td = $("td");
+             for (let i = 0; i < td.length; i++) {
+                 $(td[i]).click(function () {
+                     let i = $(this).attr("id");
+                     alert($(td[i]).text())
+                 })
+             }*/
+
+            //$('.record td').toggle()
+            //
+            /* if(document.getElementById('secondTable').style.display==="none"){
+                 document.getElementById('secondTable').style.display="block"
+             }else {
+                 document.getElementById('secondTable').style.display="none";
+             }*/
+            // generate_table(td[i]);
+            //alert(i + " is added to constraint")
+            /* $("button").click(function(){
+                 $("p").toggle();
+             });*/
+
+            // });
+
+
         }
     });
 }
