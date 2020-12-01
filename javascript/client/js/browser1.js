@@ -23,9 +23,10 @@ function reset() {
 var a = new TapApi();
 let handlerApi = new HandlerAttributs();
 let testfor = false;
-let tapButton=[];
+let tapButton = [];
+
 function createButton() {
-    let buttons ="";
+    let buttons = "";
     let api = a;
     let schema = a.getConnector().service["schema"];
     if (testfor == false) {
@@ -72,6 +73,7 @@ function createButton() {
     }
 
 }
+
 var params = {
     tapService: "",
     schema: "",
@@ -205,6 +207,9 @@ function newMain() {
                 let status = a.connector.status;
                 //alert("you are now connected")
                 a.getObjectMapWithAllDescriptions();
+                let connector = JSON.stringify(a.getConnector().service, undefined, 2);
+                // let status = a.getConnector().status;
+                display(connector, "getJsonAll")
                 document.getElementById("testContent").style["display"] = "none";
                 display(status, "getStatu");
                 ConnectActive("btnApiConnectS", "btnApiDisconnect")
@@ -251,56 +256,56 @@ function newMain() {
             // alert("The service is disconnected ! connect service and try again ..." )
         }
     })
-/*
-    $("#btnGetObjectMap2").click(function () {
-        if (a.testConnection == true) {
-            /* let objectMap = JSON.stringify(a.getObjectMap(), undefined, 2);
-             let status = a.getObjectMap().succes.status;
+    /*
+        $("#btnGetObjectMap2").click(function () {
+            if (a.testConnection == true) {
+                /* let objectMap = JSON.stringify(a.getObjectMap(), undefined, 2);
+                 let status = a.getObjectMap().succes.status;
+                 display(status, "getStatu");
+                 display(objectMap, "getJsonAll")
+                 a.joinTable("basic");
+                 alert($("#btnGetObjectMap").val())
+                 setActive("btnGetObjectMap", "btnGetConnector", "btnGetJoinTable", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")*/
+
+    /*    display('ok', "getStatu");
+        display(JSON.stringify(a.getObjectMapWithAllDescriptions(), undefined, 2), "getJsonAll")
+    } else {
+        display(statusf, "getStatu");
+        display(message, "getJsonAll")
+        // alert("The service is disconnected ! connect service and try again ..." )
+    }
+})*/
+
+
+    /* $("#btnGetJoinTable").click(function () {
+         if (a.testConnection == true) {
+
+             let joinTables = JSON.stringify(a.getJoinedTables(params.table).Succes, undefined, 2);
+             let status = a.getJoinedTables(params.table).Succes.status;
              display(status, "getStatu");
-             display(objectMap, "getJsonAll")
-             a.joinTable("basic");
-             alert($("#btnGetObjectMap").val())
-             setActive("btnGetObjectMap", "btnGetConnector", "btnGetJoinTable", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")*/
+             display(joinTables, "getJsonAll")
+             setActive("btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")
+         } else {
+             display(statusf, "getStatu");
+             display(message, "getJsonAll")
+             //alert("The service is disconnected ! connect service and try again ..." )
+         }
+     })
+     $("#btnGetRootField").click(function () {
+         if (a.testConnection == true) {
 
-        /*    display('ok', "getStatu");
-            display(JSON.stringify(a.getObjectMapWithAllDescriptions(), undefined, 2), "getJsonAll")
-        } else {
-            display(statusf, "getStatu");
-            display(message, "getJsonAll")
-            // alert("The service is disconnected ! connect service and try again ..." )
-        }
-    })*/
+             let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
+             let status = a.getRootFields().status;
+             display(status, "getStatu");
+             display(rootFields, "getJsonAll")
+             setActive("btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootFieldValue", "btnGetRootQuery")
+         } else {
 
-
-   /* $("#btnGetJoinTable").click(function () {
-        if (a.testConnection == true) {
-
-            let joinTables = JSON.stringify(a.getJoinedTables(params.table).Succes, undefined, 2);
-            let status = a.getJoinedTables(params.table).Succes.status;
-            display(status, "getStatu");
-            display(joinTables, "getJsonAll")
-            setActive("btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootField", "btnGetRootFieldValue", "btnGetRootQuery")
-        } else {
-            display(statusf, "getStatu");
-            display(message, "getJsonAll")
-            //alert("The service is disconnected ! connect service and try again ..." )
-        }
-    })
-    $("#btnGetRootField").click(function () {
-        if (a.testConnection == true) {
-
-            let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
-            let status = a.getRootFields().status;
-            display(status, "getStatu");
-            display(rootFields, "getJsonAll")
-            setActive("btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootFieldValue", "btnGetRootQuery")
-        } else {
-
-            display(statusf, "getStatu");
-            display(message, "getJsonAll")
-            // alert("The service is disconnected ! connect service and try again ...")
-        }
-    })*/
+             display(statusf, "getStatu");
+             display(message, "getJsonAll")
+             // alert("The service is disconnected ! connect service and try again ...")
+         }
+     })*/
 
     $("#btnGetRootFieldValue").click(function () {
         if (a.testConnection == true) {
@@ -453,21 +458,21 @@ function newMain() {
         }
     })
 
-/*
+    /*
 
-    $("#btnGetRootQueryId").click(function () {
-        if (a.testConnection == true) {
-            let rootValue = JSON.stringify(a.getRootQueryIds().succes, undefined, 3);
-            let status = a.getRootQueryIds().succes.status;
-            display(status, "getStatu");
-            display(rootValue, "getJsonAll")
-            setActive("btnGetRootQueryId", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector")
-        } else {
-            display(statusf, "getStatu");
-            display(message, "getJsonAll")
-            //alert("The service is disconnected ! connect service and try again ..." )
-        }
-    })*/
+        $("#btnGetRootQueryId").click(function () {
+            if (a.testConnection == true) {
+                let rootValue = JSON.stringify(a.getRootQueryIds().succes, undefined, 3);
+                let status = a.getRootQueryIds().succes.status;
+                display(status, "getStatu");
+                display(rootValue, "getJsonAll")
+                setActive("btnGetRootQueryId", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector")
+            } else {
+                display(statusf, "getStatu");
+                display(message, "getJsonAll")
+                //alert("The service is disconnected ! connect service and try again ..." )
+            }
+        })*/
 
 
     $("#btnApiDisconnect").click(function () {
@@ -493,78 +498,78 @@ function newMain() {
     })
 
 }
-    /////////////////////////// END API //////////////////////////
-  /*  var rootQuerys = []
 
-    function addConstraint(rootQuery, table) {
-        var buttons = "";
-        var tapButton = [];
+/////////////////////////// END API //////////////////////////
+/*  var rootQuerys = []
 
-        for (let i = 0; i < table.length; i++) {
+  function addConstraint(rootQuery, table) {
+      var buttons = "";
+      var tapButton = [];
 
-            buttons = "<button  type='button' class=\"btn btn-default\" id='" + table[i][0] + "' value='" + table[i][0] + "' style=\"margin-top: 7px\">Join '" + table[i][0] + "'</button>"
-            // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
+      for (let i = 0; i < table.length; i++) {
 
-            tapButton.push(buttons);
-            $("#loadButton").append(tapButton[i]);
-            window.location.hash = "#loadButton";
-            $("#" + table[i][0]).click(function () {
+          buttons = "<button  type='button' class=\"btn btn-default\" id='" + table[i][0] + "' value='" + table[i][0] + "' style=\"margin-top: 7px\">Join '" + table[i][0] + "'</button>"
+          // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
 
-
-                if (rootQuerys.indexOf(rootQuerys[i]) > -1) {
-                    alert('existe deja')
-                } else {
-                    rootQuerys.push(table[i][1]);
-                    rootQuery += " " + table[i][1];
+          tapButton.push(buttons);
+          $("#loadButton").append(tapButton[i]);
+          window.location.hash = "#loadButton";
+          $("#" + table[i][0]).click(function () {
 
 
-                    $("#getJsonAll").text(rootQuery);
-                    $("#getJsonAll").html(rootQuery);
-                    window.location.hash = "#loadJson";
-                    //display(rootQuery,"getJsonAll")
-
-                    // alert("join value "+table[i][1])
-                }
+              if (rootQuerys.indexOf(rootQuerys[i]) > -1) {
+                  alert('existe deja')
+              } else {
+                  rootQuerys.push(table[i][1]);
+                  rootQuery += " " + table[i][1];
 
 
-            })
+                  $("#getJsonAll").text(rootQuery);
+                  $("#getJsonAll").html(rootQuery);
+                  window.location.hash = "#loadJson";
+                  //display(rootQuery,"getJsonAll")
+
+                  // alert("join value "+table[i][1])
+              }
 
 
-        }
-
-        // console.log(tapButton);
-        return rootQuery;
-    }*/
+          })
 
 
+      }
 
-    function showLoader() {
-        var head = document.getElementsByTagName('HEAD')[0];
+      // console.log(tapButton);
+      return rootQuery;
+  }*/
 
-        // Create new link Element
-        var link = document.createElement('link');
 
-        // set the attributes for link element
-        link.rel = 'stylesheet';
+function showLoader() {
+    var head = document.getElementsByTagName('HEAD')[0];
 
-        link.type = 'text/css';
+    // Create new link Element
+    var link = document.createElement('link');
 
-        link.href = 'css/main.css';
+    // set the attributes for link element
+    link.rel = 'stylesheet';
 
-        // Append link element to HTML head
-        head.appendChild(link);
-        $("head").append('<script type="text/javascript" src="js/vendor/modernizr-2.6.2.min.js""></script>');
-    }
+    link.type = 'text/css';
 
-    /**
-     *
-     * @param {*} urlPath   the base urlPath of tapService exemple : http://xcatdb.unistra.fr/3xmmdr8/tap/sync
-     * @param {*} schema    the schema of database exemple : for Gavo database, schema = "rr"
-     * @param {*} shortname the shortname of database like Gavo for gavo database
-     * @param {*} adql      the request you want for choosing table. exemble : SELECT TOP 1* FROM rr.resource for gavo
-     * @param {*} tableName the name of table in datable like resource table in gavo database
-     */
-    var flag;
+    link.href = 'css/main.css';
+
+    // Append link element to HTML head
+    head.appendChild(link);
+    $("head").append('<script type="text/javascript" src="js/vendor/modernizr-2.6.2.min.js""></script>');
+}
+
+/**
+ *
+ * @param {*} urlPath   the base urlPath of tapService exemple : http://xcatdb.unistra.fr/3xmmdr8/tap/sync
+ * @param {*} schema    the schema of database exemple : for Gavo database, schema = "rr"
+ * @param {*} shortname the shortname of database like Gavo for gavo database
+ * @param {*} adql      the request you want for choosing table. exemble : SELECT TOP 1* FROM rr.resource for gavo
+ * @param {*} tableName the name of table in datable like resource table in gavo database
+ */
+var flag;
 
 
 function createHtmlTable(tableName) {
@@ -577,7 +582,9 @@ function createHtmlTable(tableName) {
     var contentText = QObject.responseText;
     var Field = VOTableTools.genererField(QObject, contentText)
     var nb = Field.length;
-    var out = "\n"+
+    let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
+
+    var out = "\n" +
         "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + name + "</span>" +
         "<button class='delete_right btn btn-danger'  data-dismiss=\"modal\" id='d_right'><i class='fa fa-close ' ></i></button><br></br>";//head
     out += "<table  class = 'table table-bordered table-striped table-hover' id='mytable' role = 'grid' >";
@@ -599,10 +606,11 @@ function createHtmlTable(tableName) {
                 //out+="<td><input type='checkbox'></td>";
             }
             //var row = j/6+1;
-            out += "<td id = '" + dataTable[j] + "' style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + dataTable[j] + "</td>";
+            out += "<td id = '" + dataTable[j] + "' style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + dataTable[j];
+            out += "</td>";
 
         } else {
-            out += "<td style='text-align: center;vertical-align:bottom'>" + dataTable[j] +"</td>";
+            out += "<td style='text-align: center;vertical-align:bottom'>" + dataTable[j] + "</td>";
         }
         column = column + 1;
         if (column == nb) {
@@ -624,28 +632,94 @@ function createHtmlTable(tableName) {
     $("#getJsonAll").html(out);
 
     //let schema = this.connector.service["schema"];
-   var td = $("td");
-    for (var i = 0; i < td.length; i++) {
-        $(td[i]).click(function () {
-            // alert($("#" + txtImput).val().length);
-            var i = $(this).attr("id");
-            let jointab =a.correctService.getJoinTables(a.getConnector().service["table"])
-            console.log(jointab)
+    $(document).ready(function () {
+        var td = $("td");
+        let val
+        let root = a.getConnector().service["table"]
+        let jsonAll = a.getObjectMapWithAllDescriptions().map[root].join_tables
+        let tesl = false;
+        let tesl2 = false
+        for (let i = 0; i < td.length; i++) {
+            $(td[i]).click(function () {
+                // alert($("#" + txtImput).val().length);
+                var i = $(this).attr("id");
+                let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
 
-            let   markup = "<table class='table table-striped table-bordered'><thead>Join table of "+a.getConnector().service["table"]+"</thead><tbody>";
-            for(let k =0;k<jointab.length;k++){
-                markup+="<tr><td>"+jointab[k]+"</td></td>"
-            }
-            markup  +="</tbody></table>"
-             //let   tableBody = $("table tbody tr ");
-            $(td[i]).html(markup);
+                let markup = "<table class='table record table-striped table-bordered' id='secondTable'><th style='cursor: pointer'>join table of " + a.getConnector().service["table"] + "</th><tbody>";
 
+                for (let k = 0; k < jointab.length; k++) {
+                    markup += "<tr><td id='b" + k + "'>" + jointab[k] + "</td></td>"
+                }
+                markup += "</tbody></table>"
 
-           // generate_table(td[i]);
-            //alert(i + " is added to constraint")
+                //let   tableBody = $("table tbody tr ");
 
-        });
-    }
+                if (tesl === false && $(this)) {
+                    val = $(this).append(markup);
+                    tesl = true
+                }
+                $('.record > tbody  > tr>td').each(function (index, td) {
+                    // console.log(index);
+                    $("#b" + index).click(function () {
+                        let value = $("#b" + index).text()
+                        let v = 0;
+                        for (let key in jsonAll) {
+                            v++;
+                            if (key == value) {
+                                let markup2 = "<table class='table record2 table-striped table-bordered' id='secondTable2'><th style='cursor: pointer'> " + key + " Keys</th><tbody>";
+                                markup2 += "<tr> <td>Target ID</td><td style='cursor: pointer' id='c" + v + "'>" + jsonAll[key].target + "</td></td>"
+                               // v++
+                                markup2 += "<tr><td>From ID</td><td style='cursor: pointer' id='c1" + v+ "'>" + jsonAll[key].from + "</td></td>"
+
+                                markup2 += "</tbody></table>"
+                                ;
+                                console.log(v);
+                                if (tesl2 === false) {
+                                    $("#b" + index).append(markup2);
+                                    //tesl2 = true
+                                }
+                                $('.record2 > tbody  > tr>td').each(function (index2, td) {
+                                    console.log(index2);
+                                    $("#c" + index2).click(function () {
+                                        alert($("#c" + index2).text())
+                                        console.log($("#c" + index2).text());
+                                    })
+                                    $("#c1" + index2).click(function () {
+                                        alert($("#c1" + index2).text());
+                                        console.log($("#c1" + index2).text());
+                                    })
+                                })
+                            }
+
+                        }
+                        // alert($("#b"+index).text())
+                        //console.log($("#b"+index).text());
+                    })
+                });
+                /* let td = $("td");
+                 for (let i = 0; i < td.length; i++) {
+                     $(td[i]).click(function () {
+                         let i = $(this).attr("id");
+                         alert($(td[i]).text())
+                     })
+                 }*/
+
+                //$('.record td').toggle()
+                //
+                /* if(document.getElementById('secondTable').style.display==="none"){
+                     document.getElementById('secondTable').style.display="block"
+                 }else {
+                     document.getElementById('secondTable').style.display="none";
+                 }*/
+                // generate_table(td[i]);
+                //alert(i + " is added to constraint")
+                /* $("button").click(function(){
+                     $("p").toggle();
+                 });*/
+
+            });
+        }
+    });
 }
 
 
@@ -667,7 +741,7 @@ function generate_table(id) {
             // node the contents of the <td>, and put the <td> at
             // the end of the table row
             var cell = document.createElement("td");
-            var cellText = document.createTextNode("cell in row "+i+", column "+j);
+            var cellText = document.createTextNode("cell in row " + i + ", column " + j);
             cell.appendChild(cellText);
             row.appendChild(cell);
         }
@@ -795,7 +869,6 @@ function genererDataTable(Field, dataTable) {//zone 3 except textarea class = 'w
     out1 += "</tbody>";
     out1 += "</table></div></td></tr>";
     return out1;
-
 
 
 }
