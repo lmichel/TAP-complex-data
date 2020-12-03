@@ -44,11 +44,14 @@ var TapService = /** @class */ (function () {
             url: "" + site,
             type: "GET",
             data: { query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery' },
-            async: false
-        })
+            async: false,
+
+        } )
             .done(function (result) {
-            return result;
+
+                return result;
         });
+        //console.log(reTable);
         return reTable; 
     };
 
@@ -75,6 +78,7 @@ var TapService = /** @class */ (function () {
             async: false
         })
             .done(function (result) {
+
             return result;
         });
         return reTable;
@@ -103,6 +107,7 @@ var TapService = /** @class */ (function () {
                 async: false
             })
                 .done(function (result) {
+
                     return result;
                 });
 

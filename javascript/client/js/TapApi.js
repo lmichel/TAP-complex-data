@@ -183,7 +183,33 @@ TapApi.prototype.disconnect = function () {
 
 }
 
+TapApi.prototype.setConnector=function (rootTable){
+    let adql =''
+    let root = this.getConnector().service["table"]// .jsonContaintJoinTable.Succes.base_table;
+    // jsonAll = this.getObjectMap().succes.object_map;
+    let schema;
+    let contentAdql = "";
+    let textJoinConstraint = "";
+    let objectMap = this.getObjectMap().succes.object_map //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
+    let map = objectMap.map[root].join_tables
+    for (var keyRoot in map) {//jou
+        // console.log(keyRoot + '  ' + rootTable)
+        if (keyRoot === rootTable) {
+            schema = this.connector.service["schema"];
+            schema = schema.quotedTableName().qualifiedName;
+                console.log(map[keyRoot])
+                let formatTableName = schema + "." + keyRoot;
+               // let formatJoinTable = schema + "." + key;
+               // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+                let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
+                adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
+                adql += '\n' + " FROM  " + correctTableNameFormat;
+
+        }
+    }
+    return adql;
+}
 TapApi.prototype.getConnector = function () {
     if (this.testConnection == true) {
         return this.connector;
