@@ -571,20 +571,22 @@ function showLoader() {
  */
 var flag;
 
-function createTableInHtmlTable(table) {
+function createTableInHtmlTable(table,constraint) {
     //let root = a.getConnector().service["table"]
 
-    let adql = a.setConnector(table)
+    let adql = a.setConnector(table, constraint)
     console.log(adql);
     let QObject = a.tapService.Query(adql);
     let dataTable = VOTableTools.votable2Rows(QObject)
+    console.log("///////////////////***************************");
+    console.log(dataTable);
     let contentText = QObject.responseText;
     let Field = VOTableTools.genererField(QObject, contentText)
     let nb = Field.length;
-    var schema = a.connector.service["schema"];
+   // var schema = a.connector.service["schema"];
 
-    let jsonAll = a.correctService.getJoinTables(table)
-    let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
+   // let jsonAll = a.correctService.getJoinTables(table)
+    //let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
 
     var out = "\n"
     out += "<table  class = 'table table-bordered table-striped table-hover' id='mytable1' role = 'grid' >";
@@ -606,11 +608,16 @@ function createTableInHtmlTable(table) {
             } else {
                 out += "<tr data-event='eventA' class = 'even table-primary'>";
             }
-            out += "<td data-event='eventA' id = 'td" +table+ j + j + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table + j+ j + j+ "'style='cursor: pointer'>" + dataTable[j];
-            out += "</p></td>";
-
+            if(dataTable.length!==0){
+                out += "<td data-event='eventA' id = 'td" +table+ j + dataTable[j] + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table + j+ j + j+ "'style='cursor: pointer'>" + dataTable[j];
+                out += "</p></td>";
+            }else {
+                out += "<td data-event='eventA' id = 'td" +table+ j + dataTable[j] + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table + j+ j + j+ "'style='cursor: pointer'> No Data Found";
+                out += "</p></td>";
+            }
+            
         } else {
-            out += "<p id='content2"+table + j+ j + j+ "'><td id = 'td" +table+ j + j + j+ "' data-event='eventA' style='vertical-align:bottom;cursor: pointer'>" + dataTable[j] + "</td></p>";
+            out += "<p id='content2"+table + j+ j + j+ "'><td id = 'td" +table+ j + dataTable[j] + j+ "' data-event='eventA' style='vertical-align:bottom;cursor: pointer'>" + dataTable[j] + "</td></p>";
         }
         column = column + 1;
         if (column == nb) {
@@ -642,6 +649,7 @@ let markup = "";
 
 }
 
+var tableIdTD2 = '';
 function createHtmlTable(tableName) {
     var name = tableName //b[ii].id.slice(1);//the name of
     var schema = a.connector.service["schema"];
@@ -713,6 +721,7 @@ function createHtmlTable(tableName) {
         let tesl2 = false
         let tableIdTD = [];
         let tableIndex = []
+
         //tableIdTD=td;
 
         //
@@ -783,7 +792,10 @@ function createHtmlTable(tableName) {
                         if (f1.indexOf(key+j+dataTable[j]) === -1) {
                             f1 += key+j+dataTable[j];
                             let out =" <div class=\"tree-nav__item\">"
-                             out += createTableInHtmlTable(key);
+
+
+                                out += createTableInHtmlTable(key,dataTable[j]);
+
                             out +="</div>"
                             api3.find("#c" + key + j+dataTable[j]).prepend(out);
                             //alert($("#c" + key + j).text());
@@ -796,7 +808,6 @@ function createHtmlTable(tableName) {
                             // let jsonAll = a.getObjectMapWithAllDescriptions().map[root].join_tables
                             let tesl = false;
                             let tesl2 = false
-                            let tableIdTD2 = [];
                             let tableIndex = []
                             //tableIdTD=td;
 
@@ -809,7 +820,8 @@ function createHtmlTable(tableName) {
                                    // tableIdTD =""
                                     let jointab = a.correctService.getJoinTables(key)
                                     let markup = ""
-                                    markup = "<nav class=\"tree-nav\" id='tree-nav2"+key + j + j+ j+ "'>\n"
+                                    markup = " ";
+                                    markup += "<nav class=\"tree-nav\" id='tree-nav2"+key + j + j+ j+ "'>\n"
                                     for (let k = 0; k < jointab.length; k++) {
                                         markup += "<details class=\"tree-nav__item is-expandable\">" +
                                             "   <summary class=\"tree-nav__item-title\" id='s2" + j + k + "'>" + jointab[k] + "</summary>" +
@@ -823,11 +835,11 @@ function createHtmlTable(tableName) {
                                         markup += "</div></details>"
                                     }
                                     markup += "</nav>"
-                                    if (tableIdTD2.indexOf(index.currentTarget.getAttribute("id"))===-1) {
-                                        tableIdTD2.push(index.currentTarget.getAttribute("id"))
-                                        tableIdTD2 = Array.from(new Set(tableIdTD2))
-                                        $(this).append(markup);
-
+                                    if (tableIdTD2.indexOf(key+j+dataTable[j]+index.currentTarget.getAttribute("id"))===-1) {
+                                        tableIdTD2+=key+j+dataTable[j]+index.currentTarget.getAttribute("id")
+                                        //tableIdTD2 = Array.from(new Set(tableIdTD2))
+                                        $("#"+index.currentTarget.getAttribute("id")).append(markup);
+                                        console.log(tableIdTD2)
                                     }
                                     $(this).find('#tree-nav2'+key + j+ j+ j).toggle()
                                     let api2 = $(this);

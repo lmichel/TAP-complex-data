@@ -183,7 +183,7 @@ TapApi.prototype.disconnect = function () {
 
 }
 
-TapApi.prototype.setConnector=function (rootTable){
+TapApi.prototype.setConnector=function (rootTable,constraint){
     let adql =''
     let root = this.getConnector().service["table"]// .jsonContaintJoinTable.Succes.base_table;
     // jsonAll = this.getObjectMap().succes.object_map;
@@ -202,12 +202,14 @@ TapApi.prototype.setConnector=function (rootTable){
                // let formatJoinTable = schema + "." + key;
                // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
                 let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-
                 adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
                 adql += '\n' + " FROM  " + correctTableNameFormat;
+                adql += '\n' + " WHERE  " + correctTableNameFormat+"."+map[keyRoot].from +" = "+constraint;
+
 
         }
     }
+
     return adql;
 }
 TapApi.prototype.getConnector = function () {

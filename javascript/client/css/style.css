@@ -116,7 +116,7 @@ bottom: .5em;
   display: none;
   text-align: center;
 }
-#btnGetRootFieldValue{
+#button{
   display:block;
   margin:20px auto;
   padding:10px 30px;

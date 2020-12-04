@@ -23,11 +23,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/css/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/html/browser1.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/browser1.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/html/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/css/main.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/browser1.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/browser1.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/script.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/script.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,7 +101,8 @@
       <workItem from="1606116885464" duration="94645000" />
       <workItem from="1606375810834" duration="43202000" />
       <workItem from="1606721869636" duration="1212000" />
-      <workItem from="1606723248848" duration="117211000" />
+      <workItem from="1606723248848" duration="121224000" />
+      <workItem from="1607068214651" duration="2371000" />
     </task>
     <servers />
   </component>
