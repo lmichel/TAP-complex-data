@@ -578,8 +578,6 @@ function createTableInHtmlTable(table,constraint) {
     console.log(adql);
     let QObject = a.tapService.Query(adql);
     let dataTable = VOTableTools.votable2Rows(QObject)
-    console.log("///////////////////***************************");
-    console.log(dataTable);
     let contentText = QObject.responseText;
     let Field = VOTableTools.genererField(QObject, contentText)
     let nb = Field.length;
@@ -609,7 +607,7 @@ function createTableInHtmlTable(table,constraint) {
                 out += "<tr data-event='eventA' class = 'even table-primary'>";
             }
             if(dataTable.length!==0){
-                out += "<td data-event='eventA' id = 'td" +table+ j + dataTable[j] + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table + j+ j + j+ "'style='cursor: pointer'>" + dataTable[j];
+                out += "<td data-event='eventA' id = 'td" +table+ j + dataTable[j] + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table +j+ j + j+ "'style='cursor: pointer'>" + dataTable[j];
                 out += "</p></td>";
             }else {
                 out += "<td data-event='eventA' id = 'td" +table+ j + dataTable[j] + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table + j+ j + j+ "'style='cursor: pointer'> No Data Found";
@@ -670,10 +668,14 @@ function createHtmlTable(tableName) {
     out += "</tr></thead>";
     out += "<tbody>"
     var column = 0;
+    if (dataTable[dataTable.length - 1] == 0) {
+        dataTable.unshift(dataTable[dataTable.length - 1]);
+       // let temp = dataTable[dataTable.length - 1];
+        //dataTable[0] = temp;
+        dataTable.splice(dataTable.length - 1, 1);
+    }
     for (var j = 0; j < dataTable.length; j++) {//table  content
-        if (dataTable[dataTable.length - 1] == 0) {
-            dataTable.splice(dataTable.length - 1, 1);
-        }
+
         if (column == 0) {
             var judge = (j + nb) / nb;
             if (judge % 2 == 1) {
@@ -753,7 +755,7 @@ function createHtmlTable(tableName) {
                     $('#s'+j+k).click(function (){
                         if(values.indexOf(jointab[k])===-1){
                             values+=jointab[k];
-                            console.log(jointab[k]);
+                           // console.log(jointab[k]);
 
                             //markup+= createTableInHtmlTable(jointab[k]);
                         }
@@ -761,7 +763,7 @@ function createHtmlTable(tableName) {
                     for (let key in jsonAll) {
                         if (key == jointab[k]) {
                            // let val =dataTable[j].replaceAll('-',"_");
-                               markup+= "<tr><td> <a class=\"tree-nav__item-title\" id='c" + key + j+dataTable[j] + "'><i class=\"fa fa-key\"></i> Click to show " + key+ " keys</a> </td></tr></table>"
+                               markup+= "<tr><td> <a class=\"tree-nav__item-title\" id='c" + key + j+dataTable[j] + "'><i class=\"fa fa-key\"></i> </a> </td></tr></table>"
                         }
                     }
                     markup +="</div></details>"
@@ -792,61 +794,57 @@ function createHtmlTable(tableName) {
                         if (f1.indexOf(key+j+dataTable[j]) === -1) {
                             f1 += key+j+dataTable[j];
                             let out =" <div class=\"tree-nav__item\">"
-
-
                                 out += createTableInHtmlTable(key,dataTable[j]);
+                            //console.log(out);
 
                             out +="</div>"
-                            api3.find("#c" + key + j+dataTable[j]).prepend(out);
-                            //alert($("#c" + key + j).text());
+                            api3.find("#c" + key + j+dataTable[j]).html(out);
 
-
-                            let tds = $("td");
-                            //console.log(td)
-                            let val
-                            let root = a.getConnector().service["table"]
-                            // let jsonAll = a.getObjectMapWithAllDescriptions().map[root].join_tables
-                            let tesl = false;
-                            let tesl2 = false
-                            let tableIndex = []
-                            //tableIdTD=td;
+                           // $("#mytable1 tr td").html(out);
 
                             $(function(){
-
-
                                 $( "#mytable1 tr td" ).click(function(index) {
+
                                     var name = $(this).find('td:eq(0)').html;
-                                    console.log(index.currentTarget.getAttribute("id"));
+                                   // console.log(index.currentTarget.getAttribute("id"));
                                    // tableIdTD =""
                                     let jointab = a.correctService.getJoinTables(key)
-                                    let markup = ""
-                                    markup = " ";
-                                    markup += "<nav class=\"tree-nav\" id='tree-nav2"+key + j + j+ j+ "'>\n"
+                                    let markup2 = ""
+                                    markup2 = " ";
+                                    markup2 += "<nav class=\"tree-nav\" id='tree-nav2"+key + j + j+ j+ "'>\n"
                                     for (let k = 0; k < jointab.length; k++) {
-                                        markup += "<details class=\"tree-nav__item is-expandable\">" +
+                                        markup2 += "<details class=\"tree-nav__item is-expandable\">" +
                                             "   <summary class=\"tree-nav__item-title\" id='s2" + j + k + "'>" + jointab[k] + "</summary>" +
                                             " <div class=\"tree-nav__item\">"
                                         for (let key in jsonAll) {
                                             if (key == jointab[k]) {
-
-                                                markup += "<a class=\"tree-nav__item-title\" id='c2" + key + j + 1 + "'><i class=\"fa fa-key\"></i>" + jsonAll[key].from + "</a> "
+                                                markup2 += "<a class=\"tree-nav__item-title\" id='c2" + key + j + 1 + "'><i class=\"fa fa-key\"></i>" + jsonAll[key].from + "</a> "
                                             }
                                         }
-                                        markup += "</div></details>"
+                                        markup2 += "</div></details>"
                                     }
-                                    markup += "</nav>"
-                                    if (tableIdTD2.indexOf(key+j+dataTable[j]+index.currentTarget.getAttribute("id"))===-1) {
-                                        tableIdTD2+=key+j+dataTable[j]+index.currentTarget.getAttribute("id")
+                                    markup2 += "</nav>"
+
+
                                         //tableIdTD2 = Array.from(new Set(tableIdTD2))
-                                        $("#"+index.currentTarget.getAttribute("id")).append(markup);
-                                        console.log(tableIdTD2)
+                                        if($("#"+index.currentTarget.getAttribute("id")).text()==dataTable[j]) {
+                                            $("#"+index.currentTarget.getAttribute("id")).click(function (){
+                                                if (tableIdTD2.indexOf(key+j+dataTable[j]+index.currentTarget.getAttribute("id"))===-1) {
+                                                    tableIdTD2 += key + j + dataTable[j] + index.currentTarget.getAttribute("id")
+                                                    $(this).append(markup2);
+                                                }
+                                            })
+
+                                       // $(this).parent().last().add(this);
+                                        //console.log(tableIdTD2)
                                     }
                                     $(this).find('#tree-nav2'+key + j+ j+ j).toggle()
                                     let api2 = $(this);
-                                    $(this).find("#content2"+key + j+ j+ j).click(function () {
-                                        console.log('#tree-nav2'+key+ j+j+j)
+                                    $(this).find("#content2"+key + dataTable[j]+ j+ j).click(function () {
+                                       // console.log('#tree-nav2'+key+ j+j+j)
+
                                         api2.find('#tree-nav2'+key + j+ j+ j).toggle()
-                                        console.log("tableIdTD")
+                                        //console.log("tableIdTD")
                                         // api.find("#tree-nav").toggle();
                                     })
                                 });
