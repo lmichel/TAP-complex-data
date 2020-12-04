@@ -577,6 +577,9 @@ function createTableInHtmlTable(table,constraint) {
     let adql = a.setConnector(table, constraint)
     console.log(adql);
     let QObject = a.tapService.Query(adql);
+   // let dataTable =""// VOTableTools.votable2Rows(QObject)
+    console.log(QObject);
+
     let dataTable = VOTableTools.votable2Rows(QObject)
     let contentText = QObject.responseText;
     let Field = VOTableTools.genererField(QObject, contentText)
@@ -585,7 +588,7 @@ function createTableInHtmlTable(table,constraint) {
 
    // let jsonAll = a.correctService.getJoinTables(table)
     //let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
-
+    const regex = /[/,:,.,_,\,',"]/g;
     var out = "\n"
     out += "<table  class = 'table table-bordered table-striped table-hover' id='mytable1' role = 'grid' >";
     out += "<thead class='thead-dark'><tr  role='row'>"
@@ -599,6 +602,13 @@ function createTableInHtmlTable(table,constraint) {
         if (dataTable[dataTable.length - 1] == 0) {
             dataTable.splice(dataTable.length - 1, 1);
         }
+        let tempFound =dataTable[j]+""
+        if(typeof dataTable[j] ==="string"){
+            dataTable[j] = "'"+dataTable[j]+"'"
+        }
+        //console.log( dataTable[j])
+
+        const found = tempFound.replaceAll(regex,"");
         if (column == 0) {
             var judge = (j + nb) / nb;
             if (judge % 2 == 1) {
@@ -607,15 +617,15 @@ function createTableInHtmlTable(table,constraint) {
                 out += "<tr data-event='eventA' class = 'even table-primary'>";
             }
             if(dataTable.length!==0){
-                out += "<td data-event='eventA' id = 'td" +table+ j + dataTable[j] + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table +j+ j + j+ "'style='cursor: pointer'>" + dataTable[j];
+                out += "<td data-event='eventA' id = 'td" +table+ j + found + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table +j+ j + j+ "'style='cursor: pointer'>" + dataTable[j];
                 out += "</p></td>";
             }else {
-                out += "<td data-event='eventA' id = 'td" +table+ j + dataTable[j] + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table + j+ j + j+ "'style='cursor: pointer'> No Data Found";
+                out += "<td data-event='eventA' id = 'td" +table+ j + found + j+ "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2"+table + j+ j + j+ "'style='cursor: pointer'> No Data Found";
                 out += "</p></td>";
             }
             
         } else {
-            out += "<p id='content2"+table + j+ j + j+ "'><td id = 'td" +table+ j + dataTable[j] + j+ "' data-event='eventA' style='vertical-align:bottom;cursor: pointer'>" + dataTable[j] + "</td></p>";
+            out += "<p id='content2"+table + j+ j + j+ "'><td id = 'td" +table+ j + found + j+ "' data-event='eventA' style='vertical-align:bottom;cursor: pointer'>" + dataTable[j] + "</td></p>";
         }
         column = column + 1;
         if (column == nb) {
@@ -711,7 +721,7 @@ function createHtmlTable(tableName) {
 
     //let schema = this.connector.service["schema"];
     $(document).ready(function () {
-
+        const regex = /[/,:,.,_,\,',"]/g;
         var api ="";
         var  td = $("td");
         //console.log(td)
@@ -732,6 +742,13 @@ function createHtmlTable(tableName) {
         let ff1 = "";let values2=''
         for (let i = 0; i < td.length; i++) {
             let j = i
+            let tempFound =dataTable[j]+""
+            if(typeof dataTable[j] ==="string"){
+                dataTable[j] = "'"+dataTable[j]+"'"
+            }
+            //console.log( dataTable[j])
+
+            const found = tempFound.replaceAll(regex,"");
             tableIdTD.push(td[i])
             tableIdTD = Array.from(new Set(tableIdTD));
             let markup;
@@ -748,8 +765,11 @@ function createHtmlTable(tableName) {
                     "</div>\n"
                 markup = "<nav class=\"tree-nav\" id='tree-nav"+j+"'>\n"
                 for (let k = 0; k < jointab.length; k++) {
+
+
+
                     markup += "<details class=\"tree-nav__item is-expandable\">" +
-                        "   <summary type='button' class=\"tree-nav__item-title\" id='s"+jointab[k]+j+dataTable[j]+"'>" + jointab[k] + "</summary>" +
+                        "   <summary type='button' class=\"tree-nav__item-title\" id='s"+jointab[k]+j+found+"'>" + jointab[k] + "</summary>" +
                         " <div class=\"tree-nav__item\">"
 
                     $('#s'+j+k).click(function (){
@@ -763,7 +783,7 @@ function createHtmlTable(tableName) {
                     for (let key in jsonAll) {
                         if (key == jointab[k]) {
                            // let val =dataTable[j].replaceAll('-',"_");
-                               markup+= "<tr><td> <a class=\"tree-nav__item-title\" id='c" + key + j+dataTable[j] + "'><i class=\"fa fa-key\"></i> </a> </td></tr></table>"
+                               markup+= "<tr><td> <a class=\"tree-nav__item-title\" id='c" + key + j+found + "'></a> </td></tr></table>"
                         }
                     }
                     markup +="</div></details>"
@@ -784,21 +804,22 @@ function createHtmlTable(tableName) {
 
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 let api3 =$(this)
                 for (let key in jsonAll) {
                   //  let val1 =dataTable[j].replaceAll('-',"_");
 
-                    $("#s" + key + j+dataTable[j]).click(function () {
+                    $("#s" + key + j+found).click(function () {
                         // console.log(id);
-                        if (f1.indexOf(key+j+dataTable[j]) === -1) {
-                            f1 += key+j+dataTable[j];
+                        if (f1.indexOf(key+j+found) === -1) {
+                            f1 += key+j+found;
                             let out =" <div class=\"tree-nav__item\">"
+
                                 out += createTableInHtmlTable(key,dataTable[j]);
                             //console.log(out);
 
                             out +="</div>"
-                            api3.find("#c" + key + j+dataTable[j]).html(out);
+                            api3.find("#c" + key + j+found).html(out);
 
                            // $("#mytable1 tr td").html(out);
 
@@ -827,7 +848,8 @@ function createHtmlTable(tableName) {
 
 
                                         //tableIdTD2 = Array.from(new Set(tableIdTD2))
-                                        if($("#"+index.currentTarget.getAttribute("id")).text()==dataTable[j]) {
+                                    console.log($("#"+index.currentTarget.getAttribute("id")).text().replaceAll(regex,"") +" ==  "+found)
+                                        if($("#"+index.currentTarget.getAttribute("id")).text().replaceAll(regex,"") ==found) {
                                             $("#"+index.currentTarget.getAttribute("id")).click(function (){
                                                 if (tableIdTD2.indexOf(key+j+dataTable[j]+index.currentTarget.getAttribute("id"))===-1) {
                                                     tableIdTD2 += key + j + dataTable[j] + index.currentTarget.getAttribute("id")
@@ -840,7 +862,7 @@ function createHtmlTable(tableName) {
                                     }
                                     $(this).find('#tree-nav2'+key + j+ j+ j).toggle()
                                     let api2 = $(this);
-                                    $(this).find("#content2"+key + dataTable[j]+ j+ j).click(function () {
+                                    $(this).find("#content2"+key + found+ j+ j).click(function () {
                                        // console.log('#tree-nav2'+key+ j+j+j)
 
                                         api2.find('#tree-nav2'+key + j+ j+ j).toggle()
