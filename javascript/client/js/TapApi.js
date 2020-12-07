@@ -163,6 +163,7 @@ TapApi.prototype.disconnect = function () {
     this.tapJoinConstraint = [];
     this.tapWhereConstraint = [];
     this.adqlContent = "";
+    this.setConnectionQuery = {"query": {}}
     $("#getJsonAll").text("");
 
     if (this.correctService == null && this.tapService == null && this.votableQueryResult == null) {
@@ -183,34 +184,124 @@ TapApi.prototype.disconnect = function () {
 
 }
 
-TapApi.prototype.setConnector=function (rootTable,constraint){
-    let adql =''
+TapApi.prototype.setConnector = function (rootTable, constraint) {
+    let adql = ''
     let root = this.getConnector().service["table"]// .jsonContaintJoinTable.Succes.base_table;
     // jsonAll = this.getObjectMap().succes.object_map;
     let schema;
     let contentAdql = "";
     let textJoinConstraint = "";
-    let objectMap = this.getObjectMap().succes.object_map //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
+    let objectMap = this.getObjectMap().succes.object_map
+    //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
+    console.log(this.tapService.createJson())
     let map = objectMap.map[root].join_tables
+    //console.log(map)
+    schema = this.connector.service["schema"];
+    schema = schema.quotedTableName().qualifiedName;
+    if(constraint!=="" || constraint!==undefined){
     for (var keyRoot in map) {//jou
         // console.log(keyRoot + '  ' + rootTable)
         if (keyRoot === rootTable) {
-            schema = this.connector.service["schema"];
-            schema = schema.quotedTableName().qualifiedName;
-                console.log(map[keyRoot])
-                let formatTableName = schema + "." + keyRoot;
-               // let formatJoinTable = schema + "." + key;
-               // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-                let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-                adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
-                adql += '\n' + " FROM  " + correctTableNameFormat;
-                adql += '\n' + " WHERE  " + correctTableNameFormat+"."+map[keyRoot].from +" = "+constraint;
+            let formatTableName = schema + "." + keyRoot;
+            // let formatJoinTable = schema + "." + key;
+            // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+            adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
+          /*  for (let ke in map[keyRoot]) {
+                console.log(ke)
+                if (ke === "join_tables") {
+                    for (let k in map[keyRoot][ke]) {
+                        console.log(k);
+
+                            console.log(map[keyRoot][ke])
+                            let formatTableName = schema + "." + keyRoot;
+                            // let formatJoinTable = schema + "." + key;
+                            // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+                            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+                            //adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot][ke][k].target;
+                            adql+=" , "+correctTableNameFormat + "." + map[keyRoot][ke][k].target;
+                           //adql += '\n' + " FROM  " + correctTableNameFormat;
+                          //adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+
+                    }
+                    //return adql;
+                    //  console.log(map[keyRoot][ke])
+                }
+
+
+            }*/
+            console.log(map[keyRoot])
+
+            adql += '\n' + " FROM  " + correctTableNameFormat;
+            adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+            //this.setConnectionQuery.query[keyRoot]=adql;
+            return adql;
 
 
         }
+        if (keyRoot !== rootTable) {
+
+            let formatTableName = schema + "." + keyRoot;
+            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+            for (let ke in map[keyRoot]) {
+                //console.log(ke)
+                if (ke === "join_tables") {
+                    for (let k in map[keyRoot][ke]) {
+                        //console.log(k);
+                        if (k === rootTable) {
+                            // console.log(map[keyRoot][ke])
+                            let formatTableName2 = schema + "." + k;
+                            // let formatJoinTable = schema + "." + key;
+                            // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+                            let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
+                            adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from;
+                            adql += '\n' + " FROM  " + correctTableNameFormat2;
+                            adql += " JOIN " + correctTableNameFormat + " ON " + correctTableNameFormat + "." + map[keyRoot].join_tables[k].target
+                            adql += " = " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from
+                            adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+                            return adql;
+                            // {from: "oidbib", target: "oidbibref", join_tables: {…}}
+                            /*  {author: {…}, keywords: {…}}
+                              author:
+                                  from: "oidbibref"
+                              target: "oidbib"
+                              __proto__: Object
+                              keywords:
+                                  from: "oidbibref"
+                              target: "oidbib"
+                              __proto__: Object*/
+                        } else if (k !== rootTable) {
+                            for (let k in map[keyRoot][ke]) {
+                                //console.log(map[keyRoot][ke][k])
+                                for (let c in map[keyRoot][ke][k]) {
+                                    if (c === "join_tables") {
+                                        console.log(map[keyRoot][ke][k][c]);
+                                        let lastJson = map[keyRoot][ke][k][c];
+                                        for (let lastKey in lastJson) {
+                                            if (lastKey === rootTable) {
+                                                let formatTableName2 = schema + "." + lastKey;
+                                                let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
+                                                adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + lastJson[lastKey].from;
+                                                adql += '\n' + " FROM  " + correctTableNameFormat2;
+                                                adql += '\n' + " WHERE  " + correctTableNameFormat2 + "." + lastJson[lastKey].from + " = " + constraint;
+                                                return adql;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                        //this.setConnectionQuery["order"]=adql;
+                        // console.log(adql)
+                    }
+                    //  console.log(map[keyRoot][ke])
+                }
+            }
+        }
     }
 
-    return adql;
+
 }
 TapApi.prototype.getConnector = function () {
     if (this.testConnection == true) {
@@ -281,7 +372,7 @@ TapApi.prototype.getRootFields = function () {
         //
         // alert(this.jsonAdqlContent.rootQuery);
         //let votableQueryResult = ""//this.tapService.Query(this.getRootQuery());
-        if(isloadRootQuery == false){
+        if (isloadRootQuery == false) {
             votableQueryResult = this.tapService.Query(this.getRootQuery());
             isloadRootQuery = true;
         }
@@ -459,7 +550,7 @@ TapApi.prototype.getRootQuery = function () {
     let objectMap = this.getObjectMap().succes.object_map //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
     let map = objectMap.map
     for (var keyRoot in map) {//jou
-       // console.log(keyRoot + '  ' + rootTable)
+        // console.log(keyRoot + '  ' + rootTable)
         if (keyRoot == rootTable) {
             schema = this.connector.service["schema"];
             schema = schema.quotedTableName().qualifiedName;
