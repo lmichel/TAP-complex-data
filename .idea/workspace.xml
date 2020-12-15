@@ -23,6 +23,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/javascript/client/js/browser1.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/browser1.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,7 +103,9 @@
       <workItem from="1606723248848" duration="121224000" />
       <workItem from="1607068214651" duration="10996000" />
       <workItem from="1607113958520" duration="27963000" />
-      <workItem from="1607326812676" duration="20621000" />
+      <workItem from="1607326812676" duration="21221000" />
+      <workItem from="1607936538991" duration="4309000" />
+      <workItem from="1608039491579" duration="599000" />
     </task>
     <servers />
   </component>
