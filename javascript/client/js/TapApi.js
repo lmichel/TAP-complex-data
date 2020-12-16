@@ -340,7 +340,7 @@ TapApi.prototype.getRootFieldValues = function (query) {
         }
         for (let b = 0; b < dataTable1.attribute_handlers.length; b++) {
             for (let ke in dataTable1.attribute_handlers[b]) {
-                //console.log(ke +"-----------------");
+                console.log(ke +"-----------------");
                 for (let col = 0; col < Field.length; col++) {
                     if (dataTable1.attribute_handlers[b][ke] === Field[col]) {
                         jsonContaintHandlersValue1.push(dataTable1.attribute_handlers[b])

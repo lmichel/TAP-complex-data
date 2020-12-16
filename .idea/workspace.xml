@@ -20,7 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +103,7 @@
       <workItem from="1607326812676" duration="21221000" />
       <workItem from="1607936538991" duration="4309000" />
       <workItem from="1608039491579" duration="599000" />
-      <workItem from="1608040331785" duration="1388000" />
+      <workItem from="1608040331785" duration="1425000" />
     </task>
     <servers />
   </component>
