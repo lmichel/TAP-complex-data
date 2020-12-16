@@ -1,3 +1,25 @@
+
+else if (k !== rootTable) {
+                                for (let k in map[keyRoot][ke]) {
+                                    //console.log(map[keyRoot][ke][k])
+                                    for (let c in map[keyRoot][ke][k]) {
+                                        if (c === "join_tables") {
+                                            //console.log(map[keyRoot][ke][k][c]);
+                                            let lastJson = map[keyRoot][ke][k][c];
+                                            for (let lastKey in lastJson) {
+                                                if (lastKey === rootTable) {
+                                                    let formatTableName2 = schema + "." + lastKey;
+                                                    let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
+                                                    adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + lastJson[lastKey].from;
+                                                    adql += '\n' + " FROM  " + correctTableNameFormat2;
+                                                    adql += '\n' + " WHERE  " + correctTableNameFormat2 + "." + lastJson[lastKey].from + " = " + constraint;
+                                                    return adql;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 /////////////////////////// api jsonrootvalue ///////////////////////////////////////
 
 

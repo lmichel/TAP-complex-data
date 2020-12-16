@@ -115,12 +115,12 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     //alert(formatTableName);
     var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
     this.query = "SELECT TOP 5 * FROM " + correctTableNameFormat;
-    this.tapService = new TapService(tapService, schema, shortName, true)
+    //this.correctService.tapService = new TapService(tapService, schema, shortName, true)
     this.correctService = new TapServiceConnector(tapService, schema, shortName);
-    this.votableQueryResult = this.tapService.Query(this.query);
-    this.tapService.api = this;
-    this.handlerAttribut.api = this.tapService.api;
-    this.handlerAttribut = this.tapService;
+    this.votableQueryResult = this.correctService.Query(this.query);
+    this.correctService.api = this;
+    this.handlerAttribut.api = this.correctService.api;
+    this.handlerAttribut = this.correctService;
 
     if (this.getJsonStatu(this.votableQueryResult).success.status == 'OK') {
         this.testConnection = true;
@@ -184,125 +184,6 @@ TapApi.prototype.disconnect = function () {
 
 }
 
-TapApi.prototype.setConnector = function (rootTable, constraint) {
-    let adql = ''
-    let root = this.getConnector().service["table"]// .jsonContaintJoinTable.Succes.base_table;
-    // jsonAll = this.getObjectMap().succes.object_map;
-    let schema;
-    let contentAdql = "";
-    let textJoinConstraint = "";
-    let objectMap = this.getObjectMap().succes.object_map
-    //this.tapService.getObjectMapAndConstraint(jsonAll,rootTable);
-    console.log(this.tapService.createJson())
-    let map = objectMap.map[root].join_tables
-    //console.log(map)
-    schema = this.connector.service["schema"];
-    schema = schema.quotedTableName().qualifiedName;
-    if(constraint!=="" || constraint!==undefined){
-    for (var keyRoot in map) {//jou
-        // console.log(keyRoot + '  ' + rootTable)
-        if (keyRoot === rootTable) {
-            let formatTableName = schema + "." + keyRoot;
-            // let formatJoinTable = schema + "." + key;
-            // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-            adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
-          /*  for (let ke in map[keyRoot]) {
-                console.log(ke)
-                if (ke === "join_tables") {
-                    for (let k in map[keyRoot][ke]) {
-                        console.log(k);
-
-                            console.log(map[keyRoot][ke])
-                            let formatTableName = schema + "." + keyRoot;
-                            // let formatJoinTable = schema + "." + key;
-                            // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-                            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-                            //adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot][ke][k].target;
-                            adql+=" , "+correctTableNameFormat + "." + map[keyRoot][ke][k].target;
-                           //adql += '\n' + " FROM  " + correctTableNameFormat;
-                          //adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
-
-                    }
-                    //return adql;
-                    //  console.log(map[keyRoot][ke])
-                }
-
-
-            }*/
-            console.log(map[keyRoot])
-
-            adql += '\n' + " FROM  " + correctTableNameFormat;
-            adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
-            //this.setConnectionQuery.query[keyRoot]=adql;
-            return adql;
-
-
-        }
-        if (keyRoot !== rootTable) {
-
-            let formatTableName = schema + "." + keyRoot;
-            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-            for (let ke in map[keyRoot]) {
-                //console.log(ke)
-                if (ke === "join_tables") {
-                    for (let k in map[keyRoot][ke]) {
-                        //console.log(k);
-                        if (k === rootTable) {
-                            // console.log(map[keyRoot][ke])
-                            let formatTableName2 = schema + "." + k;
-                            // let formatJoinTable = schema + "." + key;
-                            // let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-                            let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
-                            adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from;
-                            adql += '\n' + " FROM  " + correctTableNameFormat2;
-                            adql += " JOIN " + correctTableNameFormat + " ON " + correctTableNameFormat + "." + map[keyRoot].join_tables[k].target
-                            adql += " = " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from
-                            adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
-                            return adql;
-                            // {from: "oidbib", target: "oidbibref", join_tables: {…}}
-                            /*  {author: {…}, keywords: {…}}
-                              author:
-                                  from: "oidbibref"
-                              target: "oidbib"
-                              __proto__: Object
-                              keywords:
-                                  from: "oidbibref"
-                              target: "oidbib"
-                              __proto__: Object*/
-                        } else if (k !== rootTable) {
-                            for (let k in map[keyRoot][ke]) {
-                                //console.log(map[keyRoot][ke][k])
-                                for (let c in map[keyRoot][ke][k]) {
-                                    if (c === "join_tables") {
-                                        console.log(map[keyRoot][ke][k][c]);
-                                        let lastJson = map[keyRoot][ke][k][c];
-                                        for (let lastKey in lastJson) {
-                                            if (lastKey === rootTable) {
-                                                let formatTableName2 = schema + "." + lastKey;
-                                                let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
-                                                adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + lastJson[lastKey].from;
-                                                adql += '\n' + " FROM  " + correctTableNameFormat2;
-                                                adql += '\n' + " WHERE  " + correctTableNameFormat2 + "." + lastJson[lastKey].from + " = " + constraint;
-                                                return adql;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                        //this.setConnectionQuery["order"]=adql;
-                        // console.log(adql)
-                    }
-                    //  console.log(map[keyRoot][ke])
-                }
-            }
-        }
-    }
-
-
-}
 TapApi.prototype.getConnector = function () {
     if (this.testConnection == true) {
         return this.connector;
@@ -373,7 +254,7 @@ TapApi.prototype.getRootFields = function () {
         // alert(this.jsonAdqlContent.rootQuery);
         //let votableQueryResult = ""//this.tapService.Query(this.getRootQuery());
         if (isloadRootQuery == false) {
-            votableQueryResult = this.tapService.Query(this.getRootQuery());
+            votableQueryResult = this.correctService.Query(this.getRootQuery());
             isloadRootQuery = true;
         }
         let contentText = votableQueryResult.responseText;
@@ -401,9 +282,11 @@ TapApi.prototype.getRootFields = function () {
 }
 
 
-TapApi.prototype.getRootFieldValues = function () {
+TapApi.prototype.getRootFieldValues = function (query) {
     let jsonContaintRootFieldValues = {
         succes: {status: "", field_values: []},
+        datatable : [],
+        field : [],
         failure: {
             notConnected: {status: "", message: ""},
             otherError: {status: "", message: ""}
@@ -413,18 +296,33 @@ TapApi.prototype.getRootFieldValues = function () {
     let doubleArrayValue = [];
     let singleArrayValue = [];
     if (this.testConnection == true) {
-
-        let Field = this.getRootFields().field_values;
-        this.votableQueryResult = this.tapService.Query(this.getRootQuery());
+        let Field =[]// this.getRootFields().field_values;
+        this.votableQueryResult = this.correctService.Query(query);
         let rootable = this.connector.service["table"];
         let schema = this.connector.service["schema"];
         ;
         let dataTable = VOTableTools.votable2Rows(this.votableQueryResult);
         let tableName = this.getConnector().service["table"];
+        jsonContaintRootFieldValues.datatable=dataTable;
+        let votableQueryResult="";
+        if(query!==undefined) {
+            votableQueryResult = this.correctService.Query(query);
+        }
+        let contentText = votableQueryResult.responseText;
+
+            if (this.getConnector().service.tapService === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.getConnector().service.tapService === "http://dc.zah.uni-heidelberg.de/tap/sync") {
+
+                Field = VOTableTools.getField(votableQueryResult);
+            } else {
+                Field = VOTableTools.genererField(votableQueryResult, contentText);
+            }
+
+        jsonContaintRootFieldValues.field=Field
+        //////////////////////////////////////////
 
         let nbCols = Field.length;
         if (dataTable[dataTable.length - 1] == 0) {
-            dataTable.splice(dataTable.length - 1, 1);
+          //  dataTable.splice(dataTable.length - 1, 1);
         }
         for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
             for (let col = 0; col < nbCols; col++) {
@@ -434,8 +332,6 @@ TapApi.prototype.getRootFieldValues = function () {
             doubleArrayValue.push(singleArrayValue);
             singleArrayValue = [];
         }
-
-
         /////////////////////////////BEGIN PART TO CREATE TABLE CONTENT AHS AFTER RUNING ROOT QUERY TO PU IN THE MAP/////////////////////////////
 
         if (testSecondJson == false) {
@@ -444,6 +340,7 @@ TapApi.prototype.getRootFieldValues = function () {
         }
         for (let b = 0; b < dataTable1.attribute_handlers.length; b++) {
             for (let ke in dataTable1.attribute_handlers[b]) {
+                //console.log(ke +"-----------------");
                 for (let col = 0; col < Field.length; col++) {
                     if (dataTable1.attribute_handlers[b][ke] === Field[col]) {
                         jsonContaintHandlersValue1.push(dataTable1.attribute_handlers[b])
@@ -471,9 +368,7 @@ TapApi.prototype.getRootFieldValues = function () {
         jsonContaintRootFieldValues.failure.otherError.message = "error_message"
 
     }
-
     return jsonContaintRootFieldValues;
-
 }
 
 // private function  to modify key
@@ -498,10 +393,8 @@ TapApi.prototype.getRootQueryIds = function () {
     let doubleArrayValue = [];
     let singleArrayValue = [];
     if (this.testConnection == true) {
-
         let Field = this.getRootFields().field_values;
-
-        this.votableQueryResult = this.tapService.Query(this.getRootQuery());
+        this.votableQueryResult = this.correctService.Query(this.getRootQuery());
         let rootable = this.connector.service["table"];
         let schema = this.connector.service["schema"];
         let dataTable = []
@@ -531,18 +424,14 @@ TapApi.prototype.getRootQueryIds = function () {
             jsonContaintRootQueryIdsValues.failure.notConnected.message = "No active TAP connection"
             jsonContaintRootQueryIdsValues.failure.otherError.status = "failed"
             jsonContaintRootQueryIdsValues.failure.otherError.message = "error_message"
-            // alert('you are not connected');
         }
     }
-
     return jsonContaintRootQueryIdsValues;
-
 }
 
-
 TapApi.prototype.getRootQuery = function () {
-    //var rootQueyJson = {status: "", query: "query"}
-    let rootTable = this.getConnector().service["table"]// .jsonContaintJoinTable.Succes.base_table;
+       let rootTable = this.getConnector().service["table"];
+    //let rootTable = this.getConnector().service["table"]// .jsonContaintJoinTable.Succes.base_table;
     // jsonAll = this.getObjectMap().succes.object_map;
     let schema;
     let contentAdql = "";
@@ -551,25 +440,25 @@ TapApi.prototype.getRootQuery = function () {
     let map = objectMap.map
     for (var keyRoot in map) {//jou
         // console.log(keyRoot + '  ' + rootTable)
-        if (keyRoot == rootTable) {
+        if (keyRoot == rootTable){
             schema = this.connector.service["schema"];
             schema = schema.quotedTableName().qualifiedName;
-            for (var key in map[keyRoot].join_tables) {
-                let formatTableName = schema + "." + keyRoot;
+            for (var key in map[rootTable].join_tables) {
+                let formatTableName = schema + "." + rootTable;
                 let formatJoinTable = schema + "." + key;
                 let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
                 let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
-                contentAdql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].join_tables[key].target;
+                contentAdql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[rootTable].join_tables[key].target;
                 contentAdql += '\n' + " FROM  " + correctTableNameFormat;
                 this.jsonAdqlContent.rootQuery = contentAdql;
                 textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
-                textJoinConstraint += "ON " + correctTableNameFormat + "." + map[keyRoot].join_tables[key].target;
-                textJoinConstraint += "=" + correctJoinFormaTable + "." + map[keyRoot].join_tables[key].from;
+                textJoinConstraint += "ON " + correctTableNameFormat + "." + map[rootTable].join_tables[key].target;
+                textJoinConstraint += "=" + correctJoinFormaTable + "." + map[rootTable].join_tables[key].from;
                 this.jsonAdqlContent.constraint[correctJoinFormaTable] = textJoinConstraint
                 //this.tapJoinConstraint.push([key, textJoinConstraint]);
                 textJoinConstraint = "";
-                let json2 = map[keyRoot].join_tables[key]
+                let json2 = map[rootTable].join_tables[key]
                 if (json2.join_tables !== undefined) {
                     for (let f in json2.join_tables) {
                         let firstJoin = this.jsonAdqlContent.constraint[correctJoinFormaTable]
@@ -617,9 +506,6 @@ TapApi.prototype.addConstraint = function () {
     /**
      * Search a good place to put where and AND close to adql query
      * */
-    //var testWhere = false;
-    // if (JSON.stringify(jsonAdqlContent.allJoin) !== "{}") {
-
     for (let keyconst in objectMapWithAllDescription.tables) {
         if (this.jsonAdqlContent.rootQuery.indexOf("WHERE") === -1) {
             //jsonAdqlContent.rootQuery=jsonAdqlContent.rootQuery+" WHERE "
@@ -628,7 +514,6 @@ TapApi.prototype.addConstraint = function () {
             } else {
                 this.jsonAdqlContent.rootQuery += '\n' + " WHERE " + objectMapWithAllDescription.tables[keyconst].constraints + ' ';
             }
-            /// testWhere = true;
         } else {
             if (this.jsonAdqlContent.rootQuery.indexOf(objectMapWithAllDescription.tables[keyconst].constraints) !== -1) {
 
@@ -637,10 +522,6 @@ TapApi.prototype.addConstraint = function () {
             }
         }
     }
-
-
-    //}
-
     /**
      * if you remouve a constrain we verified that there is not a duplication of WHERE OR AND condition
      * */
@@ -654,7 +535,6 @@ TapApi.prototype.addConstraint = function () {
     if (this.jsonAdqlContent.rootQuery.trim().endsWith("WHERE") == true) {
         this.jsonAdqlContent.rootQuery = this.jsonAdqlContent.rootQuery.trim().replaceAll("WHERE", "");
     }
-    // this.jsonAdqlContent = this.jsonAdqlContent;
 }
 
 
@@ -664,13 +544,9 @@ TapApi.prototype.addConstraint = function () {
  * @param{*} replace : String the replace value of the search element
  **/
 function replaceAll(str, find, replace) {
-
     var escapedFind = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
     return str.replace(new RegExp(escapedFind, 'g'), replace);
 }
-
-//var splitToJoin = [];
-//var finalQueryRemouve = "";
 /**
  *@param{*} table : String the name of table you want to remove the contraint associeted with
  * @return{*} : Json the json containing root Query with all join table and all condition of each table
@@ -693,32 +569,12 @@ TapApi.prototype.resetTableConstraint = function (table) {
     }
     return this.jsonAdqlContent;
 }
-/*TapApi.prototype.resetTableConstraint = function (table) {
-    ;
-    var schema = this.connector.service["schema"];
-    var formatTableName = schema + "." + table;
 
-    var correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-    for (let key in this.jsonAdqlContent.allJoin) {
-        if (key == correctTableNameFormat) {
-           delete this.jsonAdqlContent.allJoin[key] //= "";
-            delete this.jsonAdqlContent.allCondition[key] //= "";
-             this.jsonAdqlContent.status.status = "OK";
-        } else {
-            this.jsonAdqlContent.status.status = "Failed";
-            //this.jsonAdqlContent.status.orderErros="The join table query not exist in rootQuery";
-        }
-        //jsonAdqlContent.rootQuery += " " + jsonAdqlContent.allJoin[key] + " ";
-    }
-    //$("#getJsonAll").text(this.jsonAdqlContent.rootQuery);
-    return this.jsonAdqlContent;
-}*/
 /**
  *@param{*} table : String the name of table you want to remove the contraint associeted with
  * @return{*} : Json the json containing root Query with all join table and all condition of each table
  **/
 TapApi.prototype.resetAll = function () {
-
     for (let key in this.getObjectMapWithAllDescriptions().tables) {
         this.resetTableConstraint(key);
         this.jsonAdqlContent.status.status = "OK";
@@ -726,13 +582,11 @@ TapApi.prototype.resetAll = function () {
     return this.jsonAdqlContent;
 }
 
-
 /**
  * @param {*} table : String the name of table you want get handlerAttribut associeted with
  * @return{*} : Json the json containing all handler Attribut of the table
  * */
 TapApi.prototype.getTableAttributeHandlers = function (table) {
-
     return this.attributsHandler.getTableAttributeHandler(table);
 }
 /**
@@ -740,63 +594,51 @@ TapApi.prototype.getTableAttributeHandlers = function (table) {
  **/
 
 TapApi.prototype.getObjectMapWithAllDescriptions = function () {
-    //if(testLoadObjectMapWithAllDesc==false){
     getObjectMapWithAllDescription = this.handlerAttribut.getObjectMapAndConstraints();
-    // testLoadObjectMapWithAllDesc = true;
-    //  }
     return getObjectMapWithAllDescription;
 }
-
-/**
- *
- * @param {*} listJoinAndId the list of id returned by TapServiceConnector.prototype.getListJoinAndId
- * @return   list of all id
- */
-
-/*TapApi.prototype.getListeId = function (listJoinAndId) {
-    var listId = [];
-    for (var i = 0; i < listJoinAndId.length; i = i + 2) {
-        if (!json2Requete.isString(listJoinAndId[i])) {
-            var temp = listJoinAndId[i][0];
-        } else {
-            var temp = listJoinAndId[i];
-        }
-        if (listId.indexOf(temp) == -1) {
-            listId.push(temp);//record the key linked to root table, No repeating
-        }
-    }
-    return listId;
-}*/
-/**
- *
- *  @param {*} rootName |the root table names of tabservice
- * @param {*} mainJsonData the main json generated by the  method createJson()
- * @returns return array containing all join table with correct id
- */
-/*
-TapApi.prototype.getListJoinAndId = function (rootName, mainJsonData) {
-    //alert(rootName);
-    var listJoinAndId = [];
-    listJoinAndId = this.joinAndId(rootName, mainJsonData)
-    return listJoinAndId;
-}*/
-/**
- *
- * @param {*} root  represent the root table
- * @param {*} json represent the main json create by the method createMainJson
- * @returns return the list of id of join table
- */
-/*
-TapApi.prototype.joinAndId = function (root, json) {
-    var list = [];
-    for (var key in json) {
-        if (key == root) {
-            for (var join in json[key].join_tables) {
-                list.push(json[key].join_tables[join].target);
-                list.push(join);
+TapApi.prototype.setConnector = function (rootTable, constraint) {
+    let adql = ''
+    let root = this.getConnector().service["table"]
+    let schema;
+    let objectMap = this.getObjectMap().succes.object_map
+    let map = objectMap.map[root].join_tables
+    schema = this.connector.service["schema"];
+    schema = schema.quotedTableName().qualifiedName;
+    if(constraint!=="" || constraint!==undefined){
+        for (var keyRoot in map) {//jou
+            if (keyRoot === rootTable) {
+                let formatTableName = schema + "." + keyRoot;
+                let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+                adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
+                adql += '\n' + " FROM  " + correctTableNameFormat;
+                adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+                console.log(adql);
+                return adql;
+            }
+            if (keyRoot !== rootTable) {
+                let formatTableName = schema + "." + keyRoot;
+                let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+                for (let ke in map[keyRoot]) {
+                    //console.log(ke)
+                    if (ke === "join_tables") {
+                        for (let k in map[keyRoot][ke]) {
+                            //console.log(k);
+                            if (k === rootTable) {
+                                // console.log(map[keyRoot][ke])
+                                let formatTableName2 = schema + "." + k;
+                                let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
+                                adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from;
+                                adql += '\n' + " FROM  " + correctTableNameFormat2;
+                                adql += " JOIN " + correctTableNameFormat + " ON " + correctTableNameFormat + "." + map[keyRoot].join_tables[k].target
+                                adql += " = " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from
+                                adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+                                return adql;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-    return list;
-}*/
-
+}

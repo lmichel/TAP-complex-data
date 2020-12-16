@@ -74,7 +74,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
 
         var adql = this.addAllColumn(table, api.connector.service["schema"]);
 
-        var s = api.tapService;
+        var s = api.correctService;
         var votableQueryResult = s.Query(adql);
 
         let dataTable;

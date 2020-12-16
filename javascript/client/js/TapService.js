@@ -9,19 +9,7 @@ var TapService = /** @class */ (function () {
         this.allTables =undefined
         this.tableRemoveView = undefined;
         this.rootQuery = '';
-        this.objectMapWithAllDescription = {
-            "root_table": {
-                "name": "root_table_name",
-                "schema": "schema"
-            },
-            //"table": {},
-            "tables": {},
-            "map": {
-                "handler_attributs": {}
-            }
-        }
 
-        this.api ="";
     }
     /***
      * Receive adql, return votable objects
@@ -374,67 +362,6 @@ var TapService = /** @class */ (function () {
     };
 
 
-    /**
-     * In order to create the json with all join table
-     * @param data :json the return json file of createJson()
-     * @param root :the main table: root table
-     * @return the json with all join table
-     */
-    TapService.prototype.getObjectMapAndConstraint = function (data, root) {
-        var reJson = {};
-        for (var key in data) {
-            var list_exist = [];
-            list_exist.push(key);
-            var joinJson = {};
-            if (root == key) {
-                var joinJsonJoin = {};
-                for (var join in data[key].join_tables) {
-                    var joinJsonJoin1 = {};
-                    list_exist.push(join);
-                    joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                    joinJsonJoin1["target"] = data[key].join_tables[join].target;
-                    var a = this.verifiedJoin(data, list_exist, join);
-                    if (JSON.stringify(a) != '{}') {
-                        joinJsonJoin1["join_tables"] = a;
-                       // console.log(a);
-                    }
-                    joinJsonJoin[join] = joinJsonJoin1;
-                    joinJson["join_tables"] = joinJsonJoin;
-                }
-                reJson[key] = joinJson;
-                break;
-            }
-        }
-        return reJson;
-    };
-
-    /***
-     * @param data: the main json
-     * @param list_exist:list of tables who are already recorded
-     * @param root: the root table
-     */
-    TapService.prototype.verifiedJoin = function (data, list_exist, root) {
-        var joinJsonJoin = {};
-        for (var key in data) {
-            if (key == root) {
-                for (var join in data[key].join_tables) {
-                    if (list_exist.indexOf(join) == -1) {
-                        list_exist.push(join);
-                        var joinJsonJoin1 = {};
-                        joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                        joinJsonJoin1["target"] = data[key].join_tables[join].target;
-                        var a = this.verifiedJoin(data, list_exist, join);
-                        if (JSON.stringify(a) != '{}') {
-                            joinJsonJoin1["join_tables"] = a;
-                        }
-                        joinJsonJoin[join] = joinJsonJoin1;
-                    }
-                }
-                break;
-            }
-        }
-        return joinJsonJoin;
-    };
 
     /***
      * @param data: the main json
@@ -475,7 +402,7 @@ var TapService = /** @class */ (function () {
      * @param root root table's name
      * @param listId all the key between root table and join table
      * @param listJoinAndId all the join table and it's id with root table
-     */
+     *//*
     TapService.prototype.createMainJson = function (adql, jsonAll, root, listId, listJoinAndId) {
         var QObject = this.Query(adql);
         var joinIdDic = {};
@@ -488,7 +415,7 @@ var TapService = /** @class */ (function () {
             url : this.url,
             rootTable :root,
             withSchema :VizierUrl||XmmUrl? false:true
-        }*/
+        }---/
         for (var i = 0; i < listJoinAndId.length; i = i + 2) {
             if (!json2Requete.isString(listJoinAndId[i])) {
                 joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i][0];
@@ -520,9 +447,9 @@ var TapService = /** @class */ (function () {
                         
                         contentAdql = "";
 
-                       /* if(this.url ==VizierUrl || this.url== XmmUrl){
-                            jsonQuerySchema.
-                        }*/
+                       //* if(this.url ==VizierUrl || this.url== XmmUrl){
+                           // jsonQuerySchema.
+                        //}
                         var schemaPrefix = "";
                        // if( jsonQuerySchema.withSchema==true){
                             schemaPrefix =  schema + "." ;
@@ -619,7 +546,7 @@ var TapService = /** @class */ (function () {
         }
       //  console.log(JSON.stringify(json,undefined,3))
         return json;
-    };
+    };*/
 
 
     /***
@@ -700,81 +627,6 @@ var TapService = /** @class */ (function () {
             return allLinkRe;
         }
     };
-
-
-
-    var testLoadJson = false;
-    var testLoadallTable = false;
-    var testJoinRootTable = false
-    var testOtherJoinTables = false;
-    var testMap = false;
-    let jsonWithaoutDescription = "";
-    let allTables = "";
-    let allJoinRootTable = [];
-    let testJoinTableOfJoin = false;
-    let map = {};
-
-    TapService.prototype.getObjectMapAndConstraints = function () {
-        let api = this.api;
-       // let objectMapWithAllDescription;
-        let attributHanler = [];
-
-        let rootTable = api.getConnector().service["table"]
-        jsonWithaoutDescription = api.correctService.loadJson();
-        let jsonAdqlContent = api.jsonAdqlContent;
-        this.objectMapWithAllDescription.root_table.name = rootTable;
-        this.schema = api.getConnector().service["schema"];
-        this.objectMapWithAllDescription.root_table.schema = this.schema;
-        let correctCondition
-        let formatJoinTable = "";
-        let correctJoinFormaTable = "";
-        let correctTableConstraint = "";
-        let correctWhereClose = "";
-
-     if (testMap == false) {
-            map = api.tapService.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
-        }
-
-        allJoinRootTable = api.correctService.createAllJoinTable(map)
-        allTables = allJoinRootTable;
-        for (let k = 0; k < allTables.length; k++) {
-            for (let tableKey in jsonWithaoutDescription) {
-                if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
-                    formatJoinTable = this.schema + "." + tableKey;
-                    correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-                    attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
-                    for (let keyConstraint in jsonAdqlContent.constraint) {
-                        if (keyConstraint == correctJoinFormaTable) {
-                            for (let keyConst in jsonAdqlContent.constraint) {
-                                if (keyConst == "condition " + correctJoinFormaTable) {
-                                    correctWhereClose = api.jsonAdqlContent.allCondition[keyConstraint];
-                                }
-                            }
-                        }
-                    }
-                    this.objectMapWithAllDescription.tables[tableKey] = {
-                        "description": jsonWithaoutDescription[tableKey].description,
-                        "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
-                        "columns": attributHanler != undefined ? attributHanler : [],
-                    }
-                    for (let keyConstraint in jsonAdqlContent.constraint) {
-                        if (keyConstraint == correctJoinFormaTable) {
-                            correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
-                            correctCondition = correctCondition.replaceAll("WHERE".trim(), " ");
-                            this.objectMapWithAllDescription.tables[tableKey].constraints = correctTableConstraint != undefined && correctWhereClose != undefined ? correctCondition : "";
-                        }
-                    }
-
-                } else {
-                }
-
-            }
-
-        }
-
-this.objectMapWithAllDescription.map = map
-return this.objectMapWithAllDescription;
-}
 
 
 return TapService;
