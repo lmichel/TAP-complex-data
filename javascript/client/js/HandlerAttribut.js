@@ -40,8 +40,9 @@ var sj = '';
 HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     let doubleArrayValue = [];
     let singleArrayValue = [];
-    this.db_name = this.api.connector.service["table"]
-    var api = this.api;
+    console.log(this.api)
+    this.db_name = this.api.getConnector().service["table"]
+    let api = this.api;
     let jsonContaintHandlerValues = {
         succes: {
             status: "",
@@ -65,16 +66,16 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     }
 
 
-    if (api.testConnection == true) {
+    if (api.getConnector().status === "OK") {
 
         if (testJsonRead == false) {
             sj = new jsonRead(api.getObjectMap().succes.object_map);
             testJsonRead = true;
         }
 
-        var adql = this.addAllColumn(table, api.connector.service["schema"]);
+        var adql = this.addAllColumn(table, api.getConnector().service["schema"]);
 
-        var s = api.correctService;
+        var s = api.tapServiceConnector;
         var votableQueryResult = s.Query(adql);
 
         let dataTable;
@@ -168,17 +169,4 @@ HandlerAttributs.prototype.addAllColumn = function (table, schema) {
 
 }
 
-HandlerAttributs.prototype.addSingelColumn = function () {
-    //alert(schema)
-    let adql1 = "SELECT "
-        + "TAP_SCHEMA.columns.column_name"
-        + ",TAP_SCHEMA.columns.unit"
-        + ",TAP_SCHEMA.columns.ucd"
-        + ",TAP_SCHEMA.columns.utype"
-        + ",TAP_SCHEMA.columns.dataType"
-        + ",TAP_SCHEMA.columns.description"
-        + " FROM TAP_SCHEMA.columns";
 
-    return adql1;
-
-}

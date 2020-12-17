@@ -68,12 +68,11 @@ function setActive(btnId, g, c, x, v, a) {
     remouveAtive(a)
 
 }
-
 function OnChangeRadio(radio) {
     // alert ("The " + radio.value + " radio is selected.");
     switch (radio.value) {
         case "Simbad":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync"
                 params.schema = Simbadschema;
                 params.table = "basic";
@@ -85,7 +84,7 @@ function OnChangeRadio(radio) {
             ;
             break;
         case "Gavo":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://dc.zah.uni-heidelberg.de/tap/sync"
                 params.schema = "rr";
                 params.table = "resource";
@@ -98,7 +97,7 @@ function OnChangeRadio(radio) {
             break;
 
         case "Caom":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"
                 params.schema = "dbo";
                 params.table = "CaomObservation";
@@ -110,7 +109,7 @@ function OnChangeRadio(radio) {
             ;
             break;
         case "Xmm":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync"
                 params.schema = "EPIC";
                 params.table = "EPIC_IMAGE";
@@ -124,7 +123,7 @@ function OnChangeRadio(radio) {
             break;
 
         case "Vizier":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync"
                 params.schema = "metaviz";
                 params.table = "METAcat";
@@ -138,7 +137,6 @@ function OnChangeRadio(radio) {
             break;
     }
 }
-
 function newMain() {
 
     // initial();
@@ -149,16 +147,17 @@ function newMain() {
     })
 
     $("#btnApiConnectS").click(function () {
-        if (a.testConnection == false) {
+
+        if (a.getConnector().status !== "OK") {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
-                let connect = a.connect(params);  //  var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
+                //console.log(a.connect(params))
+                a.connect(params);
+                //  var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
                 let status = a.connector.status;
                 a.getObjectMapWithAllDescriptions();
-                let connector = JSON.stringify(a.getConnector().service, undefined, 2);
-                // let status = a.getConnector().status;
-                display(connector, "getJsonAll")
                 document.getElementById("testContent").style["display"] = "none";
                 display(status, "getStatu");
+                display( JSON.stringify(a.getConnector().service,undefined,2), "getJsonAll");
                 ConnectActive("btnApiConnectS", "btnApiDisconnect")
             } else {
                 display("no service selected... Choose service first and try again", "getStatu");
@@ -167,13 +166,14 @@ function newMain() {
         } else {
             display("the service is  already connected ! disconnect the service and try again ...", "getStatu");
 
+            //alert("the service is  already connected ! disconnect the service and try again ...")
         }
 
 
     });
 
     $("#btnGetConnector").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
 
             let connector = JSON.stringify(a.getConnector().service, undefined, 2);
             let status = a.getConnector().status;
@@ -188,7 +188,7 @@ function newMain() {
     })
 
     $("#btnGetRootFieldValue").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             createHtmlTable(a.getConnector().service["table"]);
             setActive("btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootQuery")
         } else {
@@ -200,7 +200,7 @@ function newMain() {
 
     var tesTabCRQ = false;
     $("#btnGetRootQuery").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             let rootQuery;
             rootQuery = a.getRootQuery() // JSON.stringify(a.getRootQuery(), undefined, 2);
             tesTabCRQ = true;
@@ -219,7 +219,7 @@ function newMain() {
         $(document).ajaxStop(function () {
             window.location.reload();
         });
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             a.disconnect();
 
             if (a.testDeconnection == false) {
@@ -254,7 +254,7 @@ let mainFound
 let datatables = []
 
 function createTableInHtmlTable(table, constraint) {
-    let adql = a.setConnector(table, constraint)
+    let adql = a.setAdql(table, constraint)
    /* let fieldValue =a.getRootFieldValues(adql)
     //var QObject = a.tapService.Query(adql);
     var dataTable = fieldValue.datatable//VOTableTools.votable2Rows(QObject)
@@ -263,15 +263,14 @@ function createTableInHtmlTable(table, constraint) {
     var Field = fieldValue.field*/
     let QObject = "";
     if (adql !== undefined) {
-        QObject = a.correctService.Query(adql);
+        QObject = a.tapServiceConnector.Query(adql);
     }
 
     console.log(QObject);
-
-    let dataTable = VOTableTools.votable2Rows(QObject)
+    let dataTable = a.tapServiceConnector.getDataTable(QObject)
     datatables = dataTable
-    let contentText = QObject.responseText;
-    let Field = VOTableTools.genererField(QObject, contentText)
+    //let contentText = QObject.responseText;
+    let Field = a.tapServiceConnector.getFields(QObject)//VOTableTools.genererField(QObject, contentText)
     let nb = Field.length;
     const regex = /[/,:,.,_,\,',"]/g;
     var out = "\n"
@@ -334,9 +333,6 @@ function createTableInHtmlTable(table, constraint) {
 var tableIdTD2 = '';
 
 function createHtmlTable(tableName) {
-    var name = tableName //b[ii].id.slice(1);//the name of
-    var schema = a.connector.service["schema"];
-    // alert(name +' '+schema);
     var adql = a.getRootQuery();
     let fieldValue =a.getRootFieldValues(adql)
     //var QObject = a.tapService.Query(adql);
@@ -344,7 +340,7 @@ function createHtmlTable(tableName) {
     //var contentText = QObject.responseText;
     var Field = fieldValue.field//VOTableTools.genererField(QObject, contentText)
     var nb = Field.length;
-    let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
+    let jointab = a.tapServiceConnector.getJoinTables(a.getConnector().service["table"])
     var out = "\n"
     out += "<table  class = 'clickable-table  table table-bordered table-striped table-hover' id='mytable' role = 'grid' >";
     out += "<thead class='thead-dark'><tr role='row'>"
@@ -396,7 +392,7 @@ function createHtmlTable(tableName) {
         var td = $("td");
         let val
         let root = a.getConnector().service["table"]
-        let jsonAll = a.correctService.loadJson()//.getObjectMapWithAllDescriptions().map[root].join_tables
+        let jsonAll = a.tapServiceConnector.loadJson()//.getObjectMapWithAllDescriptions().map[root].join_tables
         let tesl = false;
         let tesl2 = false
         let tableIdTD = [];
@@ -423,7 +419,7 @@ function createHtmlTable(tableName) {
             $(td[i]).click(function () {
 
                 var i = $(this).attr("id");
-                let jointab = a.correctService.getJoinTables(a.getConnector().service["table"])
+                let jointab = a.tapServiceConnector.getJoinTables(a.getConnector().service["table"])
                 markup = "<div id=\"overlay\">\n" +
                     "    <div class=\"cv-spinner\">\n" +
                     "        <span class=\"spinner\"></span>\n" +
@@ -473,7 +469,7 @@ function createHtmlTable(tableName) {
                             $(function () {
                                 $("#mytable1 tr td").click(function (index) {
                                     var name = $(this)
-                                    let jointab = a.correctService.getJoinTables(key)
+                                    let jointab = a.tapServiceConnector.getJoinTables(key)
                                     for (let u = 0; u < jointab.length; u++) {
                                         if (jointab[u] === root) {
                                             jointab.splice(u, 1)

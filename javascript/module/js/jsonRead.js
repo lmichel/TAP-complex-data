@@ -460,5 +460,6 @@ var jsonRead = /** @class */ (function () {
         }
         return adql;
     };
+
     return jsonRead;
 }());

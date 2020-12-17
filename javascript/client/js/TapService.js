@@ -1,4 +1,3 @@
-
 "use strict";
 var TapService = /** @class */ (function () {
     function TapService(url, schema, label, checkstatus) {
@@ -6,11 +5,12 @@ var TapService = /** @class */ (function () {
         this.schema = schema;
         this.label = label;
         this.checkstatus = checkstatus;// the result
-        this.allTables =undefined
+        this.allTables = undefined
         this.tableRemoveView = undefined;
         this.rootQuery = '';
 
     }
+
     /***
      * Receive adql, return votable objects
      * @params String :receive adql statements and perform queries
@@ -21,26 +21,26 @@ var TapService = /** @class */ (function () {
         //alert(adql);
         var correctFormat = "votable";
         var reTable;
-        if(this.url=="http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.url == "http://dc.zah.uni-heidelberg.de/tap/sync"){
-            correctFormat ="votable";
-        }else{
-            correctFormat ="votable";
+        if (this.url == "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.url == "http://dc.zah.uni-heidelberg.de/tap/sync") {
+            correctFormat = "votable";
+        } else {
+            correctFormat = "votable";
         }
-       console.log("AJAXurl: " + site + " query: " + adql)
+        console.log("AJAXurl: " + site + " query: " + adql)
 
         reTable = $.ajax({
             url: "" + site,
             type: "GET",
-            data: { query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery' },
+            data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
             async: false,
 
-        } )
+        })
             .done(function (result) {
 
                 return result;
-        });
+            });
         //console.log(reTable);
-        return reTable; 
+        return reTable;
     };
 
     /**
@@ -58,17 +58,17 @@ var TapService = /** @class */ (function () {
         if (checkstatus == true) {
             checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \'' + schema_name + '\' ';
         }
-       console.log("AJAXurl: " + site + " query: " + checkvalue)
+        console.log("AJAXurl: " + site + " query: " + checkvalue)
         reTable = $.ajax({
             url: "" + site,
             type: "GET",
-            data: { query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery' },
+            data: {query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery'},
             async: false
         })
             .done(function (result) {
 
-            return result;
-        });
+                return result;
+            });
         return reTable;
     };
     /**
@@ -85,19 +85,18 @@ var TapService = /** @class */ (function () {
         }
 
 
+        // console.log("AJAXurl: " + site + " query: " + checkvalue)
 
-           // console.log("AJAXurl: " + site + " query: " + checkvalue)
+        reLink = $.ajax({
+            url: "" + site,
+            type: "GET",
+            data: {query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery'},
+            async: false
+        })
+            .done(function (result) {
 
-            reLink = $.ajax({
-                url: "" + site,
-                type: "GET",
-                data: { query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery' },
-                async: false
-            })
-                .done(function (result) {
-
-                    return result;
-                });
+                return result;
+            });
 
 
         return reLink;
@@ -112,12 +111,11 @@ var TapService = /** @class */ (function () {
     TapService.prototype.getQualifiedName = function (table) {
         if (table.indexOf(this.schema) != -1) {
             return table;
-        }
-        else {
+        } else {
             return this.schema + "." + table;
         }
     };
-    
+
     /**
      * Delete the schema name and return table name withaout schema
      * @param table
@@ -126,18 +124,18 @@ var TapService = /** @class */ (function () {
     TapService.prototype.getRightName = function (table) {
         if (table.indexOf(this.schema) == -1) {
             return table;
-        }else{
+        } else {
             //return table.replace(new RegExp(this.schema + '.', 'g'), "");
             // quotedTableName return a String by overloading String class 
-           return table.quotedTableName().tableName;
+            return table.quotedTableName().tableName;
         }
-        
-            
+
+
     };
 
     /**
      * Varibles : tt => target_table, ft => from_table
-     *            tc => target column,fc => from_column 
+     *            tc => target column,fc => from_column
      * INPUT : VOTABLE OBJET Return by the method this.allLinkQuery(),
      *       : Array who is the return table of method votable2Rows(votableObjet)
      *  Get 2-dimensional array. The array returns all the information related to the rootTable.
@@ -149,29 +147,29 @@ var TapService = /** @class */ (function () {
         var reTableRe;
         //var everyLink = [];
         var allLink = [];
-       // //console.log(allLinkLimitObject);
-       reTableRe = VOTableTools.votable2Rows(allLinkLimitObject);
-       ////console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-       //console.log(reTableRe);
-       //console.log(reTableRe.length);
-       // row format : from_table target_table key_id from_column target_column
-       for (var i = 0; i < reTableRe.length; i = i + 5) { // i+ 5 return another row to the first position of retable
-          // //console.log("@@@@ 1 " + reTableRe)
-           var tt = reTableRe[i + 1]; // i+1 => represent the column of target table in retable 
-           tt = this.getRightName(tt);// return the target table name  withaout schema
-           var tc = reTableRe[i + 4]; //return the target_ècolumn. (reTableRe[i + 4]) represent the column of target column
-           var ft = reTableRe[i];     
-           ft = this.getRightName(ft); // return the from table name  withaout schema
-           var fc = reTableRe[i + 3];  //return the from column. (reTableRe[i + 3]) represent the column of target column
-                 
-          allLink.push([tt + '|' + tc,
-                        ft + '|' + fc]);
-       }
-      if( this.tableRemoveView==undefined){
+        // //console.log(allLinkLimitObject);
+        reTableRe = VOTableTools.votable2Rows(allLinkLimitObject);
+        ////console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        //console.log(reTableRe);
+        //console.log(reTableRe.length);
+        // row format : from_table target_table key_id from_column target_column
+        for (var i = 0; i < reTableRe.length; i = i + 5) { // i+ 5 return another row to the first position of retable
+            // //console.log("@@@@ 1 " + reTableRe)
+            var tt = reTableRe[i + 1]; // i+1 => represent the column of target table in retable
+            tt = this.getRightName(tt);// return the target table name  withaout schema
+            var tc = reTableRe[i + 4]; //return the target_ècolumn. (reTableRe[i + 4]) represent the column of target column
+            var ft = reTableRe[i];
+            ft = this.getRightName(ft); // return the from table name  withaout schema
+            var fc = reTableRe[i + 3];  //return the from column. (reTableRe[i + 3]) represent the column of target column
 
-        this.tableRemoveView = this.removeViewTable(allLink);
-      }
-       return this.tableRemoveView;
+            allLink.push([tt + '|' + tc,
+                ft + '|' + fc]);
+        }
+        if (this.tableRemoveView == undefined) {
+
+            this.tableRemoveView = this.removeViewTable(allLink);
+        }
+        return this.tableRemoveView;
     };
 
     /**
@@ -180,15 +178,15 @@ var TapService = /** @class */ (function () {
      */
     TapService.prototype.allTable = function () {
 
-            //var allTable = [];
-        if(this.allTables == undefined){
+        //var allTable = [];
+        if (this.allTables == undefined) {
             let allTableObject = this.allTableQuery(); //Get all the tables
             this.allTables = VOTableTools.votable2Rows(allTableObject);
         }
 
-            return this.allTables;
-        
-         
+        return this.allTables;
+
+
     };
 
     /**
@@ -208,16 +206,16 @@ var TapService = /** @class */ (function () {
             var arrJoint = {};// correct json of join table 
             var flag = 0;
             var ifSame = 0;
-            var nowTable = allTtable[k]; 
-            
+            var nowTable = allTtable[k];
+
             nowTable = this.getRightName(nowTable);// containt the name of table withaout schema
-                for (var i = 0; i < alllink.length; i++) {
+            for (var i = 0; i < alllink.length; i++) {
                 var arrLinkJoint = {};
                 var tt = alllink[i][0].split("|"); // target table name 
                 var ft = alllink[i][1].split("|");// from table name
                 if (tt[0] == nowTable) {
                     loop: for (var key in arrLink) { // contaning all joinTable of root table
-                       
+
                         if (ft[0] == key) {
                             ifSame = 1;
                             arrLinkJoint["schema"] = this.schema;
@@ -227,8 +225,7 @@ var TapService = /** @class */ (function () {
                             if (Array.isArray(arrLink[ft[0]].from) && arrLink[ft[0]].from.indexOf(ft[1]) == -1) {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].from));
                                 temp1.push(ft[1]);
-                            }
-                            else {
+                            } else {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].from));
                             }
                             arrLinkJoint["from"] = temp1;
@@ -236,15 +233,13 @@ var TapService = /** @class */ (function () {
                             if (Array.isArray(arrLink[ft[0]].target) && arrLink[ft[0]].target.indexOf(tt[1]) == -1) {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].target));
                                 temp1.push(tt[1]);
-                            }
-                            else {
+                            } else {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].target));
                             }
                             arrLinkJoint["target"] = temp1;
                             arrLink[ft[0]] = arrLinkJoint;
                             break loop;
-                        }
-                        else {
+                        } else {
                             ifSame = 0;
                         }
                     }
@@ -257,8 +252,7 @@ var TapService = /** @class */ (function () {
                         arrLinkJoint["target"] = tt[1];
                         arrLink[ft[0]] = arrLinkJoint;
                     }
-                }
-                else if (ft[0] == nowTable) {
+                } else if (ft[0] == nowTable) {
                     loop: for (var key in arrLink) {
                         if (tt[0] == key) {
                             ifSame = 1;
@@ -269,8 +263,7 @@ var TapService = /** @class */ (function () {
                             if (Array.isArray(arrLink[tt[0]].from) && arrLink[tt[0]].from.indexOf(tt[1]) == -1) {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].from));
                                 temp1.push(tt[1]);
-                            }
-                            else {
+                            } else {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].from));
                             }
                             arrLinkJoint["from"] = temp1;
@@ -278,15 +271,13 @@ var TapService = /** @class */ (function () {
                             if (Array.isArray(arrLink[tt[0]].target) && arrLink[tt[0]].target.indexOf(ft[1]) == -1) {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].target));
                                 temp1.push(ft[1]);
-                            }
-                            else {
+                            } else {
                                 temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].target));
                             }
                             arrLinkJoint["target"] = temp1;
                             arrLink[tt[0]] = arrLinkJoint;
                             break loop;
-                        }
-                        else {
+                        } else {
                             ifSame = 0;
                         }
                     }
@@ -301,31 +292,28 @@ var TapService = /** @class */ (function () {
                         arrLink[tt[0]] = arrLinkJoint;
                     }
                 }
-                
+
             }
             if (flag == 0) {
                 continue;
-            }
-            else {
+            } else {
                 arrJoint["schema"] = this.schema;
                 arrJoint["description"] = allTtable[k + 1];
                 arrJoint["join_tables"] = arrLink;
                 jsonAll[nowTable] = arrJoint;
-                
+
             }
         }
         return jsonAll;
     };
 
 
-
-
     /**
-   * In order to create the json with all join table
-   * @param data :json the return json file of createJson()
-   * @param root :the main table: root table
-   * @return the json with all join table
-   */
+     * In order to create the json with all join table
+     * @param data :json the return json file of createJson()
+     * @param root :the main table: root table
+     * @return the json with all join table
+     */
     TapService.prototype.createNewJson = function (data, root) {
         var reJson = {};
         for (var key in data) {
@@ -360,7 +348,6 @@ var TapService = /** @class */ (function () {
         }
         return reJson;
     };
-
 
 
     /***
@@ -402,151 +389,49 @@ var TapService = /** @class */ (function () {
      * @param root root table's name
      * @param listId all the key between root table and join table
      * @param listJoinAndId all the join table and it's id with root table
-     *//*
-    TapService.prototype.createMainJson = function (adql, jsonAll, root, listId, listJoinAndId) {
-        var QObject = this.Query(adql);
-        var joinIdDic = {};
-        /**
-         * @TODO JUSTE POUR BESOIN DE DEVELLOPEMENT
-         */
-       /* const VizierUrl = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync";
-        const XmmUrl = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync";
-        var jsonQuerySchema = {
-            url : this.url,
-            rootTable :root,
-            withSchema :VizierUrl||XmmUrl? false:true
-        }---/
-        for (var i = 0; i < listJoinAndId.length; i = i + 2) {
-            if (!json2Requete.isString(listJoinAndId[i])) {
-                joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i][0];
-            }
-            else {
-                joinIdDic[listJoinAndId[i + 1]] = listJoinAndId[i];
-            }
-        }
-        var IdDic = {};
-        for (var i = 0; i < listId.length; i++) {
-            IdDic[listId[i]] = i;
-        }
-        var dataTable = VOTableTools.votable2Rows(QObject);
-        var json = {};
-        var contentTable = {};
-        var contentAdql;
-        var schema;
-        for (var keyRoot in jsonAll) {
-            if (keyRoot == root) {
-                schema = jsonAll[keyRoot].schema;
-                if (schema == 'public') {
-                    schema = "\"" + "public" + "\"";
+     */
+    TapService.prototype.createSimpleAdqlWithConstraint = function (rootTable, constraint,api) {
+        let adql = ''
+        let root = api.getConnector().service["table"]
+        let schema;
+        let objectMap = api.getObjectMap().succes.object_map
+        let map = objectMap.map[root].join_tables
+        schema = api.getConnector().service["schema"];
+        schema = schema.quotedTableName().qualifiedName;
+        if (constraint !== "" || constraint !== undefined) {
+            for (var keyRoot in map) {
+                if (keyRoot === rootTable) {
+                    let formatTableName = schema + "." + keyRoot;
+                    let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+                    adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
+                    adql += '\n' + " FROM  " + correctTableNameFormat;
+                    adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+                    console.log(adql);
+                    return adql;
                 }
-                var m =0;
-                for (var key in jsonAll[keyRoot].join_tables) {
-                    
-                    contentTable = {};
-                    for (var i = 0; i < dataTable.length; i = i + listId.length) {
-                        
-                        contentAdql = "";
-
-                       //* if(this.url ==VizierUrl || this.url== XmmUrl){
-                           // jsonQuerySchema.
-                        //}
-                        var schemaPrefix = "";
-                       // if( jsonQuerySchema.withSchema==true){
-                            schemaPrefix =  schema + "." ;
-                       // }else{
-                           // schemaPrefix = "" ;
-                       // }
-                       //console.log("keyRoot " + keyRoot)
-                       //console.log("key " + key)
-                      // console.log(jsonAll[keyRoot].join_tables[key])
-                        contentAdql = "SELECT TOP 100 " + schemaPrefix + key + "."+jsonAll[keyRoot].join_tables[key].from + " ";
-                        contentAdql += " FROM " + schema + "." + keyRoot + " ";
-                        contentAdql += "JOIN " + schema + "." + key + " ";
-                        var k=0;
-                        if (!json2Requete.isString(jsonAll[keyRoot].join_tables[key].target)) {
-                            console.log("fffffffffffffffff");
-                            contentAdql += "ON " + schema + "." + keyRoot + "." + jsonAll[keyRoot].join_tables[key].target[0];
-                            contentAdql += "=" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from[0];
-                            var temp = IdDic[joinIdDic[key]];
-                            
-                            if (schema.indexOf("public") != -1) {
-                                contentAdql += " WHERE " + jsonAll[keyRoot].join_tables[key].target[0] + "=" + dataTable[i + temp];
-                            }
-                            else if (schema.indexOf("rr") != -1) {
-                                contentAdql += " WHERE " + jsonAll[keyRoot].join_tables[key].target + "=" + "\'" + dataTable[i + temp] + "\'";
-                            }
-                            else if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") == -1) {
-                                contentAdql += " WHERE " + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].target + "=" + dataTable[i + temp];
-                            }
-                            else {
-                                contentAdql += " WHERE " + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].target[0] + "=" + "\'" + dataTable[i + temp] + "\'";
-                            }
-                            contentTable[dataTable[i + temp]] = contentAdql;
-                        }
-                        else {
-                            //console.log("fhhhhhhhhhhhhhhhhhhhhhhhhhh");
-                            contentAdql += "ON " + schema + "." + keyRoot + "." + jsonAll[keyRoot].join_tables[key].target;
-                            contentAdql += "=" + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from;
-                            
-                            var temp = IdDic[joinIdDic[key]];
-                            var j=0;
-                            var contentText;
-                            var votableField;
-                            if(this.url=="http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.url == "http://dc.zah.uni-heidelberg.de/tap/sync"){
-                                 votableField = VOTableTools.getField (QObject);
-                                     
-                             }else{
-
-                                contentText = QObject.responseText;
-                                votableField =VOTableTools.genererField(QObject,contentText);
-
-                             }   
-                                    ////console.log(k+"  iddic "+votableField[k]+" "+joinIdDic[key]+" "+dataTable[k])
-                                    for(j=0;j<votableField.length;j++){
-                                      //  console.log(votableField[j]+" =>  "+joinIdDic[key])
-                                        if(votableField[j]==joinIdDic[key]){
-                                            k=j;
-                                        //alert(votableField[j]+" "+joinIdDic[key])
-                                        // break
-                                        }
-                                    
-                                    }
-
-                                    if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") != -1) {
-                                        contentAdql += " WHERE " + jsonAll[keyRoot].join_tables[key].from + "=" + dataTable[k];
-                                    }
-                                    else if (schema.indexOf("rr") != -1 && contentAdql.indexOf("ivoid=") == -1) {
-                                        //alert(schema+'.'+key+'.'+jsonAll[keyRoot].join_tables[key].from );
-                                        contentAdql += " WHERE " + schema+'.'+key+'.'+jsonAll[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
-                                    }
-                                    else if (schema.indexOf("public") != -1 && contentAdql.indexOf("oid") == -1) {
-                                        if (json2Requete.isString(dataTable[k])) {
-                                            contentAdql += " WHERE " + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
-                                        }
-                                        else {
-                                            contentAdql += " WHERE " + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from + "=" + dataTable[k];
-                                        }
-                                    }
-                                    else {
-                                        contentAdql += " WHERE " + schema + "." + key + "." + jsonAll[keyRoot].join_tables[key].from + "=" + "\'" + dataTable[k] + "\'";
-                                    }
-
-                                    //contentTable[dataTable[k]] = contentAdql;break;
-                          
+                if (keyRoot !== rootTable) {
+                    let formatTableName = schema + "." + keyRoot;
+                    let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+                    for (let ke in map[keyRoot]) {
+                        if (ke === "join_tables") {
+                            for (let k in map[keyRoot][ke]) {
+                                if (k === rootTable) {
+                                    let formatTableName2 = schema + "." + k;
+                                    let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
+                                    adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from;
+                                    adql += '\n' + " FROM  " + correctTableNameFormat2;
+                                    adql += " JOIN " + correctTableNameFormat + " ON " + correctTableNameFormat + "." + map[keyRoot].join_tables[k].target
+                                    adql += " = " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from
+                                    adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+                                    return adql;
                                 }
-                        contentTable[dataTable[k]] = contentAdql;break;
-
+                            }
+                        }
                     }
-                    this.rootQuery = contentAdql;
-                    contentTable["key"] = joinIdDic[key];
-                    json[key] = contentTable;
                 }
-                break;
             }
         }
-      //  console.log(JSON.stringify(json,undefined,3))
-        return json;
-    };*/
+    }
 
 
     /***
@@ -554,7 +439,7 @@ var TapService = /** @class */ (function () {
      * @param allLinkRe : Array containing all table
      * @return: an array containing the names of the tables
      */
-    TapService.prototype.removeViewTable= function (allLinkRe) {
+    TapService.prototype.removeViewTable = function (allLinkRe) {
         var site = this.url;
         var checkstatus = this.checkstatus;
         var schema_name = this.schema;
@@ -566,17 +451,17 @@ var TapService = /** @class */ (function () {
         if (checkstatus == true) {
             checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name FROM tap_schema.tables as T WHERE T.schema_name = \'' + schema_name + '\' AND T.table_type = \'view\'';
         }
-       //console.log("AJAXurl: " + site + " query: " + checkvalue)
+        //console.log("AJAXurl: " + site + " query: " + checkvalue)
 
         reTable = $.ajax({
             url: "" + site,
             type: "GET",
-            data: { query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery' },
+            data: {query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery'},
             async: false
         })
             .done(function (result) {
-            return result;
-        });
+                return result;
+            });
         var allTable = [];
         var content = reTable.responseText;
         var l = 0;
@@ -586,9 +471,8 @@ var TapService = /** @class */ (function () {
             });
         });
         if (l == 0) {
-            return allLinkRe; 
-        }
-        else {
+            return allLinkRe;
+        } else {
             allTable = VOTableTools.votable2Rows(reTable);
             var viewTable = [];
             var j = 0;
@@ -629,7 +513,7 @@ var TapService = /** @class */ (function () {
     };
 
 
-return TapService;
+    return TapService;
 }());
 
 

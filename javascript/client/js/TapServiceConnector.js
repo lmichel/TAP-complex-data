@@ -1,80 +1,62 @@
 class TapServiceConnector {
     constructor(_serviceUrl, _schema, _shortname) {
-        //super();
-        let serviceUrl = _serviceUrl;
-        let schema = _schema;
-        let shortname = _shortname;
-        let adqlQuery = "";
-        let rootTable = "";
         this.tapService = new TapService(_serviceUrl, _schema, _shortname, true)
-        this.jsonSchema = {};
         this.isLoadJson = false;
         this.objectMapWithAllDescription = {
             "root_table": {
                 "name": "root_table_name",
-                "schema": "schema"
+                "schema": "schema",
+                "columns":[]
             },
-            //"table": {},
             "tables": {},
             "map": {
                 "handler_attributs": {}
             }
         }
-
+        this.jsonContaintJoinTable = {
+            Succes:{
+                status: "",
+                base_table: "",
+                joined_tables: []
+            },
+            Failure: {
+                NotConnected: {status: "", message: ""},
+                WrongTable: {status: "", message: ""}
+            }
+        }
         this.api ="";
-        // getteur and setteur for private parameters
-        this.setServiceUrl = function (myServiceUrl) {
-            serviceUrl = myServiceUrl;
-        }
-        this.getServiceUrl = function () {
-            return serviceUrl;
-        }
-        this.setSchema = function (mySchema) {
-            schema = mySchema;
-        }
-        this.getSchema = function () {
-            return schema;
-        }
-        this.setShortname = function (myShortname) {
-            shortname = myShortname;
-        }
-        this.getShortname = function () {
-            return shortname;
+        this.attributsHandler = new HandlerAttributs();
+        this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
+        this.setAdqlConnectorQuery = function (correctTableNameFormat) {
+            let query = "SELECT TOP 5 * FROM " + correctTableNameFormat;
+            return query
         }
 
-        this.setAdqlQuery = function (myAdqlQuery) {
-            adqlQuery = myAdqlQuery;
-        }
-        this.getAdqlQuery = function () {
-            return adqlQuery;
-        }
-        this.setRootTable = function (myRootTable) {
-            rootTable = myRootTable;
-        }
-        this.getRootTable = function () {
-            return rootTable;
-        }
 
 
     }
 
 }
-
+let testButton = false;
 /**
- * @returns the votable objet: result of adql query
- */
-TapServiceConnector.prototype.connect = function () {
-    var votableQueryResult = this.tapService.Query(this.getAdqlQuery());
-    return votableQueryResult;
-}
-
-/**
- * use this method to connect service
- */
-TapServiceConnector.prototype.connectService = function () {
-    this.connect();
-}
-
+ * Private variable for my classe
+ * */
+let testRoot = false;
+let tab = []
+let tabContaninBtnRemoveConstraint = [];
+let HtmltabContaninBtnRemoveConstraint = [];
+let tempTab = [];
+//for add AHS to handlerJson after runing query
+let testSecondJson = false;
+let jsonContaintHandlersValue1 = []
+let dataTable1 = [];
+// for getObjectWhith all description
+let getObjectMapWithAllDescription
+let testApiRooQuery = false;
+let api = "";
+let table = []
+let isloadRootQuery = false;
+const COUNT = 10;
 
 /**
  * return the full json create by the method createJson()
@@ -85,6 +67,18 @@ TapServiceConnector.prototype.loadJson = function () {
         jsonLoad = this.tapService.createJson();
     }
     return jsonLoad;
+}
+TapServiceConnector.prototype.getFields=function (votableQueryResult,url){
+    let contentText = votableQueryResult.responseText;
+    let rootFields = [];
+    if ( url === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" ||  url === "http://dc.zah.uni-heidelberg.de/tap/sync") {
+
+        rootFields = VOTableTools.getField(votableQueryResult);
+    } else {
+        rootFields = VOTableTools.genererField(votableQueryResult, contentText);
+    }
+
+    return rootFields;
 }
 
 /**
@@ -146,31 +140,30 @@ TapServiceConnector.prototype.getListJoinAndId = function (rootName, mainJsonDat
 TapServiceConnector.prototype.getJoinTables = function (baseTableName) {
     var data = this.loadJson();
     var jsonread = new jsonRead(data);
-
     return jsonread.joinTable(baseTableName);
+}
+
+TapServiceConnector.prototype.getDataTable=function (votableQueryResult){
+   return  VOTableTools.votable2Rows(votableQueryResult);
 }
 
 
 
-var testLoadJson = false;
-var testLoadallTable = false;
-var testJoinRootTable = false
-var testOtherJoinTables = false;
 var testMap = false;
 let jsonWithaoutDescription = "";
 let allTables = "";
 let allJoinRootTable = [];
-let testJoinTableOfJoin = false;
 let map = {};
 let attributHanler = [];
 TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
     let api = this.api;
      let rootTable = api.getConnector().service["table"]
-    jsonWithaoutDescription = api.correctService.loadJson();
+    jsonWithaoutDescription = this.loadJson();
     let jsonAdqlContent = api.jsonAdqlContent;
     this.objectMapWithAllDescription.root_table.name = rootTable;
     this.schema = api.getConnector().service["schema"];
     this.objectMapWithAllDescription.root_table.schema = this.schema;
+    this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs']
     let correctCondition
     let formatJoinTable = "";
     let correctJoinFormaTable = "";
@@ -178,17 +171,17 @@ TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
     let correctWhereClose = "";
 
     if (testMap == false) {
-        map = api.correctService.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
+        map = this.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
     }
 
-    allJoinRootTable = api.correctService.createAllJoinTable(map)
+    allJoinRootTable = this.createAllJoinTable(map)
     allTables = allJoinRootTable;
     for (let k = 0; k < allTables.length; k++) {
         for (let tableKey in jsonWithaoutDescription) {
             if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
                 formatJoinTable = this.schema + "." + tableKey;
                 correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
-                attributHanler = api.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
+                attributHanler = json[tableKey]!==undefined?json[tableKey].attribute_handlers:""// this.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
                 for (let keyConstraint in jsonAdqlContent.constraint) {
                     if (keyConstraint == correctJoinFormaTable) {
                         for (let keyConst in jsonAdqlContent.constraint) {
@@ -217,7 +210,6 @@ TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
         }
 
     }
-    this.objectMapWithAllDescription.root_table["columns"] =  api.handlerAttribut.objectMapWithAllDescription.map['handler_attributs']
     this.objectMapWithAllDescription.map = map
     return this.objectMapWithAllDescription;
 }
@@ -307,10 +299,10 @@ function replaceAll(str, find, replace) {
 
 TapServiceConnector.prototype.selecConstraints = function (tableName, txtImput,api){
     var name = tableName //b[ii].id.slice(1);//the name of
-    var schema = api.connector.service["schema"];
+    var schema = api.getConnector().service["schema"];
     // alert(name +' '+schema);
-    var adql = api.attributsHandler.addAllColumn(name, schema)
-    var QObject = api.correctService.Query(adql);
+    var adql = this.attributsHandler.addAllColumn(name, schema)
+    var QObject = this.Query(adql);
     var dataTable = VOTableTools.votable2Rows(QObject)
     var contentText = QObject.responseText;
     var Field = VOTableTools.genererField(QObject, contentText)
@@ -480,13 +472,15 @@ TapServiceConnector.prototype.createAllJoinTable = function (map){
     return table;
 }
 
-
-
+TapServiceConnector.prototype.getAdqlAndConstraint = function (table,constraint){
+    let api = this.api;
+    return this.tapService.createSimpleAdqlWithConstraint(table,constraint,api);
+}
 var testforConstrain = false
 /**
  * @return{*} : Json the json containing all detail about every singel table join to the root table with hadler atribut of choosing table you want to get it handler attribut
  * */
-var json = "";
+var json = {};
 TapServiceConnector.prototype.setObjectMapWithAllDescriptionConstraint = function (api) {
     var testButton = false;
 //var h = new HandlerAttributs();
@@ -542,43 +536,36 @@ TapServiceConnector.prototype.setObjectMapWithAllDescriptionConstraint = functio
 
                 //alert(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] )
                 // document.getElementById("loadbuttonsHandler").style.display = "none"
-                if (api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] == undefined) {
-                    json = api.getTableAttributeHandlers(table[i]);
-                    api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
+               // if (this.jsonCorrectTableColumnDescription.addAllColumn === undefined) {
+                if(json[table[i]]==undefined){
+                    json[table[i]] = api.getTableAttributeHandlers(table[i]);
                 }
+                  //  this.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
+               // }
 
-                display(JSON.stringify(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable], undefined, 2), "getJsonAll")
+                display(JSON.stringify(json, undefined, 2), "getJsonAll")
                 display(json.status, "getStatu")
                 //return api.jsonCorrectTableColumnDescription;
 
             })
         }
     }
-    api.tapService.objectMapWithAllDescription.root_table["columns"] =  api.handlerAttribut.objectMapWithAllDescription.map['handler_attributs']
+    api.tapServiceConnector.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs']
     testforConstrain = true;
 
 
 }
 
 TapServiceConnector.prototype.replaceWhereAnd = function (jsonAdqlContent){
-
-    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE     AND", " WHERE ");
-    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE    AND", " WHERE ");
-    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE   AND", " WHERE ");
-    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE  AND", " WHERE ");
-    jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE   "+'\n'+"  AND", " WHERE ");
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND AND"," AND ")
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND  AND"," AND ")
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND   AND"," AND ")
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND    AND"," AND ")
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND     AND"," AND ")
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND      AND"," AND ")
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND       AND"," AND ")
-    jsonAdqlContent = replaceAll(jsonAdqlContent,"AND        AND"," AND ")
+    let space=" "
+    for (let i=0;i<COUNT;i++){
+        jsonAdqlContent = replaceAll(jsonAdqlContent, "WHERE"+space+"AND", " WHERE ");
+        jsonAdqlContent = replaceAll(jsonAdqlContent,"AND"+space+"AND"," AND ");
+        space+=" ";
+    }
     if(jsonAdqlContent.indexOf("WHERE")===-1 && jsonAdqlContent.indexOf("AND") !==-1){
         jsonAdqlContent =replaceAll(jsonAdqlContent,"AND","WHERE");
     }
     return jsonAdqlContent;
-
 }
   

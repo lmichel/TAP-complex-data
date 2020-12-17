@@ -2,7 +2,8 @@ document.write("<script type='text/javascript' src= '../../module/js/json2Requet
 
 const Simbadschema = "public";
 
-var test = false;
+let test = false;
+
 
 function display(data, id) {
     $("#" + id).html(data);
@@ -55,10 +56,10 @@ function createButton() {
 
 
     }
-    for (let key in api.handlerAttribut.objectMapWithAllDescription.tables) {
-        // api.correctService.selecConstraints(key, "txt" + key, api);
+    for (let key in api.tapServiceConnector.objectMapWithAllDescription.tables) {
+        // api.tapServiceConnector.selecConstraints(key, "txt" + key, api);
         $("#" + "bbb" + key).click(function () {
-            api.correctService.selecConstraints(key, "txt" + key, api);
+            api.tapServiceConnector.selecConstraints(key, "txt" + key, api);
         })
     }
 
@@ -112,7 +113,7 @@ function OnChangeRadio(radio) {
     // alert ("The " + radio.value + " radio is selected.");
     switch (radio.value) {
         case "Simbad":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://simbad.u-strasbg.fr/simbad/sim-tap/sync"
                 params.schema = Simbadschema;
                 params.table = "basic";
@@ -124,7 +125,7 @@ function OnChangeRadio(radio) {
             ;
             break;
         case "Gavo":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://dc.zah.uni-heidelberg.de/tap/sync"
                 params.schema = "rr";
                 params.table = "resource";
@@ -137,7 +138,7 @@ function OnChangeRadio(radio) {
             break;
 
         case "Caom":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"
                 params.schema = "dbo";
                 params.table = "CaomObservation";
@@ -149,7 +150,7 @@ function OnChangeRadio(radio) {
             ;
             break;
         case "Xmm":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://xcatdb.unistra.fr/3xmmdr8/tap/sync"
                 params.schema = "EPIC";
                 params.table = "EPIC_IMAGE";
@@ -163,7 +164,7 @@ function OnChangeRadio(radio) {
             break;
 
         case "Vizier":
-            if (a.testConnection == false) {
+            if (a.getConnector().status !== 'OK') {
                 params.tapService = "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync"
                 params.schema = "metaviz";
                 params.table = "METAcat";
@@ -191,11 +192,13 @@ function newMain() {
     $("#btnApiConnectS").click(function () {
         // alert(a.testConnection);
 
-        if (a.testConnection == false) {
+        if (a.getConnector().status !== "OK") {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
+                //console.log(a.connect(params))
                 a.connect(params);
                 //  var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
-                let status = a.connector.status;
+
+                let status = a.getConnector().status;
                 //alert("you are now connected")
                 a.getObjectMapWithAllDescriptions();
                 document.getElementById("testContent").style["display"] = "none";
@@ -215,7 +218,7 @@ function newMain() {
     });
 
     $("#btnGetConnector").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
 
             let connector = JSON.stringify(a.getConnector().service, undefined, 2);
             let status = a.getConnector().status;
@@ -230,7 +233,7 @@ function newMain() {
     })
 
     $("#btnGetObjectMap").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             let objectMap = JSON.stringify(a.getObjectMap(), undefined, 2);
             let status = a.getObjectMap().succes.status;
             display(status, "getStatu");
@@ -246,7 +249,7 @@ function newMain() {
     })
 
     $("#btnGetObjectMap2").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
 
             display('ok', "getStatu");
             display(JSON.stringify(a.getObjectMapWithAllDescriptions(), undefined, 2), "getJsonAll")
@@ -259,7 +262,7 @@ function newMain() {
 
 
     $("#btnGetJoinTable").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
 
             let joinTables = JSON.stringify(a.getJoinedTables(params.table).Succes, undefined, 2);
             let status = a.getJoinedTables(params.table).Succes.status;
@@ -273,7 +276,7 @@ function newMain() {
         }
     })
     $("#btnGetRootField").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
 
             let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
             let status = a.getRootFields().status;
@@ -289,7 +292,7 @@ function newMain() {
     })
 
     $("#btnGetRootFieldValue").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             console.log(a.getRootQuery())
             let values = a.getRootFieldValues(a.getRootQuery());
             let rootFieldValues = JSON.stringify(values.succes, undefined, 3);
@@ -325,7 +328,7 @@ function newMain() {
 
     $("#btnGetRootQuery").click(function () {
 
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             let rootQuery;
             var f = "\\"
             // alert(f)
@@ -426,12 +429,12 @@ function newMain() {
     $("#btnLoadbuttonsHandler").click(function () {
 
         document.getElementById("loadbuttonsHandler").style.display = "block"
-        a.correctService.setObjectMapWithAllDescriptionConstraint(a);
+        a.tapServiceConnector.setObjectMapWithAllDescriptionConstraint(a);
     })
 
 
     $("#btnGetRootQueryId").click(function () {
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             let rootValue = JSON.stringify(a.getRootQueryIds().succes, undefined, 3);
             let status = a.getRootQueryIds().succes.status;
             display(status, "getStatu");
@@ -449,17 +452,12 @@ function newMain() {
         $(document).ajaxStop(function () {
             window.location.reload();
         });
-        if (a.testConnection == true) {
+        if (a.getConnector().status === "OK") {
             a.disconnect();
-
-            if (a.testDeconnection == false) {
                 a.disconnect();
-                reset();
                 display("The service is now disconnected", "getStatu")
-
                 ConnectActive("btnApiDisconnect", "btnApiConnectS")
                 document.getElementById("testContent").style["display"] = "none";
-            }
             a.testDeconnection = false;
         } else {
             display("The service are already disconnected", "getStatu");
