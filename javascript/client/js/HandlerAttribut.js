@@ -117,7 +117,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
                 jsonContaintHandlersValue.push(jsonContaintHandlerValues.succes.attribute_handlers);
                 jsonContaintHandlerValues.succes.attribute_handlers = {
                     "name": table,
-                    "db_name": api.connector.service["table"],
+                    "db_name": api.tapServiceConnector.connector.service["table"],
                     "column_name": "",
                     "unit": "",
                     "ucd": "",
