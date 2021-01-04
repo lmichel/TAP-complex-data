@@ -21,16 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/html/testApi.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/testApi.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/HandlerAttribut.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/HandlerAttribut.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapServiceConnector.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/apisamedi" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/apisamedi" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/browser1.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/browser1.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/util.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/module/js/jsonRead.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,7 +104,8 @@
       <workItem from="1607936538991" duration="4309000" />
       <workItem from="1608039491579" duration="599000" />
       <workItem from="1608040331785" duration="2014000" />
-      <workItem from="1608192287185" duration="27732000" />
+      <workItem from="1608192287185" duration="28286000" />
+      <workItem from="1609746001100" duration="476000" />
     </task>
     <servers />
   </component>
