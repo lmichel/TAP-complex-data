@@ -2,28 +2,10 @@ class TapServiceConnector {
     constructor(_serviceUrl, _schema, _shortname) {
         this.tapService = new TapService(_serviceUrl, _schema, _shortname, true)
         this.isLoadJson = false;
-        this.objectMapWithAllDescription = {
-            "root_table": {
-                "name": "root_table_name",
-                "schema": "schema",
-                "columns":[]
-            },
-            "tables": {},
-            "map": {
-                "handler_attributs": {}
-            }
-        }
-        this.jsonContaintJoinTable = {
-            Succes:{
-                status: "",
-                base_table: "",
-                joined_tables: []
-            },
-            Failure: {
-                NotConnected: {status: "", message: ""},
-                WrongTable: {status: "", message: ""}
-            }
-        }
+        this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}}
+        this.jsonContaintJoinTable = {Succes:{status: "", base_table: "", joined_tables: []}, Failure: {NotConnected: {status: "", message: ""}, WrongTable: {status: "", message: ""}}}
+        this.connector = {status: "", message: "", service: {}, votable: ""}
+        this.jsonAdqlContent = {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {}, "status": {"status": "", 'orderErros': ""}}
         this.api ="";
         this.attributsHandler = new HandlerAttributs();
         this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
@@ -159,7 +141,7 @@ TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
     let api = this.api;
      let rootTable = api.getConnector().service["table"]
     jsonWithaoutDescription = this.loadJson();
-    let jsonAdqlContent = api.jsonAdqlContent;
+    let jsonAdqlContent = api.tapServiceConnector.jsonAdqlContent;
     this.objectMapWithAllDescription.root_table.name = rootTable;
     this.schema = api.getConnector().service["schema"];
     this.objectMapWithAllDescription.root_table.schema = this.schema;
@@ -186,7 +168,7 @@ TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
                     if (keyConstraint == correctJoinFormaTable) {
                         for (let keyConst in jsonAdqlContent.constraint) {
                             if (keyConst == "condition " + correctJoinFormaTable) {
-                                correctWhereClose = api.jsonAdqlContent.allCondition[keyConstraint];
+                                correctWhereClose = api.tapServiceConnector.jsonAdqlContent.allCondition[keyConstraint];
                             }
                         }
                     }
@@ -407,9 +389,9 @@ function fun_btnRemoveConstraint(tabContaninBtnRemoveConstraint,key){
 TapServiceConnector.prototype.createCorrectJoin = function (api) {
     var testfor = false
     api.tapButton = []
-    var jsonAdqlContent = api.jsonAdqlContent;
+    var jsonAdqlContent = api.tapServiceConnector.jsonAdqlContent;
     let mytest = false;
-    var schema = api.connector.service["schema"];
+    var schema = api.tapServiceConnector.connector.service["schema"];
     if (testfor == false) {
         for (let key in api.getObjectMapWithAllDescriptions().tables) {
             $("#" + key).click(function () {
@@ -440,8 +422,8 @@ TapServiceConnector.prototype.createCorrectJoin = function (api) {
         testfor = true;
     }
     testButton = true
-    api.jsonAdqlContent = jsonAdqlContent
-    return api.jsonAdqlContent;
+    api.tapServiceConnector.jsonAdqlContent = jsonAdqlContent
+    return api.tapServiceConnector.jsonAdqlContent;
 }
 
 
@@ -495,7 +477,7 @@ TapServiceConnector.prototype.setObjectMapWithAllDescriptionConstraint = functio
         table = this.tapService.allTable();
         testApiRooQuery = true;
     }
-    let schema = api.connector.service["schema"];
+    let schema = api.tapServiceConnector.connector.service["schema"];
     if (testforConstrain == false) {
 
         /* for (let key in this.handlerAttribut.objectMapWithAllDescription.tables) {
