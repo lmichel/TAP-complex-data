@@ -21,7 +21,7 @@ class TapServiceConnector {
 }
 let testButton = false;
 /**
- * Private variable for my classe
+ * Private variable for our classe
  * */
 let testRoot = false;
 let tab = []

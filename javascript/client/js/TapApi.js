@@ -6,7 +6,6 @@ class TapApi {
 
 /**
  * @param params (Json) with parameters (tapService,schema,table,shortName)
- * @param tapService (String) The URL of the Tap Servie
  * @param schema (String) Schema containing the complex object
  * @param table (String) Root table of the complex object
  * @param shortName (String) The Shortname of database
@@ -18,7 +17,7 @@ TapApi.prototype.initConnetor =function (tapService, schema, table, shortName,in
     initJson.service["schema"] = schema;
     initJson.service["table"] = table;
     initJson.service["shortName"] = shortName;
-    initJson.message = "Active TAP : " + shortName
+    initJson.message = "Active TAP : " + shortName;
 }
 
 TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {

@@ -13,7 +13,7 @@ function anotherOne( e ) {
 }
 
 function Cplaceholder( e ) {
-    console.log("I am functionC");
+    console.log("I am functionC") ;
 }
 jQuery(function($){
     $(document).ajaxSend(function() {

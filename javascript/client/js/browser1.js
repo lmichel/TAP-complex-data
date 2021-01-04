@@ -152,8 +152,8 @@ function newMain() {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
                 //console.log(a.connect(params))
                 a.connect(params);
-                //  var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
-                let status = a.connector.status;
+                //var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
+                let status = a.getConnector().status;
                 a.getObjectMapWithAllDescriptions();
                 document.getElementById("testContent").style["display"] = "none";
                 display(status, "getStatu");

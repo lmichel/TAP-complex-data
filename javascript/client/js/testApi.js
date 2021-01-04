@@ -421,7 +421,6 @@ function newMain() {
         } else {
             display(statusf, "getStatu");
             display(message, "getJsonAll")
-            //alert("The service is disconnected ! connect service and try again ..." )
         }
     })
 

@@ -1,12 +1,5 @@
 class HandlerAttributs {
     constructor() {
-        /* let name; //Orginal name of the field
-         let db_name; //Field name as known by the DB. Must be used to set constraints
-         let type; //data abse type of the attribute (string, int...)
-         let ucd; //Unified Content Descriptor
-         let utype; //Model binding
-         let descriptor; //Text descriptor*/
-        //this.tapApi = new TapApi();
         this.api = "";
         this.ucd = ''
         this.name = '';
@@ -84,7 +77,6 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
         let nbCols;
         if (votableQueryResult != undefined) {
             dataTable = VOTableTools.votable2Rows(votableQueryResult);
-            // console.log(dataTable);
             contentText = votableQueryResult.responseText;
             Field = VOTableTools.genererField(votableQueryResult, contentText)
 
@@ -102,9 +94,6 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
 
                 singleArrayValue = []
             }
-            //doubleArrayValue.splice(doubleArrayValue[0][0], 0);
-            // console.log(doubleArrayValue);
-            //alert(doubleArrayValue);
             jsonContaintHandlerValues.succes.status = "OK"
             let jsonContaintHandlersValue = []
             for (let c = 0; c < doubleArrayValue.length; c++) {

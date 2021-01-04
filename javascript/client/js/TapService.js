@@ -354,6 +354,7 @@ var TapService = /** @class */ (function () {
      * @param data: the main json
      * @param list_exist:list of tables who are already recorded
      * @param root: the root table
+     * @return json
      */
     TapService.prototype.ifJoin = function (data, list_exist, root) {
         var joinJsonJoin = {};
