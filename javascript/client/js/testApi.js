@@ -181,7 +181,7 @@ function OnChangeRadio(radio) {
 
 
 function newMain() {
-
+    display("All service are now disconnected, connect one and enjoy it's services", "getStatu")
     // initial();
 
 ////////////////////////////// API ////////////////////////////////////////////
@@ -191,11 +191,31 @@ function newMain() {
 
     $("#btnApiConnectS").click(function () {
         // alert(a.testConnection);
-
         if (a.getConnector().status !== "OK") {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
                 //console.log(a.connect(params))
+                /*  jQuery(function($){
+                      $(document).ajaxSend(function() {
+                          $("#overlay").fadeIn(300);
+                      });
+
+                      $('#btnApiConnectS').click(function(){
+                          $.ajax({
+                              type: 'GET',
+                              success: function(data){
+                                  console.log(data);
+                              }
+                          }).done(function() {
+                              setTimeout(function(){
+                                  $("#overlay").fadeOut(300);
+                              },500);
+                          });
+                      });
+                  });*/
                 a.connect(params);
+
+                // Add remove loading class on body element based on Ajax request status
+
                 //  var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
 
                 let status = a.getConnector().status;
@@ -210,7 +230,6 @@ function newMain() {
             }
         } else {
             display("the service is  already connected ! disconnect the service and try again ...", "getStatu");
-
             //alert("the service is  already connected ! disconnect the service and try again ...")
         }
 
@@ -251,6 +270,7 @@ function newMain() {
     $("#btnGetObjectMap2").click(function () {
         if (a.getConnector().status === "OK") {
 
+
             display('ok', "getStatu");
             display(JSON.stringify(a.getObjectMapWithAllDescriptions(), undefined, 2), "getJsonAll")
         } else {
@@ -277,7 +297,7 @@ function newMain() {
     })
     $("#btnGetRootField").click(function () {
         if (a.getConnector().status === "OK") {
-
+            createButton()
             let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
             let status = a.getRootFields().status;
             display(status, "getStatu");
@@ -448,19 +468,9 @@ function newMain() {
 
 
     $("#btnApiDisconnect").click(function () {
-        $(document).ajaxStop(function () {
-            window.location.reload();
-        });
-        if (a.getConnector().status === "OK") {
-            a.disconnect();
-                a.disconnect();
-                display("The service is now disconnected", "getStatu")
-                ConnectActive("btnApiDisconnect", "btnApiConnectS")
-                document.getElementById("testContent").style["display"] = "none";
-            a.testDeconnection = false;
-        } else {
-            display("The service are already disconnected", "getStatu");
-        }
+        a.disconnect()
+
+
 
     })
 

@@ -41,12 +41,9 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
 }
 
 TapApi.prototype.disconnect = function () {
-    this.tapServiceConnector = null;
-    this.getConnector().votable = null;
-    if (this.tapServiceConnector === null && this.getConnector().votable == null) {
-        this.tapServiceConnector.connector.status = 'Failed'
-        return this.tapServiceConnector.connector.status;
-    }
+    //this.tapServiceConnector = null;
+    // this.getConnector().votable = null;
+    document.location.reload();
 }
 
 TapApi.prototype.getConnector = function () {
@@ -125,7 +122,7 @@ TapApi.prototype.getRootFieldValues = function (query) {
         if (query !== undefined) {
             votableQueryResult = this.tapServiceConnector.Query(query);
         }
-       let Field = this.tapServiceConnector.getFields(votableQueryResult, this.getConnector().service.tapService)
+        let Field = this.tapServiceConnector.getFields(votableQueryResult, this.getConnector().service.tapService)
         let dataTable = this.tapServiceConnector.getDataTable(votableQueryResult);
         jsonContaintRootFieldValues.datatable = dataTable;
         jsonContaintRootFieldValues.field = Field

@@ -140,7 +140,48 @@ function OnChangeRadio(radio) {
 function newMain() {
 
     // initial();
+    display("All service are now disconnected, connect one and enjoy it's services", "getStatu")
+    let testfor = false;
+    let tapButton = [];
 
+    function createButton() {
+        let buttons = "";
+        let api = a;
+        let schema = a.getConnector().service["schema"];
+        if (testfor == false) {
+            let j = 0;
+            let value = ""
+            console.log(a.getObjectMapWithAllDescriptions().tables);
+            for (let key in a.getObjectMapWithAllDescriptions().tables) {
+                value = a.getObjectMapWithAllDescriptions()//.tables[key].constraints
+                let formats = schema + '.' + key;
+                let correctTables = formats.quotedTableName().qualifiedName;
+                buttons = "<span>" + "<button data-toggle=\"modal\" data-target=\"#myModal\" type='button' class=\"btn btn-primary\" " +
+                    "id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">" +
+                    "Click to select " + key + " constraints</button>" +
+                    "<button  type='button' class=\"btn btn-default\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
+                    " <input type='text' class='form form-control' id='txt" + key + "' value='' placeholder='Enter condition' name='Cinputs'> <hr>"
+
+                if (testButton == true) {
+                    //alert( 'existe deja')
+                } else {
+                    tapButton.push(buttons);
+                }
+            }
+            $("#loadButton").append(tapButton);
+            window.location.hash = "#loadButton";
+            testfor = true;
+
+
+        }
+        for (let key in api.tapServiceConnector.objectMapWithAllDescription.tables) {
+            // api.tapServiceConnector.selecConstraints(key, "txt" + key, api);
+            $("#" + "bbb" + key).click(function () {
+                api.tapServiceConnector.selecConstraints(key, "txt" + key, api);
+            })
+        }
+
+    }
 ////////////////////////////// API ////////////////////////////////////////////
     $("#d_right").click(function () {
         document.getElementById("light").style.display = "none";
@@ -214,26 +255,26 @@ function newMain() {
 
         }
     })
+    $("#btnGetRootField").click(function () {
+        if (a.getConnector().status === "OK") {
+            createButton()
+            let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
+            let status = a.getRootFields().status;
+            display(status, "getStatu");
+            display(rootFields, "getJsonAll")
+            setActive("btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootFieldValue", "btnGetRootQuery")
+        } else {
+
+            display(statusf, "getStatu");
+            display(message, "getJsonAll")
+            // alert("The service is disconnected ! connect service and try again ...")
+        }
+    })
 
     $("#btnApiDisconnect").click(function () {
-        $(document).ajaxStop(function () {
-            window.location.reload();
-        });
-        if (a.getConnector().status === "OK") {
-            a.disconnect();
 
-            if (a.testDeconnection == false) {
-                a.disconnect();
-                reset();
-                display("The service is now disconnected", "getStatu")
+        a.disconnect();
 
-                ConnectActive("btnApiDisconnect", "btnApiConnectS")
-                document.getElementById("testContent").style["display"] = "none";
-            }
-            a.testDeconnection = false;
-        } else {
-            display("The service are already disconnected", "getStatu");
-        }
 
     })
 
@@ -255,12 +296,12 @@ let datatables = []
 
 function createTableInHtmlTable(table, constraint) {
     let adql = a.setAdql(table, constraint)
-   /* let fieldValue =a.getRootFieldValues(adql)
-    //var QObject = a.tapService.Query(adql);
-    var dataTable = fieldValue.datatable//VOTableTools.votable2Rows(QObject)
-    console.log(dataTable)
-    //var contentText = QObject.responseText;
-    var Field = fieldValue.field*/
+    /* let fieldValue =a.getRootFieldValues(adql)
+     //var QObject = a.tapService.Query(adql);
+     var dataTable = fieldValue.datatable//VOTableTools.votable2Rows(QObject)
+     console.log(dataTable)
+     //var contentText = QObject.responseText;
+     var Field = fieldValue.field*/
     let QObject = "";
     if (adql !== undefined) {
         QObject = a.tapServiceConnector.Query(adql);
@@ -273,7 +314,7 @@ function createTableInHtmlTable(table, constraint) {
     let Field = a.tapServiceConnector.getFields(QObject)//VOTableTools.genererField(QObject, contentText)
     let nb = Field.length;
     const regex = /[/,:,.,_,\,',"]/g;
-    var out = "\n"
+    var out = handlerAttribut(table,Field);"\n"
     out += "<table  class = 'table table-bordered table-striped table-hover' id='mytable1' role = 'grid' >";
     out += "<thead class='thead-dark'><tr  role='row'>"
     for (var j = 0; j < nb; j++) {
@@ -332,7 +373,31 @@ function createTableInHtmlTable(table, constraint) {
 
 var tableIdTD2 = '';
 
+function handlerAttribut(tableName,Field) {
+    let handlerAttributs = a.getTableAttributeHandlers(tableName).attribute_handlers
+    let handler = ""
+    handler =  "<table  class = ' table table-bordered table-striped table-hover' id='mytable' role = 'grid' >";
+    handler += "<thead class='thead-dark'><tr role='row'>"
+    for (let j = 0; j < handlerAttributs.length; j++) {
+        for (var k = 0; k < Field.length; k++) {
+            if (Field[k] === handlerAttributs[j].column_name) {
+                handler += "<tr rowspan='1'  colspan='1' class='table-danger' style='text-align:center;vertical-align:bottom'>" +
+                    "<td>" + handlerAttributs[j].column_name + "</td>"
+                    + "<td>" + handlerAttributs[j].dataType + "</td>"
+                    + "<td>" + handlerAttributs[j].description + "</td>";
+                +"<td>" + handlerAttributs[j].ucd + "</td></tr>";
+            }
+        }
+
+    }
+    handler += "</tr></thead>";
+    handler += "<tbody>"
+    console.log(handlerAttributs)
+    //$("#getJsonAll").html(handler);
+    return handler
+}
 function createHtmlTable(tableName) {
+
     var adql = a.getRootQuery();
     let fieldValue =a.getRootFieldValues(adql)
     //var QObject = a.tapService.Query(adql);
@@ -340,12 +405,14 @@ function createHtmlTable(tableName) {
     //var contentText = QObject.responseText;
     var Field = fieldValue.field//VOTableTools.genererField(QObject, contentText)
     var nb = Field.length;
+
+
     let jointab = a.tapServiceConnector.getJoinTables(a.getConnector().service["table"])
-    var out = "\n"
-    out += "<table  class = 'clickable-table  table table-bordered table-striped table-hover' id='mytable' role = 'grid' >";
+    var out =handlerAttribut(tableName,Field);"";
+    out += "<table  class = ' table table-bordered table-striped table-hover' id='mytable' role = 'grid' >";
     out += "<thead class='thead-dark'><tr role='row'>"
     for (var j = 0; j < nb; j++) {
-        out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[j] + "</th>";
+        out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[j]  +"</th>";
     }
     out += "</tr></thead>";
     out += "<tbody>"
@@ -359,10 +426,11 @@ function createHtmlTable(tableName) {
         if (column == 0) {
             var judge = (j + nb) / nb;
             if (judge % 2 == 1) {
-                out += "<tr class = 'odd table-primary' >";
+                out += "<tr class = 'odd table-primary' >"
             } else {
-                out += "<tr class = 'even table-primary'>";
+                out += "<tr class = 'even table-primary'>";//+handler+"<br>";;
             }
+
             out += "<td id = '" + j + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content" + j + "'style='cursor: pointer'>" + dataTable[j];
             out += "</p></td>";
 
@@ -384,7 +452,9 @@ function createHtmlTable(tableName) {
         "  </div>\n" +
         "</div>"
 
+
     $("#getJsonAll").html(out);
+
 
     $(document).ready(function () {
         const regex = /[/,:,.,_,\,',"]/g;
@@ -404,7 +474,8 @@ function createHtmlTable(tableName) {
         let values2 = '';
         let ff2 = '';
         for (let i = 0; i < td.length; i++) {
-            let j = i
+            let j = i-3
+
             let tempFound = dataTable[j] + ""
             if (typeof dataTable[j] === "string") {
                 dataTable[j] = "'" + dataTable[j] + "'"
@@ -417,14 +488,11 @@ function createHtmlTable(tableName) {
             let markup;
             values = ''
             $(td[i]).click(function () {
-
+                console.log(j);
                 var i = $(this).attr("id");
+                console.log(i);
                 let jointab = a.tapServiceConnector.getJoinTables(a.getConnector().service["table"])
-                markup = "<div id=\"overlay\">\n" +
-                    "    <div class=\"cv-spinner\">\n" +
-                    "        <span class=\"spinner\"></span>\n" +
-                    "    </div>\n" +
-                    "</div>\n"
+                markup = "";
                 markup = "<nav class=\"tree-nav\" id='tree-nav" + j + "'>\n"
                 for (let k = 0; k < jointab.length; k++) {
 
@@ -459,11 +527,11 @@ function createHtmlTable(tableName) {
                     //  let val1 =dataTable[j].replaceAll('-',"_");
 
                     $("#s" + key + j + found).click(function () {
-                        // console.log(id);
+                        console.log(j);
                         if (f1.indexOf(key + j + found) === -1) {
                             f1 += key + j + found;
                             let out = " <div class=\"tree-nav__item\">"
-                            out += createTableInHtmlTable(key, dataTable[j]);
+                            out +=createTableInHtmlTable(key, dataTable[j]);
                             out += "</div>"
                             api3.find("#c" + key + j + found).html(out);
                             $(function () {
@@ -506,7 +574,7 @@ function createHtmlTable(tableName) {
                                             if ($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim() === jointab[k]) {
                                                 f1 += key + found + j + k + 1;
                                                 let out = " <div class=\"tree-nav__item\">"
-                                                out += createTableInHtmlTable(jointab[k], dataTable[j]);
+                                                out +=createTableInHtmlTable(jointab[k], dataTable[j]);
                                                 out += "</div>"
                                                 for (let key in jsonAll) {
                                                     if (key === jointab[k]) {
@@ -518,7 +586,7 @@ function createHtmlTable(tableName) {
 
                                         })
                                         $("#mytable1 tr td p ").click(function (index) {
-                                             name.find('#tree-nav2' + key + found + j + j).toggle()
+                                            name.find('#tree-nav2' + key + found + j + j).toggle()
 
                                         })
 
@@ -535,6 +603,8 @@ function createHtmlTable(tableName) {
                 }
             });
             let api = $(this);
+
+
             $(this).find("#content" + j).click(function () {
                 console.log('#tree-nav' + j)
                 api.find('#tree-nav' + j).toggle()

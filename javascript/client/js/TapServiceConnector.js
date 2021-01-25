@@ -126,7 +126,7 @@ TapServiceConnector.prototype.getJoinTables = function (baseTableName) {
 }
 
 TapServiceConnector.prototype.getDataTable=function (votableQueryResult){
-   return  VOTableTools.votable2Rows(votableQueryResult);
+    return  VOTableTools.votable2Rows(votableQueryResult);
 }
 
 
@@ -139,7 +139,7 @@ let map = {};
 let attributHanler = [];
 TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
     let api = this.api;
-     let rootTable = api.getConnector().service["table"]
+    let rootTable = api.getConnector().service["table"]
     jsonWithaoutDescription = this.loadJson();
     let jsonAdqlContent = api.tapServiceConnector.jsonAdqlContent;
     this.objectMapWithAllDescription.root_table.name = rootTable;
@@ -296,8 +296,8 @@ TapServiceConnector.prototype.selecConstraints = function (tableName, txtImput,a
         "      <div class=\"modal-content\">"+
         "    <div class=\"modal-content\">\n" +
         "      <div class=\"modal-body\">\n"+
-       "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + name + "</span>" +
-       "<button class='delete_right btn btn-danger'  data-dismiss=\"modal\" id='d_right'><i class='fa fa-close ' ></i></button><br></br>";//head
+        "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + name + "</span>" +
+        "<button class='delete_right btn btn-danger'  data-dismiss=\"modal\" id='d_right'><i class='fa fa-close ' ></i></button><br></br>";//head
     out += "<table  class = 'table table-bordered table-striped table-hover'  role = 'grid' >";
     out += "<thead class='thead-dark'><tr role='row'>"
     for (var j = 0; j < nb; j++) {
@@ -336,13 +336,13 @@ TapServiceConnector.prototype.selecConstraints = function (tableName, txtImput,a
         "  </div>\n" +
         "</div>"
 
-        ;//head
+    ;//head
     $("body").prepend(out);
     //let schema = this.connector.service["schema"];
     var td = $("td");
     for (var i = 0; i < td.length; i++) {
         $(td[i]).click(function () {
-           // alert($("#" + txtImput).val().length);
+            // alert($("#" + txtImput).val().length);
             var i = $(this).attr("id");
             if ($("#" + txtImput).val().length !==1) {
                 var content = $("#" + txtImput).val();
@@ -352,14 +352,14 @@ TapServiceConnector.prototype.selecConstraints = function (tableName, txtImput,a
                     alert(i+" already added")
                 }else{
                     $("#" + txtImput).val(content + " AND " + correctValue + "." + i + "=");
-                   // document.getElementById('light').style.display = 'none';
+                    // document.getElementById('light').style.display = 'none';
                     alert(i+" is added to constraint")
                 }
             } else {
                 let formatValue = schema+"."+name;
                 let correctValue = formatValue.quotedTableName().qualifiedName
                 $("#" + txtImput).val(correctValue + "." + i + "=");
-               // document.getElementById('light').style.display = 'none';
+                // document.getElementById('light').style.display = 'none';
                 alert(i+" is added to constraint")
             }
 
@@ -518,12 +518,12 @@ TapServiceConnector.prototype.setObjectMapWithAllDescriptionConstraint = functio
 
                 //alert(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] )
                 // document.getElementById("loadbuttonsHandler").style.display = "none"
-               // if (this.jsonCorrectTableColumnDescription.addAllColumn === undefined) {
+                // if (this.jsonCorrectTableColumnDescription.addAllColumn === undefined) {
                 if(json[table[i]]==undefined){
                     json[table[i]] = api.getTableAttributeHandlers(table[i]);
                 }
-                  //  this.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
-               // }
+                //  this.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
+                // }
 
                 display(JSON.stringify(json, undefined, 2), "getJsonAll")
                 display(json.status, "getStatu")

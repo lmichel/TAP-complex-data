@@ -33,12 +33,31 @@ var TapService = /** @class */ (function () {
             type: "GET",
             data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
             async: false,
+            beforeSend: function() {
+                //$('#overlay').removeClass('display-none')
 
-        })
-            .done(function (result) {
 
-                return result;
+            },
+            success: function(data){
+                /*$("body").append("<div id=\"overlay\">\n" +
+                    "        <div class=\"cv-spinner\">\n" +
+                    "            <span class=\"spinner\"></span>\n" +
+                    "        </div>\n" +
+                    "    </div>");*/
+                $("#overlay").fadeIn(1000);
+                console.log(data);
+                // $('#overlay').addClass('display-none')
+            },
+
+
+        }).done(function (result) {
+            //$('#overlay').addClass('display-none')
+            setTimeout(function(){
+                //$('#overlay').addClass('display-none')
+                //$("#overlay").fadeOut(1000);
             });
+            return result;
+        });
         //console.log(reTable);
         return reTable;
     };
