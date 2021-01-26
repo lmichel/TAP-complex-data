@@ -402,7 +402,7 @@ function newMain() {
                     for (let i = 0; i < table.length; i++) {
                         if ($("#txtConstraint").val() == "") {
                             display("Failed", "getStatu");
-                            display("Inter the name of table you want ton remove constraint", "getJsonAll")
+                            display("Inter the name of table you want ton remove constraints", "getJsonAll")
 
                             //document.getElementById("loadRemoveButton").style.display = "block"
                         } else if ($("#txtConstraint").val() == table[i]) {
