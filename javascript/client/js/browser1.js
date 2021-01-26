@@ -137,6 +137,7 @@ function OnChangeRadio(radio) {
             break;
     }
 }
+let rootQuery;
 function newMain() {
 
     // initial();
@@ -193,6 +194,9 @@ function newMain() {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
                 //console.log(a.connect(params))
                 a.connect(params);
+
+
+                rootQuery = a.getRootQuery()
                 //var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
                 let status = a.getConnector().status;
                 a.getObjectMapWithAllDescriptions();
@@ -241,10 +245,11 @@ function newMain() {
 
     var tesTabCRQ = false;
     $("#btnGetRootQuery").click(function () {
+        console.log("rootQuery")
         if (a.getConnector().status === "OK") {
-            let rootQuery;
-            rootQuery = a.getRootQuery() // JSON.stringify(a.getRootQuery(), undefined, 2);
+            // JSON.stringify(a.getRootQuery(), undefined, 2);
             tesTabCRQ = true;
+            console.log(rootQuery)
             //rootQuery = a.addConstraint(rootQuery,this.tapJoinConstraint,this.tapWhereConstraint)
             let status = "OK"//a.getRootQueryIds().success.status;
             // rootQuerys=[]
@@ -255,6 +260,7 @@ function newMain() {
 
         }
     })
+
     $("#btnGetRootField").click(function () {
         if (a.getConnector().status === "OK") {
             createButton()
@@ -519,6 +525,8 @@ function createHtmlTable(tableName) {
                     //console.log(tableIdTD)
                     tesl = true
                 }
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

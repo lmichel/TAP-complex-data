@@ -35,29 +35,38 @@ var TapService = /** @class */ (function () {
             async: false,
             beforeSend: function() {
                 //$('#overlay').removeClass('display-none')
-
-
-            },
-            success: function(data){
-                /*$("body").append("<div id=\"overlay\">\n" +
+                $("body").append("<div id=\"overlay\">\n" +
                     "        <div class=\"cv-spinner\">\n" +
                     "            <span class=\"spinner\"></span>\n" +
                     "        </div>\n" +
-                    "    </div>");*/
-                $("#overlay").fadeIn(1000);
-                console.log(data);
-                // $('#overlay').addClass('display-none')
+                    "    </div>");
+                //$('#overlay').addClass('loading')
+
+                if(site) {
+                    $("#overlay").fadeIn(1);
+                }
+
+            },
+
+            success: function(data){
+
+
+               // console.log(data);
+                 //$('body').addClass('loading')
             },
 
 
         }).done(function (result) {
-            //$('#overlay').addClass('display-none')
-            setTimeout(function(){
-                //$('#overlay').addClass('display-none')
-                //$("#overlay").fadeOut(1000);
-            });
+            //$('#overlay').removeClass('loading')
+            if(site){
+                setTimeout(function(){
+                    //$('#overlay').addClass('display-none')
+                    $("#overlay").fadeOut(1000);
+                },3000);
+            }
             return result;
         });
+
         //console.log(reTable);
         return reTable;
     };
@@ -88,6 +97,13 @@ var TapService = /** @class */ (function () {
 
                 return result;
             });
+        if(site){
+            setTimeout(function(){
+                //$('#overlay').addClass('display-none')
+                $("#overlay").fadeOut(1000);
+            },2000);
+        }
+
         return reTable;
     };
     /**
@@ -113,7 +129,12 @@ var TapService = /** @class */ (function () {
             async: false
         })
             .done(function (result) {
-
+                if(site) {
+                    setTimeout(function () {
+                        //$('#overlay').addClass('display-none')
+                        $("#overlay").fadeOut(1000);
+                    }, 2000);
+                }
                 return result;
             });
 

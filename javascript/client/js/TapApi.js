@@ -31,7 +31,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     }
     /* for vizier only*/
     else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
-        this.initConnetor(tapService, schema, table, shortName)
+        this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
     } else {
         this.tapServiceConnector.connector.status = 'Failled';
         this.tapServiceConnector.connector.message = "No active TAP connection"

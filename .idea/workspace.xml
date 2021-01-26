@@ -21,6 +21,12 @@
   <component name="ChangeListManager">
     <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/css/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/css/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/html/browser1.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/browser1.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/javascript/client/js/browser1.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/browser1.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,6 +118,7 @@
       <workItem from="1610034536402" duration="601000" />
       <workItem from="1610372125485" duration="1887000" />
       <workItem from="1610395650642" duration="600000" />
+      <workItem from="1611650220446" duration="9572000" />
     </task>
     <servers />
   </component>

@@ -125,13 +125,17 @@ bottom: .5em;
   cursor: pointer;
 }
 #overlay{
-  position: fixed;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-  height:100%;
-  display: none;
-  background: rgba(0,0,0,0.6);
+  display:    none;
+  position:   fixed;
+  z-index:    1000;
+  top:        0;
+  left:       0;
+  height:     100%;
+  width:      100%;
+  background: #000000;
+  url('http://i.stack.imgur.com/FhHRx.gif')
+  50% 50%
+  no-repeat;
 }
 .cv-spinner {
   height: 100%;
@@ -154,4 +158,30 @@ bottom: .5em;
 }
 .is-hide{
   display:none;
+}
+
+.modals {
+  display:    none;
+  position:   fixed;
+  z-index:    1000;
+  top:        0;
+  left:       0;
+  height:     100%;
+  width:      100%;
+  background: rgba( 0, 0, 0, 0 )
+  url('http://i.stack.imgur.com/FhHRx.gif')
+  50% 50%
+  no-repeat;
+}
+
+/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+body.loading .modals {
+  overflow: hidden;
+}
+
+/* Anytime the body has the loading class, our
+   modal element will be visible */
+body.loading .modals {
+  display: block;
 }
