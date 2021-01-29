@@ -24,13 +24,15 @@ function reset() {
 var a = new TapApi();
 let handlerApi = new HandlerAttributs();
 let testfor = false;
+let testfor1 = false;
 let tapButton = [];
+let testButton111=false
 
 function createButton() {
     let buttons = "";
     let api = a;
     let schema = a.getConnector().service["schema"];
-    if (testfor == false) {
+    if (testfor1 == false) {
         let j = 0;
         let value = ""
         console.log(a.getObjectMapWithAllDescriptions().tables);
@@ -44,15 +46,17 @@ function createButton() {
                 "<button  type='button' class=\"btn btn-default\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
                 " <input type='text' class='form form-control' id='txt" + key + "' value='' placeholder='Enter condition' name='Cinputs'> <hr>"
 
-            if (testButton == true) {
-                //alert( 'existe deja')
+            if (testButton111 == true) {
+              //  alert( 'existe deja')
             } else {
                 tapButton.push(buttons);
+
             }
         }
         $("#loadButton").append(tapButton);
         window.location.hash = "#loadButton";
-        testfor = true;
+        testfor1 = true;
+        testButton111 =true;
 
 
     }
@@ -193,25 +197,9 @@ function newMain() {
         // alert(a.testConnection);
         if (a.getConnector().status !== "OK") {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
-                //console.log(a.connect(params))
-                /*  jQuery(function($){
-                      $(document).ajaxSend(function() {
-                          $("#overlay").fadeIn(300);
-                      });
 
-                      $('#btnApiConnectS').click(function(){
-                          $.ajax({
-                              type: 'GET',
-                              success: function(data){
-                                  console.log(data);
-                              }
-                          }).done(function() {
-                              setTimeout(function(){
-                                  $("#overlay").fadeOut(300);
-                              },500);
-                          });
-                      });
-                  });*/
+                ;
+
                 a.connect(params);
 
                 // Add remove loading class on body element based on Ajax request status
@@ -312,8 +300,10 @@ function newMain() {
     })
 
     $("#btnGetRootFieldValue").click(function () {
+
         if (a.getConnector().status === "OK") {
-            console.log(a.getRootQuery())
+            //console.log(a.getRootQuery())
+
             let values = a.getRootFieldValues(a.getRootQuery());
             let rootFieldValues = JSON.stringify(values.succes, undefined, 3);
             let status = values.succes.status;
@@ -407,14 +397,15 @@ function newMain() {
                             //document.getElementById("loadRemoveButton").style.display = "block"
                         } else if ($("#txtConstraint").val() == table[i]) {
                             let rootq = a.resetTableConstraint(table[i])
-                            display(rootq.status.status, "getStatu");
+                            display("OK", "getStatu");
+                            display("{ status : OK  }", "getJsonAll")
                             //$("#getJsonAll").text("Constraint removed successful");
                             if (rootq.status.orderErros != "") {
 
                                 display("" + JSON.stringify(rootq.status, undefined, 2), "getJsonAll")
                             } else {
 
-                                display("{ status : " + JSON.stringify(rootq.status.status, undefined, 2) + " }", "getJsonAll")
+                                display("{ status : OK }", "getJsonAll")
                             }
 
 
@@ -456,6 +447,10 @@ function newMain() {
         if (a.getConnector().status === "OK") {
             let rootValue = JSON.stringify(a.getRootQueryIds().succes, undefined, 3);
             let status = a.getRootQueryIds().succes.status;
+            setTimeout(function(){
+                //$('#overlay').addClass('display-none')
+                $("#overlay").fadeOut(1000);
+            },3000);
             display(status, "getStatu");
             display(rootValue, "getJsonAll")
             setActive("btnGetRootQueryId", "btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector")

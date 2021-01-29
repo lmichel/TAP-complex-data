@@ -33,7 +33,7 @@ var sj = '';
 HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     let doubleArrayValue = [];
     let singleArrayValue = [];
-    console.log(this.api)
+    //console.log(this.api)
     this.db_name = this.api.getConnector().service["table"]
     let api = this.api;
     let jsonContaintHandlerValues = {

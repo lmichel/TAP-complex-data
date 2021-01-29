@@ -36,10 +36,10 @@ var statusf = "failed"
 var message = "The service is disconnected ! connect service and try again ..."
 
 function remouveAtive(g) {
-    if (document.getElementById("" + g).classList.contains('btn-dark')) {
+   /* if (document.getElementById("" + g).classList.contains('btn-dark')) {
         document.getElementById("" + g).classList.add('btn-success');
         document.getElementById("" + g).classList.remove('btn-dark');
-    }
+    }*/
 }
 
 function removeConnectActive(g) {
@@ -233,6 +233,7 @@ function newMain() {
     })
 
     $("#btnGetRootFieldValue").click(function () {
+
         if (a.getConnector().status === "OK") {
             createHtmlTable(a.getConnector().service["table"]);
             setActive("btnGetRootFieldValue", "btnGetRootField", "btnGetJoinTable", "btnGetObjectMap", "btnGetConnector", "btnGetRootQuery")
@@ -245,11 +246,11 @@ function newMain() {
 
     var tesTabCRQ = false;
     $("#btnGetRootQuery").click(function () {
-        console.log("rootQuery")
+        //console.log("rootQuery")
         if (a.getConnector().status === "OK") {
             // JSON.stringify(a.getRootQuery(), undefined, 2);
             tesTabCRQ = true;
-            console.log(rootQuery)
+           // console.log(rootQuery)
             //rootQuery = a.addConstraint(rootQuery,this.tapJoinConstraint,this.tapWhereConstraint)
             let status = "OK"//a.getRootQueryIds().success.status;
             // rootQuerys=[]
@@ -262,6 +263,7 @@ function newMain() {
     })
 
     $("#btnGetRootField").click(function () {
+
         if (a.getConnector().status === "OK") {
             createButton()
             let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
@@ -299,7 +301,8 @@ function newMain() {
 var flag;
 let mainFound
 let datatables = []
-
+let fields=[];
+let QObject="";
 function createTableInHtmlTable(table, constraint) {
     let adql = a.setAdql(table, constraint)
     /* let fieldValue =a.getRootFieldValues(adql)
@@ -308,19 +311,20 @@ function createTableInHtmlTable(table, constraint) {
      console.log(dataTable)
      //var contentText = QObject.responseText;
      var Field = fieldValue.field*/
-    let QObject = "";
+     QObject = "";
     if (adql !== undefined) {
         QObject = a.tapServiceConnector.Query(adql);
     }
 
-    console.log(QObject);
+    //console.log(QObject);
     let dataTable = a.tapServiceConnector.getDataTable(QObject)
     datatables = dataTable
     //let contentText = QObject.responseText;
     let Field = a.tapServiceConnector.getFields(QObject)//VOTableTools.genererField(QObject, contentText)
     let nb = Field.length;
-    const regex = /[/,:,.,_,\,',"]/g;
-    var out = handlerAttribut(table,Field);"\n"
+    const regex = /[/,:,.,_,\,',", ,  ,+,-,*," ",]/g;
+    const regex2 = /[']/g;
+    var out = ""//handlerAttribut(table,Field);"\n"
     out += "<table  class = 'table table-bordered table-striped table-hover' id='mytable1' role = 'grid' >";
     out += "<thead class='thead-dark'><tr  role='row'>"
     for (var j = 0; j < nb; j++) {
@@ -329,33 +333,42 @@ function createTableInHtmlTable(table, constraint) {
     out += "</tr></thead>";
     out += "<tbody>"
     var column = 0;
+
+    //console.log("valeur de la tables ")
+   // console.log(dataTable.length)
+   // console.log(dataTable)
     for (var j = 0; j < dataTable.length; j++) {//table  content
-        if (dataTable[dataTable.length - 1] == 0) {
-            dataTable.splice(dataTable.length - 1, 1);
-        }
+        //if (dataTable[dataTable.length - 1] == 0) {
+            //dataTable.splice(dataTable.length - 1, 1);
+       // }
+
+        let jj = j%Field.length
         let tempFound = dataTable[j] + ""
         if (typeof dataTable[j] === "string") {
-            dataTable[j] = "'" + dataTable[j] + "'"
+           // dataTable[j] //= "'" + dataTable[j].replaceAll(regex2,"") + "'"
         }
+
         let found = tempFound.replaceAll(regex, "");
         if (column == 0) {
             var judge = (j + nb) / nb;
             if (judge % 2 == 1) {
-                out += "<tr id = 'tr" + table + j + found + j + "' data-event='eventA' class = 'odd table-primary' >";
+                out += "<tr id = 'tr" + j+'_'+table  + found + j+jj + "' data-event='eventA' class = 'odd table-primary' >";
             } else {
-                out += "<tr id = 'tr" + table + j + found + j + "' data-event='eventA' class = 'even table-primary'>";
+                out += "<tr id = 'tr" + j+'_'+table + found + j+jj + "' data-event='eventA' class = 'even table-primary'>";
             }
-            if (dataTable.length !== 0) {
-                out += "<td  id = 'td" + table + j + found + j + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2" + table + found + j + j + "'style='cursor: pointer'>" + dataTable[j];
+            if (dataTable.length > 0) {
+                out += "<td  id = 'td" + j+'_'+table + found + j+jj + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2" + table + found + j + j + "'style='cursor: pointer'>" + dataTable[j];
                 out += "</p></td>";
-            } else {
-                out += "<td  id = 'td" + table + j + found + j + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2" + table + found + j + j + "'style='cursor: pointer'> No Data Found";
+            } else if(dataTable.length === 0){
+                out += "<td  id = 'td" + j+'_'+table + found + j+jj + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2" + table + found + j + j + "'style='cursor: pointer'> No Data Found";
 
                 out += "</p></td>";
             }
 
         } else {
-            out += "<td id = 'td" + table + j + found + j + "' style='vertical-align:bottom;cursor: pointer'><p id='content3" + table + j + found + j + "'>" + dataTable[j] + "</p></td>";
+            out += "<td  id = 'td" + j+'_'+table   + found + j+jj + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content2" + table + found + j + j + "'style='cursor: pointer'>" + dataTable[j];
+            out += "</p></td>";
+            //out += "<td id = 'td" + table + j + found + j + "' style='vertical-align:bottom;cursor: pointer'><p id='content3" + table + j + found + j + "'>" + dataTable[j] + "</p></td>";
         }
         column = column + 1;
         if (column == nb) {
@@ -371,6 +384,87 @@ function createTableInHtmlTable(table, constraint) {
         "\n" +
         "  </div>\n" +
         "</div>"
+
+  /*  const regexb= /[/,:,.,_,\,',"]/g;
+    var api = "";
+    var td = $("td");
+    let val
+    let root = a.getConnector().service["table"]
+    let jsonAll = a.tapServiceConnector.loadJson()//.getObjectMapWithAllDescriptions().map[root].join_tables
+    let tesl = false;
+    let tesl2 = false
+    let tableIdTD = [];
+    let f = '';
+    let ff = "";
+    let values = '';
+    let f1 = '';
+    let ff1 = "";
+    let values2 = '';
+    let ff2 = '';
+    let fieldLenth;
+    for (let i = 0; i < dataTable.length; i++) {
+        let j = i//-3
+
+        let tempFound = dataTable[j] + ""
+        if (typeof dataTable[j] === "string") {
+            dataTable[j] = "'" + dataTable[j] + "'"
+        }
+        //console.log( dataTable[j])
+
+        const found = tempFound.replaceAll(regexb, "");
+        tableIdTD.push(td[i])
+        tableIdTD = Array.from(new Set(tableIdTD));
+        let markup;
+        values = ''*/
+
+       // $("#tt").html(out);
+
+
+
+
+            /*for (let k = 0; k < jointab.length; k++) {
+                $("#s2" + key + found + j + k).click(function () {
+                    let correctTable = $("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim().split(key);
+                    // console.log(correctTable)
+                    let testTable = correctTable[0].indexOf(jointab[k])?jointab[k]:correctTable[0];
+                    // console.log(testTable)*/
+
+            //console.log($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim().endsWith(jointab[k],correctTable.length))
+            // console.log($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim() +"==="+k+'\n'+jointab[k])
+            /*if (testTable === jointab[k]) {
+                f1 += key + found + j + k + 1;
+                let out = " <div class=\"tree-nav__item\">"
+                let Fields = a.tapServiceConnector.getFields(QObject)
+                fieldLenth=j%Fields.length
+                console.log("j ="+j+"  fildlent ="+fieldLenth + "  fildd = "+Fields.length)
+                constraint = Fields[fieldLenth]+' = '+dataTable[j]
+                out +=createTableInHtmlTable(key, constraint);
+
+                //out +=createTableInHtmlTable(jointab[k], dataTable[j]);
+                out += "</div>"
+                // console.log("teste affichage "+"#cx" + key + found + j + k + found)
+                ///console.log(key +" === "+ jointab[k])
+                for (let keys in jsonAll) {
+                    if (keys === jointab[k]) {
+                        // console.log(keys +" === "+ jointab[k])
+                        name.find("#cx" + keys + found + j + k + found).html(out)
+                        //$(this).html(out);
+                    }
+                }
+
+            }*/
+
+
+        /*$("#mytable1 tr td p ").click(function (index) {
+            name.find('#tree-nav2' + key + found + j + j).toggle()
+
+        })*/
+
+        // }
+
+        //  });
+
+        // $(this).append("gfjfgfgfffffffffffffffffffff")
 
 
     return out //console.log(dataTable)
@@ -402,6 +496,7 @@ function handlerAttribut(tableName,Field) {
     //$("#getJsonAll").html(handler);
     return handler
 }
+let constraint;
 function createHtmlTable(tableName) {
 
     var adql = a.getRootQuery();
@@ -414,7 +509,7 @@ function createHtmlTable(tableName) {
 
 
     let jointab = a.tapServiceConnector.getJoinTables(a.getConnector().service["table"])
-    var out =handlerAttribut(tableName,Field);"";
+    var out =""//handlerAttribut(tableName,Field);"";
     out += "<table  class = ' table table-bordered table-striped table-hover' id='mytable' role = 'grid' >";
     out += "<thead class='thead-dark'><tr role='row'>"
     for (var j = 0; j < nb; j++) {
@@ -423,10 +518,10 @@ function createHtmlTable(tableName) {
     out += "</tr></thead>";
     out += "<tbody>"
     var column = 0;
-    if (dataTable[dataTable.length - 1] == 0) {
+   /* if (dataTable[dataTable.length - 1] == 0) {
         dataTable.unshift(dataTable[dataTable.length - 1]);
         dataTable.splice(dataTable.length - 1, 1);
-    }
+    }*/
     for (var j = 0; j < dataTable.length; j++) {//table  content
 
         if (column == 0) {
@@ -436,12 +531,19 @@ function createHtmlTable(tableName) {
             } else {
                 out += "<tr class = 'even table-primary'>";//+handler+"<br>";;
             }
+            if(dataTable.length>0){
+                out += "<td id = '" + j + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content" + j + "'style='cursor: pointer'>" + dataTable[j];
+                out += "</p></td>";
+                }else if(dataTable.length===0) {
+                    out += "<td   style='vertical-align:bottom;text-decoration:none;' ><p style='cursor: pointer'> No Data Found";
+                    out += "</p></td>";
+                }
 
-            out += "<td id = '" + j + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content" + j + "'style='cursor: pointer'>" + dataTable[j];
-            out += "</p></td>";
 
         } else {
-            out += "<p><td style='vertical-align:bottom;cursor: pointer'>" + dataTable[j] + "</td></p>";
+            out += "<td id = '" + j + "' style='vertical-align:bottom;text-decoration:none;' ><p id='content" + j + "'style='cursor: pointer'>" + dataTable[j];
+            out += "</p></td>";
+            // out += "<p><td style='vertical-align:bottom;cursor: pointer'>" + dataTable[j] + "</td></p>";
         }
         column = column + 1;
         if (column == nb) {
@@ -463,7 +565,7 @@ function createHtmlTable(tableName) {
 
 
     $(document).ready(function () {
-        const regex = /[/,:,.,_,\,',"]/g;
+        const regex = /[/,:,.,_,\,'," ," ",  ,&,+,-,]/g;
         var api = "";
         var td = $("td");
         let val
@@ -479,8 +581,9 @@ function createHtmlTable(tableName) {
         let ff1 = "";
         let values2 = '';
         let ff2 = '';
+        let fieldLenth;
         for (let i = 0; i < td.length; i++) {
-            let j = i-3
+            let j = i//-3
 
             let tempFound = dataTable[j] + ""
             if (typeof dataTable[j] === "string") {
@@ -494,9 +597,13 @@ function createHtmlTable(tableName) {
             let markup;
             values = ''
             $(td[i]).click(function () {
-                console.log(j);
+                //console.log(j);
+                var name = $(this)
+               // console.log(name)
+                let f =name.get()
+                //console.log(f[0].getAttribute("id"))
                 var i = $(this).attr("id");
-                console.log(i);
+               // console.log(i);
                 let jointab = a.tapServiceConnector.getJoinTables(a.getConnector().service["table"])
                 markup = "";
                 markup = "<nav class=\"tree-nav\" id='tree-nav" + j + "'>\n"
@@ -504,7 +611,7 @@ function createHtmlTable(tableName) {
 
 
                     markup += "<details class=\"tree-nav__item is-expandable\">" +
-                        "   <summary type='button' class=\"tree-nav__item-title\" id='s" + jointab[k] + j + found + "'>" + jointab[k] + "</summary>" +
+                        "   <summary type='button' class=\"tree-nav__item-title\" id='s" + jointab[k] + j + found +f[0].getAttribute("id")+ "'>" + jointab[k] + "</summary>" +
                         " <div class=\"tree-nav__item\">"
                     $('#s' + j + k).click(function () {
                         if (values.indexOf(jointab[k]) === -1) {
@@ -513,7 +620,7 @@ function createHtmlTable(tableName) {
                     })
                     for (let key in jsonAll) {
                         if (key == jointab[k]) {
-                            markup += "<tr><td> <a class=\"tree-nav__item-title\" id='c" + key + j + found + "'></a> </td></tr></table>"
+                            markup += "<tr><td> <a class=\"tree-nav__item-title\" id='c" + key + j + found +f[0].getAttribute("id")+ "'></a> </td></tr></table>"
                         }
                     }
                     markup += "</div></details>"
@@ -534,71 +641,120 @@ function createHtmlTable(tableName) {
                 for (let key in jsonAll) {
                     //  let val1 =dataTable[j].replaceAll('-',"_");
 
-                    $("#s" + key + j + found).click(function () {
-                        console.log(j);
+                    $("#s" + key + j + found+f[0].getAttribute("id")).click(function () {
+                        //console.log(j);
                         if (f1.indexOf(key + j + found) === -1) {
                             f1 += key + j + found;
                             let out = " <div class=\"tree-nav__item\">"
-                            out +=createTableInHtmlTable(key, dataTable[j]);
+                            fieldLenth=j%Field.length
+                           // console.log("j ="+j+"  fildlent ="+fieldLenth + "  fildd = "+Field.length)
+                             constraint =key!=="otypedef"? Field[fieldLenth]+' = '+dataTable[j]:dataTable[j]
+                           // alert(key)
+                            if(key==="ObsPointing"){
+                                constraint =dataTable[j]
+                            }
+                            out +=createTableInHtmlTable(key, constraint);
                             out += "</div>"
-                            api3.find("#c" + key + j + found).html(out);
+                            api3.find("#c" + key + j + found+f[0].getAttribute("id")).html(out);
+                            let markup2;
                             $(function () {
-                                $("#mytable1 tr td").click(function (index) {
+                               $("#mytable1 tr td").click(function (index) {
+
                                     var name = $(this)
+                                   //name.find('#tree-nav2' + key + found + j + j).toggle()
+                                   //console.log(index.currentTarget.getAttribute("id"))
                                     let jointab = a.tapServiceConnector.getJoinTables(key)
                                     for (let u = 0; u < jointab.length; u++) {
                                         if (jointab[u] === root) {
                                             jointab.splice(u, 1)
                                         }
                                     }
-                                    let markup2;
-                                    markup2 = " ";
+
+                                    markup2 = "";
                                     let apis = $(this)
-                                    markup2 += "<nav class=\"tree-nav\" id='tree-nav2" + key + j + j + j + "'>\n"
+                                    let verifiedJoinTableAdd='';
+                                    markup2 += "<nav class=\"tree-nav\" id='tree-nav2" + key +  +found+ j + j + index.currentTarget.getAttribute("id")+ "'>\n"
                                     for (let k = 0; k < jointab.length; k++) {
                                         markup2 += "<details class=\"tree-nav__item is-expandable\">" +
-                                            "   <summary class=\"tree-nav__item-title\" id='s2" + key + found + j + k + "'>" + jointab[k] + "</summary>" +
+                                            "   <summary class=\"tree-nav__item-title\" id='s2" + key + found + j + k +index.currentTarget.getAttribute("id")+ "'>" + jointab[k] + "</summary>" +
                                             " <div class=\"tree-nav__item\">"
                                         for (let key in jsonAll) {
                                             if (key === jointab[k]) {
-                                                markup2 += "<a class=\"tree-nav__item-title\" id='cx" + key + found + j + k + found + "'></a> "
+                                               // console.log("id test")
+                                               //console.log("cx" + key + found + j + k + found )
+                                                verifiedJoinTableAdd+=key
+                                                markup2 += "<a class=\"tree-nav__item-title\" id='cx" + key + found + j + k + found+f[0].getAttribute("id") + index.currentTarget.getAttribute("id")+"'></a> "
                                             }
                                         }
                                         markup2 += "</div></details>"
                                     }
                                     markup2 += "</nav>"
-                                    if ($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(regex, "") == found) {
-                                        $("#" + index.currentTarget.getAttribute("id")).click(function () {
-                                            if (tableIdTD2.indexOf(key + j + dataTable[j] + index.currentTarget.getAttribute("id")) === -1) {
-                                                tableIdTD2 += key + j + dataTable[j] + index.currentTarget.getAttribute("id")
-                                                $(this).append(markup2);
-                                            }
-                                        })
+                                   // if ($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(regex, "") === found) {
+                                     //  $("#" + index.currentTarget.getAttribute("id")).click(function () {
 
-                                    }
+                                            if (tableIdTD2.indexOf(key + j + dataTable[j]+verifiedJoinTableAdd + index.currentTarget.getAttribute("id")) === -1) {
+                                                tableIdTD2 += key + j + dataTable[j]+verifiedJoinTableAdd + index.currentTarget.getAttribute("id")
+                                                //$("#cx" + key + found + j + k + found +f[0].getAttribute("id")+ index.currentTarget.getAttribute("id")).html(out)
+
+                                                $(this).append(markup2);
+
+                                               // $(this).append(markup2);
+                                            }
+                                          // markup2="";
+                                       //})
+
+
+                                  //  }
+
 
                                     for (let k = 0; k < jointab.length; k++) {
-                                        $("#s2" + key + found + j + k).click(function () {
-                                            if ($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim() === jointab[k]) {
+                                        $("#s2" + key + found + j + k+index.currentTarget.getAttribute("id")).click(function () {
+                                            let correctTable = $("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim().split(key);
+                                            //console.log("correctTable"+index.currentTarget.getAttribute("id"))
+                                            let testTable = correctTable[0].indexOf(jointab[k])?jointab[k]:correctTable[0];
+                                           // console.log(testTable)
+
+                                            //console.log($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim().endsWith(jointab[k],correctTable.length))
+                                           // console.log($("#" + index.currentTarget.getAttribute("id")).text().replaceAll(j, "").trim() +"==="+k+'\n'+jointab[k])
+                                            if (testTable === jointab[k]) {
                                                 f1 += key + found + j + k + 1;
                                                 let out = " <div class=\"tree-nav__item\">"
+                                               // let Fields = a.tapServiceConnector.getFields(QObject)
+                                               // fieldLenth=j%Fields.length
+                                                //console.log("j ="+j+"  fildlent ="+fieldLenth + "  fildd = "+Fields.length)
+                                               // constraint = Fields[fieldLenth]+' = '+dataTable[j]
                                                 out +=createTableInHtmlTable(jointab[k], dataTable[j]);
+
+                                                //out +=createTableInHtmlTable(jointab[k], dataTable[j]);
                                                 out += "</div>"
-                                                for (let key in jsonAll) {
-                                                    if (key === jointab[k]) {
-                                                        name.find("#cx" + key + found + j + k + found).html(out)
+                                                //console.log(out)
+                                                ///console.log(key +" === "+ jointab[k])
+                                                markup2="";
+                                                for (let keys in jsonAll) {
+                                                    if (keys === jointab[k]) {
+                                                       // console.log(keys +" === "+ jointab[k])
+                                                        //if($("#cx" + keys + found + j + k + found + index.currentTarget.getAttribute("id")).text().indexOf(jointab[k])!==-1){
+                                                            $("#cx" + keys + found + j + k + found +f[0].getAttribute("id")+ index.currentTarget.getAttribute("id")).html(out)
+                                                       // }
+
+                                                            //$(this).html(out);
+                                                        //console.log("#cx" + keys + found + j + k + found +f[0].getAttribute("id")+ index.currentTarget.getAttribute("id"))
+
+
                                                     }
                                                 }
 
                                             }
 
                                         })
-                                        $("#mytable1 tr td p ").click(function (index) {
-                                            name.find('#tree-nav2' + key + found + j + j).toggle()
 
-                                        })
 
                                     }
+                                   //'content2" + table + found + j + j +
+                                   $("#" + index.currentTarget.getAttribute("id")).click(function (index) {
+                                       $('#tree-nav2' + key + found + j + j+ index.currentTarget.getAttribute("id")).toggle()
+
+                                   })
 
                                 });
 
@@ -614,9 +770,9 @@ function createHtmlTable(tableName) {
 
 
             $(this).find("#content" + j).click(function () {
-                console.log('#tree-nav' + j)
+                //console.log('#tree-nav' + j)
                 api.find('#tree-nav' + j).toggle()
-                api.find('#tree-nav2' + j + j + j).toggle()
+                api.find('#tree-nav2' + j+ j + j).toggle()
 
             })
 

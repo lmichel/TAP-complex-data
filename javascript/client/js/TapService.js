@@ -28,12 +28,12 @@ var TapService = /** @class */ (function () {
         }
         console.log("AJAXurl: " + site + " query: " + adql)
 
-        reTable = $.ajax({
+        reTable = $.ajax(params={
             url: "" + site,
             type: "GET",
             data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
             async: false,
-            beforeSend: function() {
+            beforeSend: function(data) {
                 //$('#overlay').removeClass('display-none')
                 $("body").append("<div id=\"overlay\">\n" +
                     "        <div class=\"cv-spinner\">\n" +
@@ -42,9 +42,8 @@ var TapService = /** @class */ (function () {
                     "    </div>");
                 //$('#overlay').addClass('loading')
 
-                if(site) {
                     $("#overlay").fadeIn(1);
-                }
+
 
             },
 
@@ -435,6 +434,9 @@ var TapService = /** @class */ (function () {
         let adql = ''
         let root = api.getConnector().service["table"]
         let schema;
+
+        let allField = api.getAllSelectedRootField(rootTable);
+        let putIdInTopField="";
         let objectMap = api.getObjectMap().succes.object_map
         let map = objectMap.map[root].join_tables
         schema = api.getConnector().service["schema"];
@@ -444,26 +446,46 @@ var TapService = /** @class */ (function () {
                 if (keyRoot === rootTable) {
                     let formatTableName = schema + "." + keyRoot;
                     let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-                    adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[keyRoot].from;
+                    allField = allField.replaceAll(correctTableNameFormat + "." + map[keyRoot].from+' , ',"")
+                    putIdInTopField +=correctTableNameFormat + "." + map[keyRoot].from+' , '+allField;
+                   // alert(keyRoot)
+                  //  console.log("allField11111111111")
+                    //console.log(putIdInTopField);
+                    adql = "SELECT DISTINCT TOP 10 " +putIdInTopField//+ correctTableNameFormat + "." + map[keyRoot].from;
                     adql += '\n' + " FROM  " + correctTableNameFormat;
-                    adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
-                    console.log(adql);
+                    adql += '\n' + " JOIN  " + schema+'.'+api.getConnector().service["table"];
+                    adql += '\n' + " ON " + schema+'.'+api.getConnector().service["table"]+"."+map[keyRoot].target +" = "+ correctTableNameFormat + "." + map[keyRoot].from;
+                    adql += '\n' + " WHERE  " + schema+'.'+api.getConnector().service["table"] + "."+constraint //+ map[keyRoot].from + " = " + constraint;
+                    //adql += '\n' + " OR "
+                    //adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+                    //console.log(adql);
                     return adql;
                 }
                 if (keyRoot !== rootTable) {
                     let formatTableName = schema + "." + keyRoot;
                     let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+                    let putIdInTopField2 =""
                     for (let ke in map[keyRoot]) {
                         if (ke === "join_tables") {
                             for (let k in map[keyRoot][ke]) {
                                 if (k === rootTable) {
+                                    let allField2 = api.getAllSelectedRootField(k);
+                                    allField2=allField2.replaceAll("undefined","");
+                                    //console.log("allField2")
+                                   // console.log(allField2)
                                     let formatTableName2 = schema + "." + k;
                                     let correctTableNameFormat2 = formatTableName2.quotedTableName().qualifiedName;
-                                    adql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from;
+                                    allField = allField.replaceAll(correctTableNameFormat2 + "." + map[keyRoot][ke][k].from+',',"")
+                                    //alert(allField.indexOf(schema+"."+"ref.year"+' , '))
+                                    allField = allField.replaceAll(schema+"."+"ref.year"+' , ',"")
+                                    putIdInTopField2 +=correctTableNameFormat2 + "." + map[keyRoot][ke][k].from+' , '+allField;
+                                    //console.log(putIdInTopField2);
+                                    adql = "SELECT DISTINCT TOP 10 "+ putIdInTopField2//+ correctTableNameFormat2 + "." + map[keyRoot][ke][k].from;
                                     adql += '\n' + " FROM  " + correctTableNameFormat2;
                                     adql += " JOIN " + correctTableNameFormat + " ON " + correctTableNameFormat + "." + map[keyRoot].join_tables[k].target
                                     adql += " = " + correctTableNameFormat2 + "." + map[keyRoot][ke][k].from
-                                    adql += '\n' + " WHERE  " + correctTableNameFormat + "." + map[keyRoot].from + " = " + constraint;
+                                    adql += '\n' + " WHERE  " + correctTableNameFormat + "." +map[keyRoot].from + " = " + constraint;
+
                                     return adql;
                                 }
                             }

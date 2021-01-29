@@ -186,10 +186,12 @@ TapApi.prototype.getRootQueryIds = function () {
             let nbCols = Field.length;
             for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
                 for (let col = 0; col < nbCols; col++) {
-                    if (dataTable[rowNb + col] != null)
-                        singleArrayValue.push(dataTable[rowNb + col]);
+                    if (dataTable[rowNb] != null)
+                        singleArrayValue.push(dataTable[rowNb]);
+                    singleArrayValue= Array.from(new Set(singleArrayValue));
                 }
                 doubleArrayValue.push(singleArrayValue);
+
                 singleArrayValue = [];
             }
             jsonContaintRootQueryIdsValues.succes.status = "OK"
@@ -206,6 +208,7 @@ TapApi.prototype.getRootQueryIds = function () {
 
 TapApi.prototype.getRootQuery = function () {
     let rootTable = this.getConnector().service["table"];
+    let allField = this.getAllSelectedRootField(rootTable);
     let schema;
     let contentAdql = "";
     let textJoinConstraint = "";
@@ -220,7 +223,7 @@ TapApi.prototype.getRootQuery = function () {
                 let formatJoinTable = schema + "." + key;
                 let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
                 let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-                contentAdql = "SELECT DISTINCT TOP 60 " + correctTableNameFormat + "." + map[rootTable].join_tables[key].target;
+                contentAdql = "SELECT DISTINCT TOP 10 " + allField;//correctTableNameFormat + "." + map[rootTable].join_tables[key].target;
                 contentAdql += '\n' + " FROM  " + correctTableNameFormat;
                 this.tapServiceConnector.jsonAdqlContent.rootQuery = contentAdql;
                 textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
@@ -315,7 +318,7 @@ TapApi.prototype.resetTableConstraint = function (table) {
             delete this.tapServiceConnector.jsonAdqlContent.allCondition[correctTableNameFormat];
             this.tapServiceConnector.jsonAdqlContent.status.status = "OK";
         } else {
-            this.tapServiceConnector.jsonAdqlContent.status.status = "Failed";
+            this.tapServiceConnector.jsonAdqlContent.status.status = "OK";
         }
     }
     return this.tapServiceConnector.jsonAdqlContent;
@@ -350,4 +353,52 @@ TapApi.prototype.getObjectMapWithAllDescriptions = function () {
 }
 TapApi.prototype.setAdql = function (rootTable, constraint) {
     return this.tapServiceConnector.getAdqlAndConstraint(rootTable,constraint)
+}
+TapApi.prototype.getAllSelectedRootField = function (rootTable){
+    //let rootTable = this.getConnector().service["table"]
+    let jsonField = this.getTableAttributeHandlers(rootTable).attribute_handlers
+       // console.log(jsonField)
+    let allField ="";
+    let schema;
+    schema = this.tapServiceConnector.connector.service["schema"];
+    schema = schema.quotedTableName().qualifiedName;
+    for(let i=0;i<jsonField.length; i++){
+         if(schema==="dbo"){
+             // just for CaomMembers tables because
+             if(rootTable=="CaomMembers"){
+                 if(i<3){
+                     allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+                 }else {
+                     allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+                     break;
+                 }
+                 // just for CAOM because request lenth is limited
+             }else if(i<20){
+                allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+            }else {
+                allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+                break;
+            }
+             // just for 3XMM because request lenth is limited
+        }else if(schema==="EPIC"){
+             if(i<20){
+                 allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+             }else {
+                 allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+                 break;
+             }
+         }
+         else if(i<jsonField.length-1){
+             allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+         }else {
+             allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+             break;
+         }
+
+    }
+    let lent =allField.split(',')
+    ///console.log(lent.length)
+    //console.log(allField);
+    return allField;
+
 }
