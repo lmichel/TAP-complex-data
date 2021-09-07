@@ -26,7 +26,7 @@ TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
     this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
     this.tapServiceConnector.connector.votable = this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
     this.tapServiceConnector.api = this;
-    if (this.tapServiceConnector.connector.votable.statusText === "OK") {
+    if (this.tapServiceConnector.connector.votable.status === 200) {
         this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
     }
     /* for vizier only*/
@@ -73,14 +73,19 @@ TapApi.prototype.getObjectMap = function () {
  * */
 TapApi.prototype.getJoinedTables = function (baseTable) {
     if (this.getConnector().status === 'OK') {
-        this.tapServiceConnector.jsonContaintJoinTable.Succes.status = "OK";
-        this.tapServiceConnector.jsonContaintJoinTable.Succes.base_table = baseTable;
-        this.tapServiceConnector.jsonContaintJoinTable.Succes.joined_tables = this.tapServiceConnector.objectMapWithAllDescription.map[baseTable].join_tables//this.tapServiceConnector.getJoinTables(baseTable);
+        if(this.tapServiceConnector.objectMapWithAllDescription.map[baseTable] === undefined){
+			this.tapServiceConnector.jsonContaintJoinTable.Succes.status = "Failed";
+	        this.tapServiceConnector.jsonContaintJoinTable.Failure.WrongTable.status = "Failed";
+	        this.tapServiceConnector.jsonContaintJoinTable.Failure.WrongTable.message = "table " + baseTable + " is not part of the object map"
+		}else {
+			this.tapServiceConnector.jsonContaintJoinTable.Succes.joined_tables = this.tapServiceConnector.objectMapWithAllDescription.map[baseTable].join_tables//this.tapServiceConnector.getJoinTables(baseTable);
+			this.tapServiceConnector.jsonContaintJoinTable.Succes.status = "OK";
+        	this.tapServiceConnector.jsonContaintJoinTable.Succes.base_table = baseTable;
+		}
+		
     } else {
-        this.tapServiceConnector.jsonContaintJoinTable.succes.status = "Failed";
+        this.tapServiceConnector.jsonContaintJoinTable.Succes.status = "Failed";
         this.tapServiceConnector.jsonContaintJoinTable.Failure.NotConnected.message = "No active TAP connection";
-        this.tapServiceConnector.jsonContaintJoinTable.Failure.WrongTable.status = "Failed";
-        this.tapServiceConnector.jsonContaintJoinTable.Failure.WrongTable.message = "table " + baseTable + " is not part of the object map"
     }
     return this.tapServiceConnector.jsonContaintJoinTable;
 }

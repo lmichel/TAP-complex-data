@@ -5,7 +5,7 @@ var TapService = /** @class */ (function () {
         this.schema = schema;
         this.label = label;
         this.checkstatus = checkstatus;// the result
-        this.allTables = undefined
+        this.allTables = undefined;
         this.tableRemoveView = undefined;
         this.rootQuery = '';
 

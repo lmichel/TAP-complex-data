@@ -45,7 +45,6 @@ function createButton() {
                 "Click to select " + key + " constraints</button>" +
                 "<button  type='button' class=\"btn btn-default\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
                 " <input type='text' class='form form-control' id='txt" + key + "' value='' placeholder='Enter condition' name='Cinputs'> <hr>"
-
             if (testButton111 == true) {
               //  alert( 'existe deja')
             } else {
@@ -69,7 +68,7 @@ function createButton() {
 
 }
 
-var params = {
+let params = {
     tapService: "",
     schema: "",
     table: "",
@@ -207,10 +206,12 @@ function newMain() {
                 //  var caomServices = connectDatabase(params.tapService, params.schema, params.shortName, a.query, a.connector.service["table"]);
 
                 let status = a.getConnector().status;
+				let message = a.getConnector().message;
                 //alert("you are now connected")
                 a.getObjectMapWithAllDescriptions();
                 document.getElementById("testContent").style["display"] = "none";
-                display(status, "getStatu");
+                display(status + ": " + message, "getStatu");
+				display(JSON.stringify(params,undefined, 4),"getJsonAll");
                 ConnectActive("btnApiConnectS", "btnApiDisconnect")
             } else {
                 display("no service selected... Choose service first and try again", "getStatu");
@@ -227,7 +228,7 @@ function newMain() {
     $("#btnGetConnector").click(function () {
         if (a.getConnector().status === "OK") {
 
-            let connector = JSON.stringify(a.getConnector().service, undefined, 2);
+            let connector = JSON.stringify(a.getConnector().service, undefined, 4);
             let status = a.getConnector().status;
             display(status, "getStatu");
             display(connector, "getJsonAll")
@@ -241,7 +242,7 @@ function newMain() {
 
     $("#btnGetObjectMap").click(function () {
         if (a.getConnector().status === "OK") {
-            let objectMap = JSON.stringify(a.getObjectMap(), undefined, 2);
+            let objectMap = JSON.stringify(a.getObjectMap(), undefined, 4);
             let status = a.getObjectMap().succes.status;
             display(status, "getStatu");
             display(objectMap, "getJsonAll")
@@ -260,7 +261,7 @@ function newMain() {
 
 
             display('ok', "getStatu");
-            display(JSON.stringify(a.getObjectMapWithAllDescriptions(), undefined, 2), "getJsonAll")
+            display(JSON.stringify(a.getObjectMapWithAllDescriptions(), undefined, 4), "getJsonAll")
         } else {
             display(statusf, "getStatu");
             display(message, "getJsonAll")
@@ -272,7 +273,7 @@ function newMain() {
     $("#btnGetJoinTable").click(function () {
         if (a.getConnector().status === "OK") {
 
-            let joinTables = JSON.stringify(a.getJoinedTables(params.table).Succes, undefined, 2);
+            let joinTables = JSON.stringify(a.getJoinedTables(params.table), undefined, 4);
             let status = a.getJoinedTables(params.table).Succes.status;
             display(status, "getStatu");
             display(joinTables, "getJsonAll")
@@ -286,7 +287,7 @@ function newMain() {
     $("#btnGetRootField").click(function () {
         if (a.getConnector().status === "OK") {
             createButton()
-            let rootFields = JSON.stringify(a.getRootFields(), undefined, 2);
+            let rootFields = JSON.stringify(a.getRootFields(), undefined, 4);
             let status = a.getRootFields().status;
             display(status, "getStatu");
             display(rootFields, "getJsonAll")
@@ -326,10 +327,10 @@ function newMain() {
         //$("#getJsonAll").text("Constraint removed successful");
         if (rootq.status.orderErros != "") {
 
-            display("" + JSON.stringify(rootq.status, undefined, 2), "getJsonAll")
+            display("" + JSON.stringify(rootq.status, undefined, 4), "getJsonAll")
         } else {
             statu = rootq.status.status != "" ? rootq.status.status : "Failed"
-            display("{ status : " + JSON.stringify(statu, undefined, 2) + " }", "getJsonAll")
+            display("{ status : " + JSON.stringify(statu, undefined, 4) + " }", "getJsonAll")
         }
     });
 
@@ -343,7 +344,7 @@ function newMain() {
             var f = "\\"
             // alert(f)
             createButton();
-            rootQuery = a.getRootQuery() // JSON.stringify(a.getRootQuery(), undefined, 2);
+            rootQuery = a.getRootQuery() // JSON.stringify(a.getRootQuery(), undefined, 4);
 
             tesTabCRQ = true;
             //rootQuery = a.addConstraint(rootQuery,this.tapJoinConstraint,this.tapWhereConstraint)
@@ -402,7 +403,7 @@ function newMain() {
                             //$("#getJsonAll").text("Constraint removed successful");
                             if (rootq.status.orderErros != "") {
 
-                                display("" + JSON.stringify(rootq.status, undefined, 2), "getJsonAll")
+                                display("" + JSON.stringify(rootq.status, undefined, 4), "getJsonAll")
                             } else {
 
                                 display("{ status : OK }", "getJsonAll")
