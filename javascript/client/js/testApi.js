@@ -198,8 +198,6 @@ function newMain() {
         if (a.getConnector().status !== "OK") {
             if (params.tapService != "" && params.schema != "" && params.table != "" && params.shortName != "") {
 
-                ;
-
                 a.connect(params);
 
                 // Add remove loading class on body element based on Ajax request status
