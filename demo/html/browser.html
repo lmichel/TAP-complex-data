@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Table To JSON Test</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-1.23.1.css" type="text/css" media="screen"/>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/qunit/qunit-1.23.1.js"></script>
+    <script src="https://kit.fontawesome.com/dd484881c7.js" crossorigin="anonymous"></script>
+
+    <!-- link to table-->
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap.min.css">
+    <!-- end link to  table-->
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="../css/main.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!--link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"-->
+    <!--script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></--script-->
+    <script type="text/javascript" src="../../import/js/jquery-3.4.1.js"></script>
+    <script type="text/javascript" src="../../import/js/votable.js"></script>
+    <script type="text/javascript" src="../../api/utils/json/jsonRead.js"></script>
+    <script type="text/javascript" src="../../api/utils/VOTableTools.js"></script>
+    <!--script type="text/javascript" src= "../../module/js/TapService.js" ></script-->
+    <script type="text/javascript" src="../../import/js/jquery.js"></script>
+    <script type="text/javascript" src="../../api/utils/util.js"></script>
+    <script type="text/javascript" src="../../api/tap/TapService.js"></script>
+    <script type="text/javascript" src="../../api/tap/TapApi.js"></script>
+
+    <script type="text/javascript" src="../../api/utils/HandlerAttribut.js"></script>
+    <script type="text/javascript" src="../../api/tap/TapServiceConnector.js"></script>
+    <!--script type="text/javascript" src= "../../module/js/TapService.js" ></script>
+    <script type="text/javascript" src= "../js/main.js" charset="utf-8"></script-->
+
+    <script type="text/javascript" src="../js/browser1.js"></script>
+    <script type='text/javascript' src= '../../api/utils/json/json2Requete.js'></script>
+    <!--script type="text/javascript" src="../js/newMain.js" charset="utf-8"></script-->
+    <link rel="stylesheet" href="http://static.jstree.com/3.0.9/assets/docs.css"/>
+    <link rel="stylesheet" href="../css/style.css"/>
+
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.css" rel="stylesheet"
+          type="text/css"/>
+    <link rel="stylesheet" href="../css/table.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+
+    <style type="text/css">
+        .back-link a {
+            color: #4ca340;
+            text-decoration: none;
+            border-bottom: 1px #4ca340 solid;
+        }
+
+        .back-link a:hover,
+        .back-link a:focus {
+            color: #408536;
+            text-decoration: none;
+            border-bottom: 1px #408536 solid;
+        }
+
+        h1 {
+            height: 100%;
+            /* The html and body elements cannot have any padding or margin. */
+            margin: 0;
+            font-size: 14px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 32px;
+            margin-bottom: 3px;
+        }
+
+        .entry-header {
+            text-align: left;
+            margin: 0 auto 50px auto;
+            width: 100%;
+            max-width: 978px;
+            position: relative;
+            z-index: 10001;
+        }
+
+        #demo-content {
+            padding-top: 0px;
+        }
+
+        li {
+            font-size: 16px;
+        }
+
+        .page_loader {
+            display: table;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #inner {
+            display: table-cell;
+            width: 100%;
+            height: 100%;
+            height: 100vh;
+            vertical-align: middle;
+        }
+
+        .vl {
+            border-left: 6px solid darkslategray;
+            height: 700px;
+            position: absolute;
+            left: 24%;
+            margin-left: -3px;
+            top: 132px;
+        }
+    </style>
+
+
+    <script type="text/javascript">
+
+        window.onload = function () {
+            newMain();
+        }
+
+    </script>
+
+</head>
+
+
+<body class="">
+
+
+<div class="page_loader">
+    <div id="inner">
+        <img src="../images/126.gif" alt="loader"/>
+    </div>
+</div>
+
+<!-- Demo content -->
+<div id="demo-contet">
+
+    <header class="entry-header">
+
+        <nav class="back-link">
+            <!--span class="nav-previous"><a href="http://ihatetomatoes.net/create-css3-spinning-preloader/" rel="prev"><span class="meta-nav">&larr;</span> Back to tutorial</a></span>
+        </nav><!- .nav-single -->
+
+    </header>
+
+    <div id="loader-wrapper">
+
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+
+    </div>
+
+    <div id="contnt">
+        <br>
+
+
+
+        <div id="jstree_demo"></div>
+
+
+        <div class="container-fluid">
+            <div class="container">
+
+                <input type="radio" name="sex" id="radio_simbad" value="Simbad" onclick="OnChangeRadio(this)"/>
+                <label for="radio_simbad" class="btn badge-secondary">Simbad</label>
+
+                <input type="radio" name="sex" id="radio_gavo" value="Gavo" onclick="OnChangeRadio(this)"/>
+                <label for="radio_gavo" class="btn btn-secondary">Gavo</label>
+
+                <input type="radio" name="sex" id="radio_caom" value="Caom" onclick="OnChangeRadio(this)"/>
+                <label for="radio_caom" class="btn btn-secondary">CAOM</label>
+
+                <input type="radio" name="sex" id="radio_xmm" value="Xmm" onclick="OnChangeRadio(this)"/>
+                <label for="radio_xmm" class="btn btn-secondary">3XMM</label>
+
+                <input type="radio" name="sex" id="radio_vizier" value="Vizier" onclick="OnChangeRadio(this)"/>
+                <label for="radio_vizier" class="btn btn-secondary">Vizier</label>
+
+
+                <!--button class="btn btn-primary" id="simbadService">Simbad</--button>
+                <button class="btn btn-primary" id="gavoService">Gavo</button>
+                <button class="btn btn-primary" id="caomService">CAOM</button>
+                <button class="btn btn-primary" id="xmmService">3XMM</button>
+                <button class="btn btn-primary" id="vizierService">Vizier</button-->
+
+            </div>
+            <hr>
+            <div class="offset-1">
+                <div class="row">
+                    <div class="col-lg-2">
+                        <button class="btn btn-secondary" id="btnApiConnectS" style="margin-top: 7px">Connect
+                            Api
+                        </button>
+                        <button class="btn btn-secondary" id="btnApiDisconnect" style="margin-top: 7px">
+                            Disconnect Api
+                        </button>
+                        <hr>
+
+                        <button class="btn btn-success" id="btnGetConnector">Get Connector Params</button>
+                        <button class="btn btn-success" id="btnGetObjectMap"
+                                style="margin-top: 7px;display: none">Get
+                            Object Map
+                        </button>
+                        <button class="btn btn-primary" id="btnGetObjectMap2"
+                                style="margin-top: 7px;display: none">Get
+                            Object
+                        </button>
+                        <!--button class="btn btn-success" id="btnGetJoinTable"
+                                style="margin-top: 7px;display: none">Get
+                            Join Tables
+                        </button-->
+                        <!--button class="btn btn-success" id="btnGetRootField"
+                                style="margin-top: 7px;pxdisplay: none">Get
+                            Root Fields
+                        </button-->
+
+                        <div id="tt" ></div>
+                        <button class="btn btn-success" id="btnGetRootQuery" style="margin-top: 7px">Get Root
+                            Query
+                        </button>
+
+
+                        <!--pre id='load2' class="mt-4"
+                             style='background-color:white; overflow:scroll; width:700px; height:400px;margin-left:0px; font-size:10px ;'> </pre>
+                        <hr>
+                        <button type="button" id="test" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                            Run ADQL
+                        </button>
+
+
+
+
+                                <--div id='selectDiv' style='background-color:white; height:400px ; font-size:12px; line-height: 2.3'>
+
+                                </div-->
+
+
+                        <button class="btn btn-success" id="btnConstraint"
+                                style="margin-top: 7px; display: none;">Add
+                            joinTable constraint
+                        </button>
+                        <hr>
+                        <div class="card">
+                            <div class="card-body text-capitalize text-success" style="display: none"
+                                 id="loadButton">
+                            </div>
+                        </div>
+                        <button class="btn btn-success" id="btnRemoveConstraint"
+                                style="margin-top: 7px; display: none;">Remove constraint
+                        </button>
+                        <div class="card">
+                            <div class="card-body text-capitalize text-success" style="display: none"
+                                 id="loadRemoveButton">
+                            </div>
+                        </div>
+                        <button class="btn btn-danger" id="btnRemoveAllConstraint"
+                                style="margin-top: 7px;display: none ">Reset All constraint
+                        </button>
+                        <hr>
+
+                        <button class="btn btn-success" id="btnLoadbuttonsHandler" style="display: none">
+                            getTableHandlers
+                        </button>
+                        <div class="card">
+                            <div class="card-body" style="display: none" id="loadbuttonsHandler"></div>
+                        </div>
+                        <button class="btn btn-success" id="btnGetRootQueryId"
+                                style="margin-top: 7px; display: none">
+                            Get root Ids
+                        </button>
+                        <button class="btn btn-success" id="btnGetRootFieldValue" style="margin-top: 7px">Run
+                            Query
+                        </button>
+
+                    </div>
+                    <div class="col-lg-8" style="margin-left: 20px;">
+                        <div class="card" style="width: 1050px;"><h4 class="text-capitalize text-info text-center"> status of
+                            function</h4>
+                        </div>
+                        <div class="card" style="width: 1050px;">
+                            <div class="card-body text-capitalize text-success" style="width: 1050px;"><h4 id="getStatu"></h4>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <div class="card" style="width: 1050px;"><h4 class="text-capitalize text-info text-center" > Result </h4>
+                        </div>
+                        <pre id="handler"></pre>
+                        <pre id='getJsonAll'
+                             style='background-color:white; overflow:scroll; height:850px;margin-left:0px; width: 1050px; line-height: 1.3; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;font-weight: bold'>
+                        </pre>
+                        <input type="text" id="rootQuery" value="false" style="display: none">
+                    </div>
+                </div>
+                <div class="vl"></div>
+            </div>
+
+
+            <div style="display: none" id="testContent">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <button class="btn btn-primary" id="btnGetConnector1">Get Connector Params
+                                </button>
+                            </div>
+                            <div class="col-lg-9 offset-1">
+
+                                <pre id='getJsonConnector'
+                                     style='background-color:white; overflow:scroll; height:500px;margin-left:0px; line-height: 1.3'></pre>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-2">
+
+                                <button class="btn btn-primary" id="btnGetObjectMap1">Get Object Map</button>
+                            </div>
+
+                            <div class="col-lg-9 offset-1">
+                                <pre id='getJsonObjectMap'
+                                     style='background-color:white; overflow:scroll; height:500px;margin-left:0px; line-height: 1.3'></pre>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <button class="btn btn-primary" id="btnGetJoinTable1">Get Join Tables</button>
+                            </div>
+                            <div class="col-lg-9 offset-1">
+                                <pre id='getJsonJoinTable'
+                                     style='background-color:white; overflow:scroll; height:500px;margin-left:0px; line-height: 1.3'></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <button class="btn btn-primary" id="btnGetRootField1">Get Root Fields</button>
+                            </div>
+                            <div class="col-lg-9 offset-1">
+                                <pre id='getJsonRootField'
+                                     style='background-color:white; overflow:scroll; height:500px;margin-left:0px; line-height: 1.3'></pre>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-2">
+                                <button class="btn btn-primary" id="btnGetRootFieldValue1">Get Root Field Values
+                                </button>
+                            </div>
+                            <div class="col-lg-9 offset-1">
+                                <pre id='getJsonRootFieldValue'
+                                     style='background-color:white; overflow:scroll; height:500px;margin-left:0px; line-height: 1.3'></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-lg-2">
+
+                                <button class="btn btn-primary" id="btnGetRootQuery1">Get Root Query</button>
+                            </div>
+                            <div class="col-lg-9 offset-1">
+                                <pre id='getJsonRootQuery'
+                                     style='background-color:white; overflow:scroll; height:500px;margin-left:0px; line-height: 1.3'></pre>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="container-fluid" style="display: none">
+            <div class="row">
+                <div class="col-lg-2">
+
+                    <ul id="myUL">
+                        <li><span class="caret " style="font-size: 20px;"><i
+                                class="fa fa-folder-open green-color"
+                                aria-hidden="true"></i> Popular Databases</span>
+                            <ul class="nested">
+
+                                <li>
+                <span class="caret" id="simbadFolder">
+                  <i class="fa fa-folder-open yellow-color" aria-hidden="true"></i>
+                  Simbad   <input type="text" style="display: none;" value="Simbad" id="Simbad">
+                </span>
+                                    <ul class="nested">
+                                        <li style="cursor: pointer;" id="connectBasic"><i
+                                                class="fas fa-table teal-color"></i> Basic
+                                        </li>
+                                        <li style="cursor: pointer;" id="connectAutre"><i
+                                                class="fas fa-table teal-color"></i> List of tables ...
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li><span class="caret" id="gavoFolder"><i
+                                        class="fa fa-folder-open yellow-color"
+                                        aria-hidden="true"></i>
+                Gavo<input type="text" style="display: none;" value="Gavo" id="Gavo"></span>
+                                    <ul class="nested">
+                                        <li style="cursor: pointer;" id="connectResource"><i
+                                                class="fas fa-table teal-color"></i> Resource
+                                        </li>
+                                        <li><i class="fas fa-table teal-color"></i> List of tables ...</li>
+                                    </ul>
+                                </li>
+                                <li><span class="caret"><i class="fa fa-folder-open yellow-color"
+                                                           aria-hidden="true"></i>Caom</span>
+                                    <ul class="nested">
+                                        <li style="cursor: pointer;" id="connectCaomObservation"><i
+                                                class="fas fa-table teal-color"></i> CaomObservation
+                                        </li>
+                                        <li><i class="fas fa-table teal-color"></i> List of tables ...</li>
+                                    </ul>
+                                </li>
+
+                                <li><span class="caret"><i class="fa fa-folder-open yellow-color"
+                                                           aria-hidden="true"></i>3XMM</span>
+                                    <ul class="nested">
+                                        <li style="cursor: pointer;" id="connectEPIC_IMAGE"><i
+                                                class="fas fa-table teal-color"></i>EPIC_IMAGE
+                                        </li>
+                                        <li><i class="fas fa-table teal-color"></i> List of tables ...</li>
+                                    </ul>
+                                </li>
+
+                                <li><span class="caret"><i class="fa fa-folder-open yellow-color"
+                                                           aria-hidden="true"></i>Visier</span>
+                                    <ul class="nested">
+                                        <li style="cursor: pointer;" id="connectMETACat"><i
+                                                class="fas fa-table teal-color"></i> METAcat
+                                        </li>
+                                        <li><i class="fas fa-table teal-color"></i> List of tables ...</li>
+                                    </ul>
+                                </li>
+
+                            </ul>
+                        </li>
+                    </ul>
+                    <br>
+                    <hr>
+
+
+                    <input type="text" class="form-control" style="display: none;" id="txtArea"
+                           value='SELECT TOP 1* FROM "public".basic'><br>
+                    <button class="btn btn-success" style="display: none;" id="btnQuery">Run Query</button>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+
+
+                        <pre id='loadJson'
+                             style='background-color:white; overflow:scroll; width:550px; height:500px;margin-left:0px; font-size:12px; line-height: 2.3'></pre>
+
+                    </div>
+                    <div class="col-lg-5" style="display: block;">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <div id='votableJson'
+                                     style='background-color:white; overflow:auto;; width:700px; height:500px;;margin-left:8px; font-size:12px; line-height: 1.3'></div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+            <!--div class="row">
+                <div class="col-lg-7">
+                    <button class="btn btn-warning" id="btnBuild" style="display: none;">Build Query</button>
+                    <br>
+                    <button class="btn btn-success" id="btnJoin" style="display: none;">Join Table</button>
+                    <BR></BR>
+                    <span><button class="btn btn-primary" id="btnSimbad">Connect Simbad</button>
+            <button class="btn btn-warning" id="btnBasic">Connect to Basic</button>
+            <button class="btn btn-default btn-primary" id="refresh"><i class="fas fa-sync fa-x "></i></button>
+          </span>
+
+                    <div id='selectDiv' style='background-color:white; height:400px ; font-size:12px; line-height: 2.3'>
+
+                    </div>
+
+                </div>
+                <div class="col-lg-5">
+                    <pre id='load2' class="mt-4"
+                         style='background-color:white; overflow:scroll; width:700px; height:400px;margin-left:0px; font-size:10px ;'> </pre>
+                    <hr>
+                    <button type="button" id="test" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+                        Run ADQL
+                    </button-->
+            <hr>
+            <pre id='load4' class=""
+                 style='background-color:white; overflow:scroll; width:350px; height:400px;margin-left:200px; font-size:10px ;float: right;'> </pre>
+
+        </div>
+    </div>
+
+</div>
+
+
+</div>
+
+</div>
+<!-- /Demo content -->
+
+
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+
+
+<script type="text/javascript" src="../../api/utils/json/tabletojson-cell.js"></script>
+<script type="text/javascript" src="../../api/utils/json/tabletojson-row.js"></script>
+<script type="text/javascript" src="../../api/utils/json/tabletojson.js"></script>
+
+
+<!--script type="text/javascript" src="../lib/jquery.tabletojson.js"></script-->
+<!--script type="text/javascript" src="../lib/jquery.tabletojson.min.js"></script->
+<script type="text/javascript" src="specs-legacy/core.test.js"></script>
+<script type="text/javascript" src="specs-legacy/content.test.js"></script>
+<script type="text/javascript" src="specs/core.test.js"></script>
+<script type="text/javascript" src="specs/content.test.js"></script-->
+
+<script type="text/javascript">
+    $(window).load(function () {
+        $(".page_loader").fadeOut("slow").animate({top: -1600}, 1200);
+    });
+</script>
+
+<script>
+    let toggl = document.getElementsByClassName("caret");
+    let i;
+
+    for (i = 0; i < toggl.length; i++) {
+        toggl[i].addEventListener("click", function () {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+        });
+    }
+</script>
+
+
+<!--       script for pagination table         -->
+<script>
+    $(document).ready(function () {
+        $('#dtBasicExample').DataTable();
+        $('.dataTables_length').addClass('bs-select');
+    });
+</script>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.js"></script>
+
+<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
+<script src="../js/main2.js"></script>
+
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap.min.js"></script>
+
+<script src="../../import/js/jquery-clickable-tr.js"></script>
+<!--      end script for pagination table         -->
+</body>
+</html>
