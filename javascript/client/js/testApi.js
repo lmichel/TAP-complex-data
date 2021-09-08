@@ -3,6 +3,7 @@ document.write("<script type='text/javascript' src= '../../module/js/json2Requet
 const Simbadschema = "public";
 
 let test = false;
+let HtmltabContaninBtnRemoveConstraint = [];
 
 
 function display(data, id) {
@@ -366,7 +367,7 @@ function newMain() {
 
                 var HtmlRemoveBtn = "";
 
-                table = Array.from(new Set(tabContaninBtnRemoveConstraint));
+                table = Array.from(new Set(a.tapServiceConnector.tabContaninBtnRemoveConstraint));
                 console.log(table.length);
 
 

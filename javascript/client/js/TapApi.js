@@ -4,6 +4,15 @@ class TapApi {
     }
 }
 
+/*
+Var globale à nettoyer
+*/
+let isloadRootQuery = false;
+let testSecondJson = false;
+let jsonContaintHandlersValue1 = []
+
+
+
 /**
  * @param params (Json) with parameters (tapService,schema,table,shortName)
  * @param schema (String) Schema containing the complex object
