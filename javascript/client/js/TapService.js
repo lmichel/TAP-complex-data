@@ -28,7 +28,7 @@ var TapService = /** @class */ (function () {
         }
         console.log("AJAXurl: " + site + " query: " + adql)
 
-        reTable = $.ajax(params={
+        reTable = $.ajax({
             url: "" + site,
             type: "GET",
             data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
