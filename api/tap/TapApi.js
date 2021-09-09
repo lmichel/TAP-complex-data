@@ -107,13 +107,13 @@ var TapApi = (function(){
             rootFields = this.tapServiceConnector.getFields(this.votableQueryResult, this.getConnector().service.tapService)
             jsonContaintRootFields.succes.status = "OK"
             jsonContaintRootFields.succes.field_values = rootFields;
-            return jsonContaintRootFields.succes;
+            return jsonContaintRootFields;
         } else {
             jsonContaintRootFields.failure.notConnected.status = "Failed";
             jsonContaintRootFields.failure.notConnected.message = "No active TAP connection"
             jsonContaintRootFields.failure.otherError.status = "failed"
             jsonContaintRootFields.failure.otherError.message = "error_message"
-            return jsonContaintRootFields.failure
+            return jsonContaintRootFields
         }
     }
 

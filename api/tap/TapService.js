@@ -518,7 +518,7 @@ var TapService = /** @class */ (function () {
         var l = 0;
         $(content).find('RESOURCE[type="results"]').each(function () {
             $(this).find("STREAM").each(function () {
-                l = $(this).context.textContent.length;
+                l = $(this).text().length;
             });
         });
         if (l == 0) {
