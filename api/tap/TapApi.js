@@ -288,24 +288,33 @@ var TapApi = (function(){
     }
 
     /**
-     *@param{*} table : String the name of table you want to remove the contraint associeted with
-    * @return{*} : Json the json containing root Query with all join table and all condition of each table
+     *@param {string} table :  the name of table you want to remove the contraint associeted with
+    * @return {*} {status: ok} | {status:failed, message: error_message}
     **/
     TapApi.prototype.resetTableConstraint = function (table) {
+        let objectMap = this.getObjectMap()
+        if (objectMap.succes.status !== "OK"){
+            return objectMap.failure;
+        }
+
         let schema = this.tapServiceConnector.connector.service["schema"];
         let formatTableName = schema + "." + table;
         let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-        for (let key in this.getObjectMap().succes.object_map.tables) {
-            if (key == table) {
-                this.getObjectMap().succes.object_map.tables[key].constraints = ""
-                delete this.tapServiceConnector.jsonAdqlContent.allJoin[correctTableNameFormat];
-                delete this.tapServiceConnector.jsonAdqlContent.allCondition[correctTableNameFormat];
-                this.tapServiceConnector.jsonAdqlContent.status.status = "OK";
-            } else {
-                this.tapServiceConnector.jsonAdqlContent.status.status = "OK";
-            }
+
+        let status = {};
+        
+        if (objectMap.succes.object_map.tables[table] !== undefined ) {
+
+            objectMap.succes.object_map.tables[table].constraints = ""
+            delete this.tapServiceConnector.jsonAdqlContent.allJoin[correctTableNameFormat];
+            delete this.tapServiceConnector.jsonAdqlContent.allCondition[correctTableNameFormat];
+            status.status = "OK";
         }
-        return this.tapServiceConnector.jsonAdqlContent;
+        
+        if (status.status===undefined){
+            status = {"status":"failed","message":"Unknown table " + table}
+        }
+        return status;
     }
 
     /**
@@ -388,6 +397,12 @@ var TapApi = (function(){
 
     }
 
+    /**
+     * 
+     * @param {string} table the table name on which the constraint is set
+     * @param {string} constrain an ADQL constraint (to be put after a WHERE: no aggregation)
+     * @returns {*} {status: ok} | {status:failed, message: error_message}
+     */
     TapApi.prototype.setTableConstraint = function(table, constrain){
         if (this.getConnector().status == 'OK') {
             let schema = this.tapServiceConnector.connector.service["schema"];
