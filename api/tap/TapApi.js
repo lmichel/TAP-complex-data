@@ -268,7 +268,6 @@ var TapApi = (function(){
     }
 
     TapApi.prototype.addConstraint = function () {
-        this.tapServiceConnector.jsonAdqlContent = this.tapServiceConnector.createCorrectJoin(this);
         let objectMapWithAllDescription = this.getObjectMap().succes.object_map;
         for (let keyconst in objectMapWithAllDescription.tables) {
             if (this.tapServiceConnector.jsonAdqlContent.rootQuery.indexOf("WHERE") === -1) {

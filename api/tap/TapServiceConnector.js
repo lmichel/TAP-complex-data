@@ -3,8 +3,7 @@ var TapServiceConnector = (function() {
     function TapServiceConnector(_serviceUrl, _schema, _shortname){
         this.tapService = new TapService(_serviceUrl, _schema, _shortname, true)
         
-        this.isLoadJson = false; // TODO: replace with this.jsonLoad !== undefined 
-        this.jsonLoad = "";
+        this.jsonLoad = undefined;
 
         this.testforConstrain = false;
         this.json = {};
@@ -30,7 +29,7 @@ var TapServiceConnector = (function() {
     * return the full json created by the method createJson()
     */
     TapServiceConnector.prototype.loadJson = function () {
-        if(!this.isLoadJson){
+        if(this.jsonLoad === undefined){
             this.jsonLoad = this.tapService.createJson();
         }
         return this.jsonLoad;
@@ -336,43 +335,6 @@ var TapServiceConnector = (function() {
 
             });
         }
-    }
-    TapServiceConnector.prototype.createCorrectJoin = function (api) {
-        var testfor = false
-        api.tapButton = []
-        var jsonAdqlContent = api.tapServiceConnector.jsonAdqlContent;
-        let mytest = false;
-        var schema = api.tapServiceConnector.connector.service["schema"];
-        let master = this; // little trick to pass the value of "this"
-        /*if (testfor == false) {
-            for (let key in api.getObjectMapWithAllDescriptions().tables) {
-                $("#" + key).click(function () {
-                    let format = schema + '.' + key;
-                    let correctTable = format.quotedTableName().qualifiedName;
-                    fun_btnRemoveConstraint(master.tabContaninBtnRemoveConstraint,key);
-                    for (let keys in jsonAdqlContent.constraint) {
-                        if (keys == correctTable) {
-                            jsonAdqlContent.allJoin[keys] = jsonAdqlContent.constraint[keys]
-                            for (let keyConst in jsonAdqlContent.constraint) {
-                                if (keyConst == "condition " + correctTable) {
-                                    jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().length!==1?$("#txt" + key).val():"";
-                                    if (mytest == false) {
-                                        jsonAdqlContent.allCondition[keys] = jsonAdqlContent.constraint[keyConst];
-                                        mytest = true;
-                                    } else {
-                                        jsonAdqlContent.allCondition[keys] =  jsonAdqlContent.constraint[keyConst];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    $("#getJsonAll").text(jsonAdqlContent.rootQuery);
-                })
-            }
-            testfor = true;
-        }*/
-        api.tapServiceConnector.jsonAdqlContent = jsonAdqlContent
-        return api.tapServiceConnector.jsonAdqlContent;
     }
 
     TapServiceConnector.prototype.createAllJoinTable = function (map){
