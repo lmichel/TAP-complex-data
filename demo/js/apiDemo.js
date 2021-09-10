@@ -234,6 +234,7 @@ function createButton(api) {
                     //enableButton("btnGetTableFields");
                     enableButton("btnConstraint");
                     enableButton("btnRemoveConstraint");
+                    enableButton("btnRemoveAllConstraint");
 
                     createButton(api);
 
@@ -262,6 +263,7 @@ function createButton(api) {
             //disableButton("btnGetTableFields");
             disableButton("btnConstraint");
             disableButton("btnRemoveConstraint");
+            disableButton("btnRemoveAllConstraint");
 
             enableButton("btnApiConnect");
 
@@ -418,7 +420,21 @@ function createButton(api) {
                 return false;
             }
         });
-        
+
+        bindClickEvent("btnRemoveAllConstraint",() => {
+            let r = api.resetAllTableConstraint();
+
+            if (r.status === "OK"){
+                display(r.status, "getStatus");
+                display(api.getRootQuery(), "getJsonAll");
+                return true;
+            } else {
+                display(r.status + " : " + r.message, "getStatus");
+                return false;
+            }
+
+        });
+
         /*/ Templates /*/
         /*
         bindClickEvent("",() => {
