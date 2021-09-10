@@ -124,9 +124,27 @@ function createButton(api) {
     for (let key in api.tapServiceConnector.objectMapWithAllDescription.tables) {
         bindClickEvent("bbb" + key,() => {
             api.tapServiceConnector.selecConstraints(key, "txt" + key, api);
-            
             return true;
         });
+
+        bindClickEvent(key,() => {
+            if($("#txt" + key).val().length!==1){
+                let result = api.setTableConstraint(key, $("#txt" + key).val());
+                if (result.status === "OK"){
+                    display(result.status,"getStatus");
+                    display(api.getRootQuery(),"getJsonAll");
+                    return true;
+                }else{
+                    display(result.status + " : " + result.message,"getStatus");
+                    return false;
+                }
+
+            } else {
+                return false;
+            }
+            
+        });
+
     }
 
 }
@@ -188,7 +206,9 @@ function createButton(api) {
                 let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
                 
                 api.connect(params);
-                
+                api.getRootQuery(); // builds internal data structure needed later
+
+
                 let status = api.getConnector().status;
                 let message = api.getConnector().message;
 
@@ -213,6 +233,7 @@ function createButton(api) {
                     //enableButton("btnGetTableQueryIds");
                     //enableButton("btnGetTableFields");
                     enableButton("btnConstraint");
+                    enableButton("btnRemoveConstraint");
 
                     createButton(api);
 
@@ -240,6 +261,7 @@ function createButton(api) {
             //disableButton("btnGetTableQueryIds");
             //disableButton("btnGetTableFields");
             disableButton("btnConstraint");
+            disableButton("btnRemoveConstraint");
 
             enableButton("btnApiConnect");
 
@@ -382,6 +404,21 @@ function createButton(api) {
             }
 
         });
+
+        bindClickEvent("btnRemoveConstraint",() => {
+
+            let rootq = api.resetTableConstraint($("#txtConstraint").val());
+
+            if (rootq.status === "OK"){
+                display(rootq.status, "getStatus");
+                display(api.getRootQuery(), "getJsonAll");
+                return true;
+            } else {
+                display(rootq.status + " : " + rootq.message, "getStatus");
+                return false;
+            }
+        });
+        
         /*/ Templates /*/
         /*
         bindClickEvent("",() => {
