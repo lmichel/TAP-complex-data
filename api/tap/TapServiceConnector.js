@@ -249,6 +249,8 @@ var TapServiceConnector = (function() {
     }
 
     TapServiceConnector.prototype.selecConstraints = function (tableName, txtImput,api){
+        console.log(tableName);
+        console.log(txtImput);
         var name = tableName //b[ii].id.slice(1);//the name of
         var schema = api.getConnector().service["schema"];
         // alert(name +' '+schema);
@@ -364,8 +366,6 @@ var TapServiceConnector = (function() {
                             }
                         }
                     }
-                    document.getElementById("loadButton").style.display = "none"
-                    document.getElementById("btnConstraint").style.display = "none";
                     $("#getJsonAll").text(jsonAdqlContent.rootQuery);
                 })
             }

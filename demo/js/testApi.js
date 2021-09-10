@@ -460,12 +460,7 @@ function newMain() {
     })
 
 
-    $("#btnApiDisconnect").click(function () {
-        a.disconnect()
 
-
-
-    })
 
     /////////////////////////// END API //////////////////////////
 
