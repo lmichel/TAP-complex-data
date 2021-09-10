@@ -318,15 +318,19 @@ var TapApi = (function(){
     }
 
     /**
-     *@param{*} table : String the name of table you want to remove the contraint associeted with
-    * @return{*} : Json the json containing root Query with all join table and all condition of each table
+    * @return {*} {status: ok} | {status:failed, message: error_message}
     **/
-    TapApi.prototype.resetAll = function () {
+    TapApi.prototype.resetAllTableConstraint = function () {
+        let status;
+        
         for (let key in this.getObjectMapWithAllDescriptions().tables) {
-            this.resetTableConstraint(key);
-            this.tapServiceConnector.jsonAdqlContent.status.status = "OK";
+            status = this.resetTableConstraint(key);
+            if (status.status !== "OK"){
+                return status;
+            }
         }
-        return this.tapServiceConnector.jsonAdqlContent;
+
+        return status;
     }
 
     /**
