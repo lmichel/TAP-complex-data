@@ -99,6 +99,38 @@ function OnRadioChange(radio) {
     }
 }
 
+/*/ Button creation for constrain selection /*/
+
+function createButton(api) {
+    let buttons = "";
+    let value = ""
+    let tapButton = [];
+
+    for (let key in api.getObjectMapWithAllDescriptions().tables) {
+        value = api.getObjectMapWithAllDescriptions()
+
+        buttons = "<span>" + "<button data-toggle=\"modal\" data-target=\"#myModal\" type='button' class=\"btn btn-primary\" " +
+            "id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">" +
+            "Click to select " + key + " constraints</button>" +
+            "<button  type='button' class=\"btn btn-primary\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
+            " <input type='text' class='form form-control' id='txt" + key + "' value='' placeholder='Enter condition' name='Cinputs'> </span> <hr>"
+        
+        tapButton.push(buttons);
+        
+    }
+
+    $("#loadButton").append(tapButton);
+
+    for (let key in api.tapServiceConnector.objectMapWithAllDescription.tables) {
+        bindClickEvent("bbb" + key,() => {
+            api.tapServiceConnector.selecConstraints(key, "txt" + key, api);
+            
+            return true;
+        });
+    }
+
+}
+
 /*/ confined area /*/
 
 {
@@ -180,6 +212,9 @@ function OnRadioChange(radio) {
                     enableButton("btnGetRootFields");
                     //enableButton("btnGetTableQueryIds");
                     //enableButton("btnGetTableFields");
+                    enableButton("btnConstraint");
+
+                    createButton(api);
 
                     return true;
 
@@ -204,6 +239,7 @@ function OnRadioChange(radio) {
             disableButton("btnGetRootFields");
             //disableButton("btnGetTableQueryIds");
             //disableButton("btnGetTableFields");
+            disableButton("btnConstraint");
 
             enableButton("btnApiConnect");
 
@@ -211,6 +247,8 @@ function OnRadioChange(radio) {
             $("label[name=radioLabel]").each((i,btn)=>{
                 enableButton(btn.id);
             })
+
+            $("loadButton").html("");
 
             return false;
 
@@ -336,6 +374,14 @@ function OnRadioChange(radio) {
             return status === "OK";
         });
 
+        bindClickEvent("btnConstraint",() => {
+            if (document.getElementById("loadButton").style.display == "block"){
+                document.getElementById("loadButton").style.display = "none";
+            }else {
+                document.getElementById("loadButton").style.display = "block";
+            }
+
+        });
         /*/ Templates /*/
         /*
         bindClickEvent("",() => {

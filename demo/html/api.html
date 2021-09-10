@@ -5,6 +5,7 @@
         <title>API test for Tap Complex</title>
 
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
         <!-- Tap Complex API imports -->
 
@@ -35,106 +36,112 @@
         <!-- CSS imports -->
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+        <link rel="stylesheet" href="../css/style.css"/>
+        <link href="../css/main.css" rel="stylesheet">
         <!-- End of CSS imports -->
 
     </head>
 
     <body>
-        <br>
-        <div class="container">
-            <div class="text-center" >
-                <input type="radio" name="sex" id="radio_simbad" value="Simbad" onclick="OnRadioChange(this)" />
-                <label for="radio_simbad" class="btn btn-primary" id="label_simbad" name="radioLabel">Simbad</label>
+        <div>
+            <br>
+            <div class="container">
+                <div class="text-center" >
+                    <input type="radio" name="sex" id="radio_simbad" value="Simbad" onclick="OnRadioChange(this)" />
+                    <label for="radio_simbad" class="btn btn-primary" id="label_simbad" name="radioLabel">Simbad</label>
 
-                <input type="radio" name="sex" id="radio_gavo" value="Gavo" onclick="OnRadioChange(this)" />
-                <label for="radio_gavo" class="btn btn-primary" id="label_gavo" name="radioLabel">Gavo</label>
+                    <input type="radio" name="sex" id="radio_gavo" value="Gavo" onclick="OnRadioChange(this)" />
+                    <label for="radio_gavo" class="btn btn-primary" id="label_gavo" name="radioLabel">Gavo</label>
 
-                <input type="radio" name="sex" id="radio_caom" value="Caom" onclick="OnRadioChange(this)" />
-                <label for="radio_caom" class="btn btn-primary" id="label_caom" name="radioLabel">CAOM</label>
+                    <input type="radio" name="sex" id="radio_caom" value="Caom" onclick="OnRadioChange(this)" />
+                    <label for="radio_caom" class="btn btn-primary" id="label_caom" name="radioLabel">CAOM</label>
 
-                <input type="radio" name="sex" id="radio_3xmm" value="3XMM" onclick="OnRadioChange(this)" />
-                <label for="radio_3xmm" class="btn btn-primary" id="label_3xmm" name="radioLabel">3XMM</label>
+                    <input type="radio" name="sex" id="radio_3xmm" value="3XMM" onclick="OnRadioChange(this)" />
+                    <label for="radio_3xmm" class="btn btn-primary" id="label_3xmm" name="radioLabel">3XMM</label>
 
-                <input type="radio" name="sex" id="radio_vizier" value="Vizier" onclick="OnRadioChange(this)" />
-                <label for="radio_vizier" class="btn btn-primary" id="label_vizier" name="radioLabel">Vizier</label>
-            </div>
-        </div>
-
-        <hr>
-
-        <div class="container">
-
-            <div class = "row">
-                <!--  Button column  -->
-                <div class="col-lg-2">
-
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnApiConnect">Connect Api</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnApiDisconnect">Disconnect Api</button>
-                    <hr>
-
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetConnector">Get Connector</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetObjectMap">Get Object Map</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetJoinTable">Get Joined Tables</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQuery">Get Root Query</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRunRootQuery">Get Run Root Query</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQueryIds">Get Root Query Ids</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootFields">Get Root Fields</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetTableQueryIds">Get Table Query Ids</button>
-                    <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetTableFields">Get Table Fields</button>
-
-                    <button class="btn btn-dark" id="btnConstraint" style="margin-top: 7px;width: 100%;">Add joinTable constraint</button>
-                    <hr>
-
-                    <div class="card"  >
-                        <div class="card-body text-capitalize text-success" id="loadButton">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-dark" id="btnRemoveConstraint" style="margin-top: 7px;width: 100%;">Remove constraint</button>
-                    
-                    <div class="card"  >
-                        <div class="card-body text-capitalize text-success" id="loadRemoveButton;width: 100%;">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-danger" id="btnRemoveAllConstraint" style="margin-top: 7px;width: 100%;">Reset All constraint</button>
-                    <hr>
-
-                    <button class="btn btn-dark" id="btnLoadbuttonsHandler">getTableHandlers</button>
-                    
-                    <div class="card">
-                        <div class="card-body" id="loadbuttonsHandler"></div>
-                    </div>
-
-                </div>
-
-                <!-- Data Output -->
-
-                <div class="col-lg-8" style="margin-left: 20px; display: flex;flex-direction: column;">
-                                    
-                    <div class="card"> <h4 class="text-capitalize text-info text-center"> status of function</h4></div>
-                    
-                    <div class="card">
-                        <div class="card-body text-capitalize text-success"> 
-                            <h4 id="getStatus"></h4>
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <div class="card"> 
-                        <h4 class="text-capitalize text-info text-center"> Json content </h4>
-                    </div>
-
-                    <div class="card" style="flex: 1 1 auto;"> 
-                        <pre style= 'overflow:scroll;margin-left:0px; line-height: 1.3; width: 100%;flex: 1 1 auto;'><code id='getJsonAll'></code></pre>
-                    </div>
+                    <input type="radio" name="sex" id="radio_vizier" value="Vizier" onclick="OnRadioChange(this)" />
+                    <label for="radio_vizier" class="btn btn-primary" id="label_vizier" name="radioLabel">Vizier</label>
                 </div>
             </div>
-            
 
+            <hr>
+
+            <div class="container">
+
+                <div class = "row">
+                    <!--  Button column  -->
+                    <div class="col-lg-2">
+
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnApiConnect">Connect Api</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnApiDisconnect">Disconnect Api</button>
+                        <hr>
+
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetConnector">Get Connector</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetObjectMap">Get Object Map</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetJoinTable">Get Joined Tables</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQuery">Get Root Query</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRunRootQuery">Get Run Root Query</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQueryIds">Get Root Query Ids</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootFields">Get Root Fields</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetTableQueryIds">Get Table Query Ids</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetTableFields">Get Table Fields</button>
+
+                        <button class="btn btn-dark" id="btnConstraint" style="margin-top: 7px;width: 100%;">Add joinTable constraint</button>
+                        <hr>
+
+                        <div class="card"  >
+                            <div class="card-body text-capitalize text-success" id="loadButton" style="display: none;">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-dark" id="btnRemoveConstraint" style="margin-top: 7px;width: 100%;">Remove constraint</button>
+                        
+                        <div class="card"  >
+                            <div class="card-body text-capitalize text-success" id="loadRemoveButton;width: 100%;">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-danger" id="btnRemoveAllConstraint" style="margin-top: 7px;width: 100%;">Reset All constraint</button>
+                        <hr>
+
+                        <button class="btn btn-dark" id="btnLoadbuttonsHandler">getTableHandlers</button>
+                        
+                        <div class="card">
+                            <div class="card-body" id="loadbuttonsHandler"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Data Output -->
+
+                    <div class="col-lg-8" style="margin-left: 20px; display: flex;flex-direction: column;">
+                                        
+                        <div class="card"> <h4 class="text-capitalize text-info text-center"> status of function</h4></div>
+                        
+                        <div class="card">
+                            <div class="card-body text-capitalize text-success"> 
+                                <h4 id="getStatus"></h4>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="card"> 
+                            <h4 class="text-capitalize text-info text-center"> Json content </h4>
+                        </div>
+
+                        <div class="card" style="flex: 1 1 auto;"> 
+                            <pre style= 'overflow:scroll;margin-left:0px; line-height: 1.3; width: 100%;flex: 1 1 auto;'><code id='getJsonAll'></code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+
+            </div>
         </div>
+        
 
     </body>
 
