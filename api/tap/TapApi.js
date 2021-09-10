@@ -217,7 +217,7 @@ var TapApi = (function(){
                     let formatJoinTable = schema + "." + key;
                     let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
                     let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-                    contentAdql = "SELECT DISTINCT TOP 10 " + allField;//correctTableNameFormat + "." + map[rootTable].join_tables[key].target;
+                    contentAdql = "SELECT TOP 10 " + allField;
                     contentAdql += '\n' + " FROM  " + correctTableNameFormat;
                     this.tapServiceConnector.jsonAdqlContent.rootQuery = contentAdql;
                     textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
@@ -234,7 +234,6 @@ var TapApi = (function(){
                             textJoinConstraint = " JOIN  " + secondformatJoinTable + " ";
                             textJoinConstraint += "ON " + correctJoinFormaTable + "." + json2.join_tables[f].target;
                             textJoinConstraint += "=" + secondformatJoinTable + "." + json2.join_tables[f].from;
-                            this.tapServiceConnector.jsonAdqlContent.constraint["condition " + secondformatJoinTable] = ""
                             this.tapServiceConnector.jsonAdqlContent.constraint[secondformatJoinTable] = firstJoin + " " + textJoinConstraint
                             for (let c in json2.join_tables[f]) {
                                 let json3 = json2.join_tables[f].join_tables
@@ -242,18 +241,15 @@ var TapApi = (function(){
                                     for (let c1 in json3) {
                                         let secondJoin = this.tapServiceConnector.jsonAdqlContent.constraint[secondformatJoinTable]
                                         let thirdformatJoinTable = schema + "." + c1;
-                                        let thirdcorrectJoinFormaTable = thirdformatJoinTable.quotedTableName().qualifiedName
                                         textJoinConstraint = " JOIN  " + thirdformatJoinTable + " ";
                                         textJoinConstraint += "ON " + secondcorrectJoinFormaTable + "." + json3[c1].target;
                                         textJoinConstraint += "=" + thirdformatJoinTable + "." + json3[c1].from;
-                                        this.tapServiceConnector.jsonAdqlContent.constraint["condition " + thirdformatJoinTable] = ""
                                         this.tapServiceConnector.jsonAdqlContent.constraint[thirdformatJoinTable] = secondJoin + " " + textJoinConstraint
                                     }
                                 }
                             }
                         }
                     }
-                    this.tapServiceConnector.jsonAdqlContent.constraint["condition " + correctJoinFormaTable] = " " + schema + "." + key + "." + map[keyRoot].join_tables[key].from + "=" + "";
                 }
             }
         }
@@ -352,43 +348,56 @@ var TapApi = (function(){
     }
 
     TapApi.prototype.getAllSelectedRootField = function (rootTable){
-        //let rootTable = this.getConnector().service["table"]
-        let jsonField = this.getTableAttributeHandlers(rootTable).attribute_handlers
-        // console.log(jsonField)
+
+        /**
+         * We get all the tables joined with the root table
+         * then we gather all the columns which connect the root table with those tables
+         * finaly we create a set to ensure not selecting any columns more than once
+         */
+
+        let join_tables = this.getObjectMap().succes.object_map.map[rootTable].join_tables;
+
+        let columns = []
+        for (let key in join_tables){
+            columns.push(join_tables[key].target);
+        }
+        columns =Array.from(new Set(columns));;
+
         let allField ="";
         let schema;
         schema = this.tapServiceConnector.connector.service["schema"];
         schema = schema.quotedTableName().qualifiedName;
-        for(let i=0;i<jsonField.length; i++){
+        
+        for(let i=0;i<columns.length; i++){
             if(schema==="dbo"){
-                // just for CaomMembers tables because
+                // just for CaomMembers tables because request lenth is limited
                 if(rootTable=="CaomMembers"){
                     if(i<3){
-                        allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+                        allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
                     }else {
-                        allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+                        allField +=schema+'.'+rootTable+'.'+columns[i]
                         break;
                     }
                     // just for CAOM because request lenth is limited
                 }else if(i<20){
-                    allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+                    allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
                 }else {
-                    allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+                    allField +=schema+'.'+rootTable+'.'+columns[i]
                     break;
                 }
                 // just for 3XMM because request lenth is limited
             }else if(schema==="EPIC"){
                 if(i<20){
-                    allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+                    allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
                 }else {
-                    allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+                    allField +=schema+'.'+rootTable+'.'+columns[i]
                     break;
                 }
             }
-            else if(i<jsonField.length-1){
-                allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name+" , "
+            else if(i<columns.length-1){
+                allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
             }else {
-                allField +=schema+'.'+rootTable+'.'+jsonField[i].column_name
+                allField +=schema+'.'+rootTable+'.'+columns[i]
                 break;
             }
 
@@ -416,13 +425,8 @@ var TapApi = (function(){
             if (jsonAdqlContent.constraint[correctTable] !== undefined ) {
 
                 jsonAdqlContent.allJoin[correctTable] = jsonAdqlContent.constraint[correctTable];
-                let keyConst = "condition " + correctTable;
+                jsonAdqlContent.allCondition[correctTable] = constrain
 
-                if(jsonAdqlContent.constraint[keyConst] !== undefined ){
-                    jsonAdqlContent.constraint[keyConst] = constrain;
-                    jsonAdqlContent.allCondition[correctTable] = jsonAdqlContent.constraint[keyConst];
-                        
-                }
             } else {
                 return {"status" : "failed", "message" : "Unknown table " + table};
             }
@@ -432,6 +436,18 @@ var TapApi = (function(){
 
         return {"status":"failed", "message": "No active TAP connection"};
         
+    }
+
+    /**
+     * 
+     * @returns {*} {"status":"OK", "jsonADQLContent": jsonADQLContent} | {"status":"failed", "message": "No active TAP connection"}
+     */
+    TapApi.prototype.getJsonAdqlContent = function() {
+        if (this.getConnector().status == 'OK'){
+            return {"status":"OK", "jsonADQLContent": this.tapServiceConnector.getJsonAdqlContent()}
+        } else {
+            return {"status":"failed", "message": "No active TAP connection"};
+        }
     }
 
     return TapApi;

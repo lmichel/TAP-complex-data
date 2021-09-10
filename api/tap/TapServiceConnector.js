@@ -459,6 +459,10 @@ var TapServiceConnector = (function() {
         return jsonAdqlContent;
     }
 
+    TapServiceConnector.prototype.getJsonAdqlContent = function(){
+        return this.jsonAdqlContent;
+    }
+
     return TapServiceConnector;
 }());
 

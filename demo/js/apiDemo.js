@@ -224,6 +224,7 @@ function createButton(api) {
 
                     enableButton("btnApiDisconnect");
                     enableButton("btnGetConnector");
+                    enableButton("btnGetJsonAdqlContent");
                     enableButton("btnGetObjectMap");
                     enableButton("btnGetJoinTable");
                     enableButton("btnGetRootQuery");
@@ -253,6 +254,7 @@ function createButton(api) {
             
             disableButton("btnApiDisconnect");
             disableButton("btnGetConnector");
+            disableButton("btnGetJsonAdqlContent");
             disableButton("btnGetObjectMap");
             disableButton("btnGetJoinTable");
             disableButton("btnGetRootQuery");
@@ -301,6 +303,19 @@ function createButton(api) {
             display(JSON.stringify(objectMap, undefined, 4), "getJsonAll");
 
             return status === "OK";
+
+        });
+
+        bindClickEvent("btnGetJsonAdqlContent",() => {
+            let jsonAdql = api.getJsonAdqlContent()
+            if (jsonAdql.status === "OK"){
+                display(jsonAdql.status,"getStatus");
+                display(JSON.stringify(jsonAdql.jsonADQLContent,undefined,4),"getJsonAll");
+                return true;
+            } else {
+                display(jsonAdql.status + " : " +jsonAdql.message ,"getStatus")
+                return false;
+            }
 
         });
 
