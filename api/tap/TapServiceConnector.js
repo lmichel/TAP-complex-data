@@ -344,7 +344,7 @@ var TapServiceConnector = (function() {
         let mytest = false;
         var schema = api.tapServiceConnector.connector.service["schema"];
         let master = this; // little trick to pass the value of "this"
-        if (testfor == false) {
+        /*if (testfor == false) {
             for (let key in api.getObjectMapWithAllDescriptions().tables) {
                 $("#" + key).click(function () {
                     let format = schema + '.' + key;
@@ -370,7 +370,7 @@ var TapServiceConnector = (function() {
                 })
             }
             testfor = true;
-        }
+        }*/
         api.tapServiceConnector.jsonAdqlContent = jsonAdqlContent
         return api.tapServiceConnector.jsonAdqlContent;
     }
@@ -499,21 +499,6 @@ var TapServiceConnector = (function() {
 
     return TapServiceConnector;
 }());
-
-function fun_btnRemoveConstraint(tabContaninBtnRemoveConstraint,key){
-    for (let r = 0; r <= tabContaninBtnRemoveConstraint.length; r++) {
-        if (tabContaninBtnRemoveConstraint.indexOf(tabContaninBtnRemoveConstraint[r]) > -1) {
-        } else {
-
-            tabContaninBtnRemoveConstraint.push(key)
-            break;
-        }
-
-    }
-    tabContaninBtnRemoveConstraint = Array.from(new Set(tabContaninBtnRemoveConstraint));
-
-    return tabContaninBtnRemoveConstraint;
-}
 
 function replaceAll(str, find, replace) {
     var escapedFind = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");

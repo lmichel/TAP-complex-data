@@ -388,6 +388,34 @@ var TapApi = (function(){
 
     }
 
+    TapApi.prototype.setTableConstraint = function(table, constrain){
+        if (this.getConnector().status == 'OK') {
+            let schema = this.tapServiceConnector.connector.service["schema"];
+            let format = schema + '.' + table;
+            let correctTable = format.quotedTableName().qualifiedName;
+            let jsonAdqlContent = this.tapServiceConnector.jsonAdqlContent;
+
+            if (jsonAdqlContent.constraint[correctTable] !== undefined ) {
+
+                jsonAdqlContent.allJoin[correctTable] = jsonAdqlContent.constraint[correctTable];
+                let keyConst = "condition " + correctTable;
+
+                if(jsonAdqlContent.constraint[keyConst] !== undefined ){
+                    jsonAdqlContent.constraint[keyConst] = constrain;
+                    jsonAdqlContent.allCondition[correctTable] = jsonAdqlContent.constraint[keyConst];
+                        
+                }
+            } else {
+                return {"status" : "failed", "message" : "Unknown table " + table};
+            }
+
+            return {"status": "OK"};
+        }
+
+        return {"status":"failed", "message": "No active TAP connection"};
+        
+    }
+
     return TapApi;
 }());
 
