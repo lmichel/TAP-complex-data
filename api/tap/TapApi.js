@@ -101,22 +101,35 @@ var TapApi = (function(){
      * @returns return all join request of each join table of the mainJson
      */
     TapApi.prototype.getRootFields = function () {
-        let jsonContaintRootFields = {succes: {status: "", field_values: []}, failure: {notConnected: {status: "", message: ""}, otherError: {status: "", message: ""}}}
-        let rootFields = [];
         if (this.getConnector().status === 'OK') {
-            if (this.votableQueryResult === undefined) {
-                this.votableQueryResult = this.tapServiceConnector.Query(this.getRootQuery().query);
+
+            let votable = this.tapServiceConnector.Query(this.getRootFieldsQuery().query);
+
+            let dataTable = []
+
+            let Field = this.getTableAttributeHandlers(this.getConnector().service["table"]).attribute_handlers
+
+            if (votable.status == 200) {
+                dataTable = this.tapServiceConnector.getDataTable(votable);
+                let nbCols = Field.length;
+                let singleArrayValue = [];
+                let doubleArrayValue = [];
+                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
+                    for (let col = 0; col < nbCols; col++) {
+                        singleArrayValue.push(dataTable[rowNb+col]);
+                    }
+                    doubleArrayValue.push(singleArrayValue);
+
+                    singleArrayValue = [];
+                }
+
+                return {"status" : "OK" , "field_values" :doubleArrayValue};
+            } else {
+                return {"status" : "Failed" , "message" :"votable.statusText" };
             }
-            rootFields = this.tapServiceConnector.getFields(this.votableQueryResult, this.getConnector().service.tapService)
-            jsonContaintRootFields.succes.status = "OK"
-            jsonContaintRootFields.succes.field_values = rootFields;
-            return jsonContaintRootFields;
+            
         } else {
-            jsonContaintRootFields.failure.notConnected.status = "Failed";
-            jsonContaintRootFields.failure.notConnected.message = "No active TAP connection"
-            jsonContaintRootFields.failure.otherError.status = "failed"
-            jsonContaintRootFields.failure.otherError.message = "error_message"
-            return jsonContaintRootFields
+            return {"status" : "Failed" , "message" :"No active TAP connection" };
         }
     }
 
@@ -175,7 +188,7 @@ var TapApi = (function(){
         let doubleArrayValue = [];
         let singleArrayValue = [];
         if (this.getConnector().status == 'OK') {
-            let Field = this.getRootFields().succes.field_values;
+            let Field = this.getAllSelectedRootField(this.getConnector().service["table"]);
             let votable = this.tapServiceConnector.Query(this.getRootQuery().query);
             let dataTable = []
             if (votable.status == 200) {
@@ -204,7 +217,7 @@ var TapApi = (function(){
     TapApi.prototype.getRootQuery = function () {
         if (this.getConnector().status === 'OK') {
             let rootTable = this.getConnector().service["table"];
-            let allField = this.getAllSelectedRootField(rootTable);
+            let allField = this.formatColNames(rootTable,this.getAllSelectedRootField(rootTable));
             let contentAdql = "";
 
             let schema = this.tapServiceConnector.connector.service["schema"];
@@ -239,7 +252,18 @@ var TapApi = (function(){
     TapApi.prototype.getRootFieldsQuery = function(){
         if (this.getConnector().status === 'OK') {
             let rootTable = this.getConnector().service["table"];
-            let allField = this.getAllRootField(rootTable);
+
+            /**
+             * Simbad doesn't support SELECT *
+             * so we explicitly tell him every field.
+             */
+            let allField;
+            if (this.getConnector().service.shortName == "Symbad"){
+                allField = this.formatColNames(rootTable,this.getAllRootField(rootTable));
+            }else {
+                allField = this.formatColNames(rootTable,["*"]);
+            }
+
             let contentAdql = "";
 
             let schema = this.tapServiceConnector.connector.service["schema"];
@@ -365,34 +389,23 @@ var TapApi = (function(){
         for (let key in join_tables){
             columns.push(join_tables[key].target);
         }
-        columns =Array.from(new Set(columns));;
-
-        return this.formatColNames(rootTable,columns);
+        
+        return columns =Array.from(new Set(columns));;
 
     }
 
     TapApi.prototype.getAllRootField = function (rootTable){
 
-        /**
-         * Simbad doesn't support SELECT *
-         * so we explicitly tell him every field.
-         */
-
         let columns = [];
 
-        if (this.getConnector().service.shortName == "Simbad"){
-            let jsonField = this.getTableAttributeHandlers(rootTable).attribute_handlers
-            
-            for (let i =0;i<jsonField.length;i++){
-                columns.push(jsonField[i].column_name);
-            }
-        }else{
-            columns = ["*"]
+
+        let jsonField = this.getTableAttributeHandlers(rootTable).attribute_handlers
+        
+        for (let i =0;i<jsonField.length;i++){
+            columns.push(jsonField[i].column_name);
         }
 
-        columns =Array.from(new Set(columns));;
-
-        return this.formatColNames(rootTable,columns);
+        return columns =Array.from(new Set(columns));;
 
     }
 

@@ -468,12 +468,16 @@ function createButton(api) {
             /*/ TODO : update api.getRootQueryIds output object /*/
 
             let rootFields = api.getRootFields();
-            let status = rootFields.succes.status;
+            let status = rootFields.status;
+            if (status == "OK"){
+                display(status, "getStatus");
+                display(JSON.stringify(rootFields.field_values,undefined,4), "getJsonAll");
+                return true;
+            }
+            
+            display(status + " : " + rootFields.message, "getStatus");
 
-            display(status, "getStatus");
-            display(JSON.stringify(rootFields,undefined,4), "getJsonAll");
-
-            return status === "OK";
+            return false;
         });
 
         bindClickEvent("btnGetTableQueryIds",() => {
