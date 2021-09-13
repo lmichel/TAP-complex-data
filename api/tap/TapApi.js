@@ -232,6 +232,41 @@ var TapApi = (function(){
         return {"status":"failed", "message": "No active TAP connection"}
     }
 
+    /**
+     * Create and return the correct adql querry to get the value of all fields of the selected root table, taking in account all user's defined constraints
+     * @returns {string} the adql query
+     */
+    TapApi.prototype.getRootFieldsQuery = function(){
+        if (this.getConnector().status === 'OK') {
+            let rootTable = this.getConnector().service["table"];
+            let allField = this.getAllRootField(rootTable);
+            let contentAdql = "";
+
+            let schema = this.tapServiceConnector.connector.service["schema"];
+            schema = schema.quotedTableName().qualifiedName;
+
+            let formatTableName = schema + "." + rootTable;
+            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+
+            contentAdql = "SELECT TOP 10 " + allField;
+            contentAdql += '\n' + " FROM  " + correctTableNameFormat;
+
+            for (let key in this.tapServiceConnector.jsonAdqlContent.allJoin) {
+                if (contentAdql.indexOf(this.tapServiceConnector.jsonAdqlContent.allJoin[key]) !== -1) {
+                } else {
+                    contentAdql += '\n' + this.tapServiceConnector.jsonAdqlContent.allJoin[key];
+                }
+            }
+
+            this.tapServiceConnector.setRootQuery(contentAdql)
+
+            this.addConstraint();
+            return {"status": "OK", "query": this.tapServiceConnector.getJsonAdqlContent().rootQuery} ;
+        }
+
+        return {"status":"failed", "message": "No active TAP connection"}
+    }
+
     TapApi.prototype.addConstraint = function () {
         let objectMapWithAllDescription = this.getObjectMap().succes.object_map;
         for (let keyconst in objectMapWithAllDescription.tables) {
@@ -332,6 +367,36 @@ var TapApi = (function(){
         }
         columns =Array.from(new Set(columns));;
 
+        return this.formatColNames(rootTable,columns);
+
+    }
+
+    TapApi.prototype.getAllRootField = function (rootTable){
+
+        /**
+         * Simbad doesn't support SELECT *
+         * so we explicitly tell him every field.
+         */
+
+        let columns = [];
+
+        if (this.getConnector().service.shortName == "Simbad"){
+            let jsonField = this.getTableAttributeHandlers(rootTable).attribute_handlers
+            
+            for (let i =0;i<jsonField.length;i++){
+                columns.push(jsonField[i].column_name);
+            }
+        }else{
+            columns = ["*"]
+        }
+
+        columns =Array.from(new Set(columns));;
+
+        return this.formatColNames(rootTable,columns);
+
+    }
+
+    TapApi.prototype.formatColNames = function(rootTable,columns){
         let allField ="";
         let schema;
         schema = this.tapServiceConnector.connector.service["schema"];
@@ -371,11 +436,7 @@ var TapApi = (function(){
             }
 
         }
-        let lent =allField.split(',')
-        ///console.log(lent.length)
-        //console.log(allField);
         return allField;
-
     }
 
     /**

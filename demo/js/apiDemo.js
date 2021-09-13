@@ -315,7 +315,7 @@ function createButton(api) {
                     enableButton("btnGetObjectMap");
                     enableButton("btnGetJoinTable");
                     enableButton("btnGetRootQuery");
-                    //enableButton("btnGetRunRootQuery");
+                    enableButton("btnGetRootFieldsQuery");
                     enableButton("btnGetRootQueryIds");
                     enableButton("btnGetRootFields");
                     //enableButton("btnGetTableQueryIds");
@@ -345,7 +345,7 @@ function createButton(api) {
             disableButton("btnGetObjectMap");
             disableButton("btnGetJoinTable");
             disableButton("btnGetRootQuery");
-            //disableButton("btnGetRunRootQuery");
+            disableButton("btnGetRootFieldsQuery");
             disableButton("btnGetRootQueryIds");
             disableButton("btnGetRootFields");
             //disableButton("btnGetTableQueryIds");
@@ -423,8 +423,6 @@ function createButton(api) {
         });
 
         bindClickEvent("btnGetRootQuery",() => {
-            
-            /*/ TODO : Re-Do  api.getRootQuery/*/
 
             let rootQuery = api.getRootQuery();
 
@@ -438,17 +436,18 @@ function createButton(api) {
             
         });
 
-        bindClickEvent("btnGetRunRootQuery",() => {
+        bindClickEvent("btnGetRootFieldsQuery",() => {
 
-            /*/ TODO : Do  api.getRunRootQuery/*/
+            let rootQuery = api.getRootFieldsQuery();
 
-            let runRootQuery = api.getRunRootQuery();
-            let status = runRootQuery.Succes.status;
-
-            display(status, "getStatus");
-            display(JSON.stringify(runRootQuery,undefined,4), "getJsonAll");
-
-            return status === "OK";
+            if (rootQuery.status == "OK"){
+                display(rootQuery.status, "getStatus");
+                display(rootQuery.query, "getJsonAll");
+                return true
+            }
+            display(rootQuery.status + " : " + rootQuery.message, "getStatus");
+            return false;
+            
         });
 
         bindClickEvent("btnGetRootQueryIds",() => {
