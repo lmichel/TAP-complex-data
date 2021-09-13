@@ -3,8 +3,7 @@ var TapServiceConnector = (function() {
     function TapServiceConnector(_serviceUrl, _schema, _shortname){
         this.tapService = new TapService(_serviceUrl, _schema, _shortname, true)
         
-        this.isLoadJson = false; // TODO: replace with this.jsonLoad !== undefined 
-        this.jsonLoad = "";
+        this.jsonLoad = undefined;
 
         this.testforConstrain = false;
         this.json = {};
@@ -16,7 +15,7 @@ var TapServiceConnector = (function() {
         this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}}
         this.jsonContaintJoinTable = {Succes:{status: "", base_table: "", joined_tables: []}, Failure: {NotConnected: {status: "", message: ""}, WrongTable: {status: "", message: ""}}}
         this.connector = {status: "", message: "", service: {}, votable: ""}
-        this.jsonAdqlContent = {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {}, "status": {"status": "", 'orderErros': ""}}
+        this.jsonAdqlContent = {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {}, "status": {"status": "Not Built", 'orderErros': ""}}
         this.api ="";
         this.attributsHandler = new HandlerAttributs();
         this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
@@ -30,7 +29,7 @@ var TapServiceConnector = (function() {
     * return the full json created by the method createJson()
     */
     TapServiceConnector.prototype.loadJson = function () {
-        if(!this.isLoadJson){
+        if(this.jsonLoad === undefined){
             this.jsonLoad = this.tapService.createJson();
         }
         return this.jsonLoad;
@@ -128,7 +127,6 @@ var TapServiceConnector = (function() {
         let correctCondition;
         let formatJoinTable = "";
         let correctJoinFormaTable = "";
-        let correctTableConstraint = "";
         let correctWhereClose = "";
         
         let testMap = false;
@@ -145,26 +143,23 @@ var TapServiceConnector = (function() {
                     formatJoinTable = this.schema + "." + tableKey;
                     correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
                     let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:""// this.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
-                    for (let keyConstraint in jsonAdqlContent.constraint) {
-                        if (keyConstraint == correctJoinFormaTable) {
-                            for (let keyConst in jsonAdqlContent.constraint) {
-                                if (keyConst == "condition " + correctJoinFormaTable) {
-                                    correctWhereClose = api.tapServiceConnector.jsonAdqlContent.allCondition[keyConstraint];
-                                }
-                            }
+                    
+                    if (jsonAdqlContent.constraint[correctJoinFormaTable] !== undefined){
+                        if (jsonAdqlContent.allCondition[correctJoinFormaTable]!= undefined){
+                            correctWhereClose = api.tapServiceConnector.jsonAdqlContent.allCondition[correctJoinFormaTable];
                         }
                     }
+
                     this.objectMapWithAllDescription.tables[tableKey] = {
                         "description": jsonWithaoutDescription[tableKey].description,
-                        "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
+                        "constraints": "",
                         "columns": attributHanler != undefined ? attributHanler : [],
                     }
-                    for (let keyConstraint in jsonAdqlContent.constraint) {
-                        if (keyConstraint == correctJoinFormaTable) {
-                            correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
-                            correctCondition = correctCondition.replaceAll("WHERE".trim(), " ");
-                            this.objectMapWithAllDescription.tables[tableKey].constraints = correctTableConstraint != undefined && correctWhereClose != undefined ? correctCondition : "";
-                        }
+
+                    if (jsonAdqlContent.constraint[correctJoinFormaTable] !== undefined) {
+                        correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
+                        correctCondition = correctCondition.replaceAll("WHERE", " ");
+                        this.objectMapWithAllDescription.tables[tableKey].constraints =  correctWhereClose != undefined ? correctCondition.trim() : "";
                     }
 
                 } else {
@@ -337,43 +332,6 @@ var TapServiceConnector = (function() {
             });
         }
     }
-    TapServiceConnector.prototype.createCorrectJoin = function (api) {
-        var testfor = false
-        api.tapButton = []
-        var jsonAdqlContent = api.tapServiceConnector.jsonAdqlContent;
-        let mytest = false;
-        var schema = api.tapServiceConnector.connector.service["schema"];
-        let master = this; // little trick to pass the value of "this"
-        if (testfor == false) {
-            for (let key in api.getObjectMapWithAllDescriptions().tables) {
-                $("#" + key).click(function () {
-                    let format = schema + '.' + key;
-                    let correctTable = format.quotedTableName().qualifiedName;
-                    fun_btnRemoveConstraint(master.tabContaninBtnRemoveConstraint,key);
-                    for (let keys in jsonAdqlContent.constraint) {
-                        if (keys == correctTable) {
-                            jsonAdqlContent.allJoin[keys] = jsonAdqlContent.constraint[keys]
-                            for (let keyConst in jsonAdqlContent.constraint) {
-                                if (keyConst == "condition " + correctTable) {
-                                    jsonAdqlContent.constraint[keyConst] = $("#txt" + key).val().length!==1?$("#txt" + key).val():"";
-                                    if (mytest == false) {
-                                        jsonAdqlContent.allCondition[keys] = jsonAdqlContent.constraint[keyConst];
-                                        mytest = true;
-                                    } else {
-                                        jsonAdqlContent.allCondition[keys] =  jsonAdqlContent.constraint[keyConst];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    $("#getJsonAll").text(jsonAdqlContent.rootQuery);
-                })
-            }
-            testfor = true;
-        }
-        api.tapServiceConnector.jsonAdqlContent = jsonAdqlContent
-        return api.tapServiceConnector.jsonAdqlContent;
-    }
 
     TapServiceConnector.prototype.createAllJoinTable = function (map){
         let table = []
@@ -407,82 +365,6 @@ var TapServiceConnector = (function() {
         return this.tapService.createSimpleAdqlWithConstraint(table,constraint,api);
     }
 
-    /**
-    * @return{*} : Json the json containing all detail about every singel table join to the root table with hadler atribut of choosing table you want to get it handler attribut
-    * */
-    TapServiceConnector.prototype.setObjectMapWithAllDescriptionConstraint = function (api) {
-        var testButton = false;
-        //var h = new HandlerAttributs();
-        var tapButton = [];
-        //api = this;
-        //this.tapWhereConstraint = [];
-        // this.tapJoinConstraint = []
-        tapButton = [];
-        
-        if (this.testApiRooQuery == false) {
-            api.getRootQuery();
-            this.table = this.tapService.allTable();
-            this.testApiRooQuery = true;
-        }
-        let schema = api.tapServiceConnector.connector.service["schema"];
-        if (this.testforConstrain == false) {
-
-            /* for (let key in this.handlerAttribut.objectMapWithAllDescription.tables) {
-                tempTable.push(key)
-            }
-            tempTable = Array.from(new Set(tempTable));*/
-            this.table = this.createAllJoinTable(api.getObjectMapWithAllDescriptions().map)
-            for (let i = 0; i < this.table.length; i = i + 1) {
-                if (this.table[i].search(schema + ".") > -1) {
-                    this.table[i] = this.table[i].replaceAll(schema + ".", "")
-                }
-                var buttons = this.createB(this.table[i], i) // "<button  type='button' class=\"btn btn-warning\" id='b" + table[i] + i + "' value='" + table[i] + "' style=\"margin-top: 7px\">handler '" + table[i] + "'</button></span>"
-                // button+="<button  type='button' class=\"btn btn-default\" id='"+table[i][0]+"' value='"+table[i][0]+"' style=\"margin-top: 7px\">Join '"+table[i][0]+"'</button>"
-
-                if (testButton == true) {
-                    //alert( 'existe deja')
-                } else {
-                    tapButton.push(buttons);
-                }
-                document.getElementById("loadbuttonsHandler").style.display = "block"
-
-            }
-
-            $("#loadbuttonsHandler").append(tapButton);
-            let master = this;
-            window.location.hash = "#loadbuttonsHandler";
-            for (let i = 0; i < this.table.length; i = i + 1) {
-
-                //document.getElementById("loadbuttonsHandler").style.display = "block"
-                $("#b" + this.table[i] + i).click(function () {
-
-                    let format = schema + '.' + master.table[i];
-                    let correctTable = format.quotedTableName().qualifiedName;
-
-                    document.getElementById("loadbuttonsHandler").style.display = "none"
-
-                    //console.log(json);
-
-                    //alert(api.jsonCorrectTableColumnDescription.addAllColumn[correctTable] )
-                    // document.getElementById("loadbuttonsHandler").style.display = "none"
-                    // if (this.jsonCorrectTableColumnDescription.addAllColumn === undefined) {
-                    if(master.json[master.table[i]]==undefined){
-                        master.json[master.table[i]] = api.getTableAttributeHandlers(master.table[i]);
-                    }
-                    //  this.jsonCorrectTableColumnDescription.addAllColumn[correctTable] = json.attribute_handlers;
-                    // }
-
-                    display(JSON.stringify(master.json, undefined, 2), "getJsonAll")
-                    display(master.json.status, "getStatu")
-                    //return api.jsonCorrectTableColumnDescription;
-
-                })
-            }
-        }
-        api.tapServiceConnector.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs']
-        this.testforConstrain = true;
-    }
-
     TapServiceConnector.prototype.replaceWhereAnd = function (jsonAdqlContent){
         const COUNT = 10;
         let space=" "
@@ -497,23 +379,83 @@ var TapServiceConnector = (function() {
         return jsonAdqlContent;
     }
 
+    /**
+     * 
+     * @param {*} query a valid adql query to be stored in the jsoonAdqlContent object
+     */
+    TapServiceConnector.prototype.setRootQuery =function(query){
+        this.jsonAdqlContent.rootQuery = query;
+    }
+
+    /**
+     * This method return (or create if the object was not existing yet) the jsonAdqlContent object which correspond to the following structure :
+     * {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {}, "status": {"status": "", 'orderErros': ""}}
+     * where rootQuery store the query setted by the {@link setRootQuery}, constraint stores all the possible joint adql code for the current selected root table with all others table.
+     * The allCondition field store all the requested conditions, allJoin store all the needed joints to fullfill those conditions.
+     * The status field store status related data.
+     * @returns {*} The jsonAdqlContent object
+     */
+    TapServiceConnector.prototype.getJsonAdqlContent = function(){
+        if (this.jsonAdqlContent.status.status === "Not Built"){
+
+            /*/ JsonAdqlContent building /*/
+
+            let textJoinConstraint = "";
+            let objectMap = this.getObjectMapAndConstraints();
+            let map = objectMap.map;
+
+            let schema = this.connector.service["schema"];
+            schema = schema.quotedTableName().qualifiedName;
+
+            for(let rootTable in map){ 
+
+                let formatTableName = schema + "." + rootTable;
+                let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+
+                for (let key in map[rootTable].join_tables) {
+
+                    let formatJoinTable = schema + "." + key;
+                    let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+
+                    textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
+                    textJoinConstraint += "ON " + correctTableNameFormat + "." + map[rootTable].join_tables[key].target;
+                    textJoinConstraint += "=" + correctJoinFormaTable + "." + map[rootTable].join_tables[key].from;
+                    this.jsonAdqlContent.constraint[correctJoinFormaTable] = textJoinConstraint
+                    textJoinConstraint = "";
+                    let json2 = map[rootTable].join_tables[key]
+                    if (json2.join_tables !== undefined) {
+                        for (let f in json2.join_tables) {
+                            let firstJoin = this.jsonAdqlContent.constraint[correctJoinFormaTable]
+                            let secondformatJoinTable = schema + "." + f;
+                            let secondcorrectJoinFormaTable = secondformatJoinTable.quotedTableName().qualifiedName
+                            textJoinConstraint = " JOIN  " + secondformatJoinTable + " ";
+                            textJoinConstraint += "ON " + correctJoinFormaTable + "." + json2.join_tables[f].target;
+                            textJoinConstraint += "=" + secondformatJoinTable + "." + json2.join_tables[f].from;
+                            this.jsonAdqlContent.constraint[secondformatJoinTable] = firstJoin + " " + textJoinConstraint
+                            for (let c in json2.join_tables[f]) {
+                                let json3 = json2.join_tables[f].join_tables
+                                if (json3 !== undefined) {
+                                    for (let c1 in json3) {
+                                        let secondJoin = this.jsonAdqlContent.constraint[secondformatJoinTable]
+                                        let thirdformatJoinTable = schema + "." + c1;
+                                        textJoinConstraint = " JOIN  " + thirdformatJoinTable + " ";
+                                        textJoinConstraint += "ON " + secondcorrectJoinFormaTable + "." + json3[c1].target;
+                                        textJoinConstraint += "=" + thirdformatJoinTable + "." + json3[c1].from;
+                                        this.jsonAdqlContent.constraint[thirdformatJoinTable] = secondJoin + " " + textJoinConstraint
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            this.jsonAdqlContent.status.status = "Built";
+        }
+        return this.jsonAdqlContent;
+    }
+
     return TapServiceConnector;
 }());
-
-function fun_btnRemoveConstraint(tabContaninBtnRemoveConstraint,key){
-    for (let r = 0; r <= tabContaninBtnRemoveConstraint.length; r++) {
-        if (tabContaninBtnRemoveConstraint.indexOf(tabContaninBtnRemoveConstraint[r]) > -1) {
-        } else {
-
-            tabContaninBtnRemoveConstraint.push(key)
-            break;
-        }
-
-    }
-    tabContaninBtnRemoveConstraint = Array.from(new Set(tabContaninBtnRemoveConstraint));
-
-    return tabContaninBtnRemoveConstraint;
-}
 
 function replaceAll(str, find, replace) {
     var escapedFind = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");

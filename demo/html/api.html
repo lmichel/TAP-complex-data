@@ -80,6 +80,7 @@
 
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetConnector">Get Connector</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetObjectMap">Get Object Map</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetJsonAdqlContent">Get Json Adql Content</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetJoinTable">Get Joined Tables</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQuery">Get Root Query</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRunRootQuery">Get Run Root Query</button>
@@ -99,11 +100,10 @@
                         <button class="btn btn-dark" id="btnRemoveConstraint" style="margin-top: 7px;width: 100%;">Remove constraint</button>
                         
                         <div class="card"  >
-                            <div class="card-body text-capitalize text-success" id="loadRemoveButton;width: 100%;">
-                            </div>
+                            <input type='text' class='form form-control' id='txtConstraint' value= '' placeholder='name of table : exp,otypes'>
                         </div>
 
-                        <button class="btn btn-danger" id="btnRemoveAllConstraint" style="margin-top: 7px;width: 100%;">Reset All constraint</button>
+                        <button class="btn btn-dark" id="btnRemoveAllConstraint" style="margin-top: 7px;width: 100%;">Reset All constraint</button>
                         <hr>
 
                         <button class="btn btn-dark" id="btnLoadbuttonsHandler">getTableHandlers</button>

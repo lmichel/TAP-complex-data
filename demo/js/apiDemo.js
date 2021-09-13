@@ -99,6 +99,94 @@ function OnRadioChange(radio) {
     }
 }
 
+/*/ modal generation /*/
+
+function selectConstraints(tableName, txtInput,api){
+    
+    let schema = api.getConnector().service["schema"];
+    let adql = api.tapServiceConnector.attributsHandler.addAllColumn(tableName, schema)
+    let QObject = api.tapServiceConnector.Query(adql);
+    let dataTable = VOTableTools.votable2Rows(QObject)
+    let contentText = QObject.responseText;
+    let Field = VOTableTools.genererField(QObject, contentText)
+    let nb = Field.length;
+    
+    let out = "\n" +
+        "  <!-- The Modal -->\n" +
+        "  <div class=\"modal fade\" id=\"myModal\">\n" +
+        "    <div class=\"modal-dialog modal-xl\">\n" +
+        "      <div class=\"modal-content\">"+
+        "    <div class=\"modal-content\">\n" +
+        "      <div class=\"modal-body\">\n"+
+        "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + tableName + "</span>" +
+        "<button class='delete_right btn btn-danger'  data-dismiss=\"modal\" id='d_right'><i class='fa fa-close ' ></i></button><br></br>";//head
+    out += "<table  class = 'table table-bordered table-striped table-hover'  role = 'grid' >";
+    out += "<thead class='thead-dark'><tr role='row'>"
+    
+    for (let j = 0; j < nb; j++) {
+        out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[j] + "</th>";
+    }
+    out += "</tr></thead>";
+    out += "<tbody>"
+    let column = 0;
+    
+    for (let j = 0; j < dataTable.length; j++) {//table  content
+        if (column == 0) {
+            var judge = (j + nb) / nb;
+            if (judge % 2 == 1) {
+                out += "<tr class = 'odd table-primary' >";
+            } else {
+                out += "<tr class = 'even table-primary'>";
+            }
+            out += "<td id = '" + dataTable[j] + "' style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + dataTable[j] + "</td>";
+        } else {
+            out += "<td style='text-align: center;vertical-align:bottom'>" + dataTable[j] + "</td>";
+        }
+        column = column + 1;
+        if (column == nb) {
+            out += "</tr>";
+            column = 0;
+        }
+
+    }
+    out += "</tbody>"
+    out += "</table>  </div>"
+    out+=    "</div>\n" +
+        "      <div class=\"modal-footer\">\n" +
+        "        <button type=\"button\" class=\"btn btn-danger\" data-dismiss=\"modal\">Close</button>\n" +
+        "      </div>\n" +
+        "    </div>\n" +
+        "\n" +
+        "  </div>\n" +
+        "</div>"
+
+    ;//head
+    $("body").prepend(out);
+    let td = $("td");
+    for (let i = 0; i < td.length; i++) {
+        $(td[i]).click(function () {
+            let id = $(this).attr("id");
+            if ($("#" + txtInput).val().length !==1) {
+                var content = $("#" + txtInput).val();
+                let formatValue = schema+"."+tableName;
+                let correctValue = formatValue.quotedTableName().qualifiedName
+                if($("#" + txtInput).val().indexOf(" AND " + correctValue + "." + id)!==-1){
+                    alert(id+" already added")
+                }else{
+                    $("#" + txtInput).val(content + " AND " + correctValue + "." + id + "=");
+                    alert(id+" is added to constraint")
+                }
+            } else {
+                let formatValue = schema+"."+tableName;
+                let correctValue = formatValue.quotedTableName().qualifiedName
+                $("#" + txtInput).val(correctValue + "." + id + "=");
+                alert(id+" is added to constraint")
+            }
+
+        });
+    }
+}
+
 /*/ Button creation for constrain selection /*/
 
 function createButton(api) {
@@ -123,10 +211,28 @@ function createButton(api) {
 
     for (let key in api.tapServiceConnector.objectMapWithAllDescription.tables) {
         bindClickEvent("bbb" + key,() => {
-            api.tapServiceConnector.selecConstraints(key, "txt" + key, api);
-            
+            selectConstraints(key, "txt" + key, api);
             return true;
         });
+
+        bindClickEvent(key,() => {
+            if($("#txt" + key).val().length!==1){
+                let result = api.setTableConstraint(key, $("#txt" + key).val());
+                if (result.status === "OK"){
+                    display(result.status,"getStatus");
+                    display(api.getRootQuery().query,"getJsonAll");
+                    return true;
+                }else{
+                    display(result.status + " : " + result.message,"getStatus");
+                    return false;
+                }
+
+            } else {
+                return false;
+            }
+            
+        });
+
     }
 
 }
@@ -188,7 +294,8 @@ function createButton(api) {
                 let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
                 
                 api.connect(params);
-                
+
+
                 let status = api.getConnector().status;
                 let message = api.getConnector().message;
 
@@ -204,6 +311,7 @@ function createButton(api) {
 
                     enableButton("btnApiDisconnect");
                     enableButton("btnGetConnector");
+                    enableButton("btnGetJsonAdqlContent");
                     enableButton("btnGetObjectMap");
                     enableButton("btnGetJoinTable");
                     enableButton("btnGetRootQuery");
@@ -213,6 +321,8 @@ function createButton(api) {
                     //enableButton("btnGetTableQueryIds");
                     //enableButton("btnGetTableFields");
                     enableButton("btnConstraint");
+                    enableButton("btnRemoveConstraint");
+                    enableButton("btnRemoveAllConstraint");
 
                     createButton(api);
 
@@ -231,6 +341,7 @@ function createButton(api) {
             
             disableButton("btnApiDisconnect");
             disableButton("btnGetConnector");
+            disableButton("btnGetJsonAdqlContent");
             disableButton("btnGetObjectMap");
             disableButton("btnGetJoinTable");
             disableButton("btnGetRootQuery");
@@ -240,6 +351,8 @@ function createButton(api) {
             //disableButton("btnGetTableQueryIds");
             //disableButton("btnGetTableFields");
             disableButton("btnConstraint");
+            disableButton("btnRemoveConstraint");
+            disableButton("btnRemoveAllConstraint");
 
             enableButton("btnApiConnect");
 
@@ -280,6 +393,19 @@ function createButton(api) {
 
         });
 
+        bindClickEvent("btnGetJsonAdqlContent",() => {
+            let jsonAdql = api.getJsonAdqlContent()
+            if (jsonAdql.status === "OK"){
+                display(jsonAdql.status,"getStatus");
+                display(JSON.stringify(jsonAdql.jsonADQLContent,undefined,4),"getJsonAll");
+                return true;
+            } else {
+                display(jsonAdql.status + " : " +jsonAdql.message ,"getStatus")
+                return false;
+            }
+
+        });
+
         bindClickEvent("btnGetJoinTable",() => {
             
             /*/ TODO : update api.getJoinedTables output object /*/
@@ -302,9 +428,12 @@ function createButton(api) {
 
             let rootQuery = api.getRootQuery();
 
-            display("", "getStatus");
-            display(rootQuery, "getJsonAll");
-
+            if (rootQuery.status == "OK"){
+                display(rootQuery.status, "getStatus");
+                display(rootQuery.query, "getJsonAll");
+                return true
+            }
+            display(rootQuery.status + " : " + rootQuery.message, "getStatus");
             return false;
             
         });
@@ -382,6 +511,35 @@ function createButton(api) {
             }
 
         });
+
+        bindClickEvent("btnRemoveConstraint",() => {
+
+            let rootq = api.resetTableConstraint($("#txtConstraint").val());
+
+            if (rootq.status === "OK"){
+                display(rootq.status, "getStatus");
+                display(api.getRootQuery(), "getJsonAll");
+                return true;
+            } else {
+                display(rootq.status + " : " + rootq.message, "getStatus");
+                return false;
+            }
+        });
+
+        bindClickEvent("btnRemoveAllConstraint",() => {
+            let r = api.resetAllTableConstraint();
+
+            if (r.status === "OK"){
+                display(r.status, "getStatus");
+                display(api.getRootQuery(), "getJsonAll");
+                return true;
+            } else {
+                display(r.status + " : " + r.message, "getStatus");
+                return false;
+            }
+
+        });
+
         /*/ Templates /*/
         /*
         bindClickEvent("",() => {
