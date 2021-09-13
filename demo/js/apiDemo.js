@@ -132,7 +132,7 @@ function createButton(api) {
                 let result = api.setTableConstraint(key, $("#txt" + key).val());
                 if (result.status === "OK"){
                     display(result.status,"getStatus");
-                    display(api.getRootQuery(),"getJsonAll");
+                    display(api.getRootQuery().query,"getJsonAll");
                     return true;
                 }else{
                     display(result.status + " : " + result.message,"getStatus");
@@ -340,9 +340,12 @@ function createButton(api) {
 
             let rootQuery = api.getRootQuery();
 
-            display("", "getStatus");
-            display(rootQuery, "getJsonAll");
-
+            if (rootQuery.status == "OK"){
+                display(rootQuery.status, "getStatus");
+                display(rootQuery.query, "getJsonAll");
+                return true
+            }
+            display(rootQuery.status + " : " + rootQuery.message, "getStatus");
             return false;
             
         });

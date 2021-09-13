@@ -127,7 +127,6 @@ var TapServiceConnector = (function() {
         let correctCondition;
         let formatJoinTable = "";
         let correctJoinFormaTable = "";
-        let correctTableConstraint = "";
         let correctWhereClose = "";
         
         let testMap = false;
@@ -150,18 +149,17 @@ var TapServiceConnector = (function() {
                             correctWhereClose = api.tapServiceConnector.jsonAdqlContent.allCondition[correctJoinFormaTable];
                         }
                     }
-                    
+
                     this.objectMapWithAllDescription.tables[tableKey] = {
                         "description": jsonWithaoutDescription[tableKey].description,
-                        "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
+                        "constraints": "",
                         "columns": attributHanler != undefined ? attributHanler : [],
                     }
-                    for (let keyConstraint in jsonAdqlContent.constraint) {
-                        if (keyConstraint == correctJoinFormaTable) {
-                            correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
-                            correctCondition = correctCondition.replaceAll("WHERE".trim(), " ");
-                            this.objectMapWithAllDescription.tables[tableKey].constraints = correctTableConstraint != undefined && correctWhereClose != undefined ? correctCondition : "";
-                        }
+
+                    if (jsonAdqlContent.constraint[correctJoinFormaTable] !== undefined) {
+                        correctCondition = replaceAll(" WHERE " + correctWhereClose, "WHERE  AND ", "")
+                        correctCondition = correctCondition.replaceAll("WHERE", " ");
+                        this.objectMapWithAllDescription.tables[tableKey].constraints =  correctWhereClose != undefined ? correctCondition.trim() : "";
                     }
 
                 } else {
