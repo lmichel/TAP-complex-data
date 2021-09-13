@@ -175,17 +175,15 @@ var TapApi = (function(){
         let doubleArrayValue = [];
         let singleArrayValue = [];
         if (this.getConnector().status == 'OK') {
-            let Field = this.getRootFields().field_values;
+            let Field = this.getRootFields().succes.field_values;
             let votable = this.tapServiceConnector.Query(this.getRootQuery().query);
             let dataTable = []
-            if (votable.statusText == "OK") {
+            if (votable.status == 200) {
                 dataTable = this.tapServiceConnector.getDataTable(votable);
                 let nbCols = Field.length;
                 for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
                     for (let col = 0; col < nbCols; col++) {
-                        if (dataTable[rowNb] != null)
-                            singleArrayValue.push(dataTable[rowNb]);
-                        singleArrayValue= Array.from(new Set(singleArrayValue));
+                        singleArrayValue.push(dataTable[rowNb+col]);
                     }
                     doubleArrayValue.push(singleArrayValue);
 
