@@ -15,7 +15,7 @@ var TapServiceConnector = (function() {
         this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}}
         this.jsonContaintJoinTable = {Succes:{status: "", base_table: "", joined_tables: []}, Failure: {NotConnected: {status: "", message: ""}, WrongTable: {status: "", message: ""}}}
         this.connector = {status: "", message: "", service: {}, votable: ""}
-        this.jsonAdqlContent = {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {}, "status": {"status": "", 'orderErros': ""}}
+        this.jsonAdqlContent = {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {}, "status": {"status": "Not Built", 'orderErros': ""}}
         this.api ="";
         this.attributsHandler = new HandlerAttributs();
         this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
@@ -144,15 +144,13 @@ var TapServiceConnector = (function() {
                     formatJoinTable = this.schema + "." + tableKey;
                     correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
                     let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:""// this.jsonCorrectTableColumnDescription.addAllColumn[correctJoinFormaTable]
-                    for (let keyConstraint in jsonAdqlContent.constraint) {
-                        if (keyConstraint == correctJoinFormaTable) {
-                            for (let keyConst in jsonAdqlContent.constraint) {
-                                if (keyConst == "condition " + correctJoinFormaTable) {
-                                    correctWhereClose = api.tapServiceConnector.jsonAdqlContent.allCondition[keyConstraint];
-                                }
-                            }
+                    
+                    if (jsonAdqlContent.constraint[correctJoinFormaTable] !== undefined){
+                        if (jsonAdqlContent.allCondition[correctJoinFormaTable]!= undefined){
+                            correctWhereClose = api.tapServiceConnector.jsonAdqlContent.allCondition[correctJoinFormaTable];
                         }
                     }
+                    
                     this.objectMapWithAllDescription.tables[tableKey] = {
                         "description": jsonWithaoutDescription[tableKey].description,
                         "constraints": "",//correctTableConstraint!=undefined && correctWhereClose!=undefined && correctConstraint.trim()!="WHERE"?correctConstraint:"",
@@ -459,7 +457,78 @@ var TapServiceConnector = (function() {
         return jsonAdqlContent;
     }
 
+    /**
+     * 
+     * @param {*} query a valid adql query to be stored in the jsoonAdqlContent object
+     */
+    TapServiceConnector.prototype.setRootQuery =function(query){
+        this.jsonAdqlContent.rootQuery = query;
+    }
+
+    /**
+     * This method return (or create if the object was not existing yet) the jsonAdqlContent object which correspond to the following structure :
+     * {'rootQuery': "", "constraint": {}, 'allJoin': {}, 'allCondition': {}, "status": {"status": "", 'orderErros': ""}}
+     * where rootQuery store the query setted by the {@link setRootQuery}, constraint stores all the possible joint adql code for the current selected root table with all others table.
+     * The allCondition field store all the requested conditions, allJoin store all the needed joints to fullfill those conditions.
+     * The status field store status related data.
+     * @returns {*} The jsonAdqlContent object
+     */
     TapServiceConnector.prototype.getJsonAdqlContent = function(){
+        if (this.jsonAdqlContent.status.status === "Not Built"){
+
+            /*/ JsonAdqlContent building /*/
+
+            let textJoinConstraint = "";
+            let objectMap = this.getObjectMapAndConstraints();
+            let map = objectMap.map;
+
+            let schema = this.connector.service["schema"];
+            schema = schema.quotedTableName().qualifiedName;
+
+            for(let rootTable in map){ 
+
+                let formatTableName = schema + "." + rootTable;
+                let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+
+                for (let key in map[rootTable].join_tables) {
+
+                    let formatJoinTable = schema + "." + key;
+                    let correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName
+
+                    textJoinConstraint = " JOIN  " + correctJoinFormaTable + " ";
+                    textJoinConstraint += "ON " + correctTableNameFormat + "." + map[rootTable].join_tables[key].target;
+                    textJoinConstraint += "=" + correctJoinFormaTable + "." + map[rootTable].join_tables[key].from;
+                    this.jsonAdqlContent.constraint[correctJoinFormaTable] = textJoinConstraint
+                    textJoinConstraint = "";
+                    let json2 = map[rootTable].join_tables[key]
+                    if (json2.join_tables !== undefined) {
+                        for (let f in json2.join_tables) {
+                            let firstJoin = this.jsonAdqlContent.constraint[correctJoinFormaTable]
+                            let secondformatJoinTable = schema + "." + f;
+                            let secondcorrectJoinFormaTable = secondformatJoinTable.quotedTableName().qualifiedName
+                            textJoinConstraint = " JOIN  " + secondformatJoinTable + " ";
+                            textJoinConstraint += "ON " + correctJoinFormaTable + "." + json2.join_tables[f].target;
+                            textJoinConstraint += "=" + secondformatJoinTable + "." + json2.join_tables[f].from;
+                            this.jsonAdqlContent.constraint[secondformatJoinTable] = firstJoin + " " + textJoinConstraint
+                            for (let c in json2.join_tables[f]) {
+                                let json3 = json2.join_tables[f].join_tables
+                                if (json3 !== undefined) {
+                                    for (let c1 in json3) {
+                                        let secondJoin = this.jsonAdqlContent.constraint[secondformatJoinTable]
+                                        let thirdformatJoinTable = schema + "." + c1;
+                                        textJoinConstraint = " JOIN  " + thirdformatJoinTable + " ";
+                                        textJoinConstraint += "ON " + secondcorrectJoinFormaTable + "." + json3[c1].target;
+                                        textJoinConstraint += "=" + thirdformatJoinTable + "." + json3[c1].from;
+                                        this.jsonAdqlContent.constraint[thirdformatJoinTable] = secondJoin + " " + textJoinConstraint
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            this.jsonAdqlContent.status.status = "Built";
+        }
         return this.jsonAdqlContent;
     }
 

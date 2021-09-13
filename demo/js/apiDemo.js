@@ -206,7 +206,6 @@ function createButton(api) {
                 let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
                 
                 api.connect(params);
-                api.getRootQuery(); // builds internal data structure needed later
 
 
                 let status = api.getConnector().status;
