@@ -120,8 +120,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
         } else {
 
             jsonContaintHandlerValues.failure.otherError.status = "Failed"
-            jsonContaintHandlerValues.failure.otherError.message = "error_message"
-            // alert('you are not connected');
+            jsonContaintHandlerValues.failure.otherError.message = "Unknown error : Query Result undefined"
         }
     } else {
         jsonContaintHandlerValues.failure.notConnected.status = "Failed";

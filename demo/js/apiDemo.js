@@ -73,7 +73,7 @@ function bindClickEvent(elemId,handler,disableText){
             } else if (disableText === undefined){
                 display("This button is currently disabled, you can't use it.", "getStatus");
             } else {
-                display(String.toString(disableText), "getStatus");
+                display(disableText, "getStatus");
             }
 
         }catch(error){
@@ -237,6 +237,43 @@ function createButton(api) {
 
 }
 
+/*/ Button creation for Handlers /*/
+
+function createHandlersButton(api){
+    let table = api.getConnector().service.table;
+    let handlers = api.getTableAttributeHandlers(table);
+    if (handlers.status == "OK"){
+        let buttons = [];
+        let map = {};
+        
+        for (let i=0;i<handlers.attribute_handlers.length;i++){
+            buttons.push(
+                "<button  type='button' class=\"btn btn-primary\" id='handler_" + 
+                handlers.attribute_handlers[i].column_name + "' value='" + 
+                handlers.attribute_handlers[i].column_name + "' style=\"margin-top: 7px;width: 100%;\">Click to show " + 
+                handlers.attribute_handlers[i].column_name + "'s handler</button> ");
+
+            map["handler_" + handlers.attribute_handlers[i].column_name] = handlers.attribute_handlers[i]
+        }
+
+        $("#loadButtonsHandler").append(buttons);
+
+        for (let key in map){
+            bindClickEvent(key,() =>{
+                display("OK","getStatus");
+                display(JSON.stringify(map[key],undefined,4),"getJsonAll");
+                return true;
+            });
+        }
+    } else{
+        $("#loadButtonsHandler").append( "<button  type='button' class=\"btn btn-primary\" id='handler_error' value='error' style=\"margin-top: 7px\">Click to show status and error</button> ");
+        bindClickEvent("handler_error",() =>{
+            display(handlers.status + " : " + handlers.message,"getStatus");
+        });
+    }
+    
+}
+
 /*/ confined area /*/
 
 {
@@ -323,8 +360,10 @@ function createButton(api) {
                     enableButton("btnConstraint");
                     enableButton("btnRemoveConstraint");
                     enableButton("btnRemoveAllConstraint");
+                    enableButton("btnLoadButtonsHandler");
 
                     createButton(api);
+                    createHandlersButton(api);
 
                     return true;
 
@@ -353,6 +392,7 @@ function createButton(api) {
             disableButton("btnConstraint");
             disableButton("btnRemoveConstraint");
             disableButton("btnRemoveAllConstraint");
+            disableButton("btnLoadButtonsHandler");
 
             enableButton("btnApiConnect");
 
@@ -362,6 +402,7 @@ function createButton(api) {
             })
 
             $("loadButton").html("");
+            $("loadButtonsHandler").html("");
 
             return false;
 
@@ -543,6 +584,13 @@ function createButton(api) {
 
         });
 
+        bindClickEvent("btnLoadButtonsHandler",() => {
+            if (document.getElementById("loadButtonsHandler").style.display == "block"){
+                document.getElementById("loadButtonsHandler").style.display = "none";
+            }else {
+                document.getElementById("loadButtonsHandler").style.display = "block";
+            }
+        });
         /*/ Templates /*/
         /*
         bindClickEvent("",() => {
