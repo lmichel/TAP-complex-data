@@ -258,7 +258,7 @@ var TapApi = (function(){
              * so we explicitly tell him every field.
              */
             let allField;
-            if (this.getConnector().service.shortName == "Symbad"){
+            if (this.getConnector().service.shortName == "Simbad"){
                 allField = this.formatColNames(rootTable,this.getAllRootField(rootTable));
             }else {
                 allField = this.formatColNames(rootTable,["*"]);
