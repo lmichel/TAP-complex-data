@@ -73,7 +73,7 @@ function bindClickEvent(elemId,handler,disableText){
             } else if (disableText === undefined){
                 display("This button is currently disabled, you can't use it.", "getStatus");
             } else {
-                display(String.toString(disableText), "getStatus");
+                display(disableText, "getStatus");
             }
 
         }catch(error){
@@ -237,6 +237,43 @@ function createButton(api) {
 
 }
 
+/*/ Button creation for Handlers /*/
+
+function createHandlersButton(api){
+    let table = api.getConnector().service.table;
+    let handlers = api.getTableAttributeHandlers(table);
+    if (handlers.status == "OK"){
+        let buttons = [];
+        let map = {};
+        
+        for (let i=0;i<handlers.attribute_handlers.length;i++){
+            buttons.push(
+                "<button  type='button' class=\"btn btn-primary\" id='handler_" + 
+                handlers.attribute_handlers[i].column_name + "' value='" + 
+                handlers.attribute_handlers[i].column_name + "' style=\"margin-top: 7px;width: 100%;\">Click to show " + 
+                handlers.attribute_handlers[i].column_name + "'s handler</button> ");
+
+            map["handler_" + handlers.attribute_handlers[i].column_name] = handlers.attribute_handlers[i]
+        }
+
+        $("#loadButtonsHandler").append(buttons);
+
+        for (let key in map){
+            bindClickEvent(key,() =>{
+                display("OK","getStatus");
+                display(JSON.stringify(map[key],undefined,4),"getJsonAll");
+                return true;
+            });
+        }
+    } else{
+        $("#loadButtonsHandler").append( "<button  type='button' class=\"btn btn-primary\" id='handler_error' value='error' style=\"margin-top: 7px\">Click to show status and error</button> ");
+        bindClickEvent("handler_error",() =>{
+            display(handlers.status + " : " + handlers.message,"getStatus");
+        });
+    }
+    
+}
+
 /*/ confined area /*/
 
 {
@@ -315,7 +352,7 @@ function createButton(api) {
                     enableButton("btnGetObjectMap");
                     enableButton("btnGetJoinTable");
                     enableButton("btnGetRootQuery");
-                    //enableButton("btnGetRunRootQuery");
+                    enableButton("btnGetRootFieldsQuery");
                     enableButton("btnGetRootQueryIds");
                     enableButton("btnGetRootFields");
                     //enableButton("btnGetTableQueryIds");
@@ -323,8 +360,10 @@ function createButton(api) {
                     enableButton("btnConstraint");
                     enableButton("btnRemoveConstraint");
                     enableButton("btnRemoveAllConstraint");
+                    enableButton("btnLoadButtonsHandler");
 
                     createButton(api);
+                    createHandlersButton(api);
 
                     return true;
 
@@ -345,7 +384,7 @@ function createButton(api) {
             disableButton("btnGetObjectMap");
             disableButton("btnGetJoinTable");
             disableButton("btnGetRootQuery");
-            //disableButton("btnGetRunRootQuery");
+            disableButton("btnGetRootFieldsQuery");
             disableButton("btnGetRootQueryIds");
             disableButton("btnGetRootFields");
             //disableButton("btnGetTableQueryIds");
@@ -353,6 +392,7 @@ function createButton(api) {
             disableButton("btnConstraint");
             disableButton("btnRemoveConstraint");
             disableButton("btnRemoveAllConstraint");
+            disableButton("btnLoadButtonsHandler");
 
             enableButton("btnApiConnect");
 
@@ -362,6 +402,7 @@ function createButton(api) {
             })
 
             $("loadButton").html("");
+            $("loadButtonsHandler").html("");
 
             return false;
 
@@ -423,8 +464,6 @@ function createButton(api) {
         });
 
         bindClickEvent("btnGetRootQuery",() => {
-            
-            /*/ TODO : Re-Do  api.getRootQuery/*/
 
             let rootQuery = api.getRootQuery();
 
@@ -438,17 +477,18 @@ function createButton(api) {
             
         });
 
-        bindClickEvent("btnGetRunRootQuery",() => {
+        bindClickEvent("btnGetRootFieldsQuery",() => {
 
-            /*/ TODO : Do  api.getRunRootQuery/*/
+            let rootQuery = api.getRootFieldsQuery();
 
-            let runRootQuery = api.getRunRootQuery();
-            let status = runRootQuery.Succes.status;
-
-            display(status, "getStatus");
-            display(JSON.stringify(runRootQuery,undefined,4), "getJsonAll");
-
-            return status === "OK";
+            if (rootQuery.status == "OK"){
+                display(rootQuery.status, "getStatus");
+                display(rootQuery.query, "getJsonAll");
+                return true
+            }
+            display(rootQuery.status + " : " + rootQuery.message, "getStatus");
+            return false;
+            
         });
 
         bindClickEvent("btnGetRootQueryIds",() => {
@@ -469,12 +509,16 @@ function createButton(api) {
             /*/ TODO : update api.getRootQueryIds output object /*/
 
             let rootFields = api.getRootFields();
-            let status = rootFields.succes.status;
+            let status = rootFields.status;
+            if (status == "OK"){
+                display(status, "getStatus");
+                display(JSON.stringify(rootFields.field_values,undefined,4), "getJsonAll");
+                return true;
+            }
+            
+            display(status + " : " + rootFields.message, "getStatus");
 
-            display(status, "getStatus");
-            display(JSON.stringify(rootFields,undefined,4), "getJsonAll");
-
-            return status === "OK";
+            return false;
         });
 
         bindClickEvent("btnGetTableQueryIds",() => {
@@ -540,6 +584,13 @@ function createButton(api) {
 
         });
 
+        bindClickEvent("btnLoadButtonsHandler",() => {
+            if (document.getElementById("loadButtonsHandler").style.display == "block"){
+                document.getElementById("loadButtonsHandler").style.display = "none";
+            }else {
+                document.getElementById("loadButtonsHandler").style.display = "block";
+            }
+        });
         /*/ Templates /*/
         /*
         bindClickEvent("",() => {

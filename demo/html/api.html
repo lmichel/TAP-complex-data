@@ -72,7 +72,7 @@
 
                 <div class = "row">
                     <!--  Button column  -->
-                    <div class="col-lg-2">
+                    <div class="col-3">
 
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnApiConnect">Connect Api</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnApiDisconnect">Disconnect Api</button>
@@ -83,7 +83,7 @@
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetJsonAdqlContent">Get Json Adql Content</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetJoinTable">Get Joined Tables</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQuery">Get Root Query</button>
-                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRunRootQuery">Get Run Root Query</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootFieldsQuery">Get Root Fields Query</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQueryIds">Get Root Query Ids</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootFields">Get Root Fields</button>
                         <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetTableQueryIds">Get Table Query Ids</button>
@@ -92,7 +92,7 @@
                         <button class="btn btn-dark" id="btnConstraint" style="margin-top: 7px;width: 100%;">Add joinTable constraint</button>
                         <hr>
 
-                        <div class="card"  >
+                        <div class="card" style="overflow:scroll;max-height: 16em;"  >
                             <div class="card-body text-capitalize text-success" id="loadButton" style="display: none;">
                             </div>
                         </div>
@@ -106,17 +106,17 @@
                         <button class="btn btn-dark" id="btnRemoveAllConstraint" style="margin-top: 7px;width: 100%;">Reset All constraint</button>
                         <hr>
 
-                        <button class="btn btn-dark" id="btnLoadbuttonsHandler">getTableHandlers</button>
+                        <button class="btn btn-dark" id="btnLoadButtonsHandler" style="margin-top: 7px;width: 100%;">getTableHandlers</button>
                         
-                        <div class="card">
-                            <div class="card-body" id="loadbuttonsHandler"></div>
+                        <div class="card" style="overflow:scroll;max-height: 12em;">
+                            <div class="card-body" id="loadButtonsHandler" style="display: none;"></div>
                         </div>
 
                     </div>
 
                     <!-- Data Output -->
 
-                    <div class="col-lg-8" style="margin-left: 20px; display: flex;flex-direction: column;">
+                    <div class="col-8" style="margin-left: 20px; display: flex;flex-direction: column;">
                                         
                         <div class="card"> <h4 class="text-capitalize text-info text-center"> status of function</h4></div>
                         
