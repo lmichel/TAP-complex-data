@@ -138,6 +138,10 @@ var JsonAdqlBuilder = (function(){
         }
     }
 
+    /**
+     * Remove any constraints put on the table
+     * @param {String} table unqualified name of the table
+     */
     JsonAdqlBuilder.prototype.removeTableConstraints = function(table){
         if(this.adqlJsonMap.joints[table] === undefined){
             return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
@@ -159,24 +163,24 @@ var JsonAdqlBuilder = (function(){
         return {"status" : true};
     }
 
-    JsonAdqlBuilder.prototype.getAdqlJoints = function(table){
+    /**
+     * create a list of all tables which are deeper than the selected rootTable in the objectMap's tree representation of the DB
+     * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
+     */
+    JsonAdqlBuilder.prototype.getSubTables = function(table){
         if (table == undefined){
             table = this.adqlJsonMap.rootTable;
         }
 
-        let whitelist = [];
+        let subTables = [];
         if (table !== this.adqlJsonMap.rootTable){
             if(this.adqlJsonMap.joints[table] === undefined){
                 return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
             }
             
-            /*/ Whitelist building /*/
-            /**
-             * only table that are deeper in the tree than the selected base table are allowed
-             */
             branch = this.adqlJsonMap.nodeTreeBranches[table]
             while (branch !== undefined && branch.length >0){
-                whitelist.push(branch)
+                subTables.push(branch)
                 let nextBranch = [];
                 for (let i =0;i<branch.length;i++){
                     nextBranch.push(this.adqlJsonMap.nodeTreeBranches[branch[i]]);
@@ -184,9 +188,26 @@ var JsonAdqlBuilder = (function(){
                 branch = nextBranch;
             }
 
-            whitelist = Array.from(new Set(whitelist));
+            subTables = Array.from(new Set(subTables));
         } else {
-            whitelist = Object.keys(this.adqlJsonMap.joints);
+            subTables = Object.keys(this.adqlJsonMap.joints);
+        }
+
+        return {"status":true,"subTables":subTables};
+    }
+
+    /**
+     * Create a string containing all active ADQL joints from the starting node ignoring any joints on same or higher level other nodes
+     * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
+     */
+    JsonAdqlBuilder.prototype.getAdqlJoints = function(table){
+        
+        let whitelist = this.getSubTables(table);
+        
+        if(whitelist.status){
+            whitelist = whitelist.subTables;
+        }else{
+            return whitelist;
         }
 
         let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value))
@@ -200,13 +221,43 @@ var JsonAdqlBuilder = (function(){
             this.adqlJsonMap.scheme + "." + joints[i] + "." + joint.from + "\n"
         }
 
-        // remove leading \n
+        return {"status":true,"adqlJoints":adqlJoints};
 
-        if (adqlJoints.length>0){
-            adqlJoints=adqlJoints.substring(0,adqlJoints.length-1)
+    }
+
+    /**
+     * create a string containing all active ADQL constraints from the starting node ignoring any joints on same or higher level other nodes
+     * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
+     * @param {String} joinKeyVal Optional, specific value of the key used to join `table` to his `parentNode`. This value is used to create an additional constraint and ignore if `table` is either undefined or the rootTable .
+     */
+    JsonAdqlBuilder.prototype.getAdqlConstraints = function(table,joinKeyVal){
+        let whitelist = this.getSubTables(table);
+        
+        if(whitelist.status){
+            whitelist = whitelist.subTables;
+        }else{
+            return whitelist;
         }
 
-        return {"status":true,"adqlJoints":adqlJoints};
+        let tables = Object.keys(this.adqlJsonMap.conditions).filter(value => whitelist.includes(value));
+
+        let adqlConstraints = ""
+
+        for (let i=0;i<tables.length;i++){
+            adqlConstraints += "( " + this.adqlJsonMap.conditions[tables[i]] + " ) AND \n "
+        }
+
+        if (table !== undefined && table !== this.adqlJsonMap.rootTable && joinKeyVal !== undefined){
+            adqlConstraints += "( " + this.adqlJsonMap.scheme + "." + table + "." + this.adqlJsonMap.joints[table].from + "=" + joinKeyVal + " )";
+        } else{
+            adqlConstraints.substring(0,adqlConstraints.length - 7) // remove trailing AND
+        }
+
+        if(adqlConstraints.length > 0){
+            return {"status":true,"adqlConstraints": " WHERE " + adqlConstraints};
+        } else {
+            return {"status":true,"adqlConstraints": ""};
+        }
 
     }
 

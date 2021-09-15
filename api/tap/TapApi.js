@@ -234,9 +234,9 @@ var TapApi = (function(){
 
             contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
 
-            this.tapServiceConnector.setRootQuery(contentAdql)
+            contentAdql += this.jsonAdqlBuilder.getAdqlConstraints().adqlConstraints;
 
-            this.addConstraint();
+            this.tapServiceConnector.setRootQuery(contentAdql)
             return {"status": "OK", "query": this.tapServiceConnector.getJsonAdqlContent().rootQuery} ;
         }
 
