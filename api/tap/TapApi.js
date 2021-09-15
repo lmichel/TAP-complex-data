@@ -472,15 +472,18 @@ var TapApi = (function(){
                 /*/ constraint cleanup /*/
                 constraint = constraint.trim();
 
-                while (constraint.startsWith("AND") || constraint.startsWith("WHERE")){
+                while (constraint.startsWith("AND") || constraint.startsWith("WHERE") || constraint.startsWith("OR")){
                     while (constraint.startsWith("AND")){
                         constraint = constraint.substring(3).trim();
                     }
                     while (constraint.startsWith("WHERE")){
                         constraint = constraint.substring(5).trim();
                     }
+                    while (constraint.startsWith("OR")){
+                        constraint = constraint.substring(2).trim();
+                    }
                 }
-                
+                this.jsonAdqlBuilder.setTableConstraint(table, constraint);
                 jsonAdqlContent.allJoin[correctTable] = jsonAdqlContent.constraint[correctTable];
                 jsonAdqlContent.allCondition[correctTable] = constraint
 

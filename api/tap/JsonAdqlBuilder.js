@@ -19,7 +19,7 @@ var JsonAdqlBuilder = (function(){
         let nextMap;
         let mapHasKey = true
         while (mapHasKey){
-            nextMap = {}
+            nextMap = {};
             mapHasKey = false;
             for (let parent in map){
                 mapHasKey = true;
@@ -48,16 +48,16 @@ var JsonAdqlBuilder = (function(){
                             "parentNode" : parent
                         };
                     } else {
-                        console.warn("the table " + key + "is in more than one tree !");
+                        console.warn("the table " + key + " is in more than one tree !");
                     }
                     
                     /*/ nextMap building /*/
                     if (map[parent][key].join_tables !== undefined){
                         if (nextMap[key] === undefined){
-                            nextMap[key] = map[parent][key].join_tables
+                            nextMap[key] = map[parent][key].join_tables;
                         }else {
                             for (let subKey in map[parent][key].join_tables){
-                                nextMap[key][subKey] = map[parent][key].join_tables[subKey]
+                                nextMap[key][subKey] = map[parent][key].join_tables[subKey];
                             }
                         }
                     }
@@ -68,5 +68,35 @@ var JsonAdqlBuilder = (function(){
         }
 
     }
+
+    /**
+     * @param {String} table unqualified name of the constraint table
+     * @param {String} constraint valid adql constraint constraining only the table `table`, without any starting or leading adql keyword (WHERE,OR,AND, ...)
+     */
+    JsonAdqlBuilder.prototype.setTableConstraint = function(table,constraint){
+
+        if(this.adqlJsonMap.joints[table] === undefined){
+            return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table,"constraint":constraint}}};
+        }
+
+        if(constraint == undefined){
+            return {"status" : false, "error":{"logs":"Invalid constraint","params" : {"table":table,"constraint":constraint}}};
+        }
+        
+        this.adqlJsonMap.conditions[table] = constraint;
+
+        while (table !== this.adqlJsonMap.rootTable){
+
+            if ( this.adqlJsonMap.activeJoints.includes(table)){
+                return;
+            } else {
+                this.adqlJsonMap.activeJoints.push(table);
+            }
+
+            table = this.adqlJsonMap.joints[table].parentNode
+        }
+
+    }
+
     return JsonAdqlBuilder;
 })();
