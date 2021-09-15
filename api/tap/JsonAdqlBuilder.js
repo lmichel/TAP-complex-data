@@ -24,15 +24,34 @@ var JsonAdqlBuilder = (function(){
             for (let parent in map){
                 mapHasKey = true;
                 for (let key in map[parent]){
+
+                    /* We cant register a table twice 
+                    * so we choose to only keep the smallest path to the rooTable
+                    * we also don't want to register branches in nodeTreeBranches that their joints isn't 
+                    * in the joint map.
+                    */
                     if(this.adqlJsonMap.joints[key] === undefined){
-                        console.warn("the table " + key + "is in more than one tree !");
-                    } else {
+
+                        /*/ nodeTreeBranches building /*/
+                        if (parent !== this.adqlJsonMap.rootTable){
+                            if (this.adqlJsonMap.nodeTreeBranches[parent] === undefined){
+                                this.adqlJsonMap.nodeTreeBranches[parent] = [key];
+                            }else{
+                                this.adqlJsonMap.nodeTreeBranches[parent].push(key);
+                            }
+                        }
+
+                        /*/ joints map building /*/
                         this.adqlJsonMap.joints[key] = {
                             "from":map[parent][key].from,
                             "target":map[parent][key].target,
                             "parentNode" : parent
                         };
+                    } else {
+                        console.warn("the table " + key + "is in more than one tree !");
                     }
+                    
+                    /*/ nextMap building /*/
                     if (map[parent][key].join_tables !== undefined){
                         if (nextMap[key] === undefined){
                             nextMap[key] = map[parent][key].join_tables
@@ -42,6 +61,7 @@ var JsonAdqlBuilder = (function(){
                             }
                         }
                     }
+
                 }
             }
             map = nextMap;

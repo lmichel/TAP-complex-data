@@ -5,6 +5,7 @@ var TapApi = (function(){
         this.tapServiceConnector = "";
         this.votableQueryResult = undefined;
         this.dataTable1 = undefined;
+        this.jsonAdqlBuilder = undefined;
     }
 
     /**
@@ -41,6 +42,8 @@ var TapApi = (function(){
         this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
         this.tapServiceConnector.getJsonAdqlContent();
+
+        this.jsonAdqlBuilder = new JsonAdqlBuilder(this.getObjectMap().succes.object_map);
 
         return this.tapServiceConnector.connector;
     }

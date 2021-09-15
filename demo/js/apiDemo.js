@@ -357,6 +357,7 @@ function createHandlersButton(api){
                     enableButton("btnGetRootFields");
                     //enableButton("btnGetTableQueryIds");
                     //enableButton("btnGetTableFields");
+                    enableButton("btnGetAdqlJsonMap");
                     enableButton("btnConstraint");
                     enableButton("btnRemoveConstraint");
                     enableButton("btnRemoveAllConstraint");
@@ -389,6 +390,7 @@ function createHandlersButton(api){
             disableButton("btnGetRootFields");
             //disableButton("btnGetTableQueryIds");
             //disableButton("btnGetTableFields");
+            disableButton("btnGetAdqlJsonMap");
             disableButton("btnConstraint");
             disableButton("btnRemoveConstraint");
             disableButton("btnRemoveAllConstraint");
@@ -545,6 +547,12 @@ function createHandlersButton(api){
             display(JSON.stringify(tableFields,undefined,4), "getJsonAll");
 
             return status === "OK";
+        });
+
+        bindClickEvent("btnGetAdqlJsonMap",() => {
+            display("Internal Object State Debug purpose only", "getStatus");
+            display(JSON.stringify(api.jsonAdqlBuilder.adqlJsonMap,undefined,4), "getJsonAll");
+            return true;
         });
 
         bindClickEvent("btnConstraint",() => {
