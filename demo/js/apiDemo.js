@@ -216,14 +216,30 @@ function createButton(api) {
         });
 
         bindClickEvent(key,() => {
-            if($("#txt" + key).val().length!==1){
-                let result = api.setTableConstraint(key, $("#txt" + key).val());
-                if (result.status === "OK"){
+            if($("#txt" + key).val().length > 1){
+                let constraint = $("#txt" + key).val().trim();
+
+                /*/ constraint cleanup /*/
+                while (constraint.startsWith("AND") || constraint.startsWith("WHERE") || constraint.startsWith("OR")){
+                    while (constraint.startsWith("AND")){
+                        constraint = constraint.substring(3).trim();
+                    }
+                    while (constraint.startsWith("WHERE")){
+                        constraint = constraint.substring(5).trim();
+                    }
+                    while (constraint.startsWith("OR")){
+                        constraint = constraint.substring(2).trim();
+                    }
+                }
+
+                let result = api.setTableConstraint(key, constraint);
+                if (result.status ){
                     display(result.status,"getStatus");
                     display(api.getRootQuery().query,"getJsonAll");
                     return true;
                 }else{
-                    display(result.status + " : " + result.message,"getStatus");
+                    display(result.status,"getStatus");
+                    display(JSON.stringify(result.error,undefined,4),"getJsonAll");
                     return false;
                 }
 
@@ -348,7 +364,6 @@ function createHandlersButton(api){
 
                     enableButton("btnApiDisconnect");
                     enableButton("btnGetConnector");
-                    enableButton("btnGetJsonAdqlContent");
                     enableButton("btnGetObjectMap");
                     enableButton("btnGetJoinTable");
                     enableButton("btnGetRootQuery");
@@ -381,7 +396,6 @@ function createHandlersButton(api){
             
             disableButton("btnApiDisconnect");
             disableButton("btnGetConnector");
-            disableButton("btnGetJsonAdqlContent");
             disableButton("btnGetObjectMap");
             disableButton("btnGetJoinTable");
             disableButton("btnGetRootQuery");
@@ -433,19 +447,6 @@ function createHandlersButton(api){
             display(JSON.stringify(objectMap, undefined, 4), "getJsonAll");
 
             return status === "OK";
-
-        });
-
-        bindClickEvent("btnGetJsonAdqlContent",() => {
-            let jsonAdql = api.getJsonAdqlContent()
-            if (jsonAdql.status === "OK"){
-                display(jsonAdql.status,"getStatus");
-                display(JSON.stringify(jsonAdql.jsonADQLContent,undefined,4),"getJsonAll");
-                return true;
-            } else {
-                display(jsonAdql.status + " : " +jsonAdql.message ,"getStatus")
-                return false;
-            }
 
         });
 
@@ -568,12 +569,13 @@ function createHandlersButton(api){
 
             let rootq = api.resetTableConstraint($("#txtConstraint").val());
 
-            if (rootq.status === "OK"){
+            if (rootq.status){
                 display(rootq.status, "getStatus");
-                display(api.getRootQuery(), "getJsonAll");
+                display(api.getRootQuery().query, "getJsonAll");
                 return true;
             } else {
-                display(rootq.status + " : " + rootq.message, "getStatus");
+                display("" + rootq.status, "getStatus");
+                display(JSON.stringify(rootq.error,undefined,4), "getJsonAll");
                 return false;
             }
         });

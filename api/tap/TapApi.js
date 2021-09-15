@@ -41,8 +41,6 @@ var TapApi = (function(){
         }
         this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-        this.tapServiceConnector.getJsonAdqlContent();
-
         this.jsonAdqlBuilder = new JsonAdqlBuilder(this.getObjectMap().succes.object_map);
 
         return this.tapServiceConnector.connector;
@@ -235,9 +233,7 @@ var TapApi = (function(){
             contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
 
             contentAdql += this.jsonAdqlBuilder.getAdqlConstraints().adqlConstraints;
-
-            this.tapServiceConnector.setRootQuery(contentAdql)
-            return {"status": "OK", "query": this.tapServiceConnector.getJsonAdqlContent().rootQuery} ;
+            return {"status": "OK", "query": contentAdql} ;
         }
 
         return {"status":"failed", "message": "No active TAP connection"}
@@ -273,86 +269,29 @@ var TapApi = (function(){
             contentAdql = "SELECT TOP 10 " + allField;
             contentAdql += '\n' + " FROM  " + correctTableNameFormat;
 
-            for (let key in this.tapServiceConnector.jsonAdqlContent.allJoin) {
-                if (contentAdql.indexOf(this.tapServiceConnector.jsonAdqlContent.allJoin[key]) !== -1) {
-                } else {
-                    contentAdql += '\n' + this.tapServiceConnector.jsonAdqlContent.allJoin[key];
-                }
-            }
+            contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
 
-            this.tapServiceConnector.setRootQuery(contentAdql)
-
-            this.addConstraint();
-            return {"status": "OK", "query": this.tapServiceConnector.getJsonAdqlContent().rootQuery} ;
+            contentAdql += this.jsonAdqlBuilder.getAdqlConstraints().adqlConstraints;
+            return {"status": "OK", "query": contentAdql} ;
         }
 
         return {"status":"failed", "message": "No active TAP connection"}
     }
 
-    TapApi.prototype.addConstraint = function () {
-        let objectMapWithAllDescription = this.getObjectMap().succes.object_map;
-        for (let keyconst in objectMapWithAllDescription.tables) {
-            if (this.tapServiceConnector.jsonAdqlContent.rootQuery.indexOf("WHERE") === -1) {
-                if (objectMapWithAllDescription.tables[keyconst].constraints.length !== 0) {
-                    this.tapServiceConnector.jsonAdqlContent.rootQuery += '\n' + " WHERE " + objectMapWithAllDescription.tables[keyconst].constraints + ' ';
-                }
-            } else {
-                if (this.tapServiceConnector.jsonAdqlContent.rootQuery.indexOf(objectMapWithAllDescription.tables[keyconst].constraints) === -1) {
-                    this.tapServiceConnector.jsonAdqlContent.rootQuery += '\n' + " AND " + objectMapWithAllDescription.tables[keyconst].constraints;
-                }
-            }
-        }
-        this.tapServiceConnector.jsonAdqlContent.rootQuery = this.tapServiceConnector.replaceWhereAnd(this.tapServiceConnector.jsonAdqlContent.rootQuery);
-        if (this.tapServiceConnector.jsonAdqlContent.rootQuery.trim().endsWith("WHERE") == true) {
-            this.tapServiceConnector.jsonAdqlContent.rootQuery = this.tapServiceConnector.jsonAdqlContent.rootQuery.trim().replaceAll("WHERE", "");
-        }
-    }
-
     /**
      *@param {string} table :  the name of table you want to remove the contraint associeted with
-    * @return {*} {status: ok} | {status:failed, message: error_message}
+    * @return {*} {status: true|false, "error?": {}}
     **/
     TapApi.prototype.resetTableConstraint = function (table) {
-        let objectMap = this.getObjectMap()
-        if (objectMap.succes.status !== "OK"){
-            return objectMap.failure;
-        }
 
-        let schema = this.tapServiceConnector.connector.service["schema"];
-        let formatTableName = schema + "." + table;
-        let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-
-        let status = {};
-        
-        if (objectMap.succes.object_map.tables[table] !== undefined ) {
-
-            this.jsonAdqlBuilder.removeTableConstraints(table);
-            objectMap.succes.object_map.tables[table].constraints = ""
-            delete this.tapServiceConnector.jsonAdqlContent.allJoin[correctTableNameFormat];
-            delete this.tapServiceConnector.jsonAdqlContent.allCondition[correctTableNameFormat];
-            status.status = "OK";
-        }
-        
-        if (status.status===undefined){
-            status = {"status":"failed","message":"Unknown table " + table}
-        }
-        return status;
+        return this.jsonAdqlBuilder.removeTableConstraints(table);
     }
 
     /**
-    * @return {*} {status: ok} | {status:failed, message: error_message}
+    * @return {*} {status: true|false, "error?": {}}
     **/
     TapApi.prototype.resetAllTableConstraint = function () {
-        let status;
-        
-        for (let key in this.getObjectMapWithAllDescriptions().tables) {
-            status = this.resetTableConstraint(key);
-            if (status.status !== "OK"){
-                return status;
-            }
-        }
-
-        return status;
+        return this.jsonAdqlBuilder.removeAllTableConstraints();
     }
 
     /**
@@ -455,55 +394,18 @@ var TapApi = (function(){
      * 
      * @param {string} table the table name on which the constraint is set
      * @param {string} constraint an ADQL constraint (to be put after a WHERE: no aggregation)
-     * @returns {*} {status: ok} | {status:failed, message: error_message}
+     * @returns {*} {"status": true|false,"error?":{}}
      */
     TapApi.prototype.setTableConstraint = function(table, constraint){
         if (this.getConnector().status == 'OK') {
-            let schema = this.tapServiceConnector.connector.service["schema"];
-            let format = schema + '.' + table;
-            let correctTable = format.quotedTableName().qualifiedName;
-            let jsonAdqlContent = this.tapServiceConnector.jsonAdqlContent;
 
-            if (jsonAdqlContent.constraint[correctTable] !== undefined ) {
-                /*/ constraint cleanup /*/
-                constraint = constraint.trim();
+            constraint = constraint.trim();
+            return this.jsonAdqlBuilder.setTableConstraint(table, constraint);
 
-                while (constraint.startsWith("AND") || constraint.startsWith("WHERE") || constraint.startsWith("OR")){
-                    while (constraint.startsWith("AND")){
-                        constraint = constraint.substring(3).trim();
-                    }
-                    while (constraint.startsWith("WHERE")){
-                        constraint = constraint.substring(5).trim();
-                    }
-                    while (constraint.startsWith("OR")){
-                        constraint = constraint.substring(2).trim();
-                    }
-                }
-                this.jsonAdqlBuilder.setTableConstraint(table, constraint);
-                jsonAdqlContent.allJoin[correctTable] = jsonAdqlContent.constraint[correctTable];
-                jsonAdqlContent.allCondition[correctTable] = constraint
-
-            } else {
-                return {"status" : "failed", "message" : "Unknown table " + table};
-            }
-
-            return {"status": "OK"};
         }
 
-        return {"status":"failed", "message": "No active TAP connection"};
+        return {"status":false, "error":{"log": "No active TAP connection","param":{"table":table,"constraint":constraint}}};
         
-    }
-
-    /**
-     * 
-     * @returns {*} {"status":"OK", "jsonADQLContent": jsonADQLContent} | {"status":"failed", "message": "No active TAP connection"}
-     */
-    TapApi.prototype.getJsonAdqlContent = function() {
-        if (this.getConnector().status == 'OK'){
-            return {"status":"OK", "jsonADQLContent": this.tapServiceConnector.getJsonAdqlContent()}
-        } else {
-            return {"status":"failed", "message": "No active TAP connection"};
-        }
     }
 
     return TapApi;

@@ -147,22 +147,41 @@ var JsonAdqlBuilder = (function(){
             return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
         }
 
-        this.adqlJsonMap.conditions[table] = undefined;
+        delete this.adqlJsonMap.conditions[table];
 
-        while (table !== this.adqlJsonMap.rootTable){
+        /*/ check if other tables rely on the tables joints tree /*/
+        let deepNeeds = false;
+        let subTables = this.getSubTables(table).subTables;
 
-            if ( this.adqlJsonMap.conditions[table] !== undefined){
-                break;
-            } else {
-                this.adqlJsonMap.activeJoints.remove(table);
+        for (let i =0;i<subTables.length;i++){
+            deepNeeds = deepNeeds || this.adqlJsonMap.activeJoints.includes(subTables[i]);
+        }
+
+        if (!deepNeeds){
+            while (table !== this.adqlJsonMap.rootTable){
+
+                if ( this.adqlJsonMap.conditions[table] !== undefined){
+                    break;
+                } else {
+                    this.adqlJsonMap.activeJoints.remove(table);
+                }
+
+                table = this.adqlJsonMap.joints[table].parentNode
             }
-
-            table = this.adqlJsonMap.joints[table].parentNode
         }
 
         return {"status" : true};
     }
+    /**
+     * Remove any constraints put on any table
+     */
+     JsonAdqlBuilder.prototype.removeAllTableConstraints = function(){
 
+        this.adqlJsonMap.conditions = {};
+        this.adqlJsonMap.activeJoints = [];
+
+        return {"status" : true};
+    }
     /**
      * create a list of all tables which are deeper than the selected rootTable in the objectMap's tree representation of the DB
      * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
@@ -178,12 +197,15 @@ var JsonAdqlBuilder = (function(){
                 return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
             }
             
-            branch = this.adqlJsonMap.nodeTreeBranches[table]
+            let branch = this.adqlJsonMap.nodeTreeBranches[table]
+            let nextBranch;
             while (branch !== undefined && branch.length >0){
-                subTables.push(branch)
-                let nextBranch = [];
+                subTables=subTables.concat(branch)
+                nextBranch = [];
                 for (let i =0;i<branch.length;i++){
-                    nextBranch.push(this.adqlJsonMap.nodeTreeBranches[branch[i]]);
+                    if(this.adqlJsonMap.nodeTreeBranches[branch[i]] !== undefined){
+                        nextBranch = nextBranch.concat(this.adqlJsonMap.nodeTreeBranches[branch[i]]);
+                    }
                 }
                 branch = nextBranch;
             }
@@ -250,7 +272,7 @@ var JsonAdqlBuilder = (function(){
         if (table !== undefined && table !== this.adqlJsonMap.rootTable && joinKeyVal !== undefined){
             adqlConstraints += "( " + this.adqlJsonMap.scheme + "." + table + "." + this.adqlJsonMap.joints[table].from + "=" + joinKeyVal + " )";
         } else{
-            adqlConstraints.substring(0,adqlConstraints.length - 7) // remove trailing AND
+            adqlConstraints=adqlConstraints.substring(0,adqlConstraints.length - 7) // remove trailing AND
         }
 
         if(adqlConstraints.length > 0){
