@@ -13,7 +13,6 @@ var TapServiceConnector = (function() {
         this.table = []
 
         this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}}
-        this.jsonContaintJoinTable = {Succes:{status: "", base_table: "", joined_tables: []}, Failure: {NotConnected: {status: "", message: ""}, WrongTable: {status: "", message: ""}}}
         this.connector = {status: "", message: "", service: {}, votable: ""}
         this.api ="";
         this.attributsHandler = new HandlerAttributs();

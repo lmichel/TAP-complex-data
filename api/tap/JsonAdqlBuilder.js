@@ -149,7 +149,7 @@ var JsonAdqlBuilder = (function(){
 
         delete this.adqlJsonMap.conditions[table];
 
-        /*/ check if other tables rely on the tables joints tree /*/
+        /*/ check if other tables rely on the table's joints tree /*/
         let deepNeeds = false;
         let subTables = this.getSubTables(table).subTables;
 
