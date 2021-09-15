@@ -230,14 +230,9 @@ var TapApi = (function(){
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
             contentAdql = "SELECT TOP 10 " + allField;
-            contentAdql += '\n' + " FROM  " + correctTableNameFormat;
+            contentAdql += '\n' + " FROM  " + correctTableNameFormat + "\n";
 
-            for (let key in this.tapServiceConnector.jsonAdqlContent.allJoin) {
-                if (contentAdql.indexOf(this.tapServiceConnector.jsonAdqlContent.allJoin[key]) !== -1) {
-                } else {
-                    contentAdql += '\n' + this.tapServiceConnector.jsonAdqlContent.allJoin[key];
-                }
-            }
+            contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
 
             this.tapServiceConnector.setRootQuery(contentAdql)
 

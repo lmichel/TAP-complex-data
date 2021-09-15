@@ -159,5 +159,56 @@ var JsonAdqlBuilder = (function(){
         return {"status" : true};
     }
 
+    JsonAdqlBuilder.prototype.getAdqlJoints = function(table){
+        if (table == undefined){
+            table = this.adqlJsonMap.rootTable;
+        }
+
+        let whitelist = [];
+        if (table !== this.adqlJsonMap.rootTable){
+            if(this.adqlJsonMap.joints[table] === undefined){
+                return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
+            }
+            
+            /*/ Whitelist building /*/
+            /**
+             * only table that are deeper in the tree than the selected base table are allowed
+             */
+            branch = this.adqlJsonMap.nodeTreeBranches[table]
+            while (branch !== undefined && branch.length >0){
+                whitelist.push(branch)
+                let nextBranch = [];
+                for (let i =0;i<branch.length;i++){
+                    nextBranch.push(this.adqlJsonMap.nodeTreeBranches[branch[i]]);
+                }
+                branch = nextBranch;
+            }
+
+            whitelist = Array.from(new Set(whitelist));
+        } else {
+            whitelist = Object.keys(this.adqlJsonMap.joints);
+        }
+
+        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value))
+
+        let adqlJoints = ""
+
+        for (let i=0;i<joints.length;i++){
+            let joint = this.adqlJsonMap.joints[joints[i]];
+            adqlJoints += " JOIN " + this.adqlJsonMap.scheme + "." + joints[i] + " ON " +
+            this.adqlJsonMap.scheme + "." + joint.parentNode + "." + joint.target + "=" +
+            this.adqlJsonMap.scheme + "." + joints[i] + "." + joint.from + "\n"
+        }
+
+        // remove leading \n
+
+        if (adqlJoints.length>0){
+            adqlJoints=adqlJoints.substring(0,adqlJoints.length-1)
+        }
+
+        return {"status":true,"adqlJoints":adqlJoints};
+
+    }
+
     return JsonAdqlBuilder;
 })();
