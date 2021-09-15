@@ -331,6 +331,7 @@ var TapApi = (function(){
         
         if (objectMap.succes.object_map.tables[table] !== undefined ) {
 
+            this.jsonAdqlBuilder.removeTableConstraints(table);
             objectMap.succes.object_map.tables[table].constraints = ""
             delete this.tapServiceConnector.jsonAdqlContent.allJoin[correctTableNameFormat];
             delete this.tapServiceConnector.jsonAdqlContent.allCondition[correctTableNameFormat];

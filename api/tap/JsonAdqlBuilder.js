@@ -88,7 +88,7 @@ var JsonAdqlBuilder = (function(){
         while (table !== this.adqlJsonMap.rootTable){
 
             if ( this.adqlJsonMap.activeJoints.includes(table)){
-                return;
+                break;
             } else {
                 this.adqlJsonMap.activeJoints.push(table);
             }
@@ -136,6 +136,27 @@ var JsonAdqlBuilder = (function(){
         } else {
             return {"status" : false, "error":{"logs":"Error while setting constraint :\n" + val.error.logs,"params" : {"table":table,"constraints":constraints,"logic":logic,"strict":strict}}};
         }
+    }
+
+    JsonAdqlBuilder.prototype.removeTableConstraints = function(table){
+        if(this.adqlJsonMap.joints[table] === undefined){
+            return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
+        }
+
+        this.adqlJsonMap.conditions[table] = undefined;
+
+        while (table !== this.adqlJsonMap.rootTable){
+
+            if ( this.adqlJsonMap.conditions[table] !== undefined){
+                break;
+            } else {
+                this.adqlJsonMap.activeJoints.remove(table);
+            }
+
+            table = this.adqlJsonMap.joints[table].parentNode
+        }
+
+        return {"status" : true};
     }
 
     return JsonAdqlBuilder;
