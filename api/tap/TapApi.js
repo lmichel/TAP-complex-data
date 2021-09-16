@@ -23,11 +23,12 @@ var TapApi = (function(){
         initJson.message = "Active TAP : " + shortName;
     }
 
-    TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
+    TapApi.prototype.connect = async function ({tapService, schema, table, shortName}) {
         let formatTableName = schema + "." + table;
         let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
         this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
-        this.tapServiceConnector.connector.votable = this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
+        this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
+        console.log(this.tapServiceConnector.connector.votable);
         this.tapServiceConnector.api = this;
         if (this.tapServiceConnector.connector.votable.status === 200) {
             this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
@@ -36,9 +37,10 @@ var TapApi = (function(){
         else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
             this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
         } else {
+            let status = this.tapServiceConnector.connector.votable.statusText
             this.tapServiceConnector.connector = undefined;
             return {"status":false,"error":{
-                "logs":"Failed to initialize TAP connection:\n" + this.tapServiceConnector.connector.votable.statusText,
+                "logs":"Failed to initialize TAP connection:\n" + status,
                 "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
             }};
         }

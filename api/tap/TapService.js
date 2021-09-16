@@ -16,7 +16,7 @@ var TapService = /** @class */ (function () {
      * @params String :receive adql statements and perform queries
      * @returns :votable object, result of adql query
      */
-    TapService.prototype.Query = function (adql) {
+    TapService.prototype.Query = async function (adql) {
         var site = this.url;
         var correctFormat = "votable";
         var reTable;
@@ -28,34 +28,12 @@ var TapService = /** @class */ (function () {
         console.log("AJAXurl: " + site + " query: " + adql)
 
         reTable = $.ajax({
-            url: "" + site,
-            type: "GET",
-            data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
-            async: false,
-            beforeSend: function(data) {
-                $("body").append("<div id=\"overlay\">\n" +
-                    "        <div class=\"cv-spinner\">\n" +
-                    "            <span class=\"spinner\"></span>\n" +
-                    "        </div>\n" +
-                    "    </div>");
+                url: "" + site,
+                type: "GET",
+                data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
+            }).done((result)=>result);
 
-                    $("#overlay").fadeIn(1);
-
-
-            },
-
-
-        }).done(function (result) {
-            if(site){
-                setTimeout(function(){
-                    $("#overlay").fadeOut(1000);
-                },3000);
-            }
-            return result;
-        });
-
-        //console.log(reTable);
-        return reTable;
+        return await reTable;
     };
 
     /**
@@ -205,14 +183,12 @@ var TapService = /** @class */ (function () {
      */
     TapService.prototype.allTable = function () {
 
-        //var allTable = [];
-        if (this.allTables == undefined) {
+        if (this.allTables === undefined) {
             let allTableObject = this.allTableQuery(); //Get all the tables
             this.allTables = VOTableTools.votable2Rows(allTableObject);
         }
 
         return this.allTables;
-
 
     };
 

@@ -346,43 +346,46 @@ function createHandlersButton(api){
 
                 let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
                 
-                api.connect(params);
+                let connect = api.connect(params);
 
+                connect.catch((reason)=>console.error(reason));
 
-                let status = api.getConnector().status;
+                connect.then((value) => {
+                    let status = value.status;
 
-                display(status , "getStatus");
+                    display(""+status , "getStatus");
 
-                if (status){
+                    if (status){
 
-                    /*/ disable all radio buttons so the user can't change their value /*/
-                    $("input:radio[name=sex]").attr("disabled",true);
-                    $("label[name=radioLabel]").each((i,btn)=>{
-                        disableButton(btn.id);
-                    })
+                        /*/ disable all radio buttons so the user can't change their value /*/
+                        $("input:radio[name=sex]").attr("disabled",true);
+                        $("label[name=radioLabel]").each((i,btn)=>{
+                            disableButton(btn.id);
+                        })
 
-                    enableButton("btnApiDisconnect");
-                    enableButton("btnGetConnector");
-                    enableButton("btnGetObjectMap");
-                    enableButton("btnGetJoinTable");
-                    enableButton("btnGetRootQuery");
-                    enableButton("btnGetRootFieldsQuery");
-                    enableButton("btnGetRootQueryIds");
-                    enableButton("btnGetRootFields");
-                    //enableButton("btnGetTableQueryIds");
-                    //enableButton("btnGetTableFields");
-                    enableButton("btnGetAdqlJsonMap");
-                    enableButton("btnConstraint");
-                    enableButton("btnRemoveConstraint");
-                    enableButton("btnRemoveAllConstraint");
-                    enableButton("btnLoadButtonsHandler");
+                        enableButton("btnApiDisconnect");
+                        enableButton("btnGetConnector");
+                        enableButton("btnGetObjectMap");
+                        enableButton("btnGetJoinTable");
+                        enableButton("btnGetRootQuery");
+                        enableButton("btnGetRootFieldsQuery");
+                        enableButton("btnGetRootQueryIds");
+                        enableButton("btnGetRootFields");
+                        //enableButton("btnGetTableQueryIds");
+                        //enableButton("btnGetTableFields");
+                        enableButton("btnGetAdqlJsonMap");
+                        enableButton("btnConstraint");
+                        enableButton("btnRemoveConstraint");
+                        enableButton("btnRemoveAllConstraint");
+                        enableButton("btnLoadButtonsHandler");
 
-                    createButton(api);
-                    createHandlersButton(api);
+                        createButton(api);
+                        createHandlersButton(api);
 
-                    return true;
+                        return true;
 
-                }
+                    }
+                })
 
             } else {
                 display("The service is  already connected ! disconnect the service and try again ...", "getStatus");

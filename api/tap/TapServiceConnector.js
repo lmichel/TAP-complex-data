@@ -215,9 +215,9 @@ var TapServiceConnector = (function() {
         return joinJsonJoin;
     };
 
-    TapServiceConnector.prototype.Query = function(adql){
-
-        return this.tapService.Query(adql)
+    TapServiceConnector.prototype.Query = async function(adql){
+        
+        return await this.tapService.Query(adql);
     }
 
     TapServiceConnector.prototype.createAllJoinTable = function (map){
