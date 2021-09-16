@@ -478,11 +478,9 @@ async function createHandlersButton(api){
 
         });
 
-        bindClickEvent("btnGetObjectMap",() => {
+        bindClickAsyncEvent("btnGetObjectMap",async () => {
 
-            /*/ TODO : update api.getObjectMap output object /*/
-
-            let objectMap = api.getObjectMap();
+            let objectMap = await api.getObjectMap();
             let status = objectMap.status;
 
             display(status, "getStatus");
@@ -493,8 +491,6 @@ async function createHandlersButton(api){
         });
 
         bindClickEvent("btnGetJoinTable",() => {
-            
-            /*/ TODO : update api.getJoinedTables output object /*/
 
             let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
 
