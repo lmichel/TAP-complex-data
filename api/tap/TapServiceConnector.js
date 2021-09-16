@@ -26,9 +26,9 @@ var TapServiceConnector = (function() {
     /**
     * return the full json created by the method createJson()
     */
-    TapServiceConnector.prototype.loadJson = function () {
+    TapServiceConnector.prototype.loadJson = async function () {
         if(this.jsonLoad === undefined){
-            this.jsonLoad = this.tapService.createJson();
+            this.jsonLoad = await this.tapService.createJson();
         }
         return this.jsonLoad;
     }
@@ -113,10 +113,10 @@ var TapServiceConnector = (function() {
         return  VOTableTools.votable2Rows(votableQueryResult);
     }
     
-    TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
+    TapServiceConnector.prototype.getObjectMapAndConstraints = async function () {
         let api = this.api;
         let rootTable = api.getConnector().connector.service["table"];
-        let jsonWithaoutDescription = this.loadJson();
+        let jsonWithaoutDescription = await this.loadJson();
         this.objectMapWithAllDescription.root_table.name = rootTable;
         this.schema = api.getConnector().connector.service["schema"];
         this.objectMapWithAllDescription.root_table.schema = this.schema;
@@ -216,7 +216,6 @@ var TapServiceConnector = (function() {
     };
 
     TapServiceConnector.prototype.Query = async function(adql){
-        
         return await this.tapService.Query(adql);
     }
 

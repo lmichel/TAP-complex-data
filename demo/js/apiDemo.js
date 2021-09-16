@@ -84,6 +84,40 @@ function bindClickEvent(elemId,handler,disableText){
     })
 }
 
+
+async function syncIt(promise){
+    $("#overlay").fadeIn(1);
+    try {
+        await promise()
+    } catch (error) {
+        console.error(error);
+    }
+    $("#overlay").fadeOut(1000)
+}
+
+
+function bindClickAsyncEvent(elemId,handler,disableText){
+    $("#" + elemId).click(async() =>{ syncIt( async ()=>{
+        try{
+            if (!isDisable(elemId)){
+                let val = await handler();
+                if(val){
+                    successButton(elemId);
+                }
+            } else if (disableText === undefined){
+                display("This button is currently disabled, you can't use it.", "getStatus");
+            } else {
+                display(disableText, "getStatus");
+            }
+
+        }catch(error){
+            console.error(error)
+            errorButton(elemId)
+            display("An unexpected Error has append see logs for more information", "getStatus");
+        }
+    })});
+}
+
 /*/ Trigers function for radio button /*/
 
 function OnRadioChange(radio) {
@@ -255,9 +289,9 @@ function createButton(api) {
 
 /*/ Button creation for Handlers /*/
 
-function createHandlersButton(api){
+async function createHandlersButton(api){
     let table = api.getConnector().connector.service.table;
-    let handlers = api.getTableAttributeHandlers(table);
+    let handlers = await api.getTableAttributeHandlers(table);
     if (handlers.status){
         let buttons = [];
         let map = {};
@@ -340,18 +374,21 @@ function createHandlersButton(api){
 
     function setupEventHandlers(){
         
-        bindClickEvent("btnApiConnect",() => {
+        bindClickAsyncEvent("btnApiConnect",async () => {
             
             if (isEnable("btnApiConnect")) {
 
                 let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
                 
                 let connect = api.connect(params);
-
+                let status = false;
                 connect.catch((reason)=>console.error(reason));
 
-                connect.then((value) => {
-                    let status = value.status;
+                let thenFun = async ()=> {};
+
+                connect.then(async (value) => {
+                    status = value.status;
+                    thenFun = async () =>{
 
                     display(""+status , "getStatus");
 
@@ -380,18 +417,21 @@ function createHandlersButton(api){
                         enableButton("btnLoadButtonsHandler");
 
                         createButton(api);
-                        createHandlersButton(api);
-
-                        return true;
-
+                        await createHandlersButton(api);
                     }
+                }
                 })
+
+                await connect;
+                await thenFun();
+
+                return status;
 
             } else {
                 display("The service is  already connected ! disconnect the service and try again ...", "getStatus");
             }
 
-        }, "no service selected... Choose service first and try again" );
+        },"no service selected... Choose service first and try again" );
 
         bindClickEvent("btnApiDisconnect",() => {
             api.disconnect();

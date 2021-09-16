@@ -28,7 +28,6 @@ var TapApi = (function(){
         let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
         this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
         this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
-        console.log(this.tapServiceConnector.connector.votable);
         this.tapServiceConnector.api = this;
         if (this.tapServiceConnector.connector.votable.status === 200) {
             this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
@@ -46,7 +45,7 @@ var TapApi = (function(){
         }
         this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-        this.jsonAdqlBuilder = new JsonAdqlBuilder(this.getObjectMap().object_map);
+        this.jsonAdqlBuilder = new JsonAdqlBuilder((await this.getObjectMap()).object_map);
 
         return {"status":true};
     }
@@ -67,11 +66,11 @@ var TapApi = (function(){
 
     }
 
-    TapApi.prototype.getObjectMap = function () {
+    TapApi.prototype.getObjectMap = async function () {
         let objectMap = {}
         if (this.getConnector().status) {
             objectMap.status = true
-            objectMap.object_map = this.getObjectMapWithAllDescriptions();
+            objectMap.object_map = await this.getObjectMapWithAllDescriptions();
             return objectMap;
         } else {
             objectMap.status = false
@@ -252,15 +251,15 @@ var TapApi = (function(){
      * @param {*} table : String the name of table you want get handlerAttribut associeted with
      * @return {*} : Json the json containing all handler Attribut of the table
      * */
-    TapApi.prototype.getTableAttributeHandlers = function (table) {
-        return this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table);
+    TapApi.prototype.getTableAttributeHandlers = async function (table) {
+        return await this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table);
     }
 
     /**
      *@return {*} : Json the json containing all detail about every singel table join to the root table with all join table of each table and all condition of each table
     **/
-    TapApi.prototype.getObjectMapWithAllDescriptions = function () {
-        return  this.tapServiceConnector.getObjectMapAndConstraints();
+    TapApi.prototype.getObjectMapWithAllDescriptions = async function () {
+        return await this.tapServiceConnector.getObjectMapAndConstraints();
     }
 
     TapApi.prototype.setAdql = function (rootTable, constraint) {
