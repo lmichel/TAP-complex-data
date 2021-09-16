@@ -34,7 +34,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     let doubleArrayValue = [];
     let singleArrayValue = [];
     //console.log(this.api)
-    this.db_name = this.api.getConnector().service["table"]
+    this.db_name = this.api.getConnector().connector.service["table"]
     let api = this.api;
     let jsonContaintHandlerValues = {
         succes: {
@@ -59,14 +59,14 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     }
 
 
-    if (api.getConnector().status === "OK") {
+    if (api.getConnector().connector.status === "OK") {
 
         if (testJsonRead == false) {
-            sj = new jsonRead(api.getObjectMap().succes.object_map);
+            sj = new jsonRead(api.getObjectMap().object_map);
             testJsonRead = true;
         }
 
-        var adql = this.addAllColumn(table, api.getConnector().service["schema"]);
+        var adql = this.addAllColumn(table, api.getConnector().connector.service["schema"]);
 
         var s = api.tapServiceConnector;
         var votableQueryResult = s.Query(adql);

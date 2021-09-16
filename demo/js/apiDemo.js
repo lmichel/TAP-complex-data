@@ -103,7 +103,7 @@ function OnRadioChange(radio) {
 
 function selectConstraints(tableName, txtInput,api){
     
-    let schema = api.getConnector().service["schema"];
+    let schema = api.getConnector().connector.service["schema"];
     let adql = api.tapServiceConnector.attributsHandler.addAllColumn(tableName, schema)
     let QObject = api.tapServiceConnector.Query(adql);
     let dataTable = VOTableTools.votable2Rows(QObject)
@@ -216,14 +216,30 @@ function createButton(api) {
         });
 
         bindClickEvent(key,() => {
-            if($("#txt" + key).val().length!==1){
-                let result = api.setTableConstraint(key, $("#txt" + key).val());
-                if (result.status === "OK"){
+            if($("#txt" + key).val().length > 1){
+                let constraint = $("#txt" + key).val().trim();
+
+                /*/ constraint cleanup /*/
+                while (constraint.startsWith("AND") || constraint.startsWith("WHERE") || constraint.startsWith("OR")){
+                    while (constraint.startsWith("AND")){
+                        constraint = constraint.substring(3).trim();
+                    }
+                    while (constraint.startsWith("WHERE")){
+                        constraint = constraint.substring(5).trim();
+                    }
+                    while (constraint.startsWith("OR")){
+                        constraint = constraint.substring(2).trim();
+                    }
+                }
+
+                let result = api.setTableConstraint(key, constraint);
+                if (result.status ){
                     display(result.status,"getStatus");
                     display(api.getRootQuery().query,"getJsonAll");
                     return true;
                 }else{
-                    display(result.status + " : " + result.message,"getStatus");
+                    display(result.status,"getStatus");
+                    display(JSON.stringify(result.error,undefined,4),"getJsonAll");
                     return false;
                 }
 
@@ -240,9 +256,9 @@ function createButton(api) {
 /*/ Button creation for Handlers /*/
 
 function createHandlersButton(api){
-    let table = api.getConnector().service.table;
+    let table = api.getConnector().connector.service.table;
     let handlers = api.getTableAttributeHandlers(table);
-    if (handlers.status == "OK"){
+    if (handlers.status){
         let buttons = [];
         let map = {};
         
@@ -334,11 +350,10 @@ function createHandlersButton(api){
 
 
                 let status = api.getConnector().status;
-                let message = api.getConnector().message;
 
-                display(status + ": " + message, "getStatus");
+                display(status , "getStatus");
 
-                if (status === "OK"){
+                if (status){
 
                     /*/ disable all radio buttons so the user can't change their value /*/
                     $("input:radio[name=sex]").attr("disabled",true);
@@ -348,7 +363,6 @@ function createHandlersButton(api){
 
                     enableButton("btnApiDisconnect");
                     enableButton("btnGetConnector");
-                    enableButton("btnGetJsonAdqlContent");
                     enableButton("btnGetObjectMap");
                     enableButton("btnGetJoinTable");
                     enableButton("btnGetRootQuery");
@@ -357,6 +371,7 @@ function createHandlersButton(api){
                     enableButton("btnGetRootFields");
                     //enableButton("btnGetTableQueryIds");
                     //enableButton("btnGetTableFields");
+                    enableButton("btnGetAdqlJsonMap");
                     enableButton("btnConstraint");
                     enableButton("btnRemoveConstraint");
                     enableButton("btnRemoveAllConstraint");
@@ -380,7 +395,6 @@ function createHandlersButton(api){
             
             disableButton("btnApiDisconnect");
             disableButton("btnGetConnector");
-            disableButton("btnGetJsonAdqlContent");
             disableButton("btnGetObjectMap");
             disableButton("btnGetJoinTable");
             disableButton("btnGetRootQuery");
@@ -389,6 +403,7 @@ function createHandlersButton(api){
             disableButton("btnGetRootFields");
             //disableButton("btnGetTableQueryIds");
             //disableButton("btnGetTableFields");
+            disableButton("btnGetAdqlJsonMap");
             disableButton("btnConstraint");
             disableButton("btnRemoveConstraint");
             disableButton("btnRemoveAllConstraint");
@@ -414,9 +429,9 @@ function createHandlersButton(api){
             let status = connector.status;
 
             display(status, "getStatus");
-            display(JSON.stringify(connector, undefined, 4), "getJsonAll")
+            display(JSON.stringify(connector.connector, undefined, 4), "getJsonAll")
 
-            return status === "OK";
+            return status;
 
         });
 
@@ -425,25 +440,12 @@ function createHandlersButton(api){
             /*/ TODO : update api.getObjectMap output object /*/
 
             let objectMap = api.getObjectMap();
-            let status = objectMap.succes.status;
+            let status = objectMap.status;
 
             display(status, "getStatus");
             display(JSON.stringify(objectMap, undefined, 4), "getJsonAll");
 
-            return status === "OK";
-
-        });
-
-        bindClickEvent("btnGetJsonAdqlContent",() => {
-            let jsonAdql = api.getJsonAdqlContent()
-            if (jsonAdql.status === "OK"){
-                display(jsonAdql.status,"getStatus");
-                display(JSON.stringify(jsonAdql.jsonADQLContent,undefined,4),"getJsonAll");
-                return true;
-            } else {
-                display(jsonAdql.status + " : " +jsonAdql.message ,"getStatus")
-                return false;
-            }
+            return status;
 
         });
 
@@ -454,12 +456,12 @@ function createHandlersButton(api){
             let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
 
             let joinTables = api.getJoinedTables(params.table);
-            let status = joinTables.Succes.status;
+            let status = joinTables.status;
 
             display(status, "getStatus");
             display(JSON.stringify(joinTables,undefined,4), "getJsonAll");
 
-            return status === "OK";
+            return status;
             
         });
 
@@ -467,12 +469,13 @@ function createHandlersButton(api){
 
             let rootQuery = api.getRootQuery();
 
-            if (rootQuery.status == "OK"){
+            if (rootQuery.status){
                 display(rootQuery.status, "getStatus");
                 display(rootQuery.query, "getJsonAll");
                 return true
             }
-            display(rootQuery.status + " : " + rootQuery.message, "getStatus");
+            display(rootQuery.status, "getStatus");
+            display(JSON.stringify(rootQuery.error,undefined,4), "getJsonAll");
             return false;
             
         });
@@ -481,12 +484,13 @@ function createHandlersButton(api){
 
             let rootQuery = api.getRootFieldsQuery();
 
-            if (rootQuery.status == "OK"){
+            if (rootQuery.status){
                 display(rootQuery.status, "getStatus");
                 display(rootQuery.query, "getJsonAll");
                 return true
             }
-            display(rootQuery.status + " : " + rootQuery.message, "getStatus");
+            display(rootQuery.status, "getStatus");
+            display(JSON.stringify(rootQuery.error,undefined,4), "getJsonAll");
             return false;
             
         });
@@ -496,12 +500,12 @@ function createHandlersButton(api){
             /*/ TODO : update api.getRootQueryIds output object /*/
 
             let rootQueryIds = api.getRootQueryIds();
-            let status = rootQueryIds.succes.status;
+            let status = rootQueryIds.status;
 
             display(status, "getStatus");
             display(JSON.stringify(rootQueryIds,undefined,4), "getJsonAll");
 
-            return status === "OK";
+            return status;
         });
 
         bindClickEvent("btnGetRootFields",() => {
@@ -510,13 +514,14 @@ function createHandlersButton(api){
 
             let rootFields = api.getRootFields();
             let status = rootFields.status;
-            if (status == "OK"){
+            if (status){
                 display(status, "getStatus");
                 display(JSON.stringify(rootFields.field_values,undefined,4), "getJsonAll");
                 return true;
             }
             
-            display(status + " : " + rootFields.message, "getStatus");
+            display(status, "getStatus");
+            display(JSON.stringify(rootFields.error,undefined,4), "getJsonAll");
 
             return false;
         });
@@ -526,12 +531,12 @@ function createHandlersButton(api){
             /*/ TODO : Do api.getTableQueryIds /*/
 
             let tableQueryIds = api.getTableQueryIds();
-            let status = tableQueryIds.succes.status;
+            let status = tableQueryIds.status;
 
             display(status, "getStatus");
             display(JSON.stringify(tableQueryIds,undefined,4), "getJsonAll");
 
-            return status === "OK";
+            return status;
         });
 
         bindClickEvent("btnGetTableFields",() => {
@@ -539,12 +544,18 @@ function createHandlersButton(api){
             /*/ TODO : Do api.getTableFields /*/
 
             let tableFields = api.getTableFields();
-            let status = tableFields.succes.status;
+            let status = tableFields.status;
 
             display(status, "getStatus");
             display(JSON.stringify(tableFields,undefined,4), "getJsonAll");
 
-            return status === "OK";
+            return status;
+        });
+
+        bindClickEvent("btnGetAdqlJsonMap",() => {
+            display("Internal Object State Debug purpose only", "getStatus");
+            display(JSON.stringify(api.jsonAdqlBuilder.adqlJsonMap,undefined,4), "getJsonAll");
+            return true;
         });
 
         bindClickEvent("btnConstraint",() => {
@@ -560,12 +571,13 @@ function createHandlersButton(api){
 
             let rootq = api.resetTableConstraint($("#txtConstraint").val());
 
-            if (rootq.status === "OK"){
+            if (rootq.status){
                 display(rootq.status, "getStatus");
-                display(api.getRootQuery(), "getJsonAll");
+                display(api.getRootQuery().query, "getJsonAll");
                 return true;
             } else {
-                display(rootq.status + " : " + rootq.message, "getStatus");
+                display("" + rootq.status, "getStatus");
+                display(JSON.stringify(rootq.error,undefined,4), "getJsonAll");
                 return false;
             }
         });
@@ -573,12 +585,13 @@ function createHandlersButton(api){
         bindClickEvent("btnRemoveAllConstraint",() => {
             let r = api.resetAllTableConstraint();
 
-            if (r.status === "OK"){
+            if (r.status){
                 display(r.status, "getStatus");
                 display(api.getRootQuery(), "getJsonAll");
                 return true;
             } else {
-                display(r.status + " : " + r.message, "getStatus");
+                display(r.status, "getStatus");
+                display(JSON.stringify(r.error,undefined,4), "getJsonAll");
                 return false;
             }
 

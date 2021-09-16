@@ -199,6 +199,16 @@ if (!String.prototype.getTreepath) {
 
 }
 
+if(!Array.prototype.remove){
+    Array.prototype.remove = function(elem){
+        const index = this.indexOf(elem);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+        return this;
+    }
+}
+
 /**
  * @param{*} str : String the root query
  * @param{*} find : String the short string you search in the root query

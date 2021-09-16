@@ -5,6 +5,7 @@ var TapApi = (function(){
         this.tapServiceConnector = "";
         this.votableQueryResult = undefined;
         this.dataTable1 = undefined;
+        this.jsonAdqlBuilder = undefined;
     }
 
     /**
@@ -35,14 +36,17 @@ var TapApi = (function(){
         else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
             this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
         } else {
-            this.tapServiceConnector.connector.status = 'Failled';
-            this.tapServiceConnector.connector.message = "No active TAP connection"
+            this.tapServiceConnector.connector = undefined;
+            return {"status":false,"error":{
+                "logs":"Failed to initialize TAP connection:\n" + this.tapServiceConnector.connector.votable.statusText,
+                "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+            }};
         }
         this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-        this.tapServiceConnector.getJsonAdqlContent();
+        this.jsonAdqlBuilder = new JsonAdqlBuilder(this.getObjectMap().object_map);
 
-        return this.tapServiceConnector.connector;
+        return {"status":true};
     }
 
     TapApi.prototype.disconnect = function () {
@@ -54,22 +58,22 @@ var TapApi = (function(){
 
     TapApi.prototype.getConnector = function () {
         if(this.tapServiceConnector.connector===undefined){
-            return ""
+            return {"status" : false , "error":{"logs" :"No active TAP connection" } };
         }else {
-            return this.tapServiceConnector.connector;
+            return {"status" : true , "connector":this.tapServiceConnector.connector}
         }
 
     }
 
     TapApi.prototype.getObjectMap = function () {
-        let objectMap = {succes: {status: "", object_map: {}}, failure: {status: "", message: ""}}
-        if (this.getConnector().status === 'OK') {
-            objectMap.succes.status = "OK"
-            objectMap.succes.object_map = this.getObjectMapWithAllDescriptions();
+        let objectMap = {}
+        if (this.getConnector().status) {
+            objectMap.status = true
+            objectMap.object_map = this.getObjectMapWithAllDescriptions();
             return objectMap;
         } else {
-            objectMap.failure.status = "Failed"
-            objectMap.failure.message = "No active TAP connection";
+            objectMap.status = false
+            objectMap.error = { "logs": "No active TAP connection"};
             return objectMap
         }
     }
@@ -78,36 +82,35 @@ var TapApi = (function(){
      * @param baseTable (string): Table from which joint table are searched
      * */
     TapApi.prototype.getJoinedTables = function (baseTable) {
-        if (this.getConnector().status === 'OK') {
+        let jsonContaintJoinTable = {};
+        if (this.getConnector().status) {
             if(this.tapServiceConnector.objectMapWithAllDescription.map[baseTable] === undefined){
-                this.tapServiceConnector.jsonContaintJoinTable.Succes.status = "Failed";
-                this.tapServiceConnector.jsonContaintJoinTable.Failure.WrongTable.status = "Failed";
-                this.tapServiceConnector.jsonContaintJoinTable.Failure.WrongTable.message = "table " + baseTable + " is not part of the object map"
+                jsonContaintJoinTable.status = false;
+                jsonContaintJoinTable.error = {"logs":"table " + baseTable + " is not part of the object map","prams":{"baseTable":baseTable}};
             }else {
-                this.tapServiceConnector.jsonContaintJoinTable.Succes.joined_tables = this.tapServiceConnector.objectMapWithAllDescription.map[baseTable].join_tables//this.tapServiceConnector.getJoinTables(baseTable);
-                this.tapServiceConnector.jsonContaintJoinTable.Succes.status = "OK";
-                this.tapServiceConnector.jsonContaintJoinTable.Succes.base_table = baseTable;
+                jsonContaintJoinTable.joined_tables = this.tapServiceConnector.objectMapWithAllDescription.map[baseTable].join_tables//this.tapServiceConnector.getJoinTables(baseTable);
+                jsonContaintJoinTable.status = true;
+                jsonContaintJoinTable.base_table = baseTable;
             }
             
         } else {
-            this.tapServiceConnector.jsonContaintJoinTable.Succes.status = "Failed";
-            this.tapServiceConnector.jsonContaintJoinTable.Failure.NotConnected.message = "No active TAP connection";
+            jsonContaintJoinTable.status = false;
+            jsonContaintJoinTable.error = {"logs":"No active TAP connection","prams":{"baseTable":baseTable}};
         }
-        return this.tapServiceConnector.jsonContaintJoinTable;
+        return jsonContaintJoinTable;
     }
 
     /**
-     * @param {*} mainJsonData the main json create by the method createMainJson of Tapservice
-     * @returns return all join request of each join table of the mainJson
+     * @returns Returns all fields of root table rows returned by the ADQL query on the root table filtered by all constraints put on joined tables at any levels.
      */
     TapApi.prototype.getRootFields = function () {
-        if (this.getConnector().status === 'OK') {
+        if (this.getConnector().status) {
 
             let votable = this.tapServiceConnector.Query(this.getRootFieldsQuery().query);
 
             let dataTable = []
 
-            let Field = this.getTableAttributeHandlers(this.getConnector().service["table"]).attribute_handlers
+            let Field = this.getTableAttributeHandlers(this.getConnector().connector.service["table"]).attribute_handlers
 
             if (votable.status == 200) {
                 dataTable = this.tapServiceConnector.getDataTable(votable);
@@ -123,72 +126,22 @@ var TapApi = (function(){
                     singleArrayValue = [];
                 }
 
-                return {"status" : "OK" , "field_values" :doubleArrayValue};
+                return {"status" : true , "field_values" :doubleArrayValue};
             } else {
-                return {"status" : "Failed" , "message" :"votable.statusText" };
+                return {"status" :false , "error":{"logs" :votable.statusText }};
             }
             
         } else {
-            return {"status" : "Failed" , "message" :"No active TAP connection" };
+            return {"status" : false , "error":{"logs" :"No active TAP connection" } };
         }
-    }
-
-    TapApi.prototype.getRootFieldValues = function (query) {
-        let jsonContaintRootFieldValues = {succes: {status: "", field_values: []}, datatable: [], field: [], failure: {notConnected: {status: "", message: ""}, otherError: {status: "", message: ""}}}
-        let doubleArrayValue = [];
-        let singleArrayValue = [];
-        if (this.getConnector().status === 'OK') {
-            let rootable = this.getConnector().service["table"];
-            let schema = this.tapServiceConnector.connector.service["schema"];
-            let votableQueryResult = "";
-            if (query !== undefined) {
-                votableQueryResult = this.tapServiceConnector.Query(query);
-            }
-            let Field = this.tapServiceConnector.getFields(votableQueryResult, this.getConnector().service.tapService)
-            let dataTable = this.tapServiceConnector.getDataTable(votableQueryResult);
-            jsonContaintRootFieldValues.datatable = dataTable;
-            jsonContaintRootFieldValues.field = Field
-            let nbCols = Field.length;
-            for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
-                for (let col = 0; col < nbCols; col++) {
-                    if (dataTable[rowNb + col] != null)
-                        singleArrayValue.push(dataTable[rowNb + col]);
-                }
-                doubleArrayValue.push(singleArrayValue);
-                singleArrayValue = [];
-            }
-            let jsonContaintHandlersValue1 = [];
-            if (this.dataTable1 === undefined) {
-                this.dataTable1 = this.tapServiceConnector.attributsHandler.getTableAttributeHandler(rootable, schema)// VOTableTools.votable2Rows(adql1);
-            }
-            for (let b = 0; b < this.dataTable1.attribute_handlers.length; b++) {
-                for (let ke in this.dataTable1.attribute_handlers[b]) {
-                    for (let col = 0; col < Field.length; col++) {
-                        if (this.dataTable1.attribute_handlers[b][ke] === Field[col]) {
-                            jsonContaintHandlersValue1.push(this.dataTable1.attribute_handlers[b])
-                        }
-                    }
-                }
-            }
-            jsonContaintHandlersValue1 = Array.from(new Set(jsonContaintHandlersValue1));
-            this.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs'] = jsonContaintHandlersValue1
-            jsonContaintRootFieldValues.succes.status = "OK"
-            jsonContaintRootFieldValues.succes.field_values = doubleArrayValue;
-        } else {
-            jsonContaintRootFieldValues.failure.notConnected.status = "Failed";
-            jsonContaintRootFieldValues.failure.notConnected.message = "No active TAP connection"
-            jsonContaintRootFieldValues.failure.otherError.status = "failed"
-            jsonContaintRootFieldValues.failure.otherError.message = "error_message"
-        }
-        return jsonContaintRootFieldValues;
     }
 
     TapApi.prototype.getRootQueryIds = function () {
-        let jsonContaintRootQueryIdsValues = {succes: {status: "", field_ids: []}, failure: {notConnected: {status: "", message: ""}, otherError: {status: "", message: ""}}}
+        let jsonContaintRootQueryIdsValues = {}
         let doubleArrayValue = [];
         let singleArrayValue = [];
-        if (this.getConnector().status == 'OK') {
-            let Field = this.getAllSelectedRootField(this.getConnector().service["table"]);
+        if (this.getConnector().status) {
+            let Field = this.getAllSelectedRootField(this.getConnector().connector.service["table"]);
             let votable = this.tapServiceConnector.Query(this.getRootQuery().query);
             let dataTable = []
             if (votable.status == 200) {
@@ -202,21 +155,22 @@ var TapApi = (function(){
 
                     singleArrayValue = [];
                 }
-                jsonContaintRootQueryIdsValues.succes.status = "OK"
-                jsonContaintRootQueryIdsValues.succes.field_ids = doubleArrayValue;
+                jsonContaintRootQueryIdsValues.status = true;
+                jsonContaintRootQueryIdsValues.field_ids = doubleArrayValue;
             } else {
-                jsonContaintRootQueryIdsValues.failure.notConnected.status = "Failed";
-                jsonContaintRootQueryIdsValues.failure.notConnected.message = "No active TAP connection"
-                jsonContaintRootQueryIdsValues.failure.otherError.status = "failed"
-                jsonContaintRootQueryIdsValues.failure.otherError.message = "error_message"
+                jsonContaintRootQueryIdsValues.error = {"logs" : votable.statusText}
+                jsonContaintRootQueryIdsValues.status = false;
             }
+        } else{
+            jsonContaintRootQueryIdsValues.error = {"logs" : "No active TAP connection"}
+            jsonContaintRootQueryIdsValues.status = false;
         }
         return jsonContaintRootQueryIdsValues;
     }
 
     TapApi.prototype.getRootQuery = function () {
-        if (this.getConnector().status === 'OK') {
-            let rootTable = this.getConnector().service["table"];
+        if (this.getConnector().status) {
+            let rootTable = this.getConnector().connector.service["table"];
             let allField = this.formatColNames(rootTable,this.getAllSelectedRootField(rootTable));
             let contentAdql = "";
 
@@ -227,38 +181,30 @@ var TapApi = (function(){
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
             contentAdql = "SELECT TOP 10 " + allField;
-            contentAdql += '\n' + " FROM  " + correctTableNameFormat;
+            contentAdql += '\n' + " FROM  " + correctTableNameFormat + "\n";
 
-            for (let key in this.tapServiceConnector.jsonAdqlContent.allJoin) {
-                if (contentAdql.indexOf(this.tapServiceConnector.jsonAdqlContent.allJoin[key]) !== -1) {
-                } else {
-                    contentAdql += '\n' + this.tapServiceConnector.jsonAdqlContent.allJoin[key];
-                }
-            }
+            contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
 
-            this.tapServiceConnector.setRootQuery(contentAdql)
-
-            this.addConstraint();
-            return {"status": "OK", "query": this.tapServiceConnector.getJsonAdqlContent().rootQuery} ;
+            contentAdql += this.jsonAdqlBuilder.getAdqlConstraints().adqlConstraints;
+            return {"status": true, "query": contentAdql} ;
         }
 
-        return {"status":"failed", "message": "No active TAP connection"}
+        return {"status":false,"error" :{ "logs": "No active TAP connection"}};
     }
 
     /**
      * Create and return the correct adql querry to get the value of all fields of the selected root table, taking in account all user's defined constraints
-     * @returns {string} the adql query
      */
     TapApi.prototype.getRootFieldsQuery = function(){
-        if (this.getConnector().status === 'OK') {
-            let rootTable = this.getConnector().service["table"];
+        if (this.getConnector().status) {
+            let rootTable = this.getConnector().connector.service["table"];
 
             /**
              * Simbad doesn't support SELECT *
              * so we explicitly tell him every field.
              */
             let allField;
-            if (this.getConnector().service.shortName == "Simbad"){
+            if (this.getConnector().connector.service.shortName == "Simbad"){
                 allField = this.formatColNames(rootTable,this.getAllRootField(rootTable));
             }else {
                 allField = this.formatColNames(rootTable,["*"]);
@@ -275,97 +221,41 @@ var TapApi = (function(){
             contentAdql = "SELECT TOP 10 " + allField;
             contentAdql += '\n' + " FROM  " + correctTableNameFormat;
 
-            for (let key in this.tapServiceConnector.jsonAdqlContent.allJoin) {
-                if (contentAdql.indexOf(this.tapServiceConnector.jsonAdqlContent.allJoin[key]) !== -1) {
-                } else {
-                    contentAdql += '\n' + this.tapServiceConnector.jsonAdqlContent.allJoin[key];
-                }
-            }
+            contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
 
-            this.tapServiceConnector.setRootQuery(contentAdql)
-
-            this.addConstraint();
-            return {"status": "OK", "query": this.tapServiceConnector.getJsonAdqlContent().rootQuery} ;
+            contentAdql += this.jsonAdqlBuilder.getAdqlConstraints().adqlConstraints;
+            return {"status": true, "query": contentAdql} ;
         }
 
-        return {"status":"failed", "message": "No active TAP connection"}
-    }
-
-    TapApi.prototype.addConstraint = function () {
-        let objectMapWithAllDescription = this.getObjectMap().succes.object_map;
-        for (let keyconst in objectMapWithAllDescription.tables) {
-            if (this.tapServiceConnector.jsonAdqlContent.rootQuery.indexOf("WHERE") === -1) {
-                if (objectMapWithAllDescription.tables[keyconst].constraints.length !== 0) {
-                    this.tapServiceConnector.jsonAdqlContent.rootQuery += '\n' + " WHERE " + objectMapWithAllDescription.tables[keyconst].constraints + ' ';
-                }
-            } else {
-                if (this.tapServiceConnector.jsonAdqlContent.rootQuery.indexOf(objectMapWithAllDescription.tables[keyconst].constraints) === -1) {
-                    this.tapServiceConnector.jsonAdqlContent.rootQuery += '\n' + " AND " + objectMapWithAllDescription.tables[keyconst].constraints;
-                }
-            }
-        }
-        this.tapServiceConnector.jsonAdqlContent.rootQuery = this.tapServiceConnector.replaceWhereAnd(this.tapServiceConnector.jsonAdqlContent.rootQuery);
-        if (this.tapServiceConnector.jsonAdqlContent.rootQuery.trim().endsWith("WHERE") == true) {
-            this.tapServiceConnector.jsonAdqlContent.rootQuery = this.tapServiceConnector.jsonAdqlContent.rootQuery.trim().replaceAll("WHERE", "");
-        }
+        return {"status":false,"error" :{ "logs": "No active TAP connection"}};
     }
 
     /**
      *@param {string} table :  the name of table you want to remove the contraint associeted with
-    * @return {*} {status: ok} | {status:failed, message: error_message}
+    * @return {*} {status: true|false, "error?": {}}
     **/
     TapApi.prototype.resetTableConstraint = function (table) {
-        let objectMap = this.getObjectMap()
-        if (objectMap.succes.status !== "OK"){
-            return objectMap.failure;
-        }
 
-        let schema = this.tapServiceConnector.connector.service["schema"];
-        let formatTableName = schema + "." + table;
-        let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-
-        let status = {};
-        
-        if (objectMap.succes.object_map.tables[table] !== undefined ) {
-
-            objectMap.succes.object_map.tables[table].constraints = ""
-            delete this.tapServiceConnector.jsonAdqlContent.allJoin[correctTableNameFormat];
-            delete this.tapServiceConnector.jsonAdqlContent.allCondition[correctTableNameFormat];
-            status.status = "OK";
-        }
-        
-        if (status.status===undefined){
-            status = {"status":"failed","message":"Unknown table " + table}
-        }
-        return status;
+        return this.jsonAdqlBuilder.removeTableConstraints(table);
     }
 
     /**
-    * @return {*} {status: ok} | {status:failed, message: error_message}
+    * @return {*} {status: true|false, "error?": {}}
     **/
     TapApi.prototype.resetAllTableConstraint = function () {
-        let status;
-        
-        for (let key in this.getObjectMapWithAllDescriptions().tables) {
-            status = this.resetTableConstraint(key);
-            if (status.status !== "OK"){
-                return status;
-            }
-        }
-
-        return status;
+        return this.jsonAdqlBuilder.removeAllTableConstraints();
     }
 
     /**
      * @param {*} table : String the name of table you want get handlerAttribut associeted with
-     * @return{*} : Json the json containing all handler Attribut of the table
+     * @return {*} : Json the json containing all handler Attribut of the table
      * */
     TapApi.prototype.getTableAttributeHandlers = function (table) {
         return this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table);
     }
 
     /**
-     *@return{*} : Json the json containing all detail about every singel table join to the root table with all join table of each table and all condition of each table
+     *@return {*} : Json the json containing all detail about every singel table join to the root table with all join table of each table and all condition of each table
     **/
     TapApi.prototype.getObjectMapWithAllDescriptions = function () {
         return  this.tapServiceConnector.getObjectMapAndConstraints();
@@ -383,7 +273,7 @@ var TapApi = (function(){
          * finaly we create a set to ensure not selecting any columns more than once
          */
 
-        let join_tables = this.getObjectMap().succes.object_map.map[rootTable].join_tables;
+        let join_tables = this.getObjectMap().object_map.map[rootTable].join_tables;
 
         let columns = []
         for (let key in join_tables){
@@ -456,52 +346,18 @@ var TapApi = (function(){
      * 
      * @param {string} table the table name on which the constraint is set
      * @param {string} constraint an ADQL constraint (to be put after a WHERE: no aggregation)
-     * @returns {*} {status: ok} | {status:failed, message: error_message}
+     * @returns {*} {"status": true|false,"error?":{}}
      */
     TapApi.prototype.setTableConstraint = function(table, constraint){
-        if (this.getConnector().status == 'OK') {
-            let schema = this.tapServiceConnector.connector.service["schema"];
-            let format = schema + '.' + table;
-            let correctTable = format.quotedTableName().qualifiedName;
-            let jsonAdqlContent = this.tapServiceConnector.jsonAdqlContent;
+        if (this.getConnector().status) {
 
-            if (jsonAdqlContent.constraint[correctTable] !== undefined ) {
-                /*/ constraint cleanup /*/
-                constraint = constraint.trim();
+            constraint = constraint.trim();
+            return this.jsonAdqlBuilder.setTableConstraint(table, constraint);
 
-                while (constraint.startsWith("AND") || constraint.startsWith("WHERE")){
-                    while (constraint.startsWith("AND")){
-                        constraint = constraint.substring(3).trim();
-                    }
-                    while (constraint.startsWith("WHERE")){
-                        constraint = constraint.substring(5).trim();
-                    }
-                }
-                
-                jsonAdqlContent.allJoin[correctTable] = jsonAdqlContent.constraint[correctTable];
-                jsonAdqlContent.allCondition[correctTable] = constraint
-
-            } else {
-                return {"status" : "failed", "message" : "Unknown table " + table};
-            }
-
-            return {"status": "OK"};
         }
 
-        return {"status":"failed", "message": "No active TAP connection"};
+        return {"status":false, "error":{"logs": "No active TAP connection","param":{"table":table,"constraint":constraint}}};
         
-    }
-
-    /**
-     * 
-     * @returns {*} {"status":"OK", "jsonADQLContent": jsonADQLContent} | {"status":"failed", "message": "No active TAP connection"}
-     */
-    TapApi.prototype.getJsonAdqlContent = function() {
-        if (this.getConnector().status == 'OK'){
-            return {"status":"OK", "jsonADQLContent": this.tapServiceConnector.getJsonAdqlContent()}
-        } else {
-            return {"status":"failed", "message": "No active TAP connection"};
-        }
     }
 
     return TapApi;
