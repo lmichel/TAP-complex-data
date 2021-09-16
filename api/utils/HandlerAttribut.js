@@ -62,11 +62,11 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     if (api.getConnector().connector.status === "OK") {
 
         if (testJsonRead == false) {
-            sj = new jsonRead(api.getObjectMap().connector.succes.object_map);
+            sj = new jsonRead(api.getObjectMap().object_map);
             testJsonRead = true;
         }
 
-        var adql = this.addAllColumn(table, api.getConnector().service["schema"]);
+        var adql = this.addAllColumn(table, api.getConnector().connector.service["schema"]);
 
         var s = api.tapServiceConnector;
         var votableQueryResult = s.Query(adql);

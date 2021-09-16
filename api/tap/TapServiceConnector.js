@@ -115,10 +115,10 @@ var TapServiceConnector = (function() {
     
     TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
         let api = this.api;
-        let rootTable = api.getConnector().service["table"];
+        let rootTable = api.getConnector().connector.service["table"];
         let jsonWithaoutDescription = this.loadJson();
         this.objectMapWithAllDescription.root_table.name = rootTable;
-        this.schema = api.getConnector().service["schema"];
+        this.schema = api.getConnector().connector.service["schema"];
         this.objectMapWithAllDescription.root_table.schema = this.schema;
         this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs'];
         let formatJoinTable = "";

@@ -353,7 +353,7 @@ function createHandlersButton(api){
 
                 display(status , "getStatus");
 
-                if (status === "OK"){
+                if (status){
 
                     /*/ disable all radio buttons so the user can't change their value /*/
                     $("input:radio[name=sex]").attr("disabled",true);
@@ -461,7 +461,7 @@ function createHandlersButton(api){
             display(status, "getStatus");
             display(JSON.stringify(joinTables,undefined,4), "getJsonAll");
 
-            return statu;
+            return status;
             
         });
 
@@ -514,7 +514,7 @@ function createHandlersButton(api){
 
             let rootFields = api.getRootFields();
             let status = rootFields.status;
-            if (status == "OK"){
+            if (status){
                 display(status, "getStatus");
                 display(JSON.stringify(rootFields.field_values,undefined,4), "getJsonAll");
                 return true;

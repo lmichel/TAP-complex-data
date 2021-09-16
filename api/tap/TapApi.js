@@ -44,7 +44,7 @@ var TapApi = (function(){
         }
         this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-        this.jsonAdqlBuilder = new JsonAdqlBuilder(this.getObjectMap().succes.object_map);
+        this.jsonAdqlBuilder = new JsonAdqlBuilder(this.getObjectMap().object_map);
 
         return {"status":true};
     }
@@ -140,8 +140,8 @@ var TapApi = (function(){
         let jsonContaintRootQueryIdsValues = {}
         let doubleArrayValue = [];
         let singleArrayValue = [];
-        if (this.getConnector().status == 'OK') {
-            let Field = this.getAllSelectedRootField(this.getConnector().service["table"]);
+        if (this.getConnector().status) {
+            let Field = this.getAllSelectedRootField(this.getConnector().connector.service["table"]);
             let votable = this.tapServiceConnector.Query(this.getRootQuery().query);
             let dataTable = []
             if (votable.status == 200) {
@@ -170,7 +170,7 @@ var TapApi = (function(){
 
     TapApi.prototype.getRootQuery = function () {
         if (this.getConnector().status) {
-            let rootTable = this.getConnector().service["table"];
+            let rootTable = this.getConnector().connector.service["table"];
             let allField = this.formatColNames(rootTable,this.getAllSelectedRootField(rootTable));
             let contentAdql = "";
 
@@ -197,14 +197,14 @@ var TapApi = (function(){
      */
     TapApi.prototype.getRootFieldsQuery = function(){
         if (this.getConnector().status) {
-            let rootTable = this.getConnector().service["table"];
+            let rootTable = this.getConnector().connector.service["table"];
 
             /**
              * Simbad doesn't support SELECT *
              * so we explicitly tell him every field.
              */
             let allField;
-            if (this.getConnector().service.shortName == "Simbad"){
+            if (this.getConnector().connector.service.shortName == "Simbad"){
                 allField = this.formatColNames(rootTable,this.getAllRootField(rootTable));
             }else {
                 allField = this.formatColNames(rootTable,["*"]);
@@ -273,7 +273,7 @@ var TapApi = (function(){
          * finaly we create a set to ensure not selecting any columns more than once
          */
 
-        let join_tables = this.getObjectMap().succes.object_map.map[rootTable].join_tables;
+        let join_tables = this.getObjectMap().object_map.map[rootTable].join_tables;
 
         let columns = []
         for (let key in join_tables){
@@ -349,7 +349,7 @@ var TapApi = (function(){
      * @returns {*} {"status": true|false,"error?":{}}
      */
     TapApi.prototype.setTableConstraint = function(table, constraint){
-        if (this.getConnector().status == 'OK') {
+        if (this.getConnector().status) {
 
             constraint = constraint.trim();
             return this.jsonAdqlBuilder.setTableConstraint(table, constraint);
