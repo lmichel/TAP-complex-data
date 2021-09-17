@@ -23,11 +23,11 @@ var TapApi = (function(){
         initJson.message = "Active TAP : " + shortName;
     }
 
-    TapApi.prototype.connect = function ({tapService, schema, table, shortName}) {
+    TapApi.prototype.connect = async function ({tapService, schema, table, shortName}) {
         let formatTableName = schema + "." + table;
         let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
         this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
-        this.tapServiceConnector.connector.votable = this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
+        this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
         this.tapServiceConnector.api = this;
         if (this.tapServiceConnector.connector.votable.status === 200) {
             this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
@@ -36,15 +36,16 @@ var TapApi = (function(){
         else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
             this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
         } else {
+            let status = this.tapServiceConnector.connector.votable.statusText
             this.tapServiceConnector.connector = undefined;
             return {"status":false,"error":{
-                "logs":"Failed to initialize TAP connection:\n" + this.tapServiceConnector.connector.votable.statusText,
+                "logs":"Failed to initialize TAP connection:\n" + status,
                 "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
             }};
         }
         this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-        this.jsonAdqlBuilder = new JsonAdqlBuilder(this.getObjectMap().object_map);
+        this.jsonAdqlBuilder = new JsonAdqlBuilder((await this.getObjectMap()).object_map);
 
         return {"status":true};
     }
@@ -65,11 +66,11 @@ var TapApi = (function(){
 
     }
 
-    TapApi.prototype.getObjectMap = function () {
+    TapApi.prototype.getObjectMap = async function () {
         let objectMap = {}
         if (this.getConnector().status) {
             objectMap.status = true
-            objectMap.object_map = this.getObjectMapWithAllDescriptions();
+            objectMap.object_map = await this.getObjectMapWithAllDescriptions();
             return objectMap;
         } else {
             objectMap.status = false
@@ -103,14 +104,14 @@ var TapApi = (function(){
     /**
      * @returns Returns all fields of root table rows returned by the ADQL query on the root table filtered by all constraints put on joined tables at any levels.
      */
-    TapApi.prototype.getRootFields = function () {
+    TapApi.prototype.getRootFields = async function () {
         if (this.getConnector().status) {
 
-            let votable = this.tapServiceConnector.Query(this.getRootFieldsQuery().query);
+            let votable = await this.tapServiceConnector.Query((await this.getRootFieldsQuery()).query);
 
             let dataTable = []
 
-            let Field = this.getTableAttributeHandlers(this.getConnector().connector.service["table"]).attribute_handlers
+            let Field = (await this.getTableAttributeHandlers(this.getConnector().connector.service["table"])).attribute_handlers
 
             if (votable.status == 200) {
                 dataTable = this.tapServiceConnector.getDataTable(votable);
@@ -136,13 +137,13 @@ var TapApi = (function(){
         }
     }
 
-    TapApi.prototype.getRootQueryIds = function () {
+    TapApi.prototype.getRootQueryIds = async function () {
         let jsonContaintRootQueryIdsValues = {}
         let doubleArrayValue = [];
         let singleArrayValue = [];
         if (this.getConnector().status) {
-            let Field = this.getAllSelectedRootField(this.getConnector().connector.service["table"]);
-            let votable = this.tapServiceConnector.Query(this.getRootQuery().query);
+            let Field = await this.getAllSelectedRootField(this.getConnector().connector.service["table"]);
+            let votable = await this.tapServiceConnector.Query( (await this.getRootQuery()).query);
             let dataTable = []
             if (votable.status == 200) {
                 dataTable = this.tapServiceConnector.getDataTable(votable);
@@ -168,10 +169,10 @@ var TapApi = (function(){
         return jsonContaintRootQueryIdsValues;
     }
 
-    TapApi.prototype.getRootQuery = function () {
+    TapApi.prototype.getRootQuery = async function () {
         if (this.getConnector().status) {
             let rootTable = this.getConnector().connector.service["table"];
-            let allField = this.formatColNames(rootTable,this.getAllSelectedRootField(rootTable));
+            let allField = this.formatColNames(rootTable,await this.getAllSelectedRootField(rootTable));
             let contentAdql = "";
 
             let schema = this.tapServiceConnector.connector.service["schema"];
@@ -195,7 +196,7 @@ var TapApi = (function(){
     /**
      * Create and return the correct adql querry to get the value of all fields of the selected root table, taking in account all user's defined constraints
      */
-    TapApi.prototype.getRootFieldsQuery = function(){
+    TapApi.prototype.getRootFieldsQuery = async function(){
         if (this.getConnector().status) {
             let rootTable = this.getConnector().connector.service["table"];
 
@@ -205,7 +206,7 @@ var TapApi = (function(){
              */
             let allField;
             if (this.getConnector().connector.service.shortName == "Simbad"){
-                allField = this.formatColNames(rootTable,this.getAllRootField(rootTable));
+                allField = this.formatColNames(rootTable,await this.getAllRootField(rootTable));
             }else {
                 allField = this.formatColNames(rootTable,["*"]);
             }
@@ -250,22 +251,22 @@ var TapApi = (function(){
      * @param {*} table : String the name of table you want get handlerAttribut associeted with
      * @return {*} : Json the json containing all handler Attribut of the table
      * */
-    TapApi.prototype.getTableAttributeHandlers = function (table) {
-        return this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table);
+    TapApi.prototype.getTableAttributeHandlers = async function (table) {
+        return await this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table);
     }
 
     /**
      *@return {*} : Json the json containing all detail about every singel table join to the root table with all join table of each table and all condition of each table
     **/
-    TapApi.prototype.getObjectMapWithAllDescriptions = function () {
-        return  this.tapServiceConnector.getObjectMapAndConstraints();
+    TapApi.prototype.getObjectMapWithAllDescriptions = async function () {
+        return await this.tapServiceConnector.getObjectMapAndConstraints();
     }
 
     TapApi.prototype.setAdql = function (rootTable, constraint) {
         return this.tapServiceConnector.getAdqlAndConstraint(rootTable,constraint)
     }
 
-    TapApi.prototype.getAllSelectedRootField = function (rootTable){
+    TapApi.prototype.getAllSelectedRootField = async function (rootTable){
 
         /**
          * We get all the tables joined with the root table
@@ -273,7 +274,7 @@ var TapApi = (function(){
          * finaly we create a set to ensure not selecting any columns more than once
          */
 
-        let join_tables = this.getObjectMap().object_map.map[rootTable].join_tables;
+        let join_tables = (await this.getObjectMap()).object_map.map[rootTable].join_tables;
 
         let columns = []
         for (let key in join_tables){
@@ -284,12 +285,12 @@ var TapApi = (function(){
 
     }
 
-    TapApi.prototype.getAllRootField = function (rootTable){
+    TapApi.prototype.getAllRootField = async function (rootTable){
 
         let columns = [];
 
 
-        let jsonField = this.getTableAttributeHandlers(rootTable).attribute_handlers
+        let jsonField = (await this.getTableAttributeHandlers(rootTable)).attribute_handlers
         
         for (let i =0;i<jsonField.length;i++){
             columns.push(jsonField[i].column_name);

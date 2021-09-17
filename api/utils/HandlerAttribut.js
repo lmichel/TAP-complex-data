@@ -30,7 +30,7 @@ function modifyKeys(obj) {
 
 var testJsonRead = false
 var sj = '';
-HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
+HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
     let doubleArrayValue = [];
     let singleArrayValue = [];
     //console.log(this.api)
@@ -62,14 +62,14 @@ HandlerAttributs.prototype.getTableAttributeHandler = function (table) {
     if (api.getConnector().connector.status === "OK") {
 
         if (testJsonRead == false) {
-            sj = new jsonRead(api.getObjectMap().object_map);
+            sj = new jsonRead((await api.getObjectMap()).object_map);
             testJsonRead = true;
         }
 
         var adql = this.addAllColumn(table, api.getConnector().connector.service["schema"]);
 
         var s = api.tapServiceConnector;
-        var votableQueryResult = s.Query(adql);
+        var votableQueryResult = await s.Query(adql);
 
         let dataTable;
         let contentText;

@@ -16,7 +16,7 @@ var TapService = /** @class */ (function () {
      * @params String :receive adql statements and perform queries
      * @returns :votable object, result of adql query
      */
-    TapService.prototype.Query = function (adql) {
+    TapService.prototype.Query = async function (adql) {
         var site = this.url;
         var correctFormat = "votable";
         var reTable;
@@ -25,37 +25,28 @@ var TapService = /** @class */ (function () {
         } else {
             correctFormat = "votable";
         }
-        console.log("AJAXurl: " + site + " query: " + adql)
+        console.log("Async AJAXurl: " + site + " query: " + adql)
 
         reTable = $.ajax({
-            url: "" + site,
-            type: "GET",
-            data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
-            async: false,
-            beforeSend: function(data) {
-                $("body").append("<div id=\"overlay\">\n" +
-                    "        <div class=\"cv-spinner\">\n" +
-                    "            <span class=\"spinner\"></span>\n" +
-                    "        </div>\n" +
-                    "    </div>");
-
-                    $("#overlay").fadeIn(1);
-
-
-            },
-
-
-        }).done(function (result) {
-            if(site){
-                setTimeout(function(){
-                    $("#overlay").fadeOut(1000);
-                },3000);
-            }
-            return result;
+                url: "" + site,
+                type: "GET",
+                data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
+            });
+        
+        let output = {}
+        reTable.then((value)=>{
+            output.status = 200;
+            output.statusText = "OK"
+            output.responseText = new XMLSerializer().serializeToString(value);
         });
+        reTable.catch((value)=>{
+            output.status = 999; //TODO : Improve 
+            output.statusText = "Failed"
+            output.response = value;
+        });
+        await reTable
 
-        //console.log(reTable);
-        return reTable;
+        return output;
     };
 
     /**
@@ -63,8 +54,7 @@ var TapService = /** @class */ (function () {
      * It's for Simbad(schema_name = 'public'), GAVO(schema_name = 'rr'), VizieR(schema_name = 'metaviz'), CAOM(schema_name = 'dbo') XMM(schema_name = 'EPIC').
      * @returns :votable object
      */
-    TapService.prototype.allTableQuery = function () {
-        var site = this.url;
+    TapService.prototype.allTableQuery = async function () {
         var checkstatus = this.checkstatus;
         var schema_name = this.schema;
         var reTable;
@@ -73,23 +63,7 @@ var TapService = /** @class */ (function () {
         if (checkstatus == true) {
             checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \'' + schema_name + '\' ';
         }
-        console.log("AJAXurl: " + site + " query: " + checkvalue)
-        reTable = $.ajax({
-            url: "" + site,
-            type: "GET",
-            data: {query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery'},
-            async: false
-        })
-            .done(function (result) {
-
-                return result;
-            });
-        if(site){
-            setTimeout(function(){
-                //$('#overlay').addClass('display-none')
-                $("#overlay").fadeOut(1000);
-            },2000);
-        }
+        reTable = await this.Query(checkvalue)
 
         return reTable;
     };
@@ -97,8 +71,7 @@ var TapService = /** @class */ (function () {
      *  INPUT : Get the from_table, target_table, from_column, target_column
      * @returns : OUPUT : votable object
      */
-    TapService.prototype.allLinkQuery = function () {
-        var site = this.url;
+    TapService.prototype.allLinkQuery = async function () {
         var checkstatus = this.checkstatus;
         var reLink;
         var checkvalue = 'SELECT tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
@@ -109,22 +82,7 @@ var TapService = /** @class */ (function () {
 
         // console.log("AJAXurl: " + site + " query: " + checkvalue)
 
-        reLink = $.ajax({
-            url: "" + site,
-            type: "GET",
-            data: {query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery'},
-            async: false
-        })
-            .done(function (result) {
-                if(site) {
-                    setTimeout(function () {
-                        //$('#overlay').addClass('display-none')
-                        $("#overlay").fadeOut(1000);
-                    }, 2000);
-                }
-                return result;
-            });
-
+        reLink = await this.Query(checkvalue)
 
         return reLink;
     };
@@ -168,9 +126,9 @@ var TapService = /** @class */ (function () {
      *  Get 2-dimensional array. The array returns all the information related to the rootTable.
      * @return : A 2-dimensional array. The array returns all the information related to the rootTable.
      */
-    TapService.prototype.allLink = function () {
+    TapService.prototype.allLink = async function () {
         var allLinkLimitObject;
-        allLinkLimitObject = this.allLinkQuery();
+        allLinkLimitObject = await this.allLinkQuery();
         var reTableRe;
         //var everyLink = [];
         var allLink = [];
@@ -203,16 +161,14 @@ var TapService = /** @class */ (function () {
      * Get all the table's name object and convert them to a simple array
      * @return Return an array containing the names of the tables
      */
-    TapService.prototype.allTable = function () {
+    TapService.prototype.allTable = async function () {
 
-        //var allTable = [];
-        if (this.allTables == undefined) {
-            let allTableObject = this.allTableQuery(); //Get all the tables
+        if (this.allTables === undefined) {
+            let allTableObject = await this.allTableQuery(); //Get all the tables
             this.allTables = VOTableTools.votable2Rows(allTableObject);
         }
 
         return this.allTables;
-
 
     };
 
@@ -220,14 +176,14 @@ var TapService = /** @class */ (function () {
      * return all tables with the name of the join table.
      * @return json object contening table,and thier description
      */
-    TapService.prototype.createJson = function () {
+    TapService.prototype.createJson = async function () {
         var allTtable = [];
         var jsonAll = {};
         var columns = [];
         var constraints = "";
         var alllink = [[]];
-        alllink = this.allLink();
-        allTtable = this.allTable(); //Get the array containing the names of the tables.//Even number is the table name.
+        alllink = await this.allLink();
+        allTtable = await this.allTable(); //Get the array containing the names of the tables.//Even number is the table name.
         for (var k = 0; k < allTtable.length; k = k + 2) {
             var arrLink = {};
             var arrJoint = {};// correct json of join table 
