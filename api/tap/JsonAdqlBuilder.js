@@ -85,16 +85,22 @@ var JsonAdqlBuilder = (function(){
         
         this.adqlJsonMap.conditions[table] = constraint;
 
+        let joints = [];
+
         while (table !== this.adqlJsonMap.rootTable){
 
             if ( this.adqlJsonMap.activeJoints.includes(table)){
                 break;
             } else {
-                this.adqlJsonMap.activeJoints.push(table);
+                joints.push(table);
             }
 
             table = this.adqlJsonMap.joints[table].parentNode
         }
+
+        joints.reverse(); // we reverse the array so we don't start by joining the outer-most table
+        
+        this.adqlJsonMap.activeJoints = this.adqlJsonMap.activeJoints.concat(joints);
 
         return {"status" : true};
 
@@ -232,7 +238,7 @@ var JsonAdqlBuilder = (function(){
             return whitelist;
         }
 
-        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value)).reverse() // joints order is reversed else we first join on the outer tables
+        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value))
 
         let adqlJoints = ""
 
