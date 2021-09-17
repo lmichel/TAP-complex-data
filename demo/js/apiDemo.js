@@ -135,11 +135,11 @@ function OnRadioChange(radio) {
 
 /*/ modal generation /*/
 
-function selectConstraints(tableName, txtInput,api){
+async function selectConstraints(tableName, txtInput,api){
     
     let schema = api.getConnector().connector.service["schema"];
     let adql = api.tapServiceConnector.attributsHandler.addAllColumn(tableName, schema)
-    let QObject = api.tapServiceConnector.Query(adql);
+    let QObject = await api.tapServiceConnector.Query(adql);
     let dataTable = VOTableTools.votable2Rows(QObject)
     let contentText = QObject.responseText;
     let Field = VOTableTools.genererField(QObject, contentText)
@@ -223,15 +223,13 @@ function selectConstraints(tableName, txtInput,api){
 
 /*/ Button creation for constrain selection /*/
 
-function createButton(api) {
+async function createButton(api) {
     let buttons = "";
-    let value = ""
     let tapButton = [];
 
-    for (let key in api.getObjectMapWithAllDescriptions().tables) {
-        value = api.getObjectMapWithAllDescriptions()
+    for (let key in (await api.getObjectMapWithAllDescriptions()).tables) {
 
-        buttons = "<span>" + "<button data-toggle=\"modal\" data-target=\"#myModal\" type='button' class=\"btn btn-primary\" " +
+        buttons = "<span>" + "<button type='button' class=\"btn btn-primary\" " +
             "id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">" +
             "Click to select " + key + " constraints</button>" +
             "<button  type='button' class=\"btn btn-primary\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
@@ -244,12 +242,13 @@ function createButton(api) {
     $("#loadButton").append(tapButton);
 
     for (let key in api.tapServiceConnector.objectMapWithAllDescription.tables) {
-        bindClickEvent("bbb" + key,() => {
-            selectConstraints(key, "txt" + key, api);
+        bindClickAsyncEvent("bbb" + key,async () => {
+            await selectConstraints(key, "txt" + key, api);
+            $('#myModal').modal({"backdrop" : "static"});
             return true;
         });
 
-        bindClickEvent(key,() => {
+        bindClickAsyncEvent(key,async () => {
             if($("#txt" + key).val().length > 1){
                 let constraint = $("#txt" + key).val().trim();
 
@@ -269,7 +268,7 @@ function createButton(api) {
                 let result = api.setTableConstraint(key, constraint);
                 if (result.status ){
                     display(result.status,"getStatus");
-                    display(api.getRootQuery().query,"getJsonAll");
+                    display((await api.getRootQuery()).query,"getJsonAll");
                     return true;
                 }else{
                     display(result.status,"getStatus");
@@ -504,24 +503,9 @@ async function createHandlersButton(api){
             
         });
 
-        bindClickEvent("btnGetRootQuery",() => {
+        bindClickAsyncEvent("btnGetRootQuery", async () => {
 
-            let rootQuery = api.getRootQuery();
-
-            if (rootQuery.status){
-                display(rootQuery.status, "getStatus");
-                display(rootQuery.query, "getJsonAll");
-                return true
-            }
-            display(rootQuery.status, "getStatus");
-            display(JSON.stringify(rootQuery.error,undefined,4), "getJsonAll");
-            return false;
-            
-        });
-
-        bindClickEvent("btnGetRootFieldsQuery",() => {
-
-            let rootQuery = api.getRootFieldsQuery();
+            let rootQuery = await api.getRootQuery();
 
             if (rootQuery.status){
                 display(rootQuery.status, "getStatus");
@@ -534,11 +518,24 @@ async function createHandlersButton(api){
             
         });
 
-        bindClickEvent("btnGetRootQueryIds",() => {
+        bindClickAsyncEvent("btnGetRootFieldsQuery",async () => {
 
-            /*/ TODO : update api.getRootQueryIds output object /*/
+            let rootQuery = await api.getRootFieldsQuery();
 
-            let rootQueryIds = api.getRootQueryIds();
+            if (rootQuery.status){
+                display(rootQuery.status, "getStatus");
+                display(rootQuery.query, "getJsonAll");
+                return true
+            }
+            display(rootQuery.status, "getStatus");
+            display(JSON.stringify(rootQuery.error,undefined,4), "getJsonAll");
+            return false;
+            
+        });
+
+        bindClickAsyncEvent("btnGetRootQueryIds",async () => {
+
+            let rootQueryIds = await api.getRootQueryIds();
             let status = rootQueryIds.status;
 
             display(status, "getStatus");
@@ -547,11 +544,9 @@ async function createHandlersButton(api){
             return status;
         });
 
-        bindClickEvent("btnGetRootFields",() => {
+        bindClickAsyncEvent("btnGetRootFields", async () => {
 
-            /*/ TODO : update api.getRootQueryIds output object /*/
-
-            let rootFields = api.getRootFields();
+            let rootFields = await api.getRootFields();
             let status = rootFields.status;
             if (status){
                 display(status, "getStatus");

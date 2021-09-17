@@ -42,7 +42,7 @@ var TapService = /** @class */ (function () {
         reTable.catch((value)=>{
             output.status = 999; //TODO : Improve 
             output.statusText = "Failed"
-            output.responseText = new XMLSerializer().serializeToString(value);
+            output.response = value;
         });
         await reTable
 

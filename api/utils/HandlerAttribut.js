@@ -62,7 +62,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
     if (api.getConnector().connector.status === "OK") {
 
         if (testJsonRead == false) {
-            sj = new jsonRead(api.getObjectMap().object_map);
+            sj = new jsonRead((await api.getObjectMap()).object_map);
             testJsonRead = true;
         }
 
