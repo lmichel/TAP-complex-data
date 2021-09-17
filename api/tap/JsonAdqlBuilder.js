@@ -232,7 +232,7 @@ var JsonAdqlBuilder = (function(){
             return whitelist;
         }
 
-        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value))
+        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value)).reverse() // joints order is reversed else we first join on the outer tables
 
         let adqlJoints = ""
 
@@ -281,6 +281,23 @@ var JsonAdqlBuilder = (function(){
             return {"status":true,"adqlConstraints": ""};
         }
 
+    }
+
+    JsonAdqlBuilder.prototype.getJoinKeys = function(table){
+        let keys = []
+        if(this.adqlJsonMap.joints[table] !== undefined){
+            keys.push(this.adqlJsonMap.joints[table].from)
+        }
+
+        for (let join in this.adqlJsonMap.joints ){
+            if(this.adqlJsonMap.joints[join].parentNode === table){
+                keys.push(this.adqlJsonMap.joints[join].target)
+            }
+        }
+
+        keys = Array.from(new Set(keys));
+
+        return {"status":true,"keys": keys};
     }
 
     return JsonAdqlBuilder;

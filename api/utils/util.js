@@ -43,6 +43,13 @@ if (!String.prototype.quotedTableName) {
        } else {
            thisValue = this;
        }
+       // list of reserved word in adql
+       let reserved = [
+            "year",
+            "public",
+            "position"
+       ];
+
        /*
         * already quoted, nothing to do
         */
@@ -107,7 +114,7 @@ if (!String.prototype.quotedTableName) {
            }
        }  
        for (var j = 0; j < tbl.length; j++) {
-           if (!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || tbl[j] == "public") {
+           if (!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || reserved.includes(tbl[j])) {
                tbl[j] = '"' + tbl[j] + '"';
            }
        }		

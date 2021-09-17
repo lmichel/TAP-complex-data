@@ -142,7 +142,7 @@ var TapApi = (function(){
         let doubleArrayValue = [];
         let singleArrayValue = [];
         if (this.getConnector().status) {
-            let Field = await this.getAllSelectedRootField(this.getConnector().connector.service["table"]);
+            let Field = this.getAllSelectedRootField(this.getConnector().connector.service["table"]);
             let votable = await this.tapServiceConnector.Query( (await this.getRootQuery()).query);
             let dataTable = []
             if (votable.status == 200) {
@@ -169,10 +169,10 @@ var TapApi = (function(){
         return jsonContaintRootQueryIdsValues;
     }
 
-    TapApi.prototype.getRootQuery = async function () {
+    TapApi.prototype.getRootQuery = function () {
         if (this.getConnector().status) {
             let rootTable = this.getConnector().connector.service["table"];
-            let allField = this.formatColNames(rootTable,await this.getAllSelectedRootField(rootTable));
+            let allField = this.formatColNames(rootTable, this.getAllSelectedRootField(rootTable));
             let contentAdql = "";
 
             let schema = this.tapServiceConnector.connector.service["schema"];
@@ -193,6 +193,122 @@ var TapApi = (function(){
         return {"status":false,"error" :{ "logs": "No active TAP connection"}};
     }
 
+
+    /**
+     * Create and return the correct adql query to get the value of the IDs of the selected table
+     */
+    TapApi.prototype.getTableQuery = function(table,joinKeyVal){
+        if(this.getConnector().status){
+            let allField = this.formatColNames(table,this.getAllSelectedRootField(table));
+            let adql =""
+
+            let schema = this.tapServiceConnector.connector.service["schema"];
+            schema = schema.quotedTableName().qualifiedName;
+
+            let formatTableName = schema + "." + table;
+            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+
+            adql = "SELECT TOP 10 " + allField;
+            adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
+
+            adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
+
+            adql += this.jsonAdqlBuilder.getAdqlConstraints(table,joinKeyVal).adqlConstraints;
+            return {"status": true, "query": adql} ;
+        }
+        return {"status":false,"error" :{ "logs": "No active TAP connection"}};
+    }
+
+    TapApi.prototype.getTableQueryIds = async function(table,joinKeyVal){
+        if (this.getConnector().status) {
+
+            let votable = await this.tapServiceConnector.Query((await this.getTableQuery(table,joinKeyVal)).query);
+
+            let dataTable = []
+
+            let Field = this.getAllSelectedRootField(table);
+
+            if (votable.status == 200) {
+                dataTable = this.tapServiceConnector.getDataTable(votable);
+                let nbCols = Field.length;
+                let singleArrayValue = [];
+                let doubleArrayValue = [];
+                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
+                    for (let col = 0; col < nbCols; col++) {
+                        singleArrayValue.push(dataTable[rowNb+col]);
+                    }
+                    doubleArrayValue.push(singleArrayValue);
+
+                    singleArrayValue = [];
+                }
+
+                return {"status" : true , "field_values" :doubleArrayValue};
+            } else {
+                return {"status" :false , "error":{"logs" :votable.statusText }};
+            }
+            
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection" } };
+        }
+    }
+
+    /**
+     * Create and return the correct adql query to get the value of all the fields of the selected table
+     */
+    TapApi.prototype.getTableFieldsQuery = async function(table,joinKeyVal){
+        if(this.getConnector().status){
+            let allField = this.formatColNames(table,await this.getAllRootField(table));
+            let adql =""
+
+            let schema = this.tapServiceConnector.connector.service["schema"];
+            schema = schema.quotedTableName().qualifiedName;
+
+            let formatTableName = schema + "." + table;
+            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+
+            adql = "SELECT TOP 10 " + allField;
+            adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
+
+            adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
+
+            adql += this.jsonAdqlBuilder.getAdqlConstraints(table,joinKeyVal).adqlConstraints;
+            return {"status": true, "query": adql} ;
+        }
+        return {"status":false,"error" :{ "logs": "No active TAP connection"}};
+    }
+    
+    TapApi.prototype.getTableFields = async function(table,joinKeyVal){
+        if (this.getConnector().status) {
+
+            let votable = await this.tapServiceConnector.Query((await this.getTableFieldsQuery(table,joinKeyVal)).query);
+
+            let dataTable = []
+
+            let Field = await this.getAllRootField(table);
+
+            if (votable.status == 200) {
+                dataTable = this.tapServiceConnector.getDataTable(votable);
+                let nbCols = Field.length;
+                let singleArrayValue = [];
+                let doubleArrayValue = [];
+                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
+                    for (let col = 0; col < nbCols; col++) {
+                        singleArrayValue.push(dataTable[rowNb+col]);
+                    }
+                    doubleArrayValue.push(singleArrayValue);
+
+                    singleArrayValue = [];
+                }
+
+                return {"status" : true , "field_values" :doubleArrayValue};
+            } else {
+                return {"status" :false , "error":{"logs" :votable.statusText }};
+            }
+            
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection" } };
+        }
+    }
     /**
      * Create and return the correct adql querry to get the value of all fields of the selected root table, taking in account all user's defined constraints
      */
@@ -266,22 +382,9 @@ var TapApi = (function(){
         return this.tapServiceConnector.getAdqlAndConstraint(rootTable,constraint)
     }
 
-    TapApi.prototype.getAllSelectedRootField = async function (rootTable){
-
-        /**
-         * We get all the tables joined with the root table
-         * then we gather all the columns which connect the root table with those tables
-         * finaly we create a set to ensure not selecting any columns more than once
-         */
-
-        let join_tables = (await this.getObjectMap()).object_map.map[rootTable].join_tables;
-
-        let columns = []
-        for (let key in join_tables){
-            columns.push(join_tables[key].target);
-        }
+    TapApi.prototype.getAllSelectedRootField = function (rootTable){
         
-        return columns =Array.from(new Set(columns));;
+        return this.jsonAdqlBuilder.getJoinKeys(rootTable).keys;
 
     }
 
@@ -304,38 +407,37 @@ var TapApi = (function(){
         let allField ="";
         let schema;
         schema = this.tapServiceConnector.connector.service["schema"];
-        schema = schema.quotedTableName().qualifiedName;
         
         for(let i=0;i<columns.length; i++){
             if(schema==="dbo"){
                 // just for CaomMembers tables because request lenth is limited
                 if(rootTable=="CaomMembers"){
                     if(i<3){
-                        allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
+                        allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName +" , "
                     }else {
-                        allField +=schema+'.'+rootTable+'.'+columns[i]
+                        allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
                         break;
                     }
                     // just for CAOM because request lenth is limited
                 }else if(i<20){
-                    allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
+                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , "
                 }else {
-                    allField +=schema+'.'+rootTable+'.'+columns[i]
+                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
                     break;
                 }
                 // just for 3XMM because request lenth is limited
             }else if(schema==="EPIC"){
                 if(i<20){
-                    allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
+                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , "
                 }else {
-                    allField +=schema+'.'+rootTable+'.'+columns[i]
+                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
                     break;
                 }
             }
             else if(i<columns.length-1){
-                allField +=schema+'.'+rootTable+'.'+columns[i]+" , "
+                allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , "
             }else {
-                allField +=schema+'.'+rootTable+'.'+columns[i]
+                allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
                 break;
             }
 

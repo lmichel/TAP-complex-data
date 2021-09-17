@@ -248,7 +248,7 @@ async function createButton(api) {
             return true;
         });
 
-        bindClickAsyncEvent(key,async () => {
+        bindClickEvent(key, () => {
             if($("#txt" + key).val().length > 1){
                 let constraint = $("#txt" + key).val().trim();
 
@@ -268,7 +268,7 @@ async function createButton(api) {
                 let result = api.setTableConstraint(key, constraint);
                 if (result.status ){
                     display(result.status,"getStatus");
-                    display((await api.getRootQuery()).query,"getJsonAll");
+                    display((api.getRootQuery()).query,"getJsonAll");
                     return true;
                 }else{
                     display(result.status,"getStatus");
@@ -323,6 +323,84 @@ async function createHandlersButton(api){
     
 }
 
+/*/ Button creation for table IDs /*/
+
+async function createTableIDsButton(api){
+    let buttons = "";
+    let tapButton = [];
+
+    for (let key in (await api.getObjectMap()).object_map.tables) {
+
+        buttons ="<button type='button' class=\"btn btn-primary\" " +
+            "id='btnSeeQueryID" + key + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
+            "See Table Query for " + key + "</button>" +
+            "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryID" + key + "' value='" + key + 
+            "' style=\"margin-top: 7px;width: 100%;\">Run Table Query for " + key + "</button> " +
+            " <input type='text' class='form form-control' id='txtJointValID" + key + "' value='' placeholder='value for joint key'> <hr>"
+        
+        tapButton.push(buttons);
+        
+    }
+    $("#loadTableQueryIds").append(tapButton);
+
+    for (let key in (await api.getObjectMap()).object_map.tables) {
+        bindClickEvent("btnSeeQueryID" + key, () =>{
+            let val = $("#txtJointValID" + key).val().trim()
+            let query = api.getTableQuery(key, val ==="" ? undefined : val);
+            display(query.status,"getStatus");
+            display(query.query,"getJsonAll");
+            return query.status;
+        });
+        
+        bindClickAsyncEvent("btnRunQueryID" + key, async () =>{
+            let val = $("#txtJointValID" + key).val().trim()
+            let query = await api.getTableQueryIds(key, val ==="" ? undefined : val);
+            display(query.status,"getStatus");
+            display(JSON.stringify(query.field_values,undefined,4),"getJsonAll");
+            return query.status;
+        });
+        
+    }
+}
+
+async function createTableFieldsButton(api){
+    let buttons = "";
+    let tapButton = [];
+
+    for (let key in (await api.getObjectMap()).object_map.tables) {
+
+        buttons ="<button type='button' class=\"btn btn-primary\" " +
+            "id='btnSeeQueryField" + key + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
+            "See Table Query for " + key + "</button>" +
+            "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryField" + key + "' value='" + key + 
+            "' style=\"margin-top: 7px;width: 100%;\">Run Table Query for " + key + "</button> " +
+            " <input type='text' class='form form-control' id='txtJointValField" + key + "' value='' placeholder='value for joint key'> <hr>"
+        
+        tapButton.push(buttons);
+        
+    }
+    $("#loadTableFields").append(tapButton);
+
+    for (let key in (await api.getObjectMap()).object_map.tables) {
+        
+        bindClickAsyncEvent("btnSeeQueryField" + key, async () =>{
+            let val = $("#txtJointValField" + key).val().trim()
+            let query = await api.getTableFieldsQuery(key, val ==="" ? undefined : val);
+            display(query.status,"getStatus");
+            display(query.query,"getJsonAll");
+            return query.status;
+        });
+        
+        bindClickAsyncEvent("btnRunQueryField" + key, async () =>{
+            let val = $("#txtJointValField" + key).val().trim()
+            let query = await api.getTableFields(key, val ==="" ? undefined : val);
+            display(query.status,"getStatus");
+            display(JSON.stringify(query.field_values,undefined,4),"getJsonAll");
+            return query.status;
+        });
+        
+    }
+}
 /*/ confined area /*/
 
 {
@@ -407,16 +485,18 @@ async function createHandlersButton(api){
                         enableButton("btnGetRootFieldsQuery");
                         enableButton("btnGetRootQueryIds");
                         enableButton("btnGetRootFields");
-                        //enableButton("btnGetTableQueryIds");
-                        //enableButton("btnGetTableFields");
+                        enableButton("btnGetTableQueryIds");
+                        enableButton("btnGetTableFields");
                         enableButton("btnGetAdqlJsonMap");
                         enableButton("btnConstraint");
                         enableButton("btnRemoveConstraint");
                         enableButton("btnRemoveAllConstraint");
                         enableButton("btnLoadButtonsHandler");
 
-                        createButton(api);
+                        await createButton(api);
                         await createHandlersButton(api);
+                        await createTableIDsButton(api);
+                        await createTableFieldsButton(api);
                     }
                 }
                 })
@@ -443,8 +523,8 @@ async function createHandlersButton(api){
             disableButton("btnGetRootFieldsQuery");
             disableButton("btnGetRootQueryIds");
             disableButton("btnGetRootFields");
-            //disableButton("btnGetTableQueryIds");
-            //disableButton("btnGetTableFields");
+            disableButton("btnGetTableQueryIds");
+            disableButton("btnGetTableFields");
             disableButton("btnGetAdqlJsonMap");
             disableButton("btnConstraint");
             disableButton("btnRemoveConstraint");
@@ -503,9 +583,9 @@ async function createHandlersButton(api){
             
         });
 
-        bindClickAsyncEvent("btnGetRootQuery", async () => {
+        bindClickEvent("btnGetRootQuery", () => {
 
-            let rootQuery = await api.getRootQuery();
+            let rootQuery = api.getRootQuery();
 
             if (rootQuery.status){
                 display(rootQuery.status, "getStatus");
@@ -533,7 +613,7 @@ async function createHandlersButton(api){
             
         });
 
-        bindClickAsyncEvent("btnGetRootQueryIds",async () => {
+        bindClickAsyncEvent("btnGetRootQueryIds", async () => {
 
             let rootQueryIds = await api.getRootQueryIds();
             let status = rootQueryIds.status;
@@ -561,29 +641,19 @@ async function createHandlersButton(api){
         });
 
         bindClickEvent("btnGetTableQueryIds",() => {
-
-            /*/ TODO : Do api.getTableQueryIds /*/
-
-            let tableQueryIds = api.getTableQueryIds();
-            let status = tableQueryIds.status;
-
-            display(status, "getStatus");
-            display(JSON.stringify(tableQueryIds,undefined,4), "getJsonAll");
-
-            return status;
+            if (document.getElementById("loadTableQueryIds").style.display == "block"){
+                document.getElementById("loadTableQueryIds").style.display = "none";
+            }else {
+                document.getElementById("loadTableQueryIds").style.display = "block";
+            }
         });
 
         bindClickEvent("btnGetTableFields",() => {
-
-            /*/ TODO : Do api.getTableFields /*/
-
-            let tableFields = api.getTableFields();
-            let status = tableFields.status;
-
-            display(status, "getStatus");
-            display(JSON.stringify(tableFields,undefined,4), "getJsonAll");
-
-            return status;
+            if (document.getElementById("loadTableFields").style.display == "block"){
+                document.getElementById("loadTableFields").style.display = "none";
+            }else {
+                document.getElementById("loadTableFields").style.display = "block";
+            }
         });
 
         bindClickEvent("btnGetAdqlJsonMap",() => {
