@@ -125,7 +125,7 @@ var JsonAdqlBuilder = (function(){
             return {"status" : false, "error":{"logs":"Invalid parameter : constraints","params" : {"table":table,"constraints":constraints,"logic":logic,"strict":strict}}};
         }
 
-        if (logic == undefined){
+        if (logic === undefined ||logic.length == 0){
             logic = ["AND"];
         }
 

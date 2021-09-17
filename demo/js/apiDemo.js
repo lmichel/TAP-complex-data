@@ -429,7 +429,7 @@ async function createTableFieldsButton(api){
         },
         
         "3XMM" : {
-            "tapService" : "http://xcatdb.unistra.fr/3xmmdr8/tap/sync",
+            "tapService" : "https://xcatdb.unistra.fr/4xmmdr10/tap/sync",
             "schema" : "EPIC",
             "table" : "EPIC_IMAGE",
             "shortName" : "3XMM"
