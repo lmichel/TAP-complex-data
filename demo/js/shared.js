@@ -3,10 +3,17 @@
 /*/ Utility function used by all demo pages /*/
 
 function display(data, id) {
+    let highlight = false
     if (typeof data != "string"){
         data = JSON.stringify(data,undefined,4);
+        if (hljs){
+            highlight = true;
+        }
     }
     $("#" + id).html(data);
+    if(highlight){
+        hljs.highlightElement(document.getElementById(id));
+    }
 }
 
 function addClass(elemId,className){

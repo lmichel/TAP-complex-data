@@ -348,7 +348,7 @@ async function createTableFieldsButton(api){
 
                 let thenFun = async ()=> {};
 
-                connect.then(async (value) => {
+                connect.then((value) => {
                     status = value.status;
                     thenFun = async () =>{
 
