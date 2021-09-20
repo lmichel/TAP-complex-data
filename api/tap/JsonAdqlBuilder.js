@@ -191,10 +191,15 @@ var JsonAdqlBuilder = (function(){
     /**
      * create a list of all tables which are deeper than the selected rootTable in the objectMap's tree representation of the DB
      * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
+     * @param {int} degree Optional, degree of deepness allowed. `Number.MAX_VALUE` if unspecified.
      */
-    JsonAdqlBuilder.prototype.getSubTables = function(table){
+    JsonAdqlBuilder.prototype.getSubTables = function(table,degree){
         if (table == undefined){
             table = this.adqlJsonMap.rootTable;
+        }
+
+        if (degree === undefined){
+            degree = Number.MAX_VALUE;
         }
 
         let subTables = [];
@@ -205,7 +210,7 @@ var JsonAdqlBuilder = (function(){
             
             let branch = this.adqlJsonMap.nodeTreeBranches[table]
             let nextBranch;
-            while (branch !== undefined && branch.length >0){
+            while (branch !== undefined && branch.length >0 && degree > 0){
                 subTables=subTables.concat(branch)
                 nextBranch = [];
                 for (let i =0;i<branch.length;i++){
@@ -214,6 +219,7 @@ var JsonAdqlBuilder = (function(){
                     }
                 }
                 branch = nextBranch;
+                degree--;
             }
 
             subTables = Array.from(new Set(subTables));

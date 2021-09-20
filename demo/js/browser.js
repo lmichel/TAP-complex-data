@@ -17,7 +17,7 @@ function OnRadioChange(radio) {
 }
 
 function buildTable(colNames,data){
-    let header = "<div class=\"table-responsive\"> <table class=\"table table-hover table-dark table-bordered\">";
+    let header = "<div class=\"table-responsive text-center\"> <table class=\"table table-hover table-dark table-bordered\">";
     let footer =  "</table></div>";
     let body = "<thead><tr>";
 
@@ -125,10 +125,22 @@ function buildTable(colNames,data){
                             display(rootIds,"codeOutput")
 
                             if (rootIds.status){
-                                let colNames = api.getAllSelectedRootField(api.getConnector().connector.service["table"]);
-                                let table = buildTable(colNames,rootIds.field_ids);
+                                let root = api.getConnector().connector.service["table"];
+                                let colNames = api.getAllSelectedRootField(root);
+
+                                let tables = Object.keys(api.getJoinedTables(root).joined_tables)
+
+                                for (let i=0;i<rootIds.field_ids.length;i++){
+                                    for (let j=0;j<tables.length;j++){
+                                        rootIds.field_ids[i].push(tables[j] + "'s related data")
+                                    }
+                                }
+
+                                let table = buildTable(colNames.concat(tables),rootIds.field_ids)
+                                
                                 $("#dataHolder").append("<div id = \"table_1\"></div>");
                                 $("#table_1").html(table);
+
                             }
 
                         }
