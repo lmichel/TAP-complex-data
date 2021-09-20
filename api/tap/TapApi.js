@@ -318,10 +318,11 @@ var TapApi = (function(){
 
             /**
              * Simbad doesn't support SELECT *
-             * so we explicitly tell him every field.
+             * Vizier has a weird management of *
+             * so we explicitly tell them every field.
              */
             let allField;
-            if (this.getConnector().connector.service.shortName == "Simbad"){
+            if (this.getConnector().connector.service.shortName == "Simbad" || this.getConnector().connector.service.shortName == "Vizier"){
                 allField = this.formatColNames(rootTable,await this.getAllRootField(rootTable));
             }else {
                 allField = this.formatColNames(rootTable,["*"]);

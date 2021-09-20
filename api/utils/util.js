@@ -99,22 +99,22 @@ if (!String.prototype.quotedTableName) {
                /*
                 * The last one is certainly a field name
                 */
-               if( last.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/) ) {
+               if( last.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/) || last === "*" ) {
                    for (var i = 2; i < (results.length -1); i++) {
                        tbl[tbl.length - 1] += "." +results[i];
                    }	
                    tbl.push(last);
-               } else {
-                   for (var i = 2; i < results.length; i++) {
-                       tbl[tbl.length - 1] += "." +results[i];
-                   }
-               }
+                } else {
+                    for (var i = 2; i < results.length; i++) {
+                        tbl[tbl.length - 1] += "." +results[i];
+                    }
+                }
            } else {
                tbl.push(thisValue);
            }
        }  
        for (var j = 0; j < tbl.length; j++) {
-           if (!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || reserved.includes(tbl[j])) {
+           if ((!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || reserved.includes(tbl[j]) ) && tbl[j] !== "*") {
                tbl[j] = '"' + tbl[j] + '"';
            }
        }		
