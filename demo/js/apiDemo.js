@@ -2,121 +2,6 @@
  * JS file containing all the function used to embed the Tap Complex API in the demo web page.
  */
 
-/*/ Utility function area /*/
-
-function display(data, id) {
-    $("#" + id).html(data);
-}
-
-function addClass(elemId,className){
-    document.getElementById(elemId).classList.add(className);
-}
-
-function removeClass(elemId,className){
-    if (document.getElementById(elemId).classList.contains(className)) {
-        document.getElementById(elemId).classList.remove(className);
-    }
-}
-
-/*/
- * Disable : btn-dark
- * Success : btn-success
- * Enable  : btn-primary
- * Errored : btn-danger
-/*/
-
-function disableButton(btnId){
-    removeClass(btnId,"btn-primary");
-    removeClass(btnId,"btn-success");
-    addClass(btnId,"btn-dark");
-}
-
-function successButton(btnId){
-    removeClass(btnId,"btn-primary");
-    removeClass(btnId,"btn-dark");
-    addClass(btnId,"btn-success");
-}
-
-function enableButton(btnId){
-    removeClass(btnId,"btn-dark");
-    removeClass(btnId,"btn-success");
-    addClass(btnId,"btn-primary");
-}
-
-function errorButton(btnId){
-    removeClass(btnId,"btn-primary");
-    removeClass(btnId,"btn-dark");
-    removeClass(btnId,"btn-success");
-    addClass(btnId,"btn-danger");
-}
-
-function isEnable(btnId){
-    return document.getElementById(btnId).classList.contains("btn-primary");
-}
-
-function isDisable(btnId){
-    return document.getElementById(btnId).classList.contains("btn-dark");
-}
-
-function isSuccess(btnId){
-    return document.getElementById(btnId).classList.contains("btn-success");
-}
-
-function bindClickEvent(elemId,handler,disableText){
-    $("#" + elemId).click(() =>{
-        try{
-
-            if (!isDisable(elemId)){
-                if(handler()){
-                    successButton(elemId);
-                }
-            } else if (disableText === undefined){
-                display("This button is currently disabled, you can't use it.", "getStatus");
-            } else {
-                display(disableText, "getStatus");
-            }
-
-        }catch(error){
-            console.error(error)
-            errorButton(elemId)
-            display("An unexpected Error has append see logs for more information", "getStatus");
-        }
-    })
-}
-
-
-async function syncIt(promise){
-    $("#overlay").fadeIn(1);
-    try {
-        await promise()
-    } catch (error) {
-        console.error(error);
-    }
-    $("#overlay").fadeOut(1000)
-}
-
-
-function bindClickAsyncEvent(elemId,handler,disableText){
-    $("#" + elemId).click(async() =>{ syncIt( async ()=>{
-        try{
-            if (!isDisable(elemId)){
-                let val = await handler();
-                if(val){
-                    successButton(elemId);
-                }
-            } else if (disableText === undefined){
-                display("This button is currently disabled, you can't use it.", "getStatus");
-            } else {
-                display(disableText, "getStatus");
-            }
-
-        }catch(error){
-            console.error(error)
-            errorButton(elemId)
-            display("An unexpected Error has append see logs for more information", "getStatus");
-        }
-    })});
-}
 
 /*/ Trigers function for radio button /*/
 
@@ -551,7 +436,7 @@ async function createTableFieldsButton(api){
             let status = connector.status;
 
             display(status, "getStatus");
-            display(JSON.stringify(connector.connector, undefined, 4), "getJsonAll")
+            display(connector.connector, "getJsonAll")
 
             return status;
 
@@ -563,7 +448,7 @@ async function createTableFieldsButton(api){
             let status = objectMap.status;
 
             display(status, "getStatus");
-            display(JSON.stringify(objectMap, undefined, 4), "getJsonAll");
+            display(objectMap, "getJsonAll");
 
             return status;
 
@@ -577,7 +462,7 @@ async function createTableFieldsButton(api){
             let status = joinTables.status;
 
             display(status, "getStatus");
-            display(JSON.stringify(joinTables,undefined,4), "getJsonAll");
+            display(joinTables, "getJsonAll");
 
             return status;
             
@@ -593,7 +478,7 @@ async function createTableFieldsButton(api){
                 return true
             }
             display(rootQuery.status, "getStatus");
-            display(JSON.stringify(rootQuery.error,undefined,4), "getJsonAll");
+            display(rootQuery.error, "getJsonAll");
             return false;
             
         });
@@ -608,7 +493,7 @@ async function createTableFieldsButton(api){
                 return true
             }
             display(rootQuery.status, "getStatus");
-            display(JSON.stringify(rootQuery.error,undefined,4), "getJsonAll");
+            display(rootQuery.error, "getJsonAll");
             return false;
             
         });
@@ -619,7 +504,7 @@ async function createTableFieldsButton(api){
             let status = rootQueryIds.status;
 
             display(status, "getStatus");
-            display(JSON.stringify(rootQueryIds,undefined,4), "getJsonAll");
+            display(rootQueryIds, "getJsonAll");
 
             return status;
         });
@@ -630,12 +515,12 @@ async function createTableFieldsButton(api){
             let status = rootFields.status;
             if (status){
                 display(status, "getStatus");
-                display(JSON.stringify(rootFields.field_values,undefined,4), "getJsonAll");
+                display(rootFields.field_values, "getJsonAll");
                 return true;
             }
             
             display(status, "getStatus");
-            display(JSON.stringify(rootFields.error,undefined,4), "getJsonAll");
+            display(rootFields.error, "getJsonAll");
 
             return false;
         });
