@@ -79,9 +79,6 @@ var TapService = /** @class */ (function () {
             checkvalue = 'SELECT TOP 100 tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
         }
 
-
-        // console.log("AJAXurl: " + site + " query: " + checkvalue)
-
         reLink = await this.Query(checkvalue)
 
         return reLink;
@@ -152,7 +149,7 @@ var TapService = /** @class */ (function () {
         }
         if (this.tableRemoveView == undefined) {
 
-            this.tableRemoveView = this.removeViewTable(allLink);
+            this.tableRemoveView = await this.removeViewTable(allLink);
         }
         return this.tableRemoveView;
     };
@@ -446,7 +443,7 @@ var TapService = /** @class */ (function () {
      * @param allLinkRe : Array containing all table
      * @return: an array containing the names of the tables
      */
-    TapService.prototype.removeViewTable = function (allLinkRe) {
+    TapService.prototype.removeViewTable = async function (allLinkRe) {
         var site = this.url;
         var checkstatus = this.checkstatus;
         var schema_name = this.schema;
@@ -460,15 +457,7 @@ var TapService = /** @class */ (function () {
         }
         //console.log("AJAXurl: " + site + " query: " + checkvalue)
 
-        reTable = $.ajax({
-            url: "" + site,
-            type: "GET",
-            data: {query: "" + checkvalue, format: 'votable', lang: 'ADQL', request: 'doQuery'},
-            async: false
-        })
-            .done(function (result) {
-                return result;
-            });
+        reTable = await this.Query(checkvalue)
         var allTable = [];
         var content = reTable.responseText;
         var l = 0;

@@ -410,39 +410,29 @@ var TapApi = (function(){
         schema = this.tapServiceConnector.connector.service["schema"];
         
         for(let i=0;i<columns.length; i++){
+            allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , "
+
             if(schema==="dbo"){
                 // just for CaomMembers tables because request lenth is limited
                 if(rootTable=="CaomMembers"){
-                    if(i<3){
-                        allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName +" , "
-                    }else {
-                        allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
+                    if(i>3){
                         break;
                     }
                     // just for CAOM because request lenth is limited
-                }else if(i<20){
-                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , "
-                }else {
-                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
+                }else if(i>20){
                     break;
                 }
                 // just for 3XMM because request lenth is limited
             }else if(schema==="EPIC"){
-                if(i<20){
-                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , "
-                }else {
-                    allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
+                if(i>20){
                     break;
                 }
             }
-            else if(i<columns.length-1){
-                allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , "
-            }else {
-                allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName
-                break;
-            }
 
         }
+
+        allField = allField.substring(0,allField.length - 3);
+
         return allField;
     }
 
