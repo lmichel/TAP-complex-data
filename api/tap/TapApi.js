@@ -375,10 +375,6 @@ var TapApi = (function(){
         return await this.tapServiceConnector.getObjectMapAndConstraints();
     }
 
-    TapApi.prototype.setAdql = function (rootTable, constraint) {
-        return this.tapServiceConnector.getAdqlAndConstraint(rootTable,constraint)
-    }
-
     TapApi.prototype.getAllSelectedRootField = function (rootTable){
         
         return this.jsonAdqlBuilder.getJoinKeys(rootTable).keys;

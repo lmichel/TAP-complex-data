@@ -246,11 +246,6 @@ var TapServiceConnector = (function() {
         return table;
     }
 
-    TapServiceConnector.prototype.getAdqlAndConstraint = function (table,constraint){
-        let api = this.api;
-        return this.tapService.createSimpleAdqlWithConstraint(table,constraint,api);
-    }
-
     return TapServiceConnector;
 }());
 
