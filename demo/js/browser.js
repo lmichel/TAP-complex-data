@@ -144,6 +144,9 @@ function buildTable(colNames,data,id){
                                     $("[data-table-id='table_1'][data-table-col='"+i+"']").click((cell)=>{
                                         syncIt(async () =>{
                                             let row = cell.target.dataset["tableRow"];
+                                            if(row == 0){
+                                                return; // the 0th row is the row containing columns name ...
+                                            }
                                             let table = tables[i-colNames.length];
                                             let joint = joinedTables[table];
 
@@ -154,7 +157,7 @@ function buildTable(colNames,data,id){
                                             let jointVal = $("[data-table-id='table_1'][data-table-col='"+valCol+"'][data-table-row='"+row+"']").text();
 
                                             let data = await api.getTableQueryIds(table,jointVal);
-                                            
+
                                             display(data,"codeOutput")
 
                                             if(data.status){

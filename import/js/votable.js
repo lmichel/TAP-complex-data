@@ -854,7 +854,7 @@ function VOTableParser() {
     dataB64 = selected.table.xml.getElementsByTagName(prefix + 'STREAM')[0].childNodes[0].nodeValue;
     
     // We must clean the B64 data from all the spaces and tabs it could contains
-    dataB64 = dataB64.replace(/[ \t\r]+/g, '');
+    dataB64 = dataB64.replace(/[ \t\r\n]+/g, '');
     dataB64Length = dataB64.length;
   
     fields = thisParser.getCurrentTableFields();
@@ -1096,7 +1096,7 @@ function VOTableParser() {
    */
   function streamB64(dataSize) {
     var bufferLenght, needBit, bitArray = [],
-        i, nb, z;
+        i, nb, z,byteDelta;
 
     // If we have not yet attained the end of the B64 stream, but we
     // know that all the next characters are padding characters '='
@@ -1108,6 +1108,16 @@ function VOTableParser() {
       // We define the number of B64 characters we need to read;
       // and take in account the rest we obtained at previous value's streaming
       needBit = Math.ceil((dataSize - bufferLenght) / 6);
+
+      byteDelta = dataB64.substring(ptrStream).length - needBit
+      // byteDelta <0 represent a lack of available data compared to the data size
+      // it's checking if don't need more bits than we have available
+      // this avoid sending additional errored data.
+      // problems of phantom data append with single column tables
+      // fix author : cyril
+      if (byteDelta < 0){
+        return null;
+      }
 
       for (i = 0; i < bufferLenght; i++)
         bitArray.push(bufferBitArray[i]);
@@ -1159,7 +1169,7 @@ function VOTableParser() {
           // give [0,0,0,0,0,0,0,0], interpreted by the parser as the value 0
           // (and this is false, 0 will have been encoded with bitArray followed by 'A' and not '=')
           // We must so immediately return null in that specific case
-          if (bitArray.length + 6 === dataSize)
+          if (bitArray.length === dataSize%6)
             return null;
           else
             endParsingB64 = true;
