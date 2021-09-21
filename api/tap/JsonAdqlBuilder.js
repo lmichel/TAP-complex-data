@@ -230,6 +230,19 @@ var JsonAdqlBuilder = (function(){
         return {"status":true,"subTables":subTables};
     }
 
+    JsonAdqlBuilder.prototype.getLowerJoints =function(table){
+        if (table == undefined){
+            table = this.adqlJsonMap.rootTable;
+        }
+        let joints = {}
+        for (let key in this.adqlJsonMap.joints){
+            if (this.adqlJsonMap.joints[key].parentNode === table){
+                joints[key] = JSON.parse(JSON.stringify(this.adqlJsonMap.joints[key]))
+            }
+        }
+        return {"status":true,"joints":joints}
+    }
+
     /**
      * Create a string containing all active ADQL joints from the starting node ignoring any joints on same or higher level other nodes
      * @param {String} table Optional, unqualified name of the node table or the root table if unspecified

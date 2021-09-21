@@ -16,25 +16,23 @@ function OnRadioChange(radio) {
     }
 }
 
-function buildTable(colNames,data){
-    let header = "<div class=\"table-responsive text-center\"> <table class=\"table table-hover table-dark table-bordered\">";
+function buildTable(colNames,data,id){
+    let header = "<div class=\"table-responsive text-center\"> <table class=\"table table-hover table-dark table-bordered\" data-table-id =" + id + ">";
     let footer =  "</table></div>";
-    let body = "<thead><tr>";
+    let body = "<thead data-table-id =" + id + "><tr data-table-id =" + id + ">";
 
     for (let i =0; i< colNames.length;i++){
-        body += "<th scope=\"col\">" + colNames[i] + "</th>"
+        body += "<th scope=\"col\" data-table-id =\"" + id + 
+        "\"data-table-row = \"0\" data-table-col =\"" + i + "\">" + colNames[i] + "</th>"
     }
 
-    body += "</tr></thead><tbody>"
+    body += "</tr></thead><tbody data-table-id =" + id + ">"
 
     for (let i=0;i<data.length;i++){
-        body += "<tr>"
+        body += "<tr data-table-id =" + id + ">"
         for (let j =0;j<data[i].length;j++){
-            if(j ==0){
-                body += "<th scope=\"row\">" + data[i][j] + "</th>"
-            } else {
-                body += "<td>" + data[i][j] + "</td>"
-            }
+            body += "<td data-table-id =\"" + id + 
+            "\"data-table-row = \""+ (i+1) + "\" data-table-col =\"" + j + "\">" + data[i][j] + "</td>"
         }
         body += "</tr>"
     }
@@ -128,7 +126,8 @@ function buildTable(colNames,data){
                                 let root = api.getConnector().connector.service["table"];
                                 let colNames = api.getAllSelectedRootField(root);
 
-                                let tables = Object.keys(api.getJoinedTables(root).joined_tables)
+                                let joinedTables = api.getJoinedTables(root).joined_tables;
+                                let tables = Object.keys(joinedTables);
 
                                 for (let i=0;i<rootIds.field_ids.length;i++){
                                     for (let j=0;j<tables.length;j++){
@@ -136,13 +135,48 @@ function buildTable(colNames,data){
                                     }
                                 }
 
-                                let table = buildTable(colNames.concat(tables),rootIds.field_ids)
+                                let table = buildTable(colNames.concat(tables),rootIds.field_ids,"table_1")
                                 
-                                $("#dataHolder").append("<div id = \"table_1\"></div>");
+                                $("#dataHolder").append("<div id = \"table_1\"></div><div id = \"table_2\"></div>");
                                 $("#table_1").html(table);
 
-                            }
+                                for (let i=colNames.length;i<tables.length + colNames.length;i++){
+                                    $("[data-table-id='table_1'][data-table-col='"+i+"']").click((cell)=>{
+                                        syncIt(async () =>{
+                                            let row = cell.target.dataset["tableRow"];
+                                            let table = tables[i-colNames.length];
+                                            let joint = joinedTables[table];
 
+                                            let valCol = $("th[data-table-id='table_1'][data-table-row='0']").filter((i,val)=>{
+                                                return val.textContent ==joint.target;
+                                            }).data("tableCol");
+
+                                            let jointVal = $("[data-table-id='table_1'][data-table-col='"+valCol+"'][data-table-row='"+row+"']").text();
+
+                                            let data = await api.getTableQueryIds(table,jointVal);
+                                            
+                                            display(data,"codeOutput")
+
+                                            if(data.status){
+                                                let dataCols = api.getAllSelectedRootField(table);
+                                                let subJoint = api.getJoinedTables(table)
+                                                
+                                                subJoint=subJoint.joined_tables
+                                                let subTables = Object.keys(subJoint);
+                                                
+                                                for (let i=0;i<data.field_values.length;i++){
+                                                    for (let j=0;j<subTables.length;j++){
+                                                        data.field_values[i].push(subTables[j] + "'s related data")
+                                                    }
+                                                }
+
+                                                let tableHtml = buildTable(dataCols.concat(subTables),data.field_values,"table_2");
+                                                $("#table_2").html(tableHtml);
+                                            }
+                                        });
+                                    });
+                                }
+                            }
                         }
                     }
                 })

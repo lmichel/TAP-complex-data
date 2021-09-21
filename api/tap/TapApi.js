@@ -85,14 +85,10 @@ var TapApi = (function(){
     TapApi.prototype.getJoinedTables = function (baseTable) {
         let jsonContaintJoinTable = {};
         if (this.getConnector().status) {
-            if(this.tapServiceConnector.objectMapWithAllDescription.map[baseTable] === undefined){
-                jsonContaintJoinTable.status = false;
-                jsonContaintJoinTable.error = {"logs":"table " + baseTable + " is not part of the object map","prams":{"baseTable":baseTable}};
-            }else {
-                jsonContaintJoinTable.joined_tables = this.tapServiceConnector.objectMapWithAllDescription.map[baseTable].join_tables//this.tapServiceConnector.getJoinTables(baseTable);
-                jsonContaintJoinTable.status = true;
-                jsonContaintJoinTable.base_table = baseTable;
-            }
+            
+            jsonContaintJoinTable.joined_tables = this.jsonAdqlBuilder.getLowerJoints(baseTable).joints
+            jsonContaintJoinTable.status = true;
+            jsonContaintJoinTable.base_table = baseTable;
             
         } else {
             jsonContaintJoinTable.status = false;
