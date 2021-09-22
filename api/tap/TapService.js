@@ -51,7 +51,7 @@ var TapService = /** @class */ (function () {
         } else {
             console.error(output);
             return {"status":false,"error":{
-                "logs":"Invalid answer to the query",
+                "logs":$("INFO[name=\"QUERY_STATUS\"]",output.responseXML)[0].textContent,
                 "params" : {"adql":adql}
             }};
         }
