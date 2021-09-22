@@ -24,47 +24,56 @@ var TapApi = (function(){
     }
 
     TapApi.prototype.connect = async function ({tapService, schema, table, shortName}) {
-        let formatTableName = schema + "." + table;
-        let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-        this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
-        this.tapServiceConnector.api = this;
-        this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
-        if (this.tapServiceConnector.connector.votable.status){
-            
-            this.tapServiceConnector.connector.votable = this.tapServiceConnector.connector.votable.answer;
+        try {
+            let formatTableName = schema + "." + table;
+            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+            this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
+            this.tapServiceConnector.api = this;
+            this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
+            if (this.tapServiceConnector.connector.votable.status){
+                
+                this.tapServiceConnector.connector.votable = this.tapServiceConnector.connector.votable.answer;
 
-            if (this.tapServiceConnector.connector.votable.status === 200) {
-                this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
-            }
-            /* for vizier only*/
-            else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
-                this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
-            } else {
-                let status = this.tapServiceConnector.connector.votable.statusText
-                this.tapServiceConnector.connector = undefined;
-                return {"status":false,"error":{
-                    "logs":"Failed to initialize TAP connection:\n " + status,
-                    "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-                }};
-            }
-            this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
+                if (this.tapServiceConnector.connector.votable.status === 200) {
+                    this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
+                }
+                /* for vizier only*/
+                else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
+                    this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
+                } else {
+                    let status = this.tapServiceConnector.connector.votable.statusText
+                    this.tapServiceConnector.connector = undefined;
+                    return {"status":false,"error":{
+                        "logs":"Failed to initialize TAP connection:\n " + status,
+                        "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+                    }};
+                }
+                this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-            let obj = await this.getObjectMap()
+                let obj = await this.getObjectMap()
 
-            if (obj.status){
-                this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
-            } else {
-                return {"status":false,"error":{
-                    "logs":"Failed to initialize internal data structures :\n " + obj.error.logs,
-                    "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-                }};
+                if (obj.status){
+                    this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
+                } else {
+                    this.tapServiceConnector.connector = undefined;
+                    return {"status":false,"error":{
+                        "logs":"Failed to initialize internal data structures :\n " + obj.error.logs,
+                        "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+                    }};
+                }
+                return {"status":true};
             }
-            return {"status":true};
+            return {"status":false,"error":{
+                "logs":"Failed to initialize TAP connection:\n " + this.tapServiceConnector.connector.votable.error.logs,
+                "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+            }};
+        } catch (error) {
+            return {"status":false,"error":{
+                "logs":error.toString(),
+                "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+            }};
         }
-        return {"status":false,"error":{
-            "logs":"Failed to initialize TAP connection:\n " + this.tapServiceConnector.connector.votable.error.logs,
-            "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-        }};
+        
         
     }
 

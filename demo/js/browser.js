@@ -106,6 +106,7 @@ function buildTable(colNames,data,id){
 
                 connect.then( (value) => {
                     status = value.status;
+                    display(value,"codeOutput")
                     thenFun = async () =>{
 
                         if (status){

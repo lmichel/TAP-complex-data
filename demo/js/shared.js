@@ -3,13 +3,16 @@
 /*/ Utility function used by all demo pages /*/
 
 function display(data, id) {
+    let highlight = false
     if (typeof data != "string"){
+        highlight = true;
         data = JSON.stringify(data,undefined,4);
     }
     $("#" + id).html(data);
-    
+
     try {
-        hljs.highlightElement(document.getElementById(id));
+        if (highlight)
+            hljs.highlightElement(document.getElementById(id));
     }catch {}
 }
 
