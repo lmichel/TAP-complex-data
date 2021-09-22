@@ -442,7 +442,7 @@ var TapApi = (function(){
 
         }
 
-        return {"status":false, "error":{"logs": "No active TAP connection","param":{"table":table,"constraint":constraint}}};
+        return {"status":false, "error":{"logs": "No active TAP connection","params":{"table":table,"constraint":constraint}}};
         
     }
 

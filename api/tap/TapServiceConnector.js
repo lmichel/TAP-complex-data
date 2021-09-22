@@ -29,21 +29,36 @@ var TapServiceConnector = (function() {
     TapServiceConnector.prototype.loadJson = async function () {
         if(this.jsonLoad === undefined){
             this.jsonLoad = await this.tapService.createJson();
+            if(this.jsonLoad.status){
+                this.jsonLoad = this.jsonLoad.json
+            }else{
+                let val = this.jsonLoad;
+                this.jsonLoad = undefined;
+                return val
+            }
         }
-        return this.jsonLoad;
+        return {"status":true,"json": this.jsonLoad};
     }
 
     TapServiceConnector.prototype.getFields=function (votableQueryResult,url){
-        let contentText = votableQueryResult.responseText;
-        let rootFields = [];
-        if ( url === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" ||  url === "http://dc.zah.uni-heidelberg.de/tap/sync") {
+        try{
+            let contentText = votableQueryResult.responseText;
+            let rootFields = [];
+            if ( url === "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" ||  url === "http://dc.zah.uni-heidelberg.de/tap/sync") {
 
-            rootFields = VOTableTools.getField(votableQueryResult);
-        } else {
-            rootFields = VOTableTools.genererField(votableQueryResult, contentText);
+                rootFields = VOTableTools.getField(votableQueryResult);
+            } else {
+                rootFields = VOTableTools.genererField(votableQueryResult, contentText);
+            }
+
+            return {"status":true,"fields":rootFields};
+        } catch(error){
+            return {"status":false,"error":{
+                "logs":error.toString(),
+                "params":{"votableQueryResult":votableQueryResult,"url":url}
+            }};
         }
-
-        return rootFields;
+        
     }
 
     /**
@@ -53,16 +68,24 @@ var TapServiceConnector = (function() {
     * @returns return the list of id of join table
     */
     TapServiceConnector.prototype.joinAndId = function (root, json) {
-        var list = [];
-        for (var key in json) {
-            if (key == root) {
-                for (var join in json[key].join_tables) {
-                    list.push(json[key].join_tables[join].target);
-                    list.push(join);
+        try {
+            var list = [];
+            for (var key in json) {
+                if (key == root) {
+                    for (var join in json[key].join_tables) {
+                        list.push(json[key].join_tables[join].target);
+                        list.push(join);
+                    }
                 }
             }
+            return {"status":true,"joinedTables":list};
+        } catch (error) {
+            return {"status":false,"error":{
+                "logs":error.toString(),
+                "params":{"root":root,"json":json}
+            }};
         }
-        return list;
+       
     }
 
     /**
@@ -72,18 +95,26 @@ var TapServiceConnector = (function() {
      */
 
     TapServiceConnector.prototype.getListeId = function (listJoinAndId) {
-        var listId = [];
-        for (var i = 0; i < listJoinAndId.length; i = i + 2) {
-            if (!json2Requete.isString(listJoinAndId[i])) {
-                var temp = listJoinAndId[i][0];
-            } else {
-                var temp = listJoinAndId[i];
+        try {
+            var listId = [];
+            for (var i = 0; i < listJoinAndId.length; i = i + 2) {
+                if (!json2Requete.isString(listJoinAndId[i])) {
+                    var temp = listJoinAndId[i][0];
+                } else {
+                    var temp = listJoinAndId[i];
+                }
+                if (listId.indexOf(temp) == -1) {
+                    listId.push(temp);//record the key linked to root table, No repeating
+                }
             }
-            if (listId.indexOf(temp) == -1) {
-                listId.push(temp);//record the key linked to root table, No repeating
-            }
+            return {"status":true,"idList":listId};
+        } catch (error) {
+            return {"status":false,"error":{
+                "logs":error.toString(),
+                "params":{"listJoinAndId":listJoinAndId}
+            }};
         }
-        return listId;
+        
     }
 
     /**
@@ -98,59 +129,63 @@ var TapServiceConnector = (function() {
         return listJoinAndId;
     }
 
-    /**
-     *
-     * @param {*} baseTableName  the root table name
-     * @returns return all join table of the root table name
-     */
-    TapServiceConnector.prototype.getJoinTables = function (baseTableName) {
-        var data = this.loadJson();
-        var jsonread = new jsonRead(data);
-        return jsonread.joinTable(baseTableName);
-    }
-
     TapServiceConnector.prototype.getDataTable=function (votableQueryResult){
         return  VOTableTools.votable2Rows(votableQueryResult);
     }
     
     TapServiceConnector.prototype.getObjectMapAndConstraints = async function () {
-        let api = this.api;
-        let rootTable = api.getConnector().connector.service["table"];
-        let jsonWithaoutDescription = await this.loadJson();
-        this.objectMapWithAllDescription.root_table.name = rootTable;
-        this.schema = api.getConnector().connector.service["schema"];
-        this.objectMapWithAllDescription.root_table.schema = this.schema;
-        this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs'];
-        let formatJoinTable = "";
-        let correctJoinFormaTable = "";
-        
-        let testMap = false;
-        let map = {};
-        if (testMap == false) {
-            map = this.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
-        }
-
-        let allJoinRootTable = this.createAllJoinTable(map)
-        let allTables = allJoinRootTable;
-        for (let k = 0; k < allTables.length; k++) {
-            for (let tableKey in jsonWithaoutDescription) {
-                if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
-
-                    formatJoinTable = this.schema + "." + tableKey;
-                    correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
-                    let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:""
-
-                    this.objectMapWithAllDescription.tables[tableKey] = {
-                        "description": jsonWithaoutDescription[tableKey].description,
-                        "columns": attributHanler !== undefined ? attributHanler : [],
-                    }
-
-                } 
+        try {
+            let api = this.api;
+            let rootTable = api.getConnector().connector.service["table"];
+            let jsonWithaoutDescription = await this.loadJson();
+            if(this.jsonWithaoutDescription.status){
+                this.jsonWithaoutDescription = this.jsonWithaoutDescription.json;
+            } else {
+                return {"status":false,"error":{
+                    "logs": "Error while loading base data : \n" + this.jsonWithaoutDescription.error.logs,
+                }};
+            }
+            this.objectMapWithAllDescription.root_table.name = rootTable;
+            this.schema = api.getConnector().connector.service["schema"];
+            this.objectMapWithAllDescription.root_table.schema = this.schema;
+            this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs'];
+            let formatJoinTable = "";
+            let correctJoinFormaTable = "";
+            
+            let testMap = false;
+            let map = {};
+            if (testMap == false) {
+                map = this.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
             }
 
+            let allJoinRootTable = this.createAllJoinTable(map)
+            let allTables = allJoinRootTable;
+            for (let k = 0; k < allTables.length; k++) {
+                for (let tableKey in jsonWithaoutDescription) {
+                    if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
+
+                        formatJoinTable = this.schema + "." + tableKey;
+                        correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
+                        let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:""
+
+                        this.objectMapWithAllDescription.tables[tableKey] = {
+                            "description": jsonWithaoutDescription[tableKey].description,
+                            "columns": attributHanler !== undefined ? attributHanler : [],
+                        }
+
+                    } 
+                }
+
+            }
+            this.objectMapWithAllDescription.map = map
+            this.objectMapWithAllDescription["status"] = true;
+            return this.objectMapWithAllDescription;
+        } catch (error) {
+            return {"status":false,"error":{
+                "logs":error.toString(),
+            }};
         }
-        this.objectMapWithAllDescription.map = map
-        return this.objectMapWithAllDescription;
+
     }
 
     /**
