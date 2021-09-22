@@ -282,6 +282,7 @@ var JsonAdqlBuilder = (function(){
         
         if(whitelist.status){
             whitelist = whitelist.subTables;
+            whitelist.push(table) // the table itself isn't the sub tables but we still want to keep constraints put on it
         }else{
             return whitelist;
         }
