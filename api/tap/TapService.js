@@ -82,6 +82,7 @@ var TapService = /** @class */ (function () {
             }};
             
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString()
             }};
@@ -110,6 +111,7 @@ var TapService = /** @class */ (function () {
                 "logs":"Error while querying " + JSON.stringify(reTable.error.params) + " : \n" + reTable.error.logs
             }};
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString()
             }};
@@ -198,6 +200,7 @@ var TapService = /** @class */ (function () {
             }
             return {"status":true , "allLink":this.tableRemoveView} ;
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString()
             }};
@@ -225,6 +228,7 @@ var TapService = /** @class */ (function () {
 
             return {"status":true, "allTables": this.allTables};
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString()
             }};
@@ -365,6 +369,7 @@ var TapService = /** @class */ (function () {
             }
             return {"status":true, "json":jsonAll };
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString()
             }};
@@ -414,6 +419,7 @@ var TapService = /** @class */ (function () {
             }
             return {"status":false,"newJson": reJson};
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
                 "params" : {"data":data, "root":root}
@@ -456,6 +462,7 @@ var TapService = /** @class */ (function () {
             }
             return {"status":true,"json":joinJsonJoin} ;
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
                 "params" : {"data":data, "list_exist":list_exist, "root":root}
@@ -541,6 +548,7 @@ var TapService = /** @class */ (function () {
                 return {"status":true, "allLinkRe":allLinkRe} ;
             }
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
                 "params" : {"allLinkRe":allLinkRe}

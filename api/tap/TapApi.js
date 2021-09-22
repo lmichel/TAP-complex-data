@@ -27,27 +27,45 @@ var TapApi = (function(){
         let formatTableName = schema + "." + table;
         let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
         this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
-        this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
         this.tapServiceConnector.api = this;
-        if (this.tapServiceConnector.connector.votable.status === 200) {
-            this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
-        }
-        /* for vizier only*/
-        else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
-            this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
-        } else {
-            let status = this.tapServiceConnector.connector.votable.statusText
-            this.tapServiceConnector.connector = undefined;
-            return {"status":false,"error":{
-                "logs":"Failed to initialize TAP connection:\n" + status,
-                "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-            }};
-        }
-        this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
+        this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
+        if (this.tapServiceConnector.connector.votable.status){
+            
+            this.tapServiceConnector.connector.votable = this.tapServiceConnector.connector.votable.answer;
 
-        this.jsonAdqlBuilder = new JsonAdqlBuilder((await this.getObjectMap()).object_map);
+            if (this.tapServiceConnector.connector.votable.status === 200) {
+                this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
+            }
+            /* for vizier only*/
+            else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
+                this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector)
+            } else {
+                let status = this.tapServiceConnector.connector.votable.statusText
+                this.tapServiceConnector.connector = undefined;
+                return {"status":false,"error":{
+                    "logs":"Failed to initialize TAP connection:\n " + status,
+                    "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+                }};
+            }
+            this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-        return {"status":true};
+            let obj = await this.getObjectMap()
+
+            if (obj.status){
+                this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
+            } else {
+                return {"status":false,"error":{
+                    "logs":"Failed to initialize internal data structures :\n " + obj.error.logs,
+                    "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+                }};
+            }
+            return {"status":true};
+        }
+        return {"status":false,"error":{
+            "logs":"Failed to initialize TAP connection:\n " + this.tapServiceConnector.connector.votable.error.logs,
+            "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
+        }};
+        
     }
 
     TapApi.prototype.disconnect = function () {
@@ -69,9 +87,17 @@ var TapApi = (function(){
     TapApi.prototype.getObjectMap = async function () {
         let objectMap = {}
         if (this.getConnector().status) {
-            objectMap.status = true
-            objectMap.object_map = await this.getObjectMapWithAllDescriptions();
-            return objectMap;
+            let map = await this.getObjectMapWithAllDescriptions()
+            objectMap.status = map.status
+            delete map.status;
+
+            if(objectMap.status){
+                objectMap.object_map = map;
+                return objectMap;
+            } else {
+                objectMap.error = { "logs": map.error.logs};
+                return objectMap
+            }
         } else {
             objectMap.status = false
             objectMap.error = { "logs": "No active TAP connection"};
@@ -109,7 +135,8 @@ var TapApi = (function(){
 
             let Field = (await this.getTableAttributeHandlers(this.getConnector().connector.service["table"])).attribute_handlers
 
-            if (votable.status == 200) {
+            if (votable.status) {
+                votable = votable.answer
                 dataTable = this.tapServiceConnector.getDataTable(votable);
                 let nbCols = Field.length;
                 let singleArrayValue = [];
@@ -125,7 +152,7 @@ var TapApi = (function(){
 
                 return {"status" : true , "field_values" :doubleArrayValue};
             } else {
-                return {"status" :false , "error":{"logs" :votable.statusText }};
+                return {"status" :false , "error":{"logs" :votable.error.logs }};
             }
             
         } else {
@@ -141,7 +168,8 @@ var TapApi = (function(){
             let Field = this.getAllSelectedRootField(this.getConnector().connector.service["table"]);
             let votable = await this.tapServiceConnector.Query( (await this.getRootQuery()).query);
             let dataTable = []
-            if (votable.status == 200) {
+            if (votable) {
+                votable = votable.answer;
                 dataTable = this.tapServiceConnector.getDataTable(votable);
                 let nbCols = Field.length;
                 for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
@@ -155,7 +183,7 @@ var TapApi = (function(){
                 jsonContaintRootQueryIdsValues.status = true;
                 jsonContaintRootQueryIdsValues.field_ids = doubleArrayValue;
             } else {
-                jsonContaintRootQueryIdsValues.error = {"logs" : votable.statusText}
+                jsonContaintRootQueryIdsValues.error = {"logs" : votable.error.logs}
                 jsonContaintRootQueryIdsValues.status = false;
             }
         } else{
@@ -224,7 +252,8 @@ var TapApi = (function(){
 
             let Field = this.getAllSelectedRootField(table);
 
-            if (votable.status == 200) {
+            if (votable) {
+                votable = votable.answer
                 dataTable = this.tapServiceConnector.getDataTable(votable);
                 let nbCols = Field.length;
                 let singleArrayValue = [];
@@ -240,7 +269,7 @@ var TapApi = (function(){
 
                 return {"status" : true , "field_values" :doubleArrayValue};
             } else {
-                return {"status" :false , "error":{"logs" :votable.statusText }};
+                return {"status" :false , "error":{"logs" :votable.error.logs }};
             }
             
         } else {
@@ -282,7 +311,8 @@ var TapApi = (function(){
 
             let Field = await this.getAllRootField(table);
 
-            if (votable.status == 200) {
+            if (votable.status) {
+                votable = votable.answer
                 dataTable = this.tapServiceConnector.getDataTable(votable);
                 let nbCols = Field.length;
                 let singleArrayValue = [];
@@ -298,7 +328,7 @@ var TapApi = (function(){
 
                 return {"status" : true , "field_values" :doubleArrayValue};
             } else {
-                return {"status" :false , "error":{"logs" :votable.statusText }};
+                return {"status" :false , "error":{"logs" :votable.error.logs }};
             }
             
         } else {

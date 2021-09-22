@@ -25,6 +25,7 @@ async function selectConstraints(tableName, txtInput,api){
     let schema = api.getConnector().connector.service["schema"];
     let adql = api.tapServiceConnector.attributsHandler.addAllColumn(tableName, schema)
     let QObject = await api.tapServiceConnector.Query(adql);
+    QObject = QObject.answer;
     let dataTable = VOTableTools.votable2Rows(QObject)
     let contentText = QObject.responseText;
     let Field = VOTableTools.genererField(QObject, contentText)
@@ -350,9 +351,8 @@ async function createTableFieldsButton(api){
 
                 connect.then((value) => {
                     status = value.status;
+                    display(value , "getJsonAll");
                     thenFun = async () =>{
-
-                    display(""+status , "getStatus");
 
                     if (status){
 
@@ -385,6 +385,8 @@ async function createTableFieldsButton(api){
                     }
                 }
                 })
+
+                display(""+status , "getStatus");
 
                 await connect;
                 await thenFun();

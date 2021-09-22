@@ -884,6 +884,9 @@ function VOTableParser() {
           // If the last dimension of the array is variable (i.e. equals to '*'),
           // its value is coded on the 4 first bytes, before the values themselves
           bitArray = streamB64(32);
+          if (bitArray === null){
+            break;
+          }
           value = bin2uint32(bitArray);
           for (k = 0; k < arrayStruct.length - 1; k++)
             value /= arrayStruct[k];

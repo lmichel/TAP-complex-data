@@ -80,6 +80,7 @@ var TapServiceConnector = (function() {
             }
             return {"status":true,"joinedTables":list};
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
                 "params":{"root":root,"json":json}
@@ -109,6 +110,7 @@ var TapServiceConnector = (function() {
             }
             return {"status":true,"idList":listId};
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
                 "params":{"listJoinAndId":listJoinAndId}
@@ -138,11 +140,11 @@ var TapServiceConnector = (function() {
             let api = this.api;
             let rootTable = api.getConnector().connector.service["table"];
             let jsonWithaoutDescription = await this.loadJson();
-            if(this.jsonWithaoutDescription.status){
-                this.jsonWithaoutDescription = this.jsonWithaoutDescription.json;
+            if(jsonWithaoutDescription.status){
+                jsonWithaoutDescription = jsonWithaoutDescription.json;
             } else {
                 return {"status":false,"error":{
-                    "logs": "Error while loading base data : \n" + this.jsonWithaoutDescription.error.logs,
+                    "logs": "Error while loading base data : \n" + jsonWithaoutDescription.error.logs,
                 }};
             }
             this.objectMapWithAllDescription.root_table.name = rootTable;
@@ -181,6 +183,7 @@ var TapServiceConnector = (function() {
             this.objectMapWithAllDescription["status"] = true;
             return this.objectMapWithAllDescription;
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
             }};

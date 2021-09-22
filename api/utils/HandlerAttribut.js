@@ -53,8 +53,8 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
 
         },
         failure: {
-            notConnected: {status: "", message: ""},
-            otherError: {status: "", message: ""}
+            "status":false,
+            "error":{"logs":"","params":{"table":table}}
         }
     }
 
@@ -75,7 +75,8 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
         let contentText;
         let Field;
         let nbCols;
-        if (votableQueryResult != undefined) {
+        if (votableQueryResult.status) {
+            votableQueryResult = votableQueryResult.answer;
             dataTable = VOTableTools.votable2Rows(votableQueryResult);
             contentText = votableQueryResult.responseText;
             Field = VOTableTools.genererField(votableQueryResult, contentText)
@@ -94,7 +95,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
 
                 singleArrayValue = []
             }
-            jsonContaintHandlerValues.succes.status = "OK"
+            jsonContaintHandlerValues.succes.status = true
             let jsonContaintHandlersValue = []
             for (let c = 0; c < doubleArrayValue.length; c++) {
                 jsonContaintHandlerValues.succes.attribute_handlers.column_name = doubleArrayValue[c][0];
@@ -119,19 +120,17 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
 
         } else {
 
-            jsonContaintHandlerValues.failure.otherError.status = "Failed"
-            jsonContaintHandlerValues.failure.otherError.message = "Unknown error : Query Result undefined"
+            jsonContaintHandlerValues.failure.status = false
+            jsonContaintHandlerValues.failure.error.logs = "Error while querying data : \n" + votableQueryResult.error.logs;
         }
     } else {
-        jsonContaintHandlerValues.failure.notConnected.status = "Failed";
-        jsonContaintHandlerValues.failure.notConnected.message = "No active TAP connection"
+        jsonContaintHandlerValues.failure.status = "Failed";
+        jsonContaintHandlerValues.failure.error.logs = "No active TAP connection"
     }
-    if (jsonContaintHandlerValues.succes.status == "OK") {
+    if (jsonContaintHandlerValues.succes.status) {
         return jsonContaintHandlerValues.succes
-    } else if (jsonContaintHandlerValues.failure.notConnected.status == "Failed") {
-        return jsonContaintHandlerValues.failure.notConnected
     } else {
-        return jsonContaintHandlerValues.failure.otherError;
+        return jsonContaintHandlerValues.failure;
     }
 }
 
