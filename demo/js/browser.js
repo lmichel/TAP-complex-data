@@ -72,6 +72,55 @@ async function getTableData(api,table,jointVal){
     return {"status":false}
 }
 
+function makeTableHeader(tableName,jointKey,jointVal){
+    let head = "<hr><h4 class=\"text-center\" >"
+    head += tableName + "</h4>"
+    if(jointKey !== undefined){
+        head += "<h5 class=\"text-center\" >"
+        head += "where " + jointKey + " = " + jointVal
+        head += "</h5>" 
+    }
+    return head
+}
+
+function bindTableEvent(api, tableID,data){
+    let tableFullID = "table_" + tableID;
+    let nextID = "table_" + (tableID+1);
+
+    let joints = data.joints
+    let colNames = data.data.colNames;
+    let joinedTables = data.joinedTables;
+
+
+    for (let i=colNames.length;i<joinedTables.length + colNames.length;i++){
+        $("[data-table-id='" + tableFullID + "'][data-table-col='"+i+"']").click((cell)=>{
+            
+            let row = cell.target.dataset["tableRow"];
+            if(row == 0){
+                return; // the 0th row is the row containing columns name ...
+            }
+
+            syncIt(async () =>{
+                let table = joinedTables[i-colNames.length];
+                let joint = joints[table];
+
+                let valCol = $("th[data-table-id='" + tableFullID + "'][data-table-row='0']").filter((i,val)=>{
+                    return val.textContent ==joint.target;
+                }).data("tableCol");
+
+                let jointVal = $("[data-table-id='" + tableFullID + "'][data-table-col='"+valCol+"'][data-table-row='"+row+"']").text();
+
+                let data = await getTableData(api,table,jointVal)
+                if(data.status){
+                    let tableHtml = buildTable(data.data.colNames.concat(data.joinedTables),data.data.value,nextID);
+                    $("#dataHolder").append("<div id = '" + nextID + "'></div>")
+                    $("#" + nextID).html(makeTableHeader(table,joint.from,jointVal) + tableHtml);
+                    bindTableEvent(api,tableID+1,data)
+                }
+            });
+        });
+    }
+}
 
 /*/ confined area /*/
 
@@ -154,44 +203,12 @@ async function getTableData(api,table,jointVal){
                             let rootData = await getTableData(api,root)
 
                             if (rootData.status){
+                                let table = buildTable(rootData.data.colNames.concat(rootData.joinedTables),rootData.data.value,"table_1")
                                 
-                                let colNames = rootData.data.colNames
-
-                                let joinedTables = rootData.joints
-                                let tables = rootData.joinedTables
-                                let field_ids = rootData.data.value
-
-                                let table = buildTable(colNames.concat(tables),field_ids,"table_1")
-                                
-                                $("#dataHolder").append("<div id = \"table_1\"></div><div id = \"table_2\"></div>");
+                                $("#dataHolder").append("<div id = \"table_1\"></div>");
                                 $("#table_1").html(table);
 
-                                for (let i=colNames.length;i<tables.length + colNames.length;i++){
-                                    $("[data-table-id='table_1'][data-table-col='"+i+"']").click((cell)=>{
-                                        syncIt(async () =>{
-                                            let row = cell.target.dataset["tableRow"];
-                                            if(row == 0){
-                                                return; // the 0th row is the row containing columns name ...
-                                            }
-                                            let table = tables[i-colNames.length];
-                                            let joint = joinedTables[table];
-
-                                            let valCol = $("th[data-table-id='table_1'][data-table-row='0']").filter((i,val)=>{
-                                                return val.textContent ==joint.target;
-                                            }).data("tableCol");
-
-                                            let jointVal = $("[data-table-id='table_1'][data-table-col='"+valCol+"'][data-table-row='"+row+"']").text();
-
-                                            let data = await getTableData(api,table,jointVal)
-                                            if(data.status){
-                                                let tableHtml = buildTable(data.data.colNames.concat(data.joinedTables),data.data.value,"table_2");
-                                                $("#table_2").html(tableHtml);
-                                            }
-                                            
-                                            
-                                        });
-                                    });
-                                }
+                                bindTableEvent(api,1,rootData)
                             }
                         }
                     }
