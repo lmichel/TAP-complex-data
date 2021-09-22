@@ -161,12 +161,6 @@ async function getTableData(api,table,jointVal){
                                 let tables = rootData.joinedTables
                                 let field_ids = rootData.data.value
 
-                                for (let i=0;i<field_ids.length;i++){
-                                    for (let j=0;j<tables.length;j++){
-                                        field_ids[i].push(tables[j] + "'s related data")
-                                    }
-                                }
-
                                 let table = buildTable(colNames.concat(tables),field_ids,"table_1")
                                 
                                 $("#dataHolder").append("<div id = \"table_1\"></div><div id = \"table_2\"></div>");
