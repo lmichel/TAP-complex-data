@@ -261,7 +261,7 @@ var TapApi = (function(){
 
             let Field = this.getAllSelectedRootField(table);
 
-            if (votable) {
+            if (votable.status) {
                 votable = votable.answer
                 dataTable = this.tapServiceConnector.getDataTable(votable);
                 let nbCols = Field.length;

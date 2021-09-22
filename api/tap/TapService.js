@@ -17,41 +17,41 @@ var TapService = /** @class */ (function () {
      * @returns :votable object, result of adql query
      */
     TapService.prototype.Query = async function (adql) {
-        try{
-            var site = this.url;
-            var correctFormat = "votable";
-            var reTable;
-            if (this.url == "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.url == "http://dc.zah.uni-heidelberg.de/tap/sync") {
-                correctFormat = "votable";
-            } else {
-                correctFormat = "votable";
-            }
-            console.log("Async AJAXurl: " + site + " query: " + adql)
+        var site = this.url;
+        var correctFormat = "votable";
+        var reTable;
+        if (this.url == "http://simbad.u-strasbg.fr/simbad/sim-tap/sync" || this.url == "http://dc.zah.uni-heidelberg.de/tap/sync") {
+            correctFormat = "votable";
+        } else {
+            correctFormat = "votable";
+        }
+        console.log("Async AJAXurl: " + site + " query: " + adql)
 
-            reTable = $.ajax({
-                    url: "" + site,
-                    type: "GET",
-                    data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
-                });
-            
-            let output = {}
-            reTable.then((value)=>{
-                output.status = 200;
-                output.statusText = "OK"
-                output.responseText = new XMLSerializer().serializeToString(value);
+        reTable = $.ajax({
+                url: "" + site,
+                type: "GET",
+                data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
             });
-            reTable.catch((value)=>{
-                output.status = 999; //TODO : Improve 
-                output.statusText = "Failed"
-                output.response = value;
-            });
-            await reTable
+        
+        let output = {}
+        reTable.then((value)=>{
+            output.status = 200;
+            output.statusText = "OK"
+            output.responseText = new XMLSerializer().serializeToString(value);
+        });
 
+        try {
+            await reTable;
+        } catch (error) {
+            output = error
+        }
+        
+        if (output.status === 200){
             return {"status":true,"answer":output};
-
-        } catch(error){
+        } else {
+            console.error(output);
             return {"status":false,"error":{
-                "logs":error.toString(),
+                "logs":"Invalid answer to the query",
                 "params" : {"adql":adql}
             }};
         }
