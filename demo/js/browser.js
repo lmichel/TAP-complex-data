@@ -41,6 +41,37 @@ function buildTable(colNames,data,id){
     return header + body + footer;
 }
 
+async function getTableData(api,table,jointVal){
+    let data = await api.getTableQueryIds(table,jointVal);
+
+    display(data,"codeOutput")
+
+    if(data.status){
+        let dataCols = api.getAllSelectedRootField(table);
+        let subJoint = api.getJoinedTables(table).joined_tables
+
+        let subTables = Object.keys(subJoint);
+        
+        for (let i=0;i<data.field_values.length;i++){
+            for (let j=0;j<subTables.length;j++){
+                data.field_values[i].push(subTables[j] + "'s related data")
+            }
+        }
+
+        return {
+            "status":true,
+            "data":{
+                "colNames":dataCols,
+                "value":data.field_values
+            },
+            "joints":subJoint,
+            "joinedTables":subTables
+        };
+    }
+
+    return {"status":false}
+}
+
 
 /*/ confined area /*/
 
@@ -119,24 +150,24 @@ function buildTable(colNames,data,id){
 
                             enableButton("btnApiDisconnect");
 
-                            let rootIds = await api.getRootQueryIds();
+                            let root = api.getConnector().connector.service["table"];
+                            let rootData = await getTableData(api,root)
 
-                            display(rootIds,"codeOutput")
+                            if (rootData.status){
+                                
+                                let colNames = rootData.data.colNames
 
-                            if (rootIds.status){
-                                let root = api.getConnector().connector.service["table"];
-                                let colNames = api.getAllSelectedRootField(root);
+                                let joinedTables = rootData.joints
+                                let tables = rootData.joinedTables
+                                let field_ids = rootData.data.value
 
-                                let joinedTables = api.getJoinedTables(root).joined_tables;
-                                let tables = Object.keys(joinedTables);
-
-                                for (let i=0;i<rootIds.field_ids.length;i++){
+                                for (let i=0;i<field_ids.length;i++){
                                     for (let j=0;j<tables.length;j++){
-                                        rootIds.field_ids[i].push(tables[j] + "'s related data")
+                                        field_ids[i].push(tables[j] + "'s related data")
                                     }
                                 }
 
-                                let table = buildTable(colNames.concat(tables),rootIds.field_ids,"table_1")
+                                let table = buildTable(colNames.concat(tables),field_ids,"table_1")
                                 
                                 $("#dataHolder").append("<div id = \"table_1\"></div><div id = \"table_2\"></div>");
                                 $("#table_1").html(table);
@@ -157,26 +188,13 @@ function buildTable(colNames,data,id){
 
                                             let jointVal = $("[data-table-id='table_1'][data-table-col='"+valCol+"'][data-table-row='"+row+"']").text();
 
-                                            let data = await api.getTableQueryIds(table,jointVal);
-
-                                            display(data,"codeOutput")
-
+                                            let data = await getTableData(api,table,jointVal)
                                             if(data.status){
-                                                let dataCols = api.getAllSelectedRootField(table);
-                                                let subJoint = api.getJoinedTables(table)
-                                                
-                                                subJoint=subJoint.joined_tables
-                                                let subTables = Object.keys(subJoint);
-                                                
-                                                for (let i=0;i<data.field_values.length;i++){
-                                                    for (let j=0;j<subTables.length;j++){
-                                                        data.field_values[i].push(subTables[j] + "'s related data")
-                                                    }
-                                                }
-
-                                                let tableHtml = buildTable(dataCols.concat(subTables),data.field_values,"table_2");
+                                                let tableHtml = buildTable(data.data.colNames.concat(data.joinedTables),data.data.value,"table_2");
                                                 $("#table_2").html(tableHtml);
                                             }
+                                            
+                                            
                                         });
                                     });
                                 }
