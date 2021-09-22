@@ -113,9 +113,17 @@ function bindTableEvent(api, tableID,data){
                 let data = await getTableData(api,table,jointVal)
                 if(data.status){
                     let tableHtml = buildTable(data.data.colNames.concat(data.joinedTables),data.data.value,nextID);
-                    $("#dataHolder").append("<div id = '" + nextID + "'></div>")
+                    if ($("#" + nextID).length == 0){
+                        $("#dataHolder").append("<div id = '" + nextID + "'></div>")
+                    }
                     $("#" + nextID).html(makeTableHeader(table,joint.from,jointVal) + tableHtml);
                     bindTableEvent(api,tableID+1,data)
+                    let offset = 2
+                    while ($("#table_" + (tableID +offset)).length > 0){
+                        $("#table_" + (tableID +offset)).remove();
+                        offset++;
+                    }
+                    
                 }
             });
         });
