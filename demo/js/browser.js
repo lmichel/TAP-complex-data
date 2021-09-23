@@ -47,7 +47,6 @@ function buildTable(colNames,data,id){
 /*/ gather and transform data to an acceptable format for the buildTable function /*/
 
 async function getTableData(api,table,jointVal){
-    console.log(typeof jointVal);
     if(jointVal !== undefined){
         // we want strings to be quoted or else the query will fail.
         // isNaN alone consider things like empty strings and whitespaces are valid number
@@ -59,12 +58,12 @@ async function getTableData(api,table,jointVal){
             jointVal = "\'" + jointVal + "\'";
         }
     }
-    let data = await api.getTableQueryIds(table,jointVal);
+    let data = await api.getTableSelectedField(table,jointVal);
 
     display(data,"codeOutput");
 
     if(data.status){
-        let dataCols = api.getAllSelectedRootField(table);
+        let dataCols = api.getAllSelectedFields(table);
         let subJoint = api.getJoinedTables(table).joined_tables;
 
         let subTables = Object.keys(subJoint);

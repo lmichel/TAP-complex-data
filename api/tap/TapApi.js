@@ -140,103 +140,39 @@ var TapApi = (function(){
      * @returns Returns all fields of root table rows returned by the ADQL query on the root table filtered by all constraints put on joined tables at any levels.
      */
     TapApi.prototype.getRootFields = async function () {
-        if (this.getConnector().status) {
+        return this.getTableFields();
+    };
 
-            let votable = await this.tapServiceConnector.Query((await this.getRootFieldsQuery()).query);
-
-            let dataTable = [];
-
-            let Field = (await this.getTableAttributeHandlers(this.getConnector().connector.service.table)).attribute_handlers;
-
-            if (votable.status) {
-                votable = votable.answer;
-                dataTable = this.tapServiceConnector.getDataTable(votable);
-                let nbCols = Field.length;
-                let singleArrayValue = [];
-                let doubleArrayValue = [];
-                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
-                    for (let col = 0; col < nbCols; col++) {
-                        singleArrayValue.push(dataTable[rowNb+col]);
-                    }
-                    doubleArrayValue.push(singleArrayValue);
-
-                    singleArrayValue = [];
-                }
-
-                return {"status" : true , "field_values" :doubleArrayValue};
-            } else {
-                return {"status" :false , "error":{"logs" :votable.error.logs }};
-            }
-            
-        } else {
-            return {"status" : false , "error":{"logs" :"No active TAP connection" } };
-        }
+    /**
+     * Create and return the correct adql querry to get the value of all fields of the selected root table, taking in account all user's defined constraints
+     */
+    TapApi.prototype.getRootFieldsQuery = async function(){
+    return this.getTableFieldsQuery();
     };
 
     TapApi.prototype.getRootQueryIds = async function () {
-        let jsonContaintRootQueryIdsValues = {};
-        let doubleArrayValue = [];
-        let singleArrayValue = [];
-        if (this.getConnector().status) {
-            let Field = this.getAllSelectedRootField(this.getConnector().connector.service.table);
-            let votable = await this.tapServiceConnector.Query( (await this.getRootQuery()).query);
-            let dataTable = [];
-            if (votable) {
-                votable = votable.answer;
-                dataTable = this.tapServiceConnector.getDataTable(votable);
-                let nbCols = Field.length;
-                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {//table  content
-                    for (let col = 0; col < nbCols; col++) {
-                        singleArrayValue.push(dataTable[rowNb+col]);
-                    }
-                    doubleArrayValue.push(singleArrayValue);
-
-                    singleArrayValue = [];
-                }
-                jsonContaintRootQueryIdsValues.status = true;
-                jsonContaintRootQueryIdsValues.field_ids = doubleArrayValue;
-            } else {
-                jsonContaintRootQueryIdsValues.error = {"logs" : votable.error.logs};
-                jsonContaintRootQueryIdsValues.status = false;
-            }
-        } else{
-            jsonContaintRootQueryIdsValues.error = {"logs" : "No active TAP connection"};
-            jsonContaintRootQueryIdsValues.status = false;
-        }
-        return jsonContaintRootQueryIdsValues;
+        return this.getTableSelectedField();
     };
 
     TapApi.prototype.getRootQuery = function () {
-        if (this.getConnector().status) {
-            let rootTable = this.getConnector().connector.service.table;
-            let allField = this.formatColNames(rootTable, this.getAllSelectedRootField(rootTable));
-            let contentAdql = "";
-
-            let schema = this.tapServiceConnector.connector.service.schema;
-            schema = schema.quotedTableName().qualifiedName;
-
-            let formatTableName = schema + "." + rootTable;
-            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-
-            contentAdql = "SELECT TOP 10 " + allField;
-            contentAdql += '\n' + " FROM  " + correctTableNameFormat + "\n";
-
-            contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
-
-            contentAdql += this.jsonAdqlBuilder.getAdqlConstraints().adqlConstraints;
-            return {"status": true, "query": contentAdql} ;
-        }
-
-        return {"status":false,"error" :{ "logs": "No active TAP connection"}};
+        return this.getTableQuery();
     };
 
 
     /**
-     * Create and return the correct adql query to get the value of the IDs of the selected table
+     * Create and return the correct adql query to get the value of the slected fields (or joining keys if none are selected) of the selected table any constraint put on sub tables are added to the query
+     * @param {String} table Optional unqualified name of the node table or the root table if unspecified
+     * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
     TapApi.prototype.getTableQuery = function(table,joinKeyVal){
         if(this.getConnector().status){
-            let allField = this.formatColNames(table,this.getAllSelectedRootField(table));
+            if(table === undefined){
+                table = this.getConnector().connector.service.table;
+            }
+            if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
+                return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
+            }
+            let allField = this.formatColNames(table,this.getAllSelectedFields(table));
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -253,17 +189,26 @@ var TapApi = (function(){
             adql += this.jsonAdqlBuilder.getAdqlConstraints(table,joinKeyVal).adqlConstraints;
             return {"status": true, "query": adql} ;
         }
-        return {"status":false,"error" :{ "logs": "No active TAP connection"}};
+        return {"status":false,"error" :{ "logs": "No active TAP connection","params":{"table":table,"joinKeyVal":joinKeyVal}}};
     };
 
-    TapApi.prototype.getTableQueryIds = async function(table,joinKeyVal){
+    /**
+     * run the correct adql query to gather the value of the slected fields (or joining keys if none are selected) of the selected table any constraint put on sub tables are added to the query
+     * @param {String} table Optional unqualified name of the node table or the root table if unspecified
+     * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
+     */
+    TapApi.prototype.getTableSelectedField = async function(table,joinKeyVal){
         if (this.getConnector().status) {
-            let query = (await this.getTableQuery(table,joinKeyVal)).query;
+            let query = this.getTableQuery(table,joinKeyVal);
+            if(!query.status){
+                return query;
+            }
+            query = query.query;
             let votable = await this.tapServiceConnector.Query(query);
 
             let dataTable = [];
 
-            let Field = this.getAllSelectedRootField(table);
+            let Field = this.getAllSelectedFields(table);
 
             if (votable.status) {
                 votable = votable.answer;
@@ -291,11 +236,20 @@ var TapApi = (function(){
     };
 
     /**
-     * Create and return the correct adql query to get the value of all the fields of the selected table
+     * Create and return the correct adql query to get the value of all the fields of the selected table any constraint put on sub tables are added to the query
+     * @param {String} table Optional unqualified name of the node table or the root table if unspecified
+     *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
     TapApi.prototype.getTableFieldsQuery = async function(table,joinKeyVal){
         if(this.getConnector().status){
-            let allField = this.formatColNames(table,await this.getAllRootField(table));
+            if(table === undefined){
+                table = this.getConnector().connector.service.table;
+            }
+            if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
+                return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
+            }
+
+            let allField = this.formatColNames(table,await this.getAllTableField(table));
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -317,19 +271,25 @@ var TapApi = (function(){
     
     TapApi.prototype.getTableFields = async function(table,joinKeyVal){
         if (this.getConnector().status) {
-
+            if(table === undefined){
+                table = this.getConnector().connector.service.table;
+            }
+            if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
+                return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
+            }
             let votable = await this.tapServiceConnector.Query((await this.getTableFieldsQuery(table,joinKeyVal)).query);
-
             let dataTable = [];
-
-            let Field = await this.getAllRootField(table);
-
+            let Field = await this.getAllTableField(table);
             if (votable.status) {
+
                 votable = votable.answer;
                 dataTable = this.tapServiceConnector.getDataTable(votable);
                 let nbCols = Field.length;
                 let singleArrayValue = [];
                 let doubleArrayValue = [];
+                if(nbCols <1 && dataTable.length > 0){
+                    return {"status" : false , "error":{"logs" :"Error in columns parsing" } };
+                }
                 for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
                     for (let col = 0; col < nbCols; col++) {
                         singleArrayValue.push(dataTable[rowNb+col]);
@@ -347,44 +307,6 @@ var TapApi = (function(){
         } else {
             return {"status" : false , "error":{"logs" :"No active TAP connection" } };
         }
-    };
-    /**
-     * Create and return the correct adql querry to get the value of all fields of the selected root table, taking in account all user's defined constraints
-     */
-    TapApi.prototype.getRootFieldsQuery = async function(){
-        if (this.getConnector().status) {
-            let rootTable = this.getConnector().connector.service.table;
-
-            /**
-             * Simbad doesn't support SELECT *
-             * Vizier has a weird management of *
-             * so we explicitly tell them every field.
-             */
-            let allField;
-            if (this.getConnector().connector.service.shortName == "Simbad" || this.getConnector().connector.service.shortName == "Vizier"){
-                allField = this.formatColNames(rootTable,await this.getAllRootField(rootTable));
-            }else {
-                allField = this.formatColNames(rootTable,["*"]);
-            }
-
-            let contentAdql = "";
-
-            let schema = this.tapServiceConnector.connector.service.schema;
-            schema = schema.quotedTableName().qualifiedName;
-
-            let formatTableName = schema + "." + rootTable;
-            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-
-            contentAdql = "SELECT TOP 10 " + allField;
-            contentAdql += '\n' + " FROM  " + correctTableNameFormat;
-
-            contentAdql += this.jsonAdqlBuilder.getAdqlJoints().adqlJoints;
-
-            contentAdql += this.jsonAdqlBuilder.getAdqlConstraints().adqlConstraints;
-            return {"status": true, "query": contentAdql} ;
-        }
-
-        return {"status":false,"error" :{ "logs": "No active TAP connection"}};
     };
 
     /**
@@ -418,13 +340,13 @@ var TapApi = (function(){
         return await this.tapServiceConnector.getObjectMapAndConstraints();
     };
 
-    TapApi.prototype.getAllSelectedRootField = function (rootTable){
+    TapApi.prototype.getAllSelectedFields = function (rootTable){
         
         return this.jsonAdqlBuilder.getJoinKeys(rootTable).keys;
 
     };
 
-    TapApi.prototype.getAllRootField = async function (rootTable){
+    TapApi.prototype.getAllTableField = async function (rootTable){
 
         let columns = [];
 

@@ -240,7 +240,7 @@ async function createTableIDsButton(api){
         
         bindClickAsyncEvent("btnRunQueryID" + key, async () =>{
             let val = $("#txtJointValID" + key).val().trim();
-            let query = await api.getTableQueryIds(key, val ==="" ? undefined : val);
+            let query = await api.getTableSelectedField(key, val ==="" ? undefined : val);
             display(query.status,"getStatus");
             display(JSON.stringify(query.field_values,undefined,4),"getJsonAll");
             return query.status;

@@ -316,7 +316,14 @@ var JsonAdqlBuilder = (function(){
 
     };
 
+    /**
+     * return a set containing all fields which are use as join keys on/by the selected table 
+     * @param {String} table unqualified name of the node table or the root table if unspecified
+     */
     JsonAdqlBuilder.prototype.getJoinKeys = function(table){
+        if(table === undefined){
+            table = this.adqlJsonMap.rootTable;
+        }
         let keys = [];
         if(this.adqlJsonMap.joints[table] !== undefined){
             keys.push(this.adqlJsonMap.joints[table].from);
