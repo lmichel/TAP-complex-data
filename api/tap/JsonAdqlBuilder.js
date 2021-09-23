@@ -333,5 +333,26 @@ var JsonAdqlBuilder = (function(){
         return {"status":true,"keys": keys};
     };
 
+
+    /**
+     * check if the selected table is actively joint
+     * @param {String} table unqualified name of the node table
+     */
+    JsonAdqlBuilder.prototype.isTableJoined = function(table){
+        return {"status":true,"joined": this.adqlJsonMap.activeJoints.includes(table)};
+    };
+
+    /**
+     * return the constraint put on the selected table or an empty string if no constraint is set
+     * @param {String} table unqualified name of the node table
+     */
+    JsonAdqlBuilder.prototype.getTableConstraint = function(table){
+        let constraint = this.adqlJsonMap.conditions[table];
+        if (constraint === undefined){
+            constraint = "";
+        }
+        return {"status": true, "constraint":constraint};
+    };
+
     return JsonAdqlBuilder;
 })();
