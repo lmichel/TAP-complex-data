@@ -413,14 +413,3 @@ var TapApi = (function(){
 
     return TapApi;
 }());
-
-// private function  to modify key
-function modifyKeys(obj) {
-    Object.keys(obj).forEach(key => {
-        obj[`${obj[key].column_name}`] = obj[key];
-        delete obj[key];
-        if (typeof obj[`${obj[key].column_name}`] === "object") {
-            modifyKeys(obj[`${obj[key].column_name}`]);
-        }
-    });
-}
