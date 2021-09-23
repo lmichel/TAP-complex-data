@@ -1,4 +1,4 @@
-"use strict";
+"use strict;";
 
 var JsonAdqlBuilder = (function(){
 
@@ -14,10 +14,10 @@ var JsonAdqlBuilder = (function(){
 
         /*/ Building adqlJsonMap from objectMap /*/
 
-        let map = {}
-        map[this.adqlJsonMap.rootTable] = objectMap.map[objectMap.root_table.name].join_tables
+        let map = {};
+        map[this.adqlJsonMap.rootTable] = objectMap.map[objectMap.root_table.name].join_tables;
         let nextMap;
-        let mapHasKey = true
+        let mapHasKey = true;
         while (mapHasKey){
             nextMap = {};
             mapHasKey = false;
@@ -95,7 +95,7 @@ var JsonAdqlBuilder = (function(){
                 joints.push(table);
             }
 
-            table = this.adqlJsonMap.joints[table].parentNode
+            table = this.adqlJsonMap.joints[table].parentNode;
         }
 
         joints.reverse(); // we reverse the array so we don't start by joining the outer-most table
@@ -104,7 +104,7 @@ var JsonAdqlBuilder = (function(){
 
         return {"status" : true};
 
-    }
+    };
 
     /**
      * This method builds and set multiple constraints for a single table.
@@ -142,7 +142,7 @@ var JsonAdqlBuilder = (function(){
         } else {
             return {"status" : false, "error":{"logs":"Error while setting constraint :\n" + val.error.logs,"params" : {"table":table,"constraints":constraints,"logic":logic,"strict":strict}}};
         }
-    }
+    };
 
     /**
      * Remove any constraints put on the table
@@ -172,12 +172,12 @@ var JsonAdqlBuilder = (function(){
                     this.adqlJsonMap.activeJoints.remove(table);
                 }
 
-                table = this.adqlJsonMap.joints[table].parentNode
+                table = this.adqlJsonMap.joints[table].parentNode;
             }
         }
 
         return {"status" : true};
-    }
+    };
     /**
      * Remove any constraints put on any table
      */
@@ -187,7 +187,7 @@ var JsonAdqlBuilder = (function(){
         this.adqlJsonMap.activeJoints = [];
 
         return {"status" : true};
-    }
+    };
     /**
      * create a list of all tables which are deeper than the selected rootTable in the objectMap's tree representation of the DB
      * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
@@ -208,10 +208,10 @@ var JsonAdqlBuilder = (function(){
                 return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
             }
             
-            let branch = this.adqlJsonMap.nodeTreeBranches[table]
+            let branch = this.adqlJsonMap.nodeTreeBranches[table];
             let nextBranch;
             while (branch !== undefined && branch.length >0 && degree > 0){
-                subTables=subTables.concat(branch)
+                subTables=subTables.concat(branch);
                 nextBranch = [];
                 for (let i =0;i<branch.length;i++){
                     if(this.adqlJsonMap.nodeTreeBranches[branch[i]] !== undefined){
@@ -228,20 +228,27 @@ var JsonAdqlBuilder = (function(){
         }
 
         return {"status":true,"subTables":subTables};
-    }
+    };
+
+    /**Search and return all direct joint from the selected table to another. Only joints which goes deeper une the tree representation are returned 
+     * ie table 1 is joined to the root and to table 2 and 3 then this method will only return joints to table 2 and 3.
+     * joints are described following the same pattern as in the JsonAdqlBuilder specs
+     * 
+     * @param {String} table Table from which joined table are searched 
+     */
 
     JsonAdqlBuilder.prototype.getLowerJoints =function(table){
         if (table == undefined){
             table = this.adqlJsonMap.rootTable;
         }
-        let joints = {}
+        let joints = {};
         for (let key in this.adqlJsonMap.joints){
             if (this.adqlJsonMap.joints[key].parentNode === table){
-                joints[key] = JSON.parse(JSON.stringify(this.adqlJsonMap.joints[key]))
+                joints[key] = JSON.parse(JSON.stringify(this.adqlJsonMap.joints[key]));
             }
         }
-        return {"status":true,"joints":joints}
-    }
+        return {"status":true,"joints":joints};
+    };
 
     /**
      * Create a string containing all active ADQL joints from the starting node ignoring any joints on same or higher level other nodes
@@ -257,20 +264,20 @@ var JsonAdqlBuilder = (function(){
             return whitelist;
         }
 
-        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value))
+        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value));
 
-        let adqlJoints = ""
+        let adqlJoints = "";
 
         for (let i=0;i<joints.length;i++){
             let joint = this.adqlJsonMap.joints[joints[i]];
             adqlJoints += " JOIN " + this.adqlJsonMap.scheme + "." + joints[i] + " ON " +
             this.adqlJsonMap.scheme + "." + joint.parentNode + "." + joint.target + "=" +
-            this.adqlJsonMap.scheme + "." + joints[i] + "." + joint.from + "\n"
+            this.adqlJsonMap.scheme + "." + joints[i] + "." + joint.from + "\n";
         }
 
         return {"status":true,"adqlJoints":adqlJoints};
 
-    }
+    };
 
     /**
      * create a string containing all active ADQL constraints from the starting node ignoring any joints on same or higher level other nodes
@@ -282,23 +289,23 @@ var JsonAdqlBuilder = (function(){
         
         if(whitelist.status){
             whitelist = whitelist.subTables;
-            whitelist.push(table) // the table itself isn't the sub tables but we still want to keep constraints put on it
+            whitelist.push(table); // the table itself isn't the sub tables but we still want to keep constraints put on it
         }else{
             return whitelist;
         }
 
         let tables = Object.keys(this.adqlJsonMap.conditions).filter(value => whitelist.includes(value));
 
-        let adqlConstraints = ""
+        let adqlConstraints = "";
 
         for (let i=0;i<tables.length;i++){
-            adqlConstraints += "( " + this.adqlJsonMap.conditions[tables[i]] + " ) AND \n "
+            adqlConstraints += "( " + this.adqlJsonMap.conditions[tables[i]] + " ) AND \n ";
         }
 
         if (table !== undefined && table !== this.adqlJsonMap.rootTable && joinKeyVal !== undefined){
             adqlConstraints += "( " + this.adqlJsonMap.scheme + "." + table + "." + this.adqlJsonMap.joints[table].from + "=" + joinKeyVal + " )";
         } else{
-            adqlConstraints=adqlConstraints.substring(0,adqlConstraints.length - 7) // remove trailing AND
+            adqlConstraints=adqlConstraints.substring(0,adqlConstraints.length - 7); // remove trailing AND
         }
 
         if(adqlConstraints.length > 0){
@@ -307,24 +314,24 @@ var JsonAdqlBuilder = (function(){
             return {"status":true,"adqlConstraints": ""};
         }
 
-    }
+    };
 
     JsonAdqlBuilder.prototype.getJoinKeys = function(table){
-        let keys = []
+        let keys = [];
         if(this.adqlJsonMap.joints[table] !== undefined){
-            keys.push(this.adqlJsonMap.joints[table].from)
+            keys.push(this.adqlJsonMap.joints[table].from);
         }
 
         for (let join in this.adqlJsonMap.joints ){
             if(this.adqlJsonMap.joints[join].parentNode === table){
-                keys.push(this.adqlJsonMap.joints[join].target)
+                keys.push(this.adqlJsonMap.joints[join].target);
             }
         }
 
         keys = Array.from(new Set(keys));
 
         return {"status":true,"keys": keys};
-    }
+    };
 
     return JsonAdqlBuilder;
 })();

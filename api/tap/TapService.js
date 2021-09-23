@@ -1,4 +1,5 @@
-"use strict";
+"use strict;";
+
 var TapService = /** @class */ (function () {
     function TapService(url, schema, label, checkstatus) {
         this.url = url;
@@ -25,7 +26,7 @@ var TapService = /** @class */ (function () {
         } else {
             correctFormat = "votable";
         }
-        console.log("Async AJAXurl: " + site + " query: " + adql)
+        console.log("Async AJAXurl: " + site + " query: " + adql);
 
         reTable = $.ajax({
                 url: "" + site,
@@ -33,17 +34,17 @@ var TapService = /** @class */ (function () {
                 data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
             });
         
-        let output = {}
+        let output = {};
         reTable.then((value)=>{
             output.status = 200;
-            output.statusText = "OK"
+            output.statusText = "OK";
             output.responseText = new XMLSerializer().serializeToString(value);
         });
 
         try {
             await reTable;
         } catch (error) {
-            output = error
+            output = error;
         }
         
         if (output.status === 200){
@@ -73,7 +74,7 @@ var TapService = /** @class */ (function () {
             if (checkstatus == true) {
                 checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \'' + schema_name + '\' ';
             }
-            reTable = await this.Query(checkvalue)
+            reTable = await this.Query(checkvalue);
             if(reTable.status){
                 return {"status":true,"votable":reTable.answer};
             }
@@ -102,7 +103,7 @@ var TapService = /** @class */ (function () {
                 checkvalue = 'SELECT TOP 100 tap_schema.keys.from_table as from_table, tap_schema.keys.target_table as target_table,tap_schema.keys.key_id , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
             }
 
-            reTable = await this.Query(checkvalue)
+            reTable = await this.Query(checkvalue);
 
             if(reTable.status){
                 return {"status":true,"votable":reTable.answer};
@@ -192,7 +193,7 @@ var TapService = /** @class */ (function () {
                 if (this.tableRemoveView.status){
                     this.tableRemoveView = this.tableRemoveView.allLinkRe;
                 } else {
-                    this.tableRemoveView = undefined
+                    this.tableRemoveView = undefined;
                     return {"status":false,"error":{
                         "logs":"Error while processing data : \n" + this.tableRemoveView.error.logs
                     }};
@@ -250,7 +251,7 @@ var TapService = /** @class */ (function () {
             var alllink = [[]];
             alllink = await this.allLink();
             if(alllink.status){
-                alllink = alllink.allLink
+                alllink = alllink.allLink;
             } else{
                 return {"status":false,"error":{
                     "logs":"Error while querrying links data : \n" + alllink.error.logs
@@ -258,7 +259,7 @@ var TapService = /** @class */ (function () {
             }
             allTtable = await this.allTable(); //Get the array containing the names of the tables.//Even number is the table name.
             if(allTtable.status){
-                allTtable = allTtable.allTables
+                allTtable = allTtable.allTables;
             } else{
                 return {"status":false,"error":{
                     "logs":"Error while querrying table's name data : \n" + allTtable.error.logs
@@ -277,21 +278,21 @@ var TapService = /** @class */ (function () {
                     var tt = alllink[i][0].split("|"); // target table name 
                     var ft = alllink[i][1].split("|");// from table name
                     if (tt[0] == nowTable) {
-                        loop: for (var key in arrLink) { // contaning all joinTable of root table
+                        loop: for (let key in arrLink) { // contaning all joinTable of root table
 
                             if (ft[0] == key) {
                                 ifSame = 1;
-                                arrLinkJoint["schema"] = this.schema;
-                                arrLinkJoint["columns"] = columns;
-                                arrLinkJoint["constraints"] = constraints;
-                                var temp1 = [];
+                                arrLinkJoint.schema = this.schema;
+                                arrLinkJoint.columns = columns;
+                                arrLinkJoint.constraints = constraints;
+                                let temp1 = [];
                                 if (Array.isArray(arrLink[ft[0]].from) && arrLink[ft[0]].from.indexOf(ft[1]) == -1) {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].from));
                                     temp1.push(ft[1]);
                                 } else {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].from));
                                 }
-                                arrLinkJoint["from"] = temp1;
+                                arrLinkJoint.from = temp1;
                                 temp1 = [];
                                 if (Array.isArray(arrLink[ft[0]].target) && arrLink[ft[0]].target.indexOf(tt[1]) == -1) {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].target));
@@ -299,7 +300,7 @@ var TapService = /** @class */ (function () {
                                 } else {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[ft[0]].target));
                                 }
-                                arrLinkJoint["target"] = temp1;
+                                arrLinkJoint.target = temp1;
                                 arrLink[ft[0]] = arrLinkJoint;
                                 break loop;
                             } else {
@@ -308,28 +309,28 @@ var TapService = /** @class */ (function () {
                         }
                         if (ifSame == 0) {
                             flag = flag + 1;
-                            arrLinkJoint["schema"] = this.schema;
-                            arrLinkJoint["columns"] = columns;
-                            arrLinkJoint["constraints"] = constraints;
-                            arrLinkJoint["from"] = ft[1];
-                            arrLinkJoint["target"] = tt[1];
+                            arrLinkJoint.schema = this.schema;
+                            arrLinkJoint.columns = columns;
+                            arrLinkJoint.constraints = constraints;
+                            arrLinkJoint.from = ft[1];
+                            arrLinkJoint.target = tt[1];
                             arrLink[ft[0]] = arrLinkJoint;
                         }
                     } else if (ft[0] == nowTable) {
-                        loop: for (var key in arrLink) {
+                        loop: for (let key in arrLink) {
                             if (tt[0] == key) {
                                 ifSame = 1;
-                                arrLinkJoint["schema"] = this.schema;
-                                arrLinkJoint["columns"] = columns;
-                                arrLinkJoint["constraints"] = constraints;
-                                var temp1 = [];
+                                arrLinkJoint.schema = this.schema;
+                                arrLinkJoint.columns = columns;
+                                arrLinkJoint.constraints = constraints;
+                                let temp1 = [];
                                 if (Array.isArray(arrLink[tt[0]].from) && arrLink[tt[0]].from.indexOf(tt[1]) == -1) {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].from));
                                     temp1.push(tt[1]);
                                 } else {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].from));
                                 }
-                                arrLinkJoint["from"] = temp1;
+                                arrLinkJoint.from = temp1;
                                 temp1 = [];
                                 if (Array.isArray(arrLink[tt[0]].target) && arrLink[tt[0]].target.indexOf(ft[1]) == -1) {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].target));
@@ -337,21 +338,21 @@ var TapService = /** @class */ (function () {
                                 } else {
                                     temp1 = JSON.parse(JSON.stringify(arrLink[tt[0]].target));
                                 }
-                                arrLinkJoint["target"] = temp1;
+                                arrLinkJoint.target = temp1;
                                 arrLink[tt[0]] = arrLinkJoint;
                                 break loop;
                             } else {
                                 ifSame = 0;
                             }
                         }
-                        ;
+
                         if (ifSame == 0) {
                             flag = flag + 1;
-                            arrLinkJoint["schema"] = this.schema;
-                            arrLinkJoint["columns"] = columns;
-                            arrLinkJoint["constraints"] = constraints;
-                            arrLinkJoint["from"] = tt[1];
-                            arrLinkJoint["target"] = ft[1];
+                            arrLinkJoint.schema = this.schema;
+                            arrLinkJoint.columns = columns;
+                            arrLinkJoint.constraints = constraints;
+                            arrLinkJoint.from = tt[1];
+                            arrLinkJoint.target = ft[1];
                             arrLink[tt[0]] = arrLinkJoint;
                         }
                     }
@@ -360,9 +361,9 @@ var TapService = /** @class */ (function () {
                 if (flag == 0) {
                     continue;
                 } else {
-                    arrJoint["schema"] = this.schema;
-                    arrJoint["description"] = allTtable[k + 1];
-                    arrJoint["join_tables"] = arrLink;
+                    arrJoint.schema = this.schema;
+                    arrJoint.description = allTtable[k + 1];
+                    arrJoint.join_tables = arrLink;
                     jsonAll[nowTable] = arrJoint;
 
                 }
@@ -392,26 +393,26 @@ var TapService = /** @class */ (function () {
                 list_exist.push(key);
                 var joinJson = {};
                 if (root == key) {
-                    joinJson["schema"] = data[key].schema;
-                    joinJson["description"] = data[key].description;
-                    joinJson["columns"] = [];
-                    joinJson["constraints"] = "";
+                    joinJson.schema = data[key].schema;
+                    joinJson.description = data[key].description;
+                    joinJson.columns = [];
+                    joinJson.constraints = "";
                     var joinJsonJoin = {};
                     for (var join in data[key].join_tables) {
                         var joinJsonJoin1 = {};
                         list_exist.push(join);
-                        joinJsonJoin1["schema"] = data[join].schema;
-                        joinJsonJoin1["description"] = data[join].description;
-                        joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
-                        joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
-                        joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                        joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                        joinJsonJoin1.schema = data[join].schema;
+                        joinJsonJoin1.description = data[join].description;
+                        joinJsonJoin1.columns = data[key].join_tables[join].columns;
+                        joinJsonJoin1.constraints = data[key].join_tables[join].constraints;
+                        joinJsonJoin1.from = data[key].join_tables[join].from;
+                        joinJsonJoin1.target = data[key].join_tables[join].target;
                         var a = this.ifJoin(data, list_exist, join);
                         if (JSON.stringify(a) != '{}') {
-                            joinJsonJoin1["join_tables"] = a;
+                            joinJsonJoin1.join_tables = a;
                         }
                         joinJsonJoin[join] = joinJsonJoin1;
-                        joinJson["join_tables"] = joinJsonJoin;
+                        joinJson.join_tables = joinJsonJoin;
                     }
                     reJson[key] = joinJson;
                     break;
@@ -444,15 +445,15 @@ var TapService = /** @class */ (function () {
                         if (list_exist.indexOf(join) == -1) {
                             list_exist.push(join);
                             var joinJsonJoin1 = {};
-                            joinJsonJoin1["schema"] = data[join].schema;
-                            joinJsonJoin1["description"] = data[join].description;
-                            joinJsonJoin1["columns"] = data[key].join_tables[join].columns;
-                            joinJsonJoin1["constraints"] = data[key].join_tables[join].constraints;
-                            joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                            joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                            joinJsonJoin1.schema = data[join].schema;
+                            joinJsonJoin1.description = data[join].description;
+                            joinJsonJoin1.columns = data[key].join_tables[join].columns;
+                            joinJsonJoin1.constraints = data[key].join_tables[join].constraints;
+                            joinJsonJoin1.from = data[key].join_tables[join].from;
+                            joinJsonJoin1.target = data[key].join_tables[join].target;
                             var a = this.ifJoin(data, list_exist, join);
                             if (JSON.stringify(a) != '{}') {
-                                joinJsonJoin1["join_tables"] = a;
+                                joinJsonJoin1.join_tables = a;
                             }
                             joinJsonJoin[join] = joinJsonJoin1;
                         }
@@ -508,18 +509,18 @@ var TapService = /** @class */ (function () {
                 });
             });
             if (l == 0) {
-                return {"status":true, "allLinkRe":allLinkRe}
+                return {"status":true, "allLinkRe":allLinkRe};
             } else {
                 allTable = VOTableTools.votable2Rows(reTable);
                 var viewTable = [];
                 var j = 0;
-                for (var i = 0; i < allTable.length; i++) {
+                for (let i = 0; i < allTable.length; i++) {
                     if (allTable[i] != undefined && allTable[i].length != 0) {
                         viewTable[j] = allTable[i];
                         j++;
                     }
                 }
-                for (var i = 0; i < viewTable.length; i++) {
+                for (let i = 0; i < viewTable.length; i++) {
                     var a = viewTable[i];
                     for (var j_1 = 0; j_1 < allLinkRe.length; j_1++) {
                         for (var h = 0; h < allLinkRe[j_1].length; h++) {
@@ -533,7 +534,7 @@ var TapService = /** @class */ (function () {
                         }
                     }
                 }
-                for (var i = 0; i < position.length - 1; i++) {
+                for (let i = 0; i < position.length - 1; i++) {
                     for (var j_2 = 0; j_2 < position.length - 1; j_2++) {
                         if (position[j_2] < position[j_2 + 1]) {
                             var temp = position[j_2];

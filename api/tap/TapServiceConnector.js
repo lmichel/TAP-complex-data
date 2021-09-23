@@ -1,7 +1,7 @@
-"use strict";
+"use strict;";
 var TapServiceConnector = (function() {
     function TapServiceConnector(_serviceUrl, _schema, _shortname){
-        this.tapService = new TapService(_serviceUrl, _schema, _shortname, true)
+        this.tapService = new TapService(_serviceUrl, _schema, _shortname, true);
         
         this.jsonLoad = undefined;
 
@@ -10,17 +10,17 @@ var TapServiceConnector = (function() {
 
         this.tabContaninBtnRemoveConstraint = [];
         this.testApiRooQuery = false;
-        this.table = []
+        this.table = [];
 
-        this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}}
-        this.connector = {status: "", message: "", service: {}, votable: ""}
+        this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}};
+        this.connector = {status: "", message: "", service: {}, votable: ""};
         this.api ="";
         this.attributsHandler = new HandlerAttributs();
         this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
         this.setAdqlConnectorQuery = function (correctTableNameFormat) {
             let query = "SELECT TOP 5 * FROM " + correctTableNameFormat;
-            return query
-        }
+            return query;
+        };
     }
 
     /**
@@ -30,15 +30,15 @@ var TapServiceConnector = (function() {
         if(this.jsonLoad === undefined){
             this.jsonLoad = await this.tapService.createJson();
             if(this.jsonLoad.status){
-                this.jsonLoad = this.jsonLoad.json
+                this.jsonLoad = this.jsonLoad.json;
             }else{
                 let val = this.jsonLoad;
                 this.jsonLoad = undefined;
-                return val
+                return val;
             }
         }
         return {"status":true,"json": this.jsonLoad};
-    }
+    };
 
     TapServiceConnector.prototype.getFields=function (votableQueryResult,url){
         try{
@@ -59,7 +59,7 @@ var TapServiceConnector = (function() {
             }};
         }
         
-    }
+    };
 
     /**
     *
@@ -87,7 +87,7 @@ var TapServiceConnector = (function() {
             }};
         }
        
-    }
+    };
 
     /**
      *
@@ -99,10 +99,11 @@ var TapServiceConnector = (function() {
         try {
             var listId = [];
             for (var i = 0; i < listJoinAndId.length; i = i + 2) {
+                var temp;
                 if (!json2Requete.isString(listJoinAndId[i])) {
-                    var temp = listJoinAndId[i][0];
+                    temp = listJoinAndId[i][0];
                 } else {
-                    var temp = listJoinAndId[i];
+                    temp = listJoinAndId[i];
                 }
                 if (listId.indexOf(temp) == -1) {
                     listId.push(temp);//record the key linked to root table, No repeating
@@ -117,7 +118,7 @@ var TapServiceConnector = (function() {
             }};
         }
         
-    }
+    };
 
     /**
      *
@@ -127,18 +128,18 @@ var TapServiceConnector = (function() {
      */
     TapServiceConnector.prototype.getListJoinAndId = function (rootName, mainJsonData) {
         var listJoinAndId = [];
-        listJoinAndId = this.joinAndId(rootName, mainJsonData)
+        listJoinAndId = this.joinAndId(rootName, mainJsonData);
         return listJoinAndId;
-    }
+    };
 
     TapServiceConnector.prototype.getDataTable=function (votableQueryResult){
         return  VOTableTools.votable2Rows(votableQueryResult);
-    }
+    };
     
     TapServiceConnector.prototype.getObjectMapAndConstraints = async function () {
         try {
             let api = this.api;
-            let rootTable = api.getConnector().connector.service["table"];
+            let rootTable = api.getConnector().connector.service.table;
             let jsonWithaoutDescription = await this.loadJson();
             if(jsonWithaoutDescription.status){
                 jsonWithaoutDescription = jsonWithaoutDescription.json;
@@ -148,9 +149,9 @@ var TapServiceConnector = (function() {
                 }};
             }
             this.objectMapWithAllDescription.root_table.name = rootTable;
-            this.schema = api.getConnector().connector.service["schema"];
+            this.schema = api.getConnector().connector.service.schema;
             this.objectMapWithAllDescription.root_table.schema = this.schema;
-            this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map['handler_attributs'];
+            this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map.handler_attributs;
             let formatJoinTable = "";
             let correctJoinFormaTable = "";
             
@@ -160,7 +161,7 @@ var TapServiceConnector = (function() {
                 map = this.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
             }
 
-            let allJoinRootTable = this.createAllJoinTable(map)
+            let allJoinRootTable = this.createAllJoinTable(map);
             let allTables = allJoinRootTable;
             for (let k = 0; k < allTables.length; k++) {
                 for (let tableKey in jsonWithaoutDescription) {
@@ -168,19 +169,19 @@ var TapServiceConnector = (function() {
 
                         formatJoinTable = this.schema + "." + tableKey;
                         correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
-                        let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:""
+                        let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:"";
 
                         this.objectMapWithAllDescription.tables[tableKey] = {
                             "description": jsonWithaoutDescription[tableKey].description,
                             "columns": attributHanler !== undefined ? attributHanler : [],
-                        }
+                        };
 
                     } 
                 }
 
             }
-            this.objectMapWithAllDescription.map = map
-            this.objectMapWithAllDescription["status"] = true;
+            this.objectMapWithAllDescription.map = map;
+            this.objectMapWithAllDescription.status = true;
             return this.objectMapWithAllDescription;
         } catch (error) {
             console.error(error);
@@ -189,7 +190,7 @@ var TapServiceConnector = (function() {
             }};
         }
 
-    }
+    };
 
     /**
      * In order to create the json with all join table
@@ -208,15 +209,15 @@ var TapServiceConnector = (function() {
                 for (var join in data[key].join_tables) {
                     var joinJsonJoin1 = {};
                     list_exist.push(join);
-                    joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                    joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                    joinJsonJoin1.from = data[key].join_tables[join].from;
+                    joinJsonJoin1.target = data[key].join_tables[join].target;
                     var a = this.verifiedJoin(data, list_exist, join);
                     if (JSON.stringify(a) != '{}') {
-                        joinJsonJoin1["join_tables"] = a;
+                        joinJsonJoin1.join_tables = a;
                         // console.log(a);
                     }
                     joinJsonJoin[join] = joinJsonJoin1;
-                    joinJson["join_tables"] = joinJsonJoin;
+                    joinJson.join_tables = joinJsonJoin;
                 }
                 reJson[key] = joinJson;
                 break;
@@ -238,11 +239,11 @@ var TapServiceConnector = (function() {
                     if (list_exist.indexOf(join) == -1) {
                         list_exist.push(join);
                         var joinJsonJoin1 = {};
-                        joinJsonJoin1["from"] = data[key].join_tables[join].from;
-                        joinJsonJoin1["target"] = data[key].join_tables[join].target;
+                        joinJsonJoin1.from = data[key].join_tables[join].from;
+                        joinJsonJoin1.target = data[key].join_tables[join].target;
                         var a = this.verifiedJoin(data, list_exist, join);
                         if (JSON.stringify(a) != '{}') {
-                            joinJsonJoin1["join_tables"] = a;
+                            joinJsonJoin1.join_tables = a;
                         }
                         joinJsonJoin[join] = joinJsonJoin1;
                     }
@@ -255,21 +256,21 @@ var TapServiceConnector = (function() {
 
     TapServiceConnector.prototype.Query = async function(adql){
         return await this.tapService.Query(adql);
-    }
+    };
 
     TapServiceConnector.prototype.createAllJoinTable = function (map){
-        let table = []
+        let table = [];
         Object.keys(map).forEach(function (k) {
             let json = map[k];
             Object.keys(json.join_tables).forEach(function (k2) {
                 table.push(k2);
-                let json2 = json.join_tables[k2]
+                let json2 = json.join_tables[k2];
                 if (json2.join_tables !== undefined) {
                     for (let f in json2.join_tables) {
                         table.push(f);
                         for (let c in json2.join_tables[f]) {
-                            let json3 = json2.join_tables[f].join_tables
-                            if (json3 !== undefined) {;
+                            let json3 = json2.join_tables[f].join_tables;
+                            if (json3 !== undefined) {
                                 for (let c1 in json3) {
                                     table.push(c1);
                                 }
@@ -278,11 +279,11 @@ var TapServiceConnector = (function() {
                     }
                 }
 
-            })
+            });
             table= Array.from(new Set(table));
-        })
+        });
         return table;
-    }
+    };
 
     return TapServiceConnector;
 }());
