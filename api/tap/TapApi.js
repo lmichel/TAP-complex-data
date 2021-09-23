@@ -9,7 +9,7 @@ var TapApi = (function(){
         this.jsonAdqlBuilder = undefined;
     }
 
-    /**
+    /** Internal function do not use.
      * @param params (Json) with parameters (tapService,schema,table,shortName)
      * @param schema (String) Schema containing the complex object
      * @param table (String) Root table of the complex object
@@ -236,7 +236,7 @@ var TapApi = (function(){
     };
 
     /**
-     * Create and return the correct adql query to get the value of all the fields of the selected table any constraint put on sub tables are added to the query
+     * run the correct adql query to get the value of all the fields of the selected table any constraint put on sub tables are added to the query
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
@@ -269,6 +269,11 @@ var TapApi = (function(){
         return {"status":false,"error" :{ "logs": "No active TAP connection"}};
     };
     
+    /**
+     * Create and return the correct adql query to get the value of all the fields of the selected table any constraint put on sub tables are added to the query
+     * @param {String} table Optional unqualified name of the node table or the root table if unspecified
+     *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
+     */
     TapApi.prototype.getTableFields = async function(table,joinKeyVal){
         if (this.getConnector().status) {
             if(table === undefined){
@@ -341,17 +346,19 @@ var TapApi = (function(){
     };
 
     TapApi.prototype.getAllSelectedFields = function (rootTable){
-        
         return this.jsonAdqlBuilder.getJoinKeys(rootTable).keys;
 
     };
 
-    TapApi.prototype.getAllTableField = async function (rootTable){
+    /**
+     * this methods return a set of all columns of the table `table` if you want more information than the column name use getTableAttributeHandlers instead
+     * @param {String} table  the name of table you want get all columns in it
+     * @returns 
+     */
+    TapApi.prototype.getAllTableField = async function (table){
 
         let columns = [];
-
-
-        let jsonField = (await this.getTableAttributeHandlers(rootTable)).attribute_handlers;
+        let jsonField = (await this.getTableAttributeHandlers(table)).attribute_handlers;
         
         for (let i =0;i<jsonField.length;i++){
             columns.push(jsonField[i].column_name);
@@ -361,17 +368,23 @@ var TapApi = (function(){
 
     };
 
-    TapApi.prototype.formatColNames = function(rootTable,columns){
+    /**this is an internal helping function useless outside of the TAP Complex API
+     * this function takes a list of columns name and format them as a string taking care of request length limitation, last columns are the ones trucated if necessery
+     * @param {*} table the base table 
+     * @param {*} columns columns of the table `table`
+     * @returns 
+     */
+    TapApi.prototype.formatColNames = function(table,columns){
         let allField ="";
         let schema;
         schema = this.tapServiceConnector.connector.service.schema;
         
         for(let i=0;i<columns.length; i++){
-            allField +=(schema+'.'+rootTable+'.'+columns[i]).quotedTableName().qualifiedName+" , ";
+            allField +=(schema+'.'+table+'.'+columns[i]).quotedTableName().qualifiedName+" , ";
 
             if(schema==="dbo"){
                 // just for CaomMembers tables because request lenth is limited
-                if(rootTable=="CaomMembers"){
+                if(table=="CaomMembers"){
                     if(i>3){
                         break;
                     }
