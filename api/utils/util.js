@@ -57,7 +57,7 @@ if (!String.prototype.quotedTableName) {
            return {qualifiedName: thisValue, tableName: thisValue};
        }
        var results = thisValue.split(".");
-       var tbl = new Array();
+       var tbl = [];
        /*
         * One element: take it as as whole
         */
@@ -100,12 +100,12 @@ if (!String.prototype.quotedTableName) {
                 * The last one is certainly a field name
                 */
                if( last.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/) || last === "*" ) {
-                   for (var i = 2; i < (results.length -1); i++) {
+                   for (let i = 2; i < (results.length -1); i++) {
                        tbl[tbl.length - 1] += "." +results[i];
                    }	
                    tbl.push(last);
                 } else {
-                    for (var i = 2; i < results.length; i++) {
+                    for (let i = 2; i < results.length; i++) {
                         tbl[tbl.length - 1] += "." +results[i];
                     }
                 }
@@ -141,11 +141,10 @@ if (!String.prototype.quotedTableName) {
 if (!String.prototype.getTreepath) {
    String.prototype.getTreepath = function () {
        var retour = {
-               schema: ''
-                   , tableorg: this.valueOf()
-                   , table: ''};
+               schema: '',
+                tableorg: this.valueOf(),
+                table: ''};
        var results = this.split(".");
-       var tbl = new Array();
        /*
         * One element: assumed to a table
         */
@@ -189,11 +188,11 @@ if (!String.prototype.getTreepath) {
                 * The last one is certainly a field name
                 */
                if( last.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/) ) {
-                   for (var i = 2; i < (results.length -1); i++) {
+                   for (let i = 2; i < (results.length -1); i++) {
                        retour.table += "." +results[i];
                    }	
                } else {
-                   for (var i = 2; i < results.length; i++) {
+                   for (let i = 2; i < results.length; i++) {
                        retour.table += "." +results[i];
                    }
                }
@@ -213,7 +212,7 @@ if(!Array.prototype.remove){
             this.splice(index, 1);
         }
         return this;
-    }
+    };
 }
 
 /**
