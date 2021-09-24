@@ -62,7 +62,7 @@ if (!String.prototype.quotedTableName) {
         * One element: take it as as whole
         */
        if( results.length == 1 ) {
-           tbl.push(thisValue);
+           tbl.push(results[0]);
        } 
        /*
         * a.b could be either schema.table or just a table name including a dot.
@@ -112,7 +112,7 @@ if (!String.prototype.quotedTableName) {
            } else {
                tbl.push(thisValue);
            }
-       }  
+       }
        for (var j = 0; j < tbl.length; j++) {
            if ((!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || reserved.includes(tbl[j]) ) && tbl[j] !== "*") {
                tbl[j] = '"' + tbl[j] + '"';

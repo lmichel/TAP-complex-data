@@ -118,6 +118,7 @@ var TapServiceConnector = (function() {
             }
             this.objectMapWithAllDescription.map = map;
             this.objectMapWithAllDescription.status = true;
+            this.postProcessObjectMap();
             return this.objectMapWithAllDescription;
         } catch (error) {
             console.error(error);
@@ -126,6 +127,32 @@ var TapServiceConnector = (function() {
             }};
         }
 
+    };
+
+    /**Apply custom post processing on the object map in order to fix various issues like wrong columns name declared in joints
+     * 
+     */
+    TapServiceConnector.prototype.postProcessObjectMap = function(){
+        if (this.connector.service.shortName == "CAOM"){
+            let renameCOAM = function(obj){
+                for (let key in obj){
+                    if(obj[key].target == "obsID"){
+                        obj[key].target = "observationID";
+                    }
+                    if(obj[key].target == "obsTID"){
+                        obj[key].target = "observationTID";
+                    }
+                    if(obj[key].join_tables!== undefined){
+                        renameCOAM(obj[key].join_tables);
+                    }
+                }
+                
+            };
+            
+            for (let key in this.objectMapWithAllDescription.map){
+                renameCOAM(this.objectMapWithAllDescription.map[key].join_tables);
+            }
+        }
     };
 
     /**

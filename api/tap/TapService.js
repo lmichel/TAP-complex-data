@@ -39,6 +39,7 @@ var TapService = /** @class */ (function () {
             output.status = 200;
             output.statusText = "OK";
             output.responseText = new XMLSerializer().serializeToString(value);
+            output.responseXML = value;
         });
 
         try {
@@ -46,7 +47,19 @@ var TapService = /** @class */ (function () {
         } catch (error) {
             output = error;
         }
+        // just because CAOM always repond with code 200 even if something went wrong
+        if(this.url == "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"){
+            let status = $("INFO[name=\"QUERY_STATUS\"]",output.responseXML)[0];
+            if(status !== undefined){
+                if(status.attributes.value.value == "ERROR"){
+                    output.status = 400;
+                    output.statusText = "Bad Request";
+                }
+            }
+            
+        }
         
+
         if (output.status === 200){
             return {"status":true,"answer":output};
         } else {

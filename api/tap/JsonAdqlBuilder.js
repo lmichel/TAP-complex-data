@@ -5,7 +5,7 @@ var JsonAdqlBuilder = (function(){
     function JsonAdqlBuilder(objectMap){
         this.adqlJsonMap = {
             "rootTable" :objectMap.root_table.name,
-            "scheme" : '"' + objectMap.root_table.schema + '"', 
+            "scheme" : objectMap.root_table.schema.quotedTableName().qualifiedName, 
             "joints" : {}, 
             "nodeTreeBranches":{}, 
             "conditions":{}, 
