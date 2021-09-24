@@ -19,15 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/html/browser1.html" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/html/browser1.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/HandlerAttribut.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/HandlerAttribut.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapApi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/TapService.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/TapService.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/browser1.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/browser1.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/javascript/client/js/testApi.js" beforeDir="false" afterPath="$PROJECT_DIR$/javascript/client/js/testApi.js" afterDir="false" />
-    </list>
+    <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -57,8 +49,9 @@
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/javascript/client/js" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="list.type.of.created.stylesheet" value="CSS" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />

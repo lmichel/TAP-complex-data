@@ -1,12 +1,25 @@
-"use strict";
+"use strict;";
 
 /*/ Utility function used by all demo pages /*/
 
 function display(data, id) {
+    let highlight = false;
+
+    // auto converting object
     if (typeof data != "string"){
+        highlight = true;
         data = JSON.stringify(data,undefined,4);
     }
+    // html escaping usefull sometimes.
+    data = data.replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
     $("#" + id).html(data);
+    try {
+        if (highlight)
+            hljs.highlightElement(document.getElementById(id));
+    }catch(error){}
 }
 
 function addClass(elemId,className){
@@ -78,21 +91,21 @@ function bindClickEvent(elemId,handler,disableText){
             }
 
         }catch(error){
-            console.error(error)
-            errorButton(elemId)
+            console.error(error);
+            errorButton(elemId);
             display("An unexpected Error has append see logs for more information", "getStatus");
         }
-    })
+    });
 }
 
 async function syncIt(promise){
     $("#overlay").fadeIn(1);
     try {
-        await promise()
+        await promise();
     } catch (error) {
         console.error(error);
     }
-    $("#overlay").fadeOut(1000)
+    $("#overlay").fadeOut(1000);
 }
 
 
@@ -111,9 +124,9 @@ function bindClickAsyncEvent(elemId,handler,disableText){
             }
 
         }catch(error){
-            console.error(error)
-            errorButton(elemId)
+            console.error(error);
+            errorButton(elemId);
             display("An unexpected Error has append see logs for more information", "getStatus");
         }
-    })});
+    });});
 }

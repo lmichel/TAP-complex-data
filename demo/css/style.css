@@ -36,7 +36,11 @@ ul, #myUL {
   .active {
     display: block;
   }
-  
+
+.inherit {
+  background-color: inherit;
+}
+
 .blue-color {
 color:blue;
 }
@@ -132,7 +136,7 @@ bottom: .5em;
   left:       0;
   height:     100%;
   width:      100%;
-  background: #000000;
+  background: #000000
   url('http://i.stack.imgur.com/FhHRx.gif')
   50% 50%
   no-repeat;
