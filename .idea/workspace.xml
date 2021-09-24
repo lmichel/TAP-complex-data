@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+        <option value="HTML File" />
+        <option value="CSS File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1jauf18E7qYBJhbgOz0HMZLCXlL" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/javascript/client/html/css" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/javascript/client/js" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fd529bfc-385b-4409-b99a-5ac36e2a5147" name="Default Changelist" comment="" />
+      <created>1604054622371</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1604054622371</updated>
+      <workItem from="1604054623471" duration="3347000" />
+      <workItem from="1604306705777" duration="69858000" />
+      <workItem from="1604564276241" duration="25030000" />
+      <workItem from="1604648486025" duration="29813000" />
+      <workItem from="1604908309452" duration="80519000" />
+      <workItem from="1605167840088" duration="45814000" />
+      <workItem from="1605251820174" duration="31591000" />
+      <workItem from="1605332054150" duration="15523000" />
+      <workItem from="1605391474926" duration="67654000" />
+      <workItem from="1605598597892" duration="129203000" />
+      <workItem from="1605944681219" duration="10000" />
+      <workItem from="1605945006131" duration="787000" />
+      <workItem from="1605946338219" duration="600000" />
+      <workItem from="1606116885464" duration="94645000" />
+      <workItem from="1606375810834" duration="43202000" />
+      <workItem from="1606721869636" duration="1212000" />
+      <workItem from="1606723248848" duration="121224000" />
+      <workItem from="1607068214651" duration="10996000" />
+      <workItem from="1607113958520" duration="27963000" />
+      <workItem from="1607326812676" duration="21221000" />
+      <workItem from="1607936538991" duration="4309000" />
+      <workItem from="1608039491579" duration="599000" />
+      <workItem from="1608040331785" duration="2014000" />
+      <workItem from="1608192287185" duration="28286000" />
+      <workItem from="1609746001100" duration="4158000" />
+      <workItem from="1609752768742" duration="3716000" />
+      <workItem from="1609839511344" duration="599000" />
+      <workItem from="1610007012824" duration="599000" />
+      <workItem from="1610034536402" duration="601000" />
+      <workItem from="1610372125485" duration="1887000" />
+      <workItem from="1610395650642" duration="600000" />
+      <workItem from="1611650220446" duration="34411000" />
+      <workItem from="1611825722070" duration="61278000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+</project>
