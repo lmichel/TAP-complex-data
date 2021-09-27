@@ -1,7 +1,7 @@
 class HandlerAttributs {
     constructor() {
         this.api = "";
-        this.ucd = ''
+        this.ucd = '';
         this.name = '';
         this.db_name = '';
         this.type = '';
@@ -28,13 +28,13 @@ function modifyKeys(obj) {
     });
 }
 
-var testJsonRead = false
+var testJsonRead = false;
 var sj = '';
 HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
     let doubleArrayValue = [];
     let singleArrayValue = [];
     //console.log(this.api)
-    this.db_name = this.api.getConnector().connector.service["table"]
+    this.db_name = this.api.getConnector().connector.service.table;
     let api = this.api;
     let jsonContaintHandlerValues = {
         succes: {
@@ -100,7 +100,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
             for (let c = 0; c < doubleArrayValue.length; c++) {
                 jsonContaintHandlerValues.succes.attribute_handlers.column_name = doubleArrayValue[c][0];
                 jsonContaintHandlerValues.succes.attribute_handlers.unit = doubleArrayValue[c][1];
-                jsonContaintHandlerValues.succes.attribute_handlers.ucd = doubleArrayValue[c][2];
+                jsonContaintHandlerValues.succes.attribute_handlers.ucd =  doubleArrayValue[c][2];
                 jsonContaintHandlerValues.succes.attribute_handlers.utype = doubleArrayValue[c][3];
                 jsonContaintHandlerValues.succes.attribute_handlers.dataType = doubleArrayValue[c][4];
                 jsonContaintHandlerValues.succes.attribute_handlers.description = doubleArrayValue[c][5];
