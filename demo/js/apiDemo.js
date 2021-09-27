@@ -290,47 +290,6 @@ async function createTableFieldsButton(api){
     }
 }
 
-/*/ Data storage /*/
-
-let connectorParams = {
-    "Simbad" : {
-        "tapService" : "http://simbad.u-strasbg.fr/simbad/sim-tap/sync",
-        "schema" : "public",
-        "table" : "basic",
-        "shortName" : "Simbad"
-    },
-    
-    "Gavo" : {
-        "tapService" : "http://dc.zah.uni-heidelberg.de/tap/sync",
-        "schema" : "rr",
-        "table" : "resource",
-        "shortName" : "Gavo"
-    },
-
-    "CAOM" : {
-        "tapService" : "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync",
-        "schema" : "dbo",
-        "table" : "CaomObservation",
-        "shortName" : "CAOM"
-    },
-    
-    "3XMM" : {
-        "tapService" : "https://xcatdb.unistra.fr/4xmmdr10/tap/sync",
-        "schema" : "EPIC",
-        "table" : "EPIC_IMAGE",
-        "shortName" : "3XMM"
-    },
-    
-    "Vizier" : {
-        "tapService" : "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
-        "schema" : "metaviz",
-        "table" : "METAcat",
-        "shortName" : "Vizier"
-    }, 
-            
-    
-};
-
 let api = new TapApi();
 
 /*/ Steup of Event handlers functions /*/
@@ -340,8 +299,9 @@ function setupEventHandlers(){
     bindClickAsyncEvent("btnApiConnect",async () => {
         
         if (isEnable("btnApiConnect")) {
-
-            let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
+            let KT = new KnowledgeTank();
+            let params = KT.getDescriptors().descriptors[$("input:radio[name=sex]:checked")[0].value];
+            params.shortName = $("input:radio[name=sex]:checked")[0].value;
             
             let connect = api.connect(params);
             let status = false;
@@ -460,9 +420,7 @@ function setupEventHandlers(){
 
     bindClickEvent("btnGetJoinTable",() => {
 
-        let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
-
-        let joinTables = api.getJoinedTables(params.table);
+        let joinTables = api.getJoinedTables(api.getConnector().connector.service.table);
         let status = joinTables.status;
 
         display(status, "getStatus");
