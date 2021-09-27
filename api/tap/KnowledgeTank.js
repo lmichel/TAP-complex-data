@@ -2,7 +2,7 @@
 
 var KnowledgeTank = (function(){
     function KnowledgeTank(){
-        this.UcdStorage = {
+        this.ucdStorage = {
             "name":["meta.id","meta.main"],
             "position" : ["pos;meta.main","pos"],
             "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon"],
@@ -10,7 +10,9 @@ var KnowledgeTank = (function(){
             "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"]
         };
 
-        this.ServiceDescriptors = { 
+        this.utypeKeyword = ["description","name","coordinates"];
+
+        this.serviceDescriptors = { 
             "Simbad" : {
                 "tapService" : "http://simbad.u-strasbg.fr/simbad/sim-tap/sync",
                 "schema" : "public",
@@ -60,19 +62,19 @@ var KnowledgeTank = (function(){
     };
 
     KnowledgeTank.prototype.getDescriptors = function(){
-        return {"status":true,"descriptors": this.ServiceDescriptors};
+        return {"status":true,"descriptors": this.serviceDescriptors};
     };
 
     KnowledgeTank.prototype.selectAH = function(AHList){
         let selected = {};
         let j,i;
 
-        for (let fType in this.UcdStorage){
+        for (let fType in this.ucdStorage){
             i=0;
             if(selected.position === undefined || (fType != "longitude" && fType != "latitude" )){
-                while(i<this.UcdStorage[fType].length && selected[fType] === undefined){
+                while(i<this.ucdStorage[fType].length && selected[fType] === undefined){
                     for (j=0;j<AHList.length;j++){
-                        if(AHList[j].ucd == this.UcdStorage[fType][i]){
+                        if(AHList[j].ucd == this.ucdStorage[fType][i]){
                             selected[fType] = AHList[j];
                         }
                     }
@@ -87,6 +89,19 @@ var KnowledgeTank = (function(){
             selectedAH.push(selected[key]);
         }
         return {"status" : true,"selected":selectedAH};
+    };
+
+    KnowledgeTank.prototype.selectAHByUtypes = function(AHList){
+        let selected = [],i,j;
+        for (i=0;i<AHList.length;i++){
+            for(j=0;j<this.utypeKeyword.length;j++){
+                if(AHList[i].utype.includes(this.utypeKeyword[j])){
+                    selected.push(AHList[i]);
+                }
+            }
+        }
+        console.log(selected.length);
+        return {"status" : true,"selected":Array.from(new Set(selected))};
     };
     
     return KnowledgeTank;

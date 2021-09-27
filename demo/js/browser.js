@@ -163,6 +163,7 @@ function setupEventHandlers(){
         if (isEnable("btnApiConnect")) {
             let KT = new KnowledgeTank();
             let params = KT.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
+            params.shortName = $("input:radio[name=radio]:checked")[0].value;
             
             let connect = api.connect(params);
             let status = false;

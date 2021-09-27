@@ -352,6 +352,9 @@ var TapApi = (function(){
         if(handler.status){
             let KT = new KnowledgeTank();
             let AH = KT.selectAH(handler.attribute_handlers).selected;
+            if(AH.length<1){ //there is no ucd set or no good field has been found 
+                AH = KT.selectAHByUtypes(handler.attribute_handlers).selected;   
+            }
             for(let i=0;i<AH.length;i++){
                 fields.push(AH[i].column_name); 
             }
