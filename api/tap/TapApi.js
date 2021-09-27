@@ -346,6 +346,15 @@ var TapApi = (function(){
     };
 
     TapApi.prototype.getAllSelectedFields = async function (table){
+        let obj = await this.getObjectMap();
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined){
+                if(obj.tables[table].columns.length>0){
+                    return obj.tables[table].columns;
+                }
+            }
+        }
         let fields = [];
         fields = fields.concat(this.jsonAdqlBuilder.getJoinKeys(table).keys);
         let handler = await this.getTableAttributeHandlers(table);
@@ -359,7 +368,14 @@ var TapApi = (function(){
                 fields.push(AH[i].column_name); 
             }
         }
-        return Array.from(new Set(fields));
+        fields = Array.from(new Set(fields));
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined){
+                obj.tables[table].columns= fields;
+            }
+        }
+        return fields;
     };
 
     TapApi.prototype.getJoinKeys = function(table){

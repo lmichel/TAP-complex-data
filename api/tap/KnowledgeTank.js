@@ -95,7 +95,7 @@ var KnowledgeTank = (function(){
         let selected = [],i,j;
         for (i=0;i<AHList.length;i++){
             for(j=0;j<this.utypeKeyword.length;j++){
-                if(AHList[i].utype.includes(this.utypeKeyword[j])){
+                if(AHList[i].utype.toLowerCase().includes(this.utypeKeyword[j])){
                     selected.push(AHList[i]);
                 }
             }
