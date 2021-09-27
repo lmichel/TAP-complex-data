@@ -154,8 +154,8 @@ var TapApi = (function(){
         return this.getTableSelectedField();
     };
 
-    TapApi.prototype.getRootQuery = function () {
-        return this.getTableQuery();
+    TapApi.prototype.getRootQuery = async function () {
+        return await this.getTableQuery();
     };
 
 
@@ -164,7 +164,7 @@ var TapApi = (function(){
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    TapApi.prototype.getTableQuery = function(table,joinKeyVal){
+    TapApi.prototype.getTableQuery = async function(table,joinKeyVal){
         if(this.getConnector().status){
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -172,7 +172,7 @@ var TapApi = (function(){
             if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
-            let allField = this.formatColNames(table,this.getAllSelectedFields(table));
+            let allField = this.formatColNames(table,await this.getAllSelectedFields(table));
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -199,7 +199,7 @@ var TapApi = (function(){
      */
     TapApi.prototype.getTableSelectedField = async function(table,joinKeyVal){
         if (this.getConnector().status) {
-            let query = this.getTableQuery(table,joinKeyVal);
+            let query = await this.getTableQuery(table,joinKeyVal);
             if(!query.status){
                 return query;
             }
@@ -208,7 +208,7 @@ var TapApi = (function(){
 
             let dataTable = [];
 
-            let Field = this.getAllSelectedFields(table);
+            let Field = await this.getAllSelectedFields(table);
 
             if (votable.status) {
                 votable = votable.answer;
@@ -345,9 +345,22 @@ var TapApi = (function(){
         return await this.tapServiceConnector.getObjectMapAndConstraints();
     };
 
-    TapApi.prototype.getAllSelectedFields = function (rootTable){
-        return this.jsonAdqlBuilder.getJoinKeys(rootTable).keys;
+    TapApi.prototype.getAllSelectedFields = async function (table){
+        let fields = [];
+        fields = fields.concat(this.jsonAdqlBuilder.getJoinKeys(table).keys);
+        let handler = await this.getTableAttributeHandlers(table);
+        if(handler.status){
+            let KT = new KnowledgeTank();
+            let AH = KT.selectAH(handler.attribute_handlers).selected;
+            for(let i=0;i<AH.length;i++){
+                fields.push(AH[i].column_name); 
+            }
+        }
+        return Array.from(new Set(fields));
+    };
 
+    TapApi.prototype.getJoinKeys = function(table){
+        return this.jsonAdqlBuilder.getJoinKeys(table).keys;
     };
 
     /**

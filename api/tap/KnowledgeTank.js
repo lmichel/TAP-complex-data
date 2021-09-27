@@ -3,9 +3,11 @@
 var KnowledgeTank = (function(){
     function KnowledgeTank(){
         this.UcdStorage = {
-            "name":["meta.id","meta.main", "meta.id"],
+            "name":["meta.id","meta.main"],
+            "position" : ["pos;meta.main","pos"],
             "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon"],
-            "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat"]
+            "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat"],
+            "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"]
         };
 
         this.ServiceDescriptors = { 
@@ -64,22 +66,27 @@ var KnowledgeTank = (function(){
     KnowledgeTank.prototype.selectAH = function(AHList){
         let selected = {};
         let j,i;
+
         for (let fType in this.UcdStorage){
             i=0;
-            while(i<this.UcdStorage[fType].length && selected[fType] === undefined){
-                for (j=0;j<AHList.length;j++){
-                    if(AHList[j].ucd.includes(this.UcdStorage[fType][i])){
-                        selected[fType] = AHList[j];
+            if(selected.position === undefined || (fType != "longitude" && fType != "latitude" )){
+                while(i<this.UcdStorage[fType].length && selected[fType] === undefined){
+                    for (j=0;j<AHList.length;j++){
+                        if(AHList[j].ucd == this.UcdStorage[fType][i]){
+                            selected[fType] = AHList[j];
+                        }
                     }
+                    i++;
                 }
-                i++;
             }
+            
         }
+
         let selectedAH = [];
         for (let key in selected){
             selectedAH.push(selected[key]);
         }
-        return {"status" : true,"selected":selected};
+        return {"status" : true,"selected":selectedAH};
     };
     
     return KnowledgeTank;
