@@ -100,7 +100,6 @@ var KnowledgeTank = (function(){
                 }
             }
         }
-        console.log(selected.length);
         return {"status" : true,"selected":Array.from(new Set(selected))};
     };
     

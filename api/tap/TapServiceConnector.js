@@ -135,6 +135,12 @@ var TapServiceConnector = (function() {
     TapServiceConnector.prototype.postProcessObjectMap = function(){
         if (this.connector.service.shortName == "CAOM"){
             let renameCOAM = function(obj){
+                if(obj.ObsPointing !== undefined){
+                    obj.ObsPointing.from = "obs_id";
+                }
+                if(obj.CaomPlane !== undefined){
+                    obj.CaomPlane.from = "planeTID";
+                }
                 for (let key in obj){
                     if(obj[key].target == "obsID"){
                         obj[key].target = "observationID";
