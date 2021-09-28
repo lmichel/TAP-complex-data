@@ -9,7 +9,9 @@ var KnowledgeTank = (function(){
             "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat"],
             "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"],
             "bibliography[*]" : ["meta.bib.author","meta.record","meta.bib.bibcode","meta.bib.journal","meta.title","meta.bib"],
-            "object_class" : ["src.class[*]"]
+            "object_class" : ["src.class[*]"],
+            "unit":["meta.unit;meta.main","meta.unit"],
+            "description": ["meta.note;instr.filter"]
         };
 
         this.utypeKeyword = ["description","name","coordinates"];
