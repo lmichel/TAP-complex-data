@@ -93,8 +93,8 @@ var KnowledgeTank = (function(){
             counter = 0;
             ucds =  this.ucdStorage[fType];
             maxField = 1;
-            
-            // [*] and [[0-9]+] operator handling
+
+            // [*] and [[0-9]+] operator handling for the number of ucds per field
             if(fType.endsWith("[*]")){
                 fType = fType.substring(0,fType.length-3);
                 maxField = Number.MAX_VALUE;
@@ -108,7 +108,7 @@ var KnowledgeTank = (function(){
                     ucd =ucds[i];
                     curr = 0;
                     maxSelect = 1;
-                    // [*] and [[0-9]+] operator handling
+                    // [*] and [[0-9]+] operator handling for the number of AH per ucd
                     if(ucd.endsWith("[*]")){
                         ucd = ucd.substring(0,ucd.length-3);
                         maxSelect = Number.MAX_VALUE;
