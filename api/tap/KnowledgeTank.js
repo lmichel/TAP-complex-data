@@ -8,7 +8,7 @@ var KnowledgeTank = (function(){
             "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon"],
             "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat"],
             "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"],
-            "bibliography" : ["meta.bib.author","meta.bib"],
+            "bibliography[*]" : ["meta.bib.author","meta.record","meta.bib.bibcode","meta.bib.journal","meta.title","meta.bib"],
             "object_class" : ["src.class[*]"]
         };
 
@@ -69,13 +69,24 @@ var KnowledgeTank = (function(){
 
     KnowledgeTank.prototype.selectAH = function(AHList){
         let selected = {};
-        let j,i,maxSelect,curr,ucd;
+        let j,i,maxSelect,curr = 0,ucd,maxField,counter,ucds;
 
         for (let fType in this.ucdStorage){
             i=0;
+            counter = 0;
+            ucds =  this.ucdStorage[fType];
+            maxField = 1;
+            if(fType.endsWith("[*]")){
+                fType = fType.substring(0,fType.length-3);
+                maxField = Number.MAX_VALUE;
+            }else if(fType.match(/\[[0-9]+\]$/)){
+                maxField = +fType.substring(fType.lastIndexOf("[")+1,fType.length-1);
+                fType = fType.substring(0,fType.lastIndexOf("["));
+            }
+
             if(selected.position === undefined || (fType != "longitude" && fType != "latitude" )){
-                while(i<this.ucdStorage[fType].length && selected[fType] === undefined){
-                    ucd = this.ucdStorage[fType][i];
+                while(i<ucds.length && maxField>0){
+                    ucd =ucds[i];
                     curr = 0;
                     maxSelect = 1;
                     if(ucd.endsWith("[*]")){
@@ -87,9 +98,13 @@ var KnowledgeTank = (function(){
                     }
                     for (j=0;j<AHList.length;j++){
                         if(AHList[j].ucd == ucd && curr<maxSelect){
-                            selected[fType+(curr == 0?"": ""+curr)] = AHList[j];
+                            selected[fType+(""+counter)] = AHList[j];
                             curr++;
+                            counter++;
                         }
+                    }
+                    if(curr>0){
+                        maxField--;
                     }
                     i++;
                 }
