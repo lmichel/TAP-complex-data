@@ -224,7 +224,7 @@ async function createTableIDsButton(api){
             "See Table Query for " + key + "</button>" +
             "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryID" + key + "' value='" + key + 
             "' style=\"margin-top: 7px;width: 100%;\">Run Table Query for " + key + "</button> " +
-            " <input type='text' class='form form-control' id='txtJointValID" + key + "' value='' placeholder='value for joint key'> <hr>"
+            " <input type='text' class='form form-control' id='txtJointValID" + key + "' value='' placeholder='value for joint key'> <hr>";
         
         tapButton.push(buttons);
         

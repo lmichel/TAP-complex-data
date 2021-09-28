@@ -3,11 +3,13 @@
 var KnowledgeTank = (function(){
     function KnowledgeTank(){
         this.ucdStorage = {
-            "name":["meta.id","meta.main"],
+            "name":["meta.id;meta.main","meta.main"],
             "position" : ["pos;meta.main","pos"],
             "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon"],
             "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat"],
-            "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"]
+            "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"],
+            "bibliography" : ["meta.bib.author","meta.bib"],
+            "object_class" : ["src.class[*]"]
         };
 
         this.utypeKeyword = ["description","name","coordinates"];
@@ -67,21 +69,31 @@ var KnowledgeTank = (function(){
 
     KnowledgeTank.prototype.selectAH = function(AHList){
         let selected = {};
-        let j,i;
+        let j,i,maxSelect,curr,ucd;
 
         for (let fType in this.ucdStorage){
             i=0;
             if(selected.position === undefined || (fType != "longitude" && fType != "latitude" )){
                 while(i<this.ucdStorage[fType].length && selected[fType] === undefined){
+                    ucd = this.ucdStorage[fType][i];
+                    curr = 0;
+                    maxSelect = 1;
+                    if(ucd.endsWith("[*]")){
+                        ucd = ucd.substring(0,ucd.length-3);
+                        maxSelect = Number.MAX_VALUE;
+                    }else if(ucd.match(/\[[0-9]+\]$/)){
+                        maxSelect = +ucd.substring(ucd.lastIndexOf("[")+1,ucd.length-1);
+                        ucd = ucd.substring(0,ucd.lastIndexOf("["));
+                    }
                     for (j=0;j<AHList.length;j++){
-                        if(AHList[j].ucd == this.ucdStorage[fType][i]){
-                            selected[fType] = AHList[j];
+                        if(AHList[j].ucd == ucd && curr<maxSelect){
+                            selected[fType+(curr == 0?"": ""+curr)] = AHList[j];
+                            curr++;
                         }
                     }
                     i++;
                 }
             }
-            
         }
 
         let selectedAH = [];
