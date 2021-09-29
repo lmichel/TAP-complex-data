@@ -1,0 +1,94 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>jsResources intraction test with Tap Complex API</title>
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+
+        <!-- Tap Complex API imports -->
+
+        <script type="text/javascript" src="../../build/tap_complex-0.1.0.min.js"></script>
+
+        <!-- End of Tap Complex API imports -->
+
+        <!-- Custum scripts -->
+
+        <script type="text/javascript" src="../js/shared.js"></script>
+        <script type="text/javascript" src="../js/jsResource.js"></script>
+        
+        <!-- End of Custum scripts -->
+
+        <!-- CSS imports -->
+
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/github.min.css">
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+        <link rel="stylesheet" href="../css/style.css">
+        <link href="../css/main.css" rel="stylesheet">
+        <!-- End of CSS imports -->
+
+    </head>
+
+    <body>
+        <div id="overlay">
+            <div class="cv-spinner">
+                <span class="spinner"></span>
+            </div>
+        </div>
+
+        <div>
+            <div style="display: flex;">
+                <div class="col-2" style= "border-right:1px solid rgba(0,0,0,.1); padding-right: 1em; padding-left: 1em;">
+                    <button class="btn btn-dark" style="margin-top: 0.5em;width: 100%;" id="btnApiConnect">Connect Api</button>
+                    <button class="btn btn-dark" style="margin-top: 0.5em;width: 100%;" id="btnApiDisconnect">Disconnect Api</button>
+                </div>
+
+                <div class="col-8" style="width: 100%; display: flex;justify-content: center;align-items: center;" id="mainButtonHolder" >
+                </div>
+
+                <div class="col-2" style= "border-left:1px solid rgba(0,0,0,.1); padding-right: 1em; padding-left: 1em;display: flex;align-items: center;">
+                    <button class="btn btn-primary" style="margin-top: 0.5em;width: 100%;" id="btnDebug">Show Debug info</button>
+                </div>
+            </div>
+            
+            <hr>
+
+            <div id = "debugContainer" style="display: none;">
+                <div class = "container">
+                    <div class="card">
+                        <h5 class="card-title text-center">Status of the last function</h5>
+                        <h6 class="card-text text-center" id="getStatus"></h6>
+                        <br>
+                    </div>
+
+                    <hr>
+
+                    <div class="card"> 
+                        <h5 class="card-title text-center">Return object of the last function</h5>
+                        <pre style= 'overflow:scroll;width: 100%; max-height: 25em;'><code id='codeOutput'></code></pre>
+                    </div>
+                </div>
+                <hr>
+
+            </div>
+
+            <div style="display: flex;">
+                <div class="col-1" ></div>
+
+                <div class="col-10" id="dataHolder" >
+
+                </div>
+
+                <div class="col-1" ></div>
+
+            </div>
+        </div>
+        
+
+    </body>
+
+</html>
