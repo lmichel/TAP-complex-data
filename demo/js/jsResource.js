@@ -12,7 +12,7 @@ function OnRadioChange(radio) {
         if(lastLab !== undefined ){
             enableButton(lastLab.id);
         }
-        successButton("label_" + radio.value.toLowerCase());
+        successButton("label_" + radio.value);
     }
 }
 
@@ -30,6 +30,92 @@ function buildButtonSelctor(){
             "</label>");
     }
 
+}
+
+function setupEventHandlers(){
+
+    let api = new TapApi();
+
+    bindClickAsyncEvent("btnApiConnect",async () => {
+        
+        if (isEnable("btnApiConnect")) {
+            let KT = new KnowledgeTank();
+            let params = KT.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
+            params.shortName = $("input:radio[name=radio]:checked")[0].value;
+            
+            let connect = api.connect(params);
+            let status = false;
+            connect.catch((reason)=>console.error(reason));
+
+            let thenFun = async ()=> {};
+
+            connect.then( (value) => {
+                status = value.status;
+                display(value,"codeOutput");
+                thenFun = async () =>{
+
+                    if (status){
+
+                        /*/ disable all radio buttons so the user can't change their value /*/
+                        $("input:radio[name=radio]").attr("disabled",true);
+                        $("label[name=radioLabel]").each((i,btn)=>{
+                            disableButton(btn.id);
+                        });
+
+                        let data = await $.getJSON("../js/jsresources.json");
+                        override();
+
+                        MetadataSource.vars.cache[data.dataTreePath.key] = data;
+                        
+                        let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
+
+                        qce = QueryConstraintEditor.tapColumnSelector({parentDivId:'tapColEditor',
+                                formName: 'tapFormColName',
+                                queryView: adqlQueryView});
+                        display(MetadataSource.getTableAtt({"key":"node.schema.table"}),"codeOutput");
+                        qce.fireSetTreepath(new DataTreePath({nodekey:'node', schema: 'schema', table: 'table', tableorg: 'table'}));
+
+                        enableButton("btnApiDisconnect");
+
+                    }
+                };
+            });
+
+            await connect;
+
+            display(""+status , "getStatus");
+
+            await thenFun();
+
+            return status;
+
+        } else {
+            display("The service is  already connected ! disconnect the service and try again ...", "getStatus");
+        }
+
+    },"no service selected... Choose service first and try again" );
+
+    bindClickEvent("btnApiDisconnect",() => {
+        api.disconnect();
+
+        enableButton("btnApiConnect");
+
+        $("input:radio[name=radio]").attr("disabled",false);
+        $("label[name=radioLabel]").each((i,btn)=>{
+            enableButton(btn.id);
+        });
+
+        return false;
+
+    });
+
+    bindClickEvent("btnDebug",() => {
+        if (document.getElementById("debugContainer").style.display == "block"){
+            document.getElementById("debugContainer").style.display = "none";
+        }else {
+            document.getElementById("debugContainer").style.display = "block";
+        }
+    });
 }
 
 

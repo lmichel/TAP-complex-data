@@ -8,8 +8,23 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
 
         <!-- Tap Complex API imports -->
+        <script type="text/javascript" src="../../api/utils/json/tabletojson-cell.js"></script>
+        <script type="text/javascript" src="../../api/utils/json/tabletojson-row.js"></script>
+        <script type="text/javascript" src="../../api/utils/json/tabletojson.js"></script>
+        <script type="text/javascript" src="../../api/utils/json/jsonRead.js"></script>
+        <script type='text/javascript' src="../../api/utils/json/json2Requete.js"></script>
 
-        <script type="text/javascript" src="../../build/tap_complex-0.1.0.min.js"></script>
+        <script type="text/javascript" src="../../api/utils/VOTableTools.js"></script>
+        <script type="text/javascript" src="../../api/utils/util.js"></script>
+        <script type="text/javascript" src="../../api/utils/HandlerAttribut.js"></script>
+        <script type="text/javascript" src="../../api/utils/votable.js"></script>
+
+        <script type="text/javascript" src="../../api/tap/TapService.js"></script>
+        <script type="text/javascript" src="../../api/tap/TapApi.js"></script>
+
+        <script type="text/javascript" src="../../api/tap/TapServiceConnector.js"></script>
+        <script type="text/javascript" src="../../api/tap/JsonAdqlBuilder.js"></script>
+        <script type="text/javascript" src="../../api/tap/KnowledgeTank.js"></script>
 
         <!-- End of Tap Complex API imports -->
 
@@ -17,8 +32,17 @@
 
         <script type="text/javascript" src="../js/shared.js"></script>
         <script type="text/javascript" src="../js/jsResource.js"></script>
+        <script type="text/javascript" src="../js/overrides.js"></script>
         
         <!-- End of Custum scripts -->
+
+        <script type="text/javascript" src="../../import/saadajsbasics/loader.js"></script>
+
+        <script>
+            resourceLoader.setCss([]);
+            resourceLoader.setScripts([]);
+            resourceLoader.loadAll();
+        </script>
 
         <!-- CSS imports -->
 
@@ -71,6 +95,9 @@
                         <h5 class="card-title text-center">Return object of the last function</h5>
                         <pre style= 'overflow:scroll;width: 100%; max-height: 25em;'><code id='codeOutput'></code></pre>
                     </div>
+                    <div class="card" id="adql_query_div">
+
+                    </div>
                 </div>
                 <hr>
 
@@ -80,6 +107,9 @@
                 <div class="col-1" ></div>
 
                 <div class="col-10" id="dataHolder" >
+                    <div id="tapColEditor">
+
+                    </div>
 
                 </div>
 

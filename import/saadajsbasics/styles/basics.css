@@ -1,0 +1,698 @@
+/*
+ * CSS rules by tags
+ * May be overriden by the final application
+ */
+@font-face {
+	font-family: Lane;
+	src: url(Lane.ttf) format("truetype");
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	min-width: 1010px;
+	height: auto;
+	overflow: auto;
+}
+
+span, p, td, option, label, legend {
+	font-size: small;
+	color: black;
+}
+
+td {
+	padding: 2px 5px !important;	
+}
+
+th {
+	white-space: nowrap;	
+	padding: 2px 5px !important;	
+	overflow: hidden;
+	font-size: small;
+}
+label {
+	font-weight: normal !important;
+}
+
+li {
+	font-size: small;
+	color: black;
+}
+
+input {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+/* 	color: black;
+ */}
+button {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+	color: black;
+}
+
+h4 {
+	color: DimGray;
+}
+
+a:hover {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+
+.activehover:hover {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+.clear {
+	clear: both;
+}
+
+.help {
+	color: DimGray;
+	/*font-style: italic;*/
+	font-family: Arial, Helvetica, sans-serif;
+}
+.spanhelp {
+	color: #469eb5;
+	font-style: italic;
+	font-size: small;
+	margin-left: 5px !important;
+}
+.blackhelp {
+	color: blac;
+	font-style: italic;
+	font-size: small;
+	margin-left: 5px !important;
+}
+.datahelp {
+	color: #86C6E8;
+    font-weight:bold;
+    }
+.selecteddatahelp {
+	color: orange;
+    font-weight:bold;
+    }
+    
+.clkdatahelp {
+	color: #86C6E8;
+    font-weight:bold;
+    }
+    
+:hover.clkdatahelp {
+	color: DimGray;
+    font-weight:bold;
+    cursor: pointer}
+    
+.datafield {
+	color: #5bc0de;
+    font-weight:bold;
+    float: right;
+    }
+
+.strong {
+	color: DimGray;
+	font-size: x-large;
+}
+
+.infoanchor {
+    margin-bottom: 2px;
+    margin-left: -3px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/*
+ * Samp status indications
+ */
+img.clickableicon{
+	border: 0;
+	}
+img:hover.clickableicon{
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+	}
+	
+a.sampOn {	
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 16px 0px 16px 38px;
+	background: transparent url(../icons/sampOn.png) center left no-repeat;
+}
+a:hover.sampOn {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+a.sampOff {	
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 16px 0px 16px 38px;
+	background: transparent url(../icons/sampOff.png) center left no-repeat;
+}
+a:hover.sampOff {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+
+
+a.ivoalogo  {	
+	overflow: visible;
+	padding: 16px 0 8px 64px;
+	background:transparent url(../icons/ivoa.jpg) center left no-repeat;
+}
+
+a.dlivoalogo  {	
+	overflow: visible;
+	padding: 8px 0 4px 28px;
+	background:transparent url(../icons/dl_ivoa.png) center left no-repeat;
+}
+a:hover.dlivoalogo {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+a.dldownload  {	
+	overflow: visible;
+	padding: 8px 0 4px 28px;
+	background:transparent url(../icons/dl_download.png) center left no-repeat;
+}
+a.dl_download {
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 9px 0px 9px 23px;
+	/* background: transparent url(../images/dl_download.png) center left
+		no-repeat; */
+	background: transparent url(../images/icons_23.png) center left
+	no-repeat;
+	margin-right: 1px;
+}
+
+a.simbad {
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 12px 0px 9px 50px;
+	background: transparent url(../images/simbad_icon.png) center left no-repeat;
+	margin-right: 1px;
+	background-size: 50px 25px;
+}
+
+a.floppy{
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 9px 0px 9px 23px;
+	background: transparent url(../images/floppy.png) center left
+	no-repeat;
+	margin-right: 1px;
+	background-size: 20px 20px;
+}
+
+a.dl_cart {
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 9px 0px 9px 23px;
+	/* background: transparent url(../images/dl_cart.png) center left
+		no-repeat; */
+	background: transparent url(../icons/cart_23.png) center left
+		no-repeat;
+	margin-right: 1px;
+}
+
+a.dl_samp {
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 9px 0px 9px 23px;
+	/* background: transparent url(../images/dl_ivoa.png) center left
+		no-repeat; */
+	background: transparent url(../icons/ivoa_23.png) center left
+		no-repeat;
+	margin-right: 1px;
+}
+a.dl_aladin {
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 9px 0px 9px 24px;
+	/* background: transparent url(../images/dl_ivoa.png) center left
+		no-repeat; */
+	background: transparent url(../icons/aladin_23.png) center left
+		no-repeat;
+	margin-right: 1px;
+}
+a:hover.dl_aladin  {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+
+a.dl_viewer {
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 9px 0px 9px 24px;
+	/* background: transparent url(../images/dl_ivoa.png) center left
+		no-repeat; */
+	background: transparent url(../icons/viewer_23.png) center left
+		no-repeat;
+	margin-right: 1px;
+}
+a:hover.dl_viewer  {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+
+a.dlinfo  {	
+	overflow: visible;
+	padding: 8px 0 4px 28px;
+	background:transparent url(../icons/dl_info.png) center left no-repeat;
+}
+
+a:hover.dldownload  {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+a.dlprinter  {	
+	display: inline-block;
+	width: 0px;
+	overflow: visible;
+	padding: 9px 0 9px 23px;
+	background:transparent url(../icons/printer_23.png) center left no-repeat;
+}
+a:hover.dlprinter  {	
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
+}
+
+.infologo  {	
+	display: inline;
+	float: left;
+	width: 48px;
+	height: 32px;
+	background:transparent url(../icons/info.png) top left no-repeat;
+}
+
+.warninglogo  {	
+	display: inline;
+	float: left;
+	width: 48px;
+	height: 32px;
+	background:transparent url(../icons/warning.png) top left no-repeat;
+}
+
+.confirmlogo  {	
+	display: inline;
+	float: left;
+	width: 48px;
+	height: 32px;
+	background:transparent url(../icons/confirm.png) top left no-repeat;
+}
+.progresslogo {
+	padding: 5px;
+	display: inline;
+	float: left;
+	width: 32px;
+	height: 32px;
+	border:0px;
+	background:transparent  url(../icons/ajax-loader.gif) center no-repeat;
+}
+a.printer {
+	display: inline-block;
+	height: 30px;
+	width: 39px;
+	overflow: visible;
+	padding: 0 0 0 0;
+	background: transparent url(../icons/printer_38.png) bottom left
+		no-repeat;
+	}
+a:hover.printer {
+	filter: alpha(opacity = 50);
+/* 	-moz-opacity: 0.5; */
+	opacity: 0.5;
+}
+a:active.printer {
+	filter: alpha(opacity = 50);
+/* 	-moz-opacity: 0.8; */
+	opacity: 0.8;
+}
+
+a.sort_asc {	
+	display: block;
+	width: 19px;
+	height: 11px;
+	overflow: visible;
+	background: transparent url(../icons/sort_asc.png) center left no-repeat;
+}
+a.sort_asc_disabled {	
+	display: block;
+	width: 19px;
+	height: 11px;
+	overflow: visible;
+	background: transparent url(../icons/sort_asc_disabled.png) center left no-repeat;
+}
+a.sort_desc {	
+	display: block;
+	width: 19px;
+	height: 11px;
+	overflow: visible;
+	background: transparent url(../icons/sort_desc.png) center left no-repeat;
+}
+a.sort_desc_disabled {	
+	display: block;
+	width: 19px;
+	height: 11px;
+	overflow: visible;
+	background: transparent url(../icons/sort_desc_disabled.png) center left no-repeat;
+}
+div.sorter {
+	width: 16px;
+	height: 24px;
+	overflow:none;
+	float:left;
+}
+span.sorter{
+	position: relative;
+	top: 5px;
+	left: 0px;
+}
+.d-maxsize {
+  max-height:750px;
+  max-width:1000px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+h1 {
+	margin-bottom: 40px;
+}
+
+
+#shadow {
+    opacity:0.3;
+    filter: grayscale(0.5) blur(10px);
+    background: #000;
+	position: fixed; 
+    left: 0; top: 0;
+	width: 100%; height: 100%;
+}
+
+.shadow {
+	position: fixed; 
+	opacity:0.3;
+	background: #000;
+    left: 0; top: 0;
+	width: 100%; height: 100%;
+}
+
+.input-group-addon .glyphicon {
+	font-size: 17px;
+}
+
+.btn-dialog {
+    text-align: center;
+}
+
+.btn-dialog .btn {
+	margin-left: 5px;
+	margin-bottom: 5px;
+}
+
+.btn-warning {
+    color:white !important;
+}
+
+div.custom-modal.ui-dialog-content.ui-widget-content {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.custom-modal {
+    display: none;
+    min-width: 270px;
+}
+
+.ui-dialog-title span {
+    margin-right: 5px;
+}
+
+div.ui-dialog {
+    box-shadow: 0 5px 15px rgba(0,0,0,.5);
+}
+
+.glyphicon-remove-sign {
+    color: #FA5858;
+}
+
+.glyphicon-info-sign, .glyphicon-ok-sign, .glyphicon-file, .glyphicon-search .fi-graph-trend{
+    color: #5bc0de;
+}
+/*
+*
+*foundation
+*/
+.fi-graph-trend{
+    color: #5bc0de;	
+	font-size: 18px;
+}
+.background-error, .kwConstraint .background-error {
+	background-color: pink !important;
+	margin-bottom: 2px;
+}
+
+.custom-file::-webkit-file-upload-button {
+	visibility: hidden;
+}
+
+#upload-form {
+    width:270px;
+}
+
+.align-center {
+	text-align: center;
+}
+
+.overflow {
+    width: 270px;
+	word-break: break-all;
+}
+
+.custom-file::before {
+	content: 'Select or drop a file';
+	padding: 70px;
+	outline: none;
+	display: inline-block;
+	border: 2px dashed #2E9AFE;
+	border-radius: 3px;
+	-webkit-user-select: none;
+	cursor: pointer;
+	text-shadow: 1px 1px #fff;
+	font-weight: 700;
+	font-size: 10pt;
+	background: white;
+    word-break: break-all;
+}
+.custom-file:hover::before {
+  border-color: #045FB4;
+}
+.custom-file:focus{
+    outline:none !important;
+}
+
+.custom-file {
+	width: 270px;
+	margin-left: 1px;
+}
+
+.info-upload {
+    margin-top: -6px;
+}
+
+.custom-submit {
+    background: white;
+    border: 1px solid #BDBDBD;
+    border-radius: 3px;
+    padding: 4px 7px;
+}
+
+.custom-submit:hover {
+    background: #E6E6E6;
+    border-color: #A4A4A4;
+}
+
+.custom-submit:focus{
+    outline:none !important;
+    box-shadow: inset 0 0 0 1px #BDBDBD,inset 0 5px 30px #BDBDBD;
+}
+
+.img-title{
+	height:22px;
+	width:22px;
+}
+
+tr.odd {
+	background-color: #F2F2F2 !important;
+}
+
+.paging_full_numbers {
+	margin-bottom: 10px;
+}
+
+.img-center {
+	text-align: center;
+}
+
+.simbad-filter {
+	position: absolute;
+	bottom: -10px;
+	right: -10px;
+}
+
+.simbad-img {
+	bottom: 5px;
+}
+
+.logo-title {
+	margin-right:6px;
+}
+
+iframe {
+	width: 100%;
+	height: 100%;
+}
+
+.img-panel {
+	text-align:center;
+}
+
+.side-div {
+	display: inline-block;
+	margin-right: 5px;
+	vertical-align: middle;
+}
+
+.txt-right {
+	text-align: right;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	font-size: small;
+}
+
+.txt-center {
+	text-align: center;
+}
+
+.txt-left {
+	text-align: left;
+	float: left;
+}
+
+.custom-dt {
+	overflow: auto;
+	margin-top: 5px;
+	margin-bottom: 17px;
+	/*width: 95%; OK for XCatDB but not for Saada
+	float: left*/
+}
+
+.disabled:hover {
+  border: 1px solid white !important;	
+  opacity: 1 !important;
+  -webkit-filter: grayscale(100%); 
+  filter: grayscale(100%);
+}
+
+.disabled{
+  border: 1px solid white !important;	
+  opacity: 1 !important;
+  -webkit-filter: grayscale(100%); 
+  filter: grayscale(100%);
+}
+
+.paginate_button:hover {
+  opacity: 0.4 ;
+  border: 1px solid white !important	
+}
+
+.paginate_button {
+  margin: 0px !important	;
+}
+
+.previous {
+    font-size: small;
+    background: url('../images/back_enabled.jpg') no-repeat top right !important;
+    padding-right: 20px;	
+}
+.next {
+    font-size: small;
+    background: url('../images/forward_enabled.jpg') no-repeat top right !important;
+    padding-right: 20px;	
+}
+
+.dataTables_filter {
+	width: 190px !important;	
+	float: initial;
+	text-align: initial;
+}
+
+.dataTables_length {
+	width: 150px !important;
+}
+
+table.dataTable {
+	padding: 1px 1px !important;
+	white-space:nowrap;
+}
+.paging_full_numbers {
+	width: initial !important;
+	min-width: 310px !important;	
+}
+
+.datatable_wrapper .row {
+	margin-right:0px;
+	margin-left:0px;
+}
+
+/*
+Override jquery-ui-theme
+*/ 
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+}
+
+.ui-dialog { 
+	position: absolute; padding: .2em; width: 300px; 
+}
+
+.ui-dialog .ui-dialog-content {
+	position: relative;
+	border: 0;
+	padding: .5em 1em;
+	background: none;
+	overflow: none;
+	zoom: 1;
+}
+
+.ui-dialog-title {
+	font-size: 18px;
+	word-break: break-all;
+	/*overflow: hidden;*/
+}
+
+div.ui-dialog-titlebar.ui-widget-header.ui-corner-all.ui-helper-clearfix {
+	background: white;
+	padding-left: 7px;
+	padding-right: 7px;
+	border: none;
+	border-radius: 0px;
+	border-bottom: 1px solid #BDBDBD;
+}
+
+input[disabled] {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: small;
+	color: grey;
+	font-style: italic;
+}

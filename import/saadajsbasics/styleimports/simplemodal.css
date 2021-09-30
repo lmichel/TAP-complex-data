@@ -1,0 +1,122 @@
+/*
+ * SimpleModal Basic Modal Dialog
+ * http://www.ericmmartin.com/projects/simplemodal/
+ * http://code.google.com/p/simplemodal/
+ *
+ * Copyright (c) 2010 Eric Martin - http://ericmmartin.com
+ *
+ * Licensed under the MIT license:
+ *   http://www.opensource.org/licenses/mit-license.php
+ *
+ * Revision: $Id: simplemodal.css 127 2012-01-12 10:24:08Z laurent.mistahl $
+ */
+#basic-modal-content {
+	display: none;
+}
+
+/* Overlay */
+#simplemodal-overlay {
+	background-color: #000;
+	cursor: wait;
+}
+
+/* Container */
+#simplemodal-container {
+	height: 85%;
+	width: 85%;
+	color: black;
+	background-color: rgb(231, 231, 244);
+	border: 2px solid #444;
+	padding: 4px;
+}
+
+#simplemodal-container .simplemodal-data {
+	padding: 2px;
+}
+
+#simplemodal-container code {
+	background: #141414;
+	border-left: 3px solid #65B43D;
+	color: #bbb;
+	display: block;
+	font-size: 12px;
+	margin-bottom: 12px;
+	padding: 4px 6px 6px;
+}
+/*#simplemodal-container a {color:#ddd;}*/
+#simplemodal-container a.modalCloseImg {
+	background: url(../images/close-icon.png) no-repeat;
+	width: 25px;
+	height: 29px;
+	display: inline;
+	z-index: 3200;
+	position: absolute;
+	top: -15px;
+	right: -16px;
+	cursor: pointer;
+}
+
+#simplemodal-container h3 {
+	color: #84b8d9;
+}
+
+/**
+* Filter Editor style
+*
+*/
+
+#filterdiv {
+	border: none;
+}
+
+.selector {
+	border: none;
+}
+
+#fspefieldsselector, #fnativeselector, #frelselector {
+	border: none;
+	display: block;
+	width: auto;
+	margin-left: auto;
+	margin-right: auto;
+/* 	A CHANGER */
+	height: 152px;
+}
+
+
+#fspefieldsdrag, #fnativedrag, #frelationsdrag, #fspefieldsdrop, #fnativedrop, #frelationsdrop {
+	float: left;
+	border-width: 1;
+	border-color: dimgray;
+	height: 145px;
+	width: 45%;
+	margin-left: 10px;
+	margin-right: 10px;
+	overflow: auto;
+}
+
+#savefilter, #bonusoptions, #fheader {
+	border: none;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+	
+}
+
+#bonusoptions {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+#savefilter {
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+
+h4 {
+	width: auto;
+	background: #CCC
+		url(http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/images/ui-bg_highlight-soft_75_cccccc_1x100.png) repeat-x 50% 50%;
+	border: 1px solid #AAA;
+}
