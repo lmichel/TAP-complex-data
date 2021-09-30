@@ -118,7 +118,7 @@ var TapServiceConnector = (function() {
             }
             this.objectMapWithAllDescription.map = map;
             this.objectMapWithAllDescription.status = true;
-            this.postProcessObjectMap();
+            //this.postProcessObjectMap();
             return this.objectMapWithAllDescription;
         } catch (error) {
             console.error(error);

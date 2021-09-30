@@ -66,7 +66,7 @@ function setupEventHandlers(){
                         override();
 
                         MetadataSource.vars.cache[data.dataTreePath.key] = data;
-                        
+
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 
                         qce = QueryConstraintEditor.tapColumnSelector({parentDivId:'tapColEditor',

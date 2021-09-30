@@ -290,7 +290,7 @@ function JoinKeyMap() {
 	 *       origins: []
 	 * Origins contains the labels of the forms using the keyJoin
 	 */
-	this.keyMap =  new Array();
+	this.keyMap =  {};
 };
 /**
  * Methods
