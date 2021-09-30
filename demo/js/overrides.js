@@ -202,6 +202,7 @@ function override(){
         pblc.getJoinedTables = getJoinedTables;
         pblc.getUserGoodie = getUserGoodie;
         pblc.setJobColumns = setJobColumns;
+        pblc.buildAttMap = buildAttMap;
         pblc.test = test;
         pblc.vars = {"cache":cache};
         return pblc;	

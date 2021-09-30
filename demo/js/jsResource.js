@@ -62,18 +62,26 @@ function setupEventHandlers(){
                             disableButton(btn.id);
                         });
 
-                        let data = await $.getJSON("../js/jsresources.json");
-                        override();
+                        let data = await api.getTableAttributeHandlers(params.table);
+                        if(data.status){
+                            override();
+                            data = {"attributes":data.attribute_handlers};
+                            let cache = {};
+                            let dataTreePath = {nodekey:'node', schema: 'schema', table: 'table', tableorg: 'table'};
+                            cache.ahmap = MetadataSource.buildAttMap(cache);
+                            cache.dataTreePath = dataTreePath;
+                            cache.dataTreePath.key = dataTreePath.nodekey + dataTreePath.schema + dataTreePath.tableorg;
+                            MetadataSource.vars.cache[cache.dataTreePath.key] = cache;
 
-                        MetadataSource.vars.cache[data.dataTreePath.key] = data;
+                            let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 
-                        let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
+                            qce = QueryConstraintEditor.tapColumnSelector({parentDivId:'tapColEditor',
+                                    formName: 'tapFormColName',
+                                    queryView: adqlQueryView});
+                            display(MetadataSource.getTableAtt({"key":"node.schema.table"}),"codeOutput");
+                            qce.fireSetTreepath(new DataTreePath(dataTreePath));
+                        }
 
-                        qce = QueryConstraintEditor.tapColumnSelector({parentDivId:'tapColEditor',
-                                formName: 'tapFormColName',
-                                queryView: adqlQueryView});
-                        display(MetadataSource.getTableAtt({"key":"node.schema.table"}),"codeOutput");
-                        qce.fireSetTreepath(new DataTreePath({nodekey:'node', schema: 'schema', table: 'table', tableorg: 'table'}));
 
                         enableButton("btnApiDisconnect");
 
@@ -82,8 +90,6 @@ function setupEventHandlers(){
             });
 
             await connect;
-
-            display(""+status , "getStatus");
 
             await thenFun();
 
