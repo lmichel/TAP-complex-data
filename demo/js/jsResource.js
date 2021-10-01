@@ -32,6 +32,49 @@ function buildButtonSelctor(){
 
 }
 
+/*/ Builds the selecting table for tables /*/
+async function buildTableNameTable(api,shortName,qce){
+    let map = await api.getObjectMap();
+    if(map.status){
+
+        /*/ Table building /*/
+        let tables = Object.keys(map.object_map.tables);
+        tables.unshift(map.object_map.root_table.name);
+
+        let header = "<table class=\"table table-hover table-bordered table-sm text-center \">";
+        let body = "<thead><tr><th scope=\"col\"> Tables of " + shortName + "</th></tr></thead><tbody>";
+        let footer = "</table>";
+
+        for (let i=0;i<tables.length;i++){
+            body += "<tr><td data-table-id=\"tableName\" data-table = \""+ tables[i] +"\">" + tables[i] + "</td></tr>";
+        }
+
+        body+="</tbody>";
+
+        $("#tableNameTable").html(header+body+footer);
+
+        /*/ Binding events of the cells /*/
+        $("[data-table-id='tableName']").click((cell)=>{
+            syncIt(async ()=>{
+                //we gather the selected service
+                let KT = new KnowledgeTank();
+                let params = $.extend(true,{}, KT.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value] );
+                params.shortName = $("input:radio[name=radio]:checked")[0].value;
+                // override the root table using the table selected by the user
+                params.table = cell.target.dataset.table;
+
+                let dataTreePath = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
+
+                // remember to always hijack the cache before risquing using it.
+                let hijack = await MetadataSource.hijackCache(dataTreePath,api);
+                if(hijack){
+                    qce.fireSetTreepath(new DataTreePath(dataTreePath));
+                }
+            });
+        });
+    }
+}
+
 function setupEventHandlers(){
 
     let api = new TapApi();
@@ -61,22 +104,17 @@ function setupEventHandlers(){
                         $("label[name=radioLabel]").each((i,btn)=>{
                             disableButton(btn.id);
                         });
+                        
+                        // applying all the needed override of jsResource before using it
                         override();
-                        let dataTreePath = {nodekey:params.shortName, schema: params.schema, table: params.table, tableorg: params.table};
 
-                        let hijack = await MetadataSource.hijackCache(dataTreePath,api);
-                        if(hijack){
+                        let adqlQueryView = QueryConstraintEditor.queryTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 
-                            let adqlQueryView = QueryConstraintEditor.queryTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
+                        qce = QueryConstraintEditor.nativeConstraintEditor({parentDivId:'tapColEditor',
+                                formName: 'tapFormColName',
+                                queryView: adqlQueryView});
 
-                            qce = QueryConstraintEditor.nativeConstraintEditor({parentDivId:'tapColEditor',
-                                    formName: 'tapFormColName',
-                                    queryView: adqlQueryView});
-                            
-                            display(MetadataSource.getTableAtt({"key":"node.schema.table"}),"codeOutput");
-
-                            qce.fireSetTreepath(new DataTreePath(dataTreePath));
-                        }
+                        await buildTableNameTable(api,params.shortName,qce);
 
                         enableButton("btnApiDisconnect");
 

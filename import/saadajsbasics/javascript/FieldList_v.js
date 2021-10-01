@@ -201,7 +201,7 @@ FieldList_mVc.prototype = Object.create(BasicFieldList_mVc.prototype, {
 			this.parentDiv.html('<div class=fielddiv><div class="fieldlist" id="' + this.fieldListId
 					+  '"></div>'
 					+ ' <div class="form-group" style="width:347px; margin-bottom:8px; margin-top:8px;"><div class="input-group"><div class="input-group-addon input-sm"><span class="glyphicon glyphicon-search"></span></div>'
-					+ ' <input id="' + this.fieldFilterId +  '" class="form-control input-sm" type="text" placeholder="Search" style="z-index: 1001;"/></div></div>');
+					+ ' <input id="' + this.fieldFilterId +  '" class="form-control input-sm" type="text" placeholder="Search"/></div></div>');
 			/*
 			 * WARNING
 			 * For some reason, z-index is set at 3 which prevent keybroad event to reach the widget.
