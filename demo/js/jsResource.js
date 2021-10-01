@@ -67,9 +67,9 @@ function setupEventHandlers(){
                         let hijack = await MetadataSource.hijackCache(dataTreePath,api);
                         if(hijack){
 
-                            let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
+                            let adqlQueryView = QueryConstraintEditor.queryTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 
-                            qce = QueryConstraintEditor.tapColumnSelector({parentDivId:'tapColEditor',
+                            qce = QueryConstraintEditor.nativeConstraintEditor({parentDivId:'tapColEditor',
                                     formName: 'tapFormColName',
                                     queryView: adqlQueryView});
                             
