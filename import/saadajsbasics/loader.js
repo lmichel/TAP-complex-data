@@ -75,7 +75,7 @@ resourceLoader = function() {
 	                  , "datatable.css"
 	                  , "simplemodal.css"
 	                  , "aladin.min.css"
-	                  , "bootstrap/bootstrap.css"
+	                  //, "bootstrap/bootstrap.css"
 	                  , "foundationicon/foundation-icons.css"
 	                  ];
 

@@ -61,19 +61,11 @@ function setupEventHandlers(){
                         $("label[name=radioLabel]").each((i,btn)=>{
                             disableButton(btn.id);
                         });
+                        override();
+                        let dataTreePath = {nodekey:params.shortName, schema: params.schema, table: params.table, tableorg: params.table};
 
-                        let data = await api.getTableAttributeHandlers(params.table);
-                        display(data.status,"codeOutput");
-                        if(data.status){
-                            override();
-                            data = {"attributes":data.attribute_handlers};
-                            let cache = {"relations":[],"classes":[],"targets":[]};
-                            let dataTreePath = {nodekey:'node', schema: 'schema', table: 'table', tableorg: 'table'};
-                            cache.hamap = MetadataSource.buildAttMap(data);
-                            cache.dataTreePath = dataTreePath;
-                            cache.dataTreePath.key = [dataTreePath.nodekey , dataTreePath.schema , dataTreePath.tableorg].join(".");
-                            console.log(cache);
-                            MetadataSource.vars.cache[cache.dataTreePath.key] = cache;
+                        let hijack = await MetadataSource.hijackCache(dataTreePath,api);
+                        if(hijack){
 
                             let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 
@@ -82,6 +74,7 @@ function setupEventHandlers(){
                                     queryView: adqlQueryView});
                             
                             display(MetadataSource.getTableAtt({"key":"node.schema.table"}),"codeOutput");
+
                             qce.fireSetTreepath(new DataTreePath(dataTreePath));
                         }
 

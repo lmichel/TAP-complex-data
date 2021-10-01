@@ -580,7 +580,7 @@ tapColSelector_Mvc.prototype = Object.create(ConstQEditor_Mvc.prototype, {
 			var that = this;
 			// queried table path
 			var st = this.dataTreePath.schema + "." + this.dataTreePath.table;
-			var joins = new Array();
+			var joins = {};
 			var q = new Array();
 			/*
 			 * Merge all constraints

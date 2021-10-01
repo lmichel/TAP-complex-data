@@ -10,7 +10,7 @@ function override(){
          *
          * cache = map<DataTreePath.key, buffer>
          */
-        var cache = new Object;
+        var cache = {};
         /**
          * private methods
          */
@@ -18,7 +18,7 @@ function override(){
          * setAttMap: Normalize AHs and store them in the buffer
          */
         var buildAttMap = function (data){
-            var hamap  = new Array();
+            var hamap  = [];
             if( data.attributes ) {
                 for( var i=0 ; i<data.attributes.length ; i++ ){
                     var ah = data.attributes[i];
@@ -59,6 +59,35 @@ function override(){
                 getUserGoodieUrl = params.getUserGoodie;
             }
         };
+
+        /**special method to inject data gathered from Tap complex API into the object's cache 
+         * 
+         * @param {*} dataTreePath instance of DataTreePath
+         * @param {*} api instance of TapApi
+         */
+        var hijackCache = async function(dataTreePath,api){
+            if(dataTreePath.key === undefined){
+                dataTreePath.key = [dataTreePath.nodekey , dataTreePath.schema , dataTreePath.tableorg].join(".");
+            }
+            if(cache[dataTreePath.key] !== undefined){
+                return true;
+            }
+
+            let data = await api.getTableAttributeHandlers(dataTreePath.table);
+
+            if(data.status){
+                data = {"attributes":data.attribute_handlers};
+                let lCache = {"relations":[],"classes":[],"targets":[]};
+                lCache.dataTreePath = dataTreePath;
+                
+                lCache.hamap = buildAttMap(data);
+
+                cache[lCache.dataTreePath.key] = lCache;
+                return true;
+            }
+            return false;
+        };
+
         /**
          * dataTreePath: instance of the classe DataTreePath
          * handler(data) called when requested datra are retreived. 
@@ -73,10 +102,10 @@ function override(){
             if(  cache[key] == undefined ) {
                 var buffer = {};
                 buffer.dataTreePath = dataTreePath;		
-                buffer.hamap        = new Array();
-                buffer.relations    = new Array(); // utilisees par Saada
-                buffer.classes      = new Array(); // utilisees par Saada
-                buffer.targets      = new Array();
+                buffer.hamap        = [];
+                buffer.relations    = []; // utilisees par Saada
+                buffer.classes      = []; // utilisees par Saada
+                buffer.targets      = [];
                 if( getMetaTableUrl != null ) {
                     isAjaxing = true;
                     Out.info("Connect new node  " + key);
@@ -168,15 +197,15 @@ function override(){
             MetadataSource.init({getMetaTable: "gettableatt", getJoinedTables: "gettablejoin", getUserGoodie: null});
             var dataTreePath = new DataTreePath({nodekey:'node', schema: 'schema', table: 'table', tableorg: 'schema.table'});
             MetadataSource.getTableAtt(
-                    dataTreePath
-                    , function() {
+                    dataTreePath,
+                    function() {
                         console.log("ahMap "        + JSON.stringify(MetadataSource.ahMap(dataTreePath)));
                         console.log("joinedTables " + JSON.stringify(MetadataSource.joinedTables(dataTreePath)));	
                         //	alert("ahMap "        + JSON.stringify(MetadataSource.ahMap(dataTreePath)));
                     });
             MetadataSource.getTableAtt(
-                    dataTreePath
-                    , function() {
+                    dataTreePath,
+                    function() {
                         console.log("ahMap "        + JSON.stringify(MetadataSource.ahMap(dataTreePath)));
                         console.log("joinedTables " + JSON.stringify(MetadataSource.joinedTables(dataTreePath)));	
                         //	alert("ahMap "        + JSON.stringify(MetadataSource.ahMap(dataTreePath)));
@@ -201,9 +230,9 @@ function override(){
         pblc.getJoinedTables = getJoinedTables;
         pblc.getUserGoodie = getUserGoodie;
         pblc.setJobColumns = setJobColumns;
-        pblc.buildAttMap = buildAttMap;
         pblc.test = test;
-        pblc.vars = {"cache":cache};
-        return pblc;	
+
+        pblc.hijackCache = hijackCache;
+        return pblc;
     }();
 }

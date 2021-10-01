@@ -306,6 +306,7 @@ JoinKeyMap.prototype = {
 		addJoinKey : function(key, joinKey, origin){
 			var jk = this.keyMap[key];
 			if( jk == null ){
+				console.error(joinKey);
 				this.keyMap[key] = {joinKey: joinKey, origins: [origin]};
 			} else {
 				var ors = jk.origins;
