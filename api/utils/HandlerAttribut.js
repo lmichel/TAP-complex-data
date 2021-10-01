@@ -49,7 +49,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
                     "unit": this.range,
                     "ucd": this.ucd,
                     "utype": this.utype,
-                    "dataType": this.type,
+                    "type": this.type,
                     "description": this.description,
                     "default_value":this.default_value,
                     "available_value":this.available_value
@@ -106,7 +106,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
                 jsonContaintHandlerValues.succes.attribute_handlers.unit = doubleArrayValue[c][1];
                 jsonContaintHandlerValues.succes.attribute_handlers.ucd =  doubleArrayValue[c][2];
                 jsonContaintHandlerValues.succes.attribute_handlers.utype = doubleArrayValue[c][3];
-                jsonContaintHandlerValues.succes.attribute_handlers.dataType = doubleArrayValue[c][4];
+                jsonContaintHandlerValues.succes.attribute_handlers.type = doubleArrayValue[c][4];
                 jsonContaintHandlerValues.succes.attribute_handlers.description = doubleArrayValue[c][5];
                 jsonContaintHandlersValue.push(jsonContaintHandlerValues.succes.attribute_handlers);
                 jsonContaintHandlerValues.succes.attribute_handlers = {
@@ -116,7 +116,7 @@ HandlerAttributs.prototype.getTableAttributeHandler = async function (table) {
                     "unit": "",
                     "ucd": "",
                     "utype": "",
-                    "dataType": "",
+                    "type": "",
                     "description": "",
                     "default_value":undefined,
                     "available_value":[]
