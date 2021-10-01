@@ -143,7 +143,6 @@ function override(){
                         if( handler != null ) handler(cache[key]);
                     }
                 }
-                console.log(JSON.stringify(cache[key]));
                 return cache[key];
                 /*
                  * Meta data are in the cache
