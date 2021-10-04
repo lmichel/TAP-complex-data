@@ -64,7 +64,7 @@
             </div>
         </div>
 
-        <div>
+        <div style="display: flex;flex-flow: column;height: 100%;">
             <div style="display: flex;">
                 <div class="col-2" style= "border-right:1px solid rgba(0,0,0,.1); padding-right: 1em; padding-left: 1em;">
                     <button class="btn btn-dark" style="margin-top: 0.5em;width: 100%;" id="btnApiConnect">Connect Api</button>
@@ -103,11 +103,14 @@
 
             </div>
 
-            <div style="display: flex;">
+            <div style="display: flex;flex-grow : 1;; overflow:auto" >
                 <div class="col-1" ></div>
 
-                <div class="col-10" id="dataHolder" >
-                    <div class="row">
+                <div class="col-10" style="display: flex;flex-direction: column;">
+                    <div id=dataHolder style="overflow:auto;flex-shrink:1">
+
+                    </div>
+                    <div style="justify-content: center;display: flex;margin-top: auto;">
                         <div id="tableNameTable" style="overflow:scroll; max-height: 12em;">
                             
                         </div>
@@ -115,8 +118,6 @@
 
                         </div>
                     </div>
-                    
-
                 </div>
 
                 <div class="col-1" ></div>
