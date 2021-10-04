@@ -63,154 +63,202 @@ async function buildTableNameTable(api,shortName,qce){
                 // override the root table using the table selected by the user
                 params.table = cell.target.dataset.table;
 
-                let dataTreePath = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
+                let dataTreePath = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table, "jobid":"what a job"};
 
                 // remember to always hijack the cache before risquing using it.
                 let hijack = await MetadataSource.hijackCache(dataTreePath,api);
                 if(hijack){
                     qce.fireSetTreepath(new DataTreePath(dataTreePath));
                 }
-            });
-        });
-    }
-}
-
-// temp code stolen from the browser page 
-
-/*/ build the table html from data prevously collected /*/
-
-function buildTable(colNames,data,id){
-    let header = "<div class=\"table-responsive text-center\"> <table class=\"table table-hover table-dark table-bordered\" data-table-id =" + id + ">";
-    let footer =  "</table></div>";
-    let body = "<thead data-table-id =" + id + "><tr data-table-id =" + id + ">";
-
-    for (let i =0; i< colNames.length;i++){
-        body += "<th scope=\"col\" data-table-id =\"" + id + 
-        "\"data-table-row = \"0\" data-table-col =\"" + i + "\">" + colNames[i] + "</th>";
-    }
-
-    body += "</tr></thead><tbody data-table-id =" + id + ">";
-
-    for (let i=0;i<data.length;i++){
-        body += "<tr data-table-id =" + id + ">";
-        for (let j =0;j<data[i].length;j++){
-            body += "<td data-table-id =\"" + id + 
-            "\"data-table-row = \""+ (i+1) + "\" data-table-col =\"" + j + "\">" + data[i][j] + "</td>";
-        }
-        body += "</tr>";
-    }
-    body += "</tbody>";
-
-    return header + body + footer;
-}
-
-/*/ gather and transform data to an acceptable format for the buildTable function /*/
-
-async function getTableData(api,table,jointVal){
-    if(jointVal !== undefined){
-        // we want strings to be quoted or else the query will fail.
-        // isNaN alone consider things like empty strings and whitespaces are valid number
-        // parseFloat doesn't agree on that so we get a better number detection by adding it
-        // parseFloat allow things like 12.5px while isNaN refuse it
-        // this may need some improvement over time with valid exemple of failure.
-        if(isNaN(jointVal) || isNaN(parseFloat(jointVal))){
-            // double quotes don't always work but single ones seems to
-            jointVal = "\'" + jointVal + "\'";
-        }
-    }
-    let data = await api.getTableSelectedField(table,jointVal);
-
-    display(data,"codeOutput");
-
-    if(data.status){
-        let dataCols = await api.getAllSelectedFields(table);
-        let subJoint = api.getJoinedTables(table).joined_tables;
-
-        let subTables = Object.keys(subJoint);
-        
-        for (let i=0;i<data.field_values.length;i++){
-            for (let j=0;j<subTables.length;j++){
-                data.field_values[i].push(subTables[j] + "'s related data");
-            }
-        }
-
-        return {
-            "status":true,
-            "data":{
-                "colNames":dataCols,
-                "value":data.field_values
-            },
-            "joints":subJoint,
-            "joinedTables":subTables
-        };
-    }
-
-    return {"status":false};
-}
-
-function makeTableHeader(tableName,jointKey,jointVal){
-    let head = "<hr><h4 class=\"text-center\" >";
-    head += tableName + "</h4>";
-    if(jointKey !== undefined){
-        head += "<h5 class=\"text-center\" >";
-        head += "where " + jointKey + " = " + jointVal;
-        head += "</h5>" ;
-    }
-    return head;
-}
-
-/*/ bind all the click event for all the required cell of a given table /*/
-
-function bindTableEvent(api, tableID,data){
-    let tableFullID = "table_" + tableID;
-    let nextID = "table_" + (tableID+1);
-
-    let joints = data.joints;
-    let colNames = data.data.colNames; // columns containing data
-    let joinedTables = data.joinedTables; // tables which are joint to the actual main table.
-
-    // we don't want to bind events on the columns containing true data so we start at colNames.length to ignore them
-    for (let i=colNames.length;i<joinedTables.length + colNames.length;i++){
-        // jquery gather the whole columns with this statement and bind to them the event handler 
-        $("[data-table-id='" + tableFullID + "'][data-table-col='"+i+"']").click((cell)=>{
-            
-            let row = cell.target.dataset.tableRow;
-            if(row == 0){
-                return; // the 0th row is the row containing columns name ...
-            }
-
-            syncIt(async () =>{
-                let table = joinedTables[i-colNames.length];
-                let joint = joints[table];
-
-                // if we have multiple colmuns of data we need to know which one contains the data we want in order to constrain the subtable.
-                let valCol = $("th[data-table-id='" + tableFullID + "'][data-table-row='0']").filter((i,val)=>{
-                    return val.textContent ==joint.target;
-                }).data("tableCol");
-
-                let jointVal = $("[data-table-id='" + tableFullID + "'][data-table-col='"+valCol+"'][data-table-row='"+row+"']").text();
-
-                // creation and binding of a new sub table
-                let data = await getTableData(api,table,jointVal);
-                if(data.status){
-                    let tableHtml = buildTable(data.data.colNames.concat(data.joinedTables),data.data.value,nextID);
-                    if ($("#" + nextID).length == 0){
-                        $("#dataHolder").append("<div id = '" + nextID + "'></div>");
+                let fieldsData = await api.getTableSelectedField(params.table);
+                if(fieldsData.status){
+                    let data = {"aaData":fieldsData.field_values,"aoColumns":[]};
+                    let ah = MetadataSource.getTableAtt(dataTreePath).hamap;
+                    let ahmap = {};
+                    for (let i=0;i<ah.length;i++){
+                        data.aoColumns.push({"sTitle":ah[i].nameattr});
+                        ahmap[ah[i].nameattr] = ah[i];
                     }
-                    $("#" + nextID).html(makeTableHeader(table,joint.from,jointVal) + tableHtml);
-                    bindTableEvent(api,tableID+1,data);
-                    let offset = 2;
-                    // we remove old tables which was generated from the table we are replacing
-                    while ($("#table_" + (tableID +offset)).length > 0){
-                        $("#table_" + (tableID +offset)).remove();
-                        offset++;
-                    }
-                    
+                    showTapResult(dataTreePath,"",data,ahmap);
                 }
             });
         });
     }
 }
+
+// stolen code from tap handle
+
+showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
+    var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"datatable\" class=\"display\"></table>";
+    
+    var job = ( !dataTreePath.jobid || dataTreePath.jobid == "")? "": '&gt;'+ dataTreePath.jobid;
+    
+    $("#resultpane").prepend('<p id="title-table" class="pagetitlepath"></p>');
+    if (dataTreePath.schema != undefined && dataTreePath.table != undefined) {
+        $("#title-table").html('&nbsp;' + dataTreePath.nodekey + '&gt;' + dataTreePath.schema + '&gt;'+ dataTreePath.table + job);
+    }
+    
+    $("#resultpane").append(table);
+    
+    var aoColumns = [];
+    var columnMap = {access_format: -1, s_ra: -1, s_dec: -1, s_fov: -1, currentColumn: -1};
+    var isloadAlix=false;
+    for(var i=0 ; i<jsdata.aoColumns.length ; i++) {
+        var title ;
+        if( attributeHandlers == undefined ) {
+            title = "No descritption available" +
+                " - This job has likely been initiated in a previous session" ;
+        } else {
+            var ah = attributeHandlers[jsdata.aoColumns[i].sTitle];/*
+            /*
+             * Column name could be published in upper case but returned by the DBMS in lower case.
+             */
+            if(ah == undefined  ) {
+                ah = attributeHandlers[jsdata.aoColumns[i].sTitle.toLowerCase()];
+            }
+            if(ah == undefined  ) {
+                ah = attributeHandlers[jsdata.aoColumns[i].sTitle.toUpperCase()];
+            }
+            if( ah == undefined ) {
+                title = "No description available (joined query?)";
+            } else {
+                /*
+                 * Title must be filtered to be understood by the tooltip plugin
+                 */
+                title = ah.description.replace(/&[a-z]+;/g, '').replace(/[<>]/g, ' ').replace(/"/g, '') +
+                " - Name: " + ah.nameorg +
+                " - Unit: " + ah.unit +
+                " - UCD: " + ah.ucd +
+                " - UType: " + ah.utype +
+                " - DataType: " + ah.dataType;
+                //alert(ah.ucd);
+                if( ah.nameorg == "access_format" || ah.ucd == "meta.code.mime" ) {
+                    columnMap.access_format = i;
+                } else if( ah.nameorg == "s_ra" || ah.ucd == "pos.eq.ra;meta.main" || ah.ucd == "pos.eq.ra" || ah.ucd == "POS_EQ_RA_MAIN") {
+                    columnMap.s_ra = i ; 
+                } else if( ah.nameorg == "s_dec" || ah.ucd == "pos.eq.dec;meta.main" || ah.ucd == "pos.eq.dec" ||ah.ucd == "POS_EQ_DEC_MAIN") {
+                    columnMap.s_dec = i;
+                    //var h = document.getElementById("alix-id");
+                    //h.insertAdjacentHTML("afterend", "<p> <button class='btn btn-success mt-5 ' onclick='Alix_Modalinfo.showPopup("+01557316 +301442.99+");'> &nbsp &nbsp Load &nbsp  Alix s</button></p>");
+                
+                }else if( ah.nameorg == "s_fov" || ah.nameorg.match(/.*instr\.fov/) ) {
+                    columnMap.s_fov = i;
+                } else if( ah.nameorg == "target_name"  ) {
+                    columnMap.target_name = i;
+                    
+                }
+            }
+            
+        }
+    
+        aoColumns[i] = {sTitle: '<span title="' + title + '">' + jsdata.aoColumns[i].sTitle + '</span>'};
+    }
+    
+    var dec=0;
+    var ra =0;
+    var schema = dataTreePath.schema;
+    var getCurrentName = function (){
+                var tableBase=  dataTreePath.schema+"."+dataTreePath.table;
+                return tableBase;
+                };
+    var options = {
+        "aLengthMenu": [5, 10, 25, 50, 100],
+        "aoColumns" : aoColumns,
+        "aaData" : jsdata.aaData,
+        "pagingType" : "simple",
+        "aaSorting" : [],
+        "bSort" : false,
+        "bFilter" : true,
+        "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            ValueFormator.reset();
+            for( var c=0 ; c<aData.length ; c++ ) {
+                var copiedcolumnMap = jQuery.extend(true, {}, columnMap);
+                var colName = $(this.fnSettings().aoColumns[c].sTitle).text();
+                console.log(colName);
+                console.log(aData);
+                console.log(nRow);
+                console.log($('td:eq(' + c + ')', nRow));
+                /*
+                 * Makes sure the mime type is for the current column 
+                 */
+                if( colName != "access_url" ) {
+                    copiedcolumnMap.access_format = -1;
+                }
+                copiedcolumnMap.currentColumn = c;
+                /*
+                 * Not formatting for the relational registry
+                 */
+                if( schema != "rr")
+                
+                    ValueFormator.formatValue(colName, aData, $('td:eq(' + c + ')', nRow), copiedcolumnMap);
+                    //console.log(colName+"=> "+ aData +"<br>/n")
+                    
+            }
+            
+            //------------------ load alix in the firt position coordonnate -------------------------
+            /*if(isloadAlix==false){
+                if(columnMap.s_ra != -1 && columnMap.s_dec !=-1){
+                ra=aData[columnMap.s_ra];
+                dec=aData[columnMap.s_dec];
+                var dec_name = $(this.fnSettings().aoColumns[columnMap.s_dec].sTitle).text();
+                var ra_name = $(this.fnSettings().aoColumns[columnMap.s_ra].sTitle).text();
+                var tab=  getCurrentName().quotedTableName().qualifiedName;
+                isloadAlix=true;
+                //dataTreeView.showNodeInfos( dataTreePath.nodekey );
+                var nameTitle =dataTreeView.dataTreePath.nodekey+">"+tab;
+                var urlPath = myNodeInfo(dataTreePath.nodekey).info.url;
+                //ValueFormator.addAlixButton(nameTitle,ra,dec,urlPath,tab,ra_name,dec_name);
+                }
+            }	*/
+            return nRow;
+        }
+            
+    };
+    // function to return node information 
+    var myNodeInfo = function(f){
+        var dataInfos = dataTreeView.getNodeInfos( f );
+        return dataInfos;
+    };
+    
+            
+    
+    var positions = [
+        { "name": "pagination",
+            "pos": "bottom-left"
+        },
+        { "name": "length",
+            "pos": "top-left"
+        },
+        { "name": 'filter',
+            "pos" : "top-right"
+        },
+        { "name": "information",
+            "pos" : "top-center"
+        }
+    ];
+    
+    CustomDataTable.create("datatable", options, positions);
+
+    $('#datatable span').tooltip( { 
+        track: true, 
+        delay: 0, 
+        showURL: false, 
+        opacity: 1, 
+        fixPNG: true, 
+        showBody: " - ", 
+        top: -15, 
+        left: 5 	
+    });
+    
+    $("#datatable_wrapper").css("overflow", "hidden");
+    
+    // Shows query panel
+    if (!$("#queryformpane").is(":visible")) {
+        $("#toggle-query").trigger( "click" );
+        $("#queryformpane").show();	
+        $("#toggle-query").show();
+    }
+};
 
 function setupEventHandlers(){
 
@@ -254,19 +302,6 @@ function setupEventHandlers(){
                         await buildTableNameTable(api,params.shortName,qce);
 
                         enableButton("btnApiDisconnect");
-
-                        // create and bind the main table
-                        let root = api.getConnector().connector.service.table;
-                        let rootData = await getTableData(api,root);
-
-                        if (rootData.status){
-                            let table = buildTable(rootData.data.colNames.concat(rootData.joinedTables),rootData.data.value,"table_1");
-                            
-                            $("#dataHolder").append("<div id = \"table_1\"></div>");
-                            $("#table_1").html(table);
-
-                            bindTableEvent(api,1,rootData);
-                        }
 
                     }
                 };
