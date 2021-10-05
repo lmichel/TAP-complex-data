@@ -295,10 +295,12 @@ function setupEventHandlers(){
                         // applying all the needed override of jsResource before using it
                         override();
 
-                        let adqlQueryView = QueryConstraintEditor.queryTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
+                        let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 
-                        qce = QueryConstraintEditor.nativeConstraintEditor({parentDivId:'tapColEditor',
+                        qce = QueryConstraintEditor.tapConstraintEditor({parentDivId:'tapColEditor',
                                 formName: 'tapFormColName',
+                                sesameUrl:"sesame",
+                                upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
                                 queryView: adqlQueryView});
 
                         await buildTableNameTable(api,params.shortName,qce);
