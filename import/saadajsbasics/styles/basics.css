@@ -573,9 +573,6 @@ iframe {
 
 .txt-right {
 	text-align: right;
-	position: absolute;
-	top: 0px;
-	right: 0px;
 	font-size: small;
 }
 
