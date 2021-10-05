@@ -133,8 +133,6 @@ ValueFormator = function() {
 						//console.log(positions+" @@@@@@@@@@@@@@@@@@@@@@@@@  "+urlPath)
 						var alLink = "<a id='" + id + "'  class='dl_aladin'  title='Send source coordo to Alix'></a>";
 						tdNode.html(alLink + " " + (new Number(value)).toPrecision(8));
-			   			 console.log(tdNode.html());
-			    	     console.log($("#" + id).length);
 						 tdNode.first().click(function(){
 							var dec_name = columnNames[1];
 							var ra_name = columnNames[0];

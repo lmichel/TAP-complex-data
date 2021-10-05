@@ -63,7 +63,7 @@ async function buildTableNameTable(api,shortName,qce){
                 // override the root table using the table selected by the user
                 params.table = cell.target.dataset.table;
 
-                let dataTreePath = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table, "jobid":"what a job"};
+                let dataTreePath = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
 
                 // remember to always hijack the cache before risquing using it.
                 let hijack = await MetadataSource.hijackCache(dataTreePath,api);
@@ -82,6 +82,8 @@ async function buildTableNameTable(api,shortName,qce){
                     for (let i=0;i<fields.length;i++){
                         data.aoColumns.push({"sTitle":fields[i]});
                     }
+                    // adding job id before using fireSetTreepath make the editor not showing the columns
+                    dataTreePath.jobid="what a job";
                     showTapResult(dataTreePath,"",data,ahmap);
                 }
             });
@@ -177,7 +179,6 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
             for( var c=0 ; c<aData.length ; c++ ) {
                 var copiedcolumnMap = jQuery.extend(true, {}, columnMap);
                 var colName = $(this.fnSettings().aoColumns[c].sTitle).text();
-                console.error("ui");
                 /*
                  * Makes sure the mime type is for the current column 
                  */
