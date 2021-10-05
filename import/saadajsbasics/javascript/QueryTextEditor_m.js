@@ -236,7 +236,7 @@ ADQLTextEditor_Mvc.prototype = Object.create(QueryTextEditor_Mvc.prototype, {
 			this.query += this.buildWhereConstraint("SELECT " + topLimit , ",", this.selectConst);
 			this.query += "FROM " + tableName ;
 			if( this.flatJoined != null ){
-				for( var i in this.flatJoined) {
+				for( var i=0; i<this.flatJoined.length;i++) {
 					this.query += ", " + this.flatJoined[i];
 				}
 			}
