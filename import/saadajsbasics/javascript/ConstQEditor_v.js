@@ -27,23 +27,23 @@ function ConstQEditor_mVc(params /*{parentDivId,formName,queryView}*/){
 	this.constListId   = '';
 	this.formName = params.formName;
 	this.orderById     = params.parentDivId + "_orderby";
-	this.fieldListView = new FieldList_mVc(params.parentDivId
-			, this.formName
-			, {stackHandler: function(ahName){ that.fireAttributeEvent(ahName);}
-	, orderByHandler: function(ahName){ that.fireOrderBy(ahName);}
-	}
+	this.fieldListView = new FieldList_mVc(params.parentDivId,
+			this.formName,
+			{stackHandler: function(ahName){ that.fireAttributeEvent(ahName);},
+			orderByHandler: function(ahName){ that.fireOrderBy(ahName);}
+		}
 	);
-	this.constListView = new ConstList_mVc(params.parentDivId
-			, this.formName
-			, this.constContainerId
-			, function(ahName){ that.fireClearAllConst();}
+	this.constListView = new ConstList_mVc(params.parentDivId,
+			this.formName,
+			this.constContainerId,
+			function(ahName){ that.fireClearAllConst();}
 	);
-	this.orderByView = new 	OrderBy_mVc(params.parentDivId
-			, this.formName
-			, this.constContainerId
-			, function(ahName){ that.fireOrderBy(ahName);}
+	this.orderByView = new 	OrderBy_mVc(params.parentDivId,
+			this.formName,
+			this.constContainerId,
+			function(ahName){ that.fireOrderBy(ahName);}
 	);
-};
+}
 
 ConstQEditor_mVc.prototype = {
 		/**
@@ -161,13 +161,13 @@ function UcdQEditor_mVc(params /*{parentDivId,formName,queryView, help}*/){
 	ConstQEditor_mVc.call(this, params);
 	var that = this;
 	this.help = params.help;
-	this.fieldListView = new UcdFieldList_mVc(params.parentDivId
-			, this.formName
-			, { stackHandler: function(ahName){ that.fireAttributeEvent(ahName);}
-	, orderByHandler: function(ahName){ that.fireOrderBy(ahName);}
-	}
+	this.fieldListView = new UcdFieldList_mVc(params.parentDivId,
+			this.formName,
+			{ stackHandler: function(ahName){ that.fireAttributeEvent(ahName);},
+			orderByHandler: function(ahName){ that.fireOrderBy(ahName);}
+		}
 	);
-};
+}
 
 /**
  * Method overloading
@@ -203,7 +203,7 @@ UcdQEditor_mVc.prototype = Object.create(ConstQEditor_mVc.prototype, {
  */
 function UcdPatternEditor_mVc(params /*{parentDivId, formName, queryView, help}*/){
 	UcdQEditor_mVc.call(this, params);
-};
+}
 /**
  * Method overloading
  */
@@ -230,7 +230,7 @@ function PosQEditor_mVc(params /*{parentDivId, formName, queryView, frames, urls
 	ConstQEditor_mVc.call(this, params);
 	params.editor = this;
 	this.fieldListView = new ConeSearch_mVc(params);
-};
+}
 /**
  * Method overloading
  */
@@ -304,16 +304,17 @@ PosQEditor_mVc.prototype = Object.create(ConstQEditor_mVc.prototype, {
 			var that = this;
 			if( data && data.userAction && data.isReady ) {
 				var rq = '';
+				var i;
 				if( data.region.format == "array2dim") {
 					rq = '';
-					for( var i=0 ; i<(data.region.points.length - 1) ; i++ ) {
+					for( i=0 ; i<(data.region.points.length - 1) ; i++ ) {
 						if( i > 0 ) rq += " ";
 						rq += data.region.points[i][0] + " " + data.region.points[i][1];
 					}
 
 				} else if( data.region.format == "array") {
 					rq = '';
-					for( var i=0 ; i<data.region.points.length  ; i++ ) {
+					for( i=0 ; i<data.region.points.length  ; i++ ) {
 						if( i > 0 ) rq += " ";
 						rq += data.region.points[i];
 					}
@@ -359,7 +360,7 @@ PosQEditor_mVc.prototype = Object.create(ConstQEditor_mVc.prototype, {
 						fieldListView.resetPosition();
 					}
 				});
-			}
+			};
 			
 			this.parentDiv.find("input.bigarrowbutton").click(handler(this.listener, this.constListId, this.fieldListView));
 
@@ -395,12 +396,12 @@ function CatalogueQEditor_mVc(params /*{parentDivId, formName, getMetaUrl, query
 	ConstQEditor_mVc.call(this, params);
 	var that = this;
 	this.help = params.help;
-	this.fieldListView = new CatalogueList_mVc(params.parentDivId
-			, this.formName
-			, {stackHandler: function(ahName){ that.fireAttributeEvent(ahName);}
-	}
+	this.fieldListView = new CatalogueList_mVc(params.parentDivId ,
+			this.formName ,
+			{stackHandler: function(ahName){ that.fireAttributeEvent(ahName);}
+		}
 	);
-};
+}
 /**
  * Method overloading
  */
@@ -440,15 +441,17 @@ function tapColSelector_mVc(params){
 	this.help = params.help;
 	this.constPosContainer   = params.parentDivId + "_constposcont";
 	
-	this.fieldListView = new TapColList_mVc(params.parentDivId
-			, this.formName
-			, {stackHandler: function(ahName){ that.fireAttributeEvent(ahName);}
-	, orderByHandler: function(ahName){ that.fireOrderBy(ahName);}
-	}	        
-	, params.sessionID
+	this.fieldListView = new TapColList_mVc(params.parentDivId ,
+		this.formName ,
+		{
+			stackHandler: function(ahName){ that.fireAttributeEvent(ahName);} ,
+			orderByHandler: function(ahName){ that.fireOrderBy(ahName);}
+		},       
+		params.sessionID
 	);
+
 	this.fieldListView.setStackTooltip("Click to select this field");
-};
+}
 /**
  * Method overloading
  */
@@ -456,10 +459,10 @@ tapColSelector_mVc.prototype = Object.create(ConstQEditor_mVc.prototype, {
 	draw : { 
 		value: function() {
 			this.fieldListView.draw();
-			this.parentDiv.append('<div >'
+			this.parentDiv.append('<div >' +
 					//	+ '<div id=' + this.constPosContainer + '></div>'
-					+ '<div id=' + this.constContainerId + '></div>'
-					+ '</div>');
+					'<div id=' + this.constContainerId + '></div>' +
+					'</div>');
 			var isADQL = true;
 			this.constListId = this.constListView.draw(null, isADQL);
 			this.orderByView.draw();
@@ -550,21 +553,24 @@ tapColSelector_mVc.prototype = Object.create(ConstQEditor_mVc.prototype, {
 function tapQEditor_mVc(params /*parentDivId, formName, sesameUrl, upload { url, postHandler}, queryView, currentNode }*/){
 	tapColSelector_mVc.call(this, params);
 	var that = this;
-	this.fieldListView = new TapFieldList_mVc(params.parentDivId
-			, this.formName
-			, {stackHandler: function(ahName){ that.fireAttributeEvent(ahName);}
-	, radec: false}	        
-	, params.sessionID
+	this.fieldListView = new TapFieldList_mVc(params.parentDivId, 
+		this.formName ,
+		{
+			stackHandler: function(ahName){ that.fireAttributeEvent(ahName);} ,
+			radec: false
+		} ,       
+		params.sessionID
 	);
+
 	this.fieldListView.setStackTooltip("Click to constrain this field");
-	this.posEditor = new TapSimplePos_mVc({editor: this
-		, parentDivId: this.constPosContainer
-		, formName: this.formName
-		, frames: null
-		, urls: {sesameURL: params.sesameUrl, uploadURL:params.upload.url}
-	    , postUploadHandler: params.upload.postHandler
+	this.posEditor = new TapSimplePos_mVc({editor: this,
+		parentDivId: this.constPosContainer,
+		formName: this.formName,
+		frames: null,
+		urls: {sesameURL: params.sesameUrl, uploadURL:params.upload.url},
+	    postUploadHandler: params.upload.postHandler,
 	});
-};
+}
 /**
  * Method overloading
  */
@@ -572,10 +578,11 @@ tapQEditor_mVc.prototype = Object.create(tapColSelector_mVc.prototype, {
 	draw : { 
 		value: function() {
 			this.fieldListView.draw();
-			this.parentDiv.append('<div >'
-					+ '<div id=' + this.constPosContainer + '></div>'
-					+ '<div id=' + this.constContainerId + '></div>'
-					+ '</div>');
+			this.parentDiv.append('<div >' +
+				'<div id=' + this.constPosContainer + '></div>' +
+				'<div id=' + this.constContainerId + '></div>' +
+				'</div>'
+			);
 
 //			$("#" +  this.constContainerId).append('<div class=constdiv><fieldset class="constraintlist">'
 //			+ '<legend>Position</legend>'
@@ -621,8 +628,8 @@ tapQEditor_mVc.prototype = Object.create(tapColSelector_mVc.prototype, {
 				Modalinfo.error("DEC field not set");
 				return;
 			}
-			this.listener.controlInputCoord(ra, dec, radius, frame
-						, rakw, deckw, that.constListId);
+			this.listener.controlInputCoord(ra, dec, radius, frame ,
+						rakw, deckw, that.constListId);
 			$("#" + this.constListId + " span.help").attr("style","display:none;");
 		}
 	},
@@ -665,26 +672,27 @@ tapQEditor_mVc.prototype = Object.create(tapColSelector_mVc.prototype, {
 function tapPosQEditor_mVc(params /*parentDivId, formName, sesameUrl, upload { url, postHandler, preloadedGetter}, queryView, currentNode }*/){
 	tapColSelector_mVc.call(this, params);
 	var that = this;
-	this.fieldListView = new TapFieldList_mVc(params.parentDivId
-			, this.formName
-			, {stackHandler: null
-	, orderByHandler: null
-	, raHandler: null
-	, decHandler: null
-	, radec: true}	        
-	, params.sessionID
+	this.fieldListView = new TapFieldList_mVc(params.parentDivId,
+			this.formName,
+			{
+				stackHandler: null,
+				orderByHandler: null,
+				raHandler: null,
+				decHandler: null,
+				radec: true
+			},        
+		params.sessionID,
 	);
 	this.fieldListView.setStackTooltip("Click to constrain this field");
-	this.posEditor = new TapSimplePos_mVc({editor: this
-		, parentDivId: this.constPosContainer
-		, formName: this.formName
-		, frames: null
-		, urls: {sesameURL: params.sesameUrl, uploadURL:params.upload.url}
-	    , postUploadHandler: params.upload.postHandler
-	    , preloadedGetter: params.upload.preloadedGetter
-
+	this.posEditor = new TapSimplePos_mVc({editor: this,
+		parentDivId: this.constPosContainer,
+		formName: this.formName,
+		frames: null,
+		urls: {sesameURL: params.sesameUrl, uploadURL:params.upload.url},
+	    postUploadHandler: params.upload.postHandler,
+	    preloadedGetter: params.upload.preloadedGetter,
 	});
-};
+}
 /**
  * Method overloading
  */
@@ -692,10 +700,10 @@ tapPosQEditor_mVc.prototype = Object.create(tapColSelector_mVc.prototype, {
 	draw : { 
 		value: function() {
 			this.fieldListView.draw();
-			this.parentDiv.append('<div>'
-					+ '<div id=' + this.constPosContainer + '></div>'
-					+ '<div id=' + this.constContainerId + '></div>'
-					+ '</div>');
+			this.parentDiv.append('<div>' +
+					'<div id=' + this.constPosContainer + '></div>' +
+					'<div id=' + this.constContainerId + '></div>' +
+					'</div>');
 
 //			$("#" +  this.constContainerId).append('<div class=constdiv><fieldset class="constraintlist">'
 //			+ '<legend>Position</legend>'
@@ -763,8 +771,8 @@ tapPosQEditor_mVc.prototype = Object.create(tapColSelector_mVc.prototype, {
 				Modalinfo.error("DEC field not set");
 				return;
 			}
-			this.listener.controlInputCoord(ra, dec, radius, frame
-						, rakw, deckw, that.constListId);
+			this.listener.controlInputCoord(ra, dec, radius, frame,
+						rakw, deckw, that.constListId);
 			$("#" + this.constListId + " span.help").attr("style","display:none;");
 		}
 	},
@@ -807,9 +815,9 @@ tapPosQEditor_mVc.prototype = Object.create(tapColSelector_mVc.prototype, {
 function tapCrossMatchQEditor_mVc(params /*parentDivId, formName, sesameUrl, upload { url, postHandler}, queryView, currentNode }*/){
 	tapPosQEditor_mVc.call(this, params);
 	this.xParentDivId = "X" + this.parentDiv.attr('id');
-	this.xfieldListView ;
+	this.xfieldListView = undefined ;
 	this.sessionId = params.sessionID;
-};
+}
 
 /**
  * Method overloading
@@ -835,14 +843,16 @@ tapCrossMatchQEditor_mVc.prototype = Object.create(tapPosQEditor_mVc.prototype, 
 			$("#" + this.xParentDivId).css("border","1px solid green");
 			
 			//setup 2nd fieldlist
-			this.xfieldListView = new TapFieldList_mVc(this.xParentDivId
-					, this.formName
-					, {stackHandler: null
-			, orderByHandler: null
-			, raHandler: null
-			, decHandler: null
-			, radec: true}	        
-			, this.sessionID
+			this.xfieldListView = new TapFieldList_mVc(this.xParentDivId,
+				this.formName,
+				{
+					stackHandler: null,
+					orderByHandler: null,
+					raHandler: null,
+					decHandler: null,
+					radec: true
+				} ,
+				this.sessionID,
 			);
 			this.xfieldListView.draw();
 			this.xfieldListView.setStackTooltip("Click to constrain this field");
