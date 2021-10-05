@@ -7,58 +7,23 @@
 ValueFormator = function() {
 	var raValue = undefined;
 	var decValue = undefined;
-	var targetName = undefined;
-	var isloadAlix =false;
-	var isGoodTitle = false;
-	var isGoodMessage = false;
 	var reset = function(){
 		raValue = undefined;
 		decValue = undefined;		
-	}
-	
-	/*/ BOTTUM ALIX TO LOAD DATA
-	var addAlixButton=function (title,ra,dec,url,ta,ra_name,dec_name,label){
-	var h = document.getElementById("title-table");
-	var positions=ra+" "+dec;
-	var tab=ta;
-	var r_name=ra_name;
-	var d_name = dec_name;
-	h.insertAdjacentHTML("beforeend", "<span class='pagetitlepath'> >  <button id= 'btn_load_alix' class='btn btn-success' class='dl_aladin' href='javascript:void(0););'> &nbsp &nbsp Load &nbsp  Alixc </button></span>");
-	//h.insertAdjacentHTML("beforeend", "<span class='pagetitlepath'> >  <button class='btn btn-success ' onclick='alixapi.changeRefBlue(&quot;"+ra+"&quot;,&quot;"+dec+"&quot;);'class='dl_aladin' href='javascript:void(0););'> &nbsp &nbsp ChangeRef </button><br>");
-	$().ready(function(){
-		$("#btn_load_alix").click(function(){
-			//alixapi.showPopupData(title,positions,url,tab,r_name,d_name);
-				alixapi.showPopupData({
-				     master: {
-						 raCenter: ra, 
-					     decCenter: dec, 
-	                     raColumn: r_name,
-	                     decColumn: d_name,
-	                     urlPath: url, 
-	                     tablePath: tab, 
-						 label: label	
-						},
-						label: label
-					 }
-				);
-		});
-		
-	});
-	
-	isloadAlix=true;
-	
-};*/
+	};
+	var dataTreePath;
 	
 	/**
 	 * 
 	 */
-	var formatValue = function(columnName, values, tdNode, columnMap) {
+	var formatValue = function(columnName, values, tdNode, columnMap,dataTreePat) {
+		dataTreePath = dataTreePat;
 		var value = values[columnName.currentColumn];
 		if( columnMap.currentColumn == undefined )  {
 			Modalinfo.error("formatValue: Missing column number in " + JSON.stringify(columnMap));
 			return;
 		}
-		var value = values[columnMap.currentColumn];
+		var value = "" + values[columnMap.currentColumn];
 		
 		if ( columnMap.s_ra == columnMap.currentColumn){
 			raValue = value;
@@ -119,7 +84,7 @@ ValueFormator = function() {
 		var myNodeInfo = function(f){
 				var dataInfos = dataTreeView.getNodeInfos( f );
 				return dataInfos;
-			}
+			};
 			
 		var columnNames=[];	var i=0;
 	var formatSimpleValue = function(columnName, value, tdNode, columnMap) {
@@ -158,35 +123,35 @@ ValueFormator = function() {
 						var ra_name = columnNames[0];	
 						//alert(ra_name+"  "+dec_name)
 						//alert (getCurrentName().quotedTableName().qualifiedName); 
-						var tableBase=  dataTreeView.dataTreePath.schema+"."+dataTreeView.dataTreePath.table;
+						var tableBase=  dataTreePath.schema+"."+dataTreePath.table;
 						var tab=  tableBase.quotedTableName().qualifiedName;
-						var urlPath = myNodeInfo(dataTreeView.dataTreePath.nodekey).info.url;
+						//var urlPath = myNodeInfo(dataTreeView.dataTreePath.nodekey).info.url;
 						isloadAlix=true;
-						var title = dataTreeView.dataTreePath.nodekey+">"+tab;
+						var title = dataTreePath.nodekey+">"+tab;
 						//dataTreeView.showNodeInfos( dataTreePath.nodekey );
 						var id = "dec_"+ dec.toString().replace(".", "").replace("-", "")
 						//console.log(positions+" @@@@@@@@@@@@@@@@@@@@@@@@@  "+urlPath)
 						var alLink = "<a id='" + id + "'  class='dl_aladin'  title='Send source coordo to Alix'></a>";
 						tdNode.html(alLink + " " + (new Number(value)).toPrecision(8));
-			   			 console.log(tdNode.html())
-			    	     console.log($("#" + id).length)
+			   			 console.log(tdNode.html());
+			    	     console.log($("#" + id).length);
 						 tdNode.first().click(function(){
-						 var dec_name = columnNames[1];
-						 var ra_name = columnNames[0];
-						 var label = "TAP "+ dataTreeView.dataTreePath.nodekey + " " + tableBase;
-					     alixapi.showPopupData({
-						     master: {
-								 raCenter: ra, 
-							     decCenter: dec, 
-			                     raColumn: ra_name,
-			                     decColumn: dec_name,
-			                     urlPath: urlPath, 
-			                     tablePath: tab, 
-								 label: label	
-								},
-								label: label
-							 }
-						);
+							var dec_name = columnNames[1];
+							var ra_name = columnNames[0];
+							var label = "TAP "+ dataTreePath.nodekey + " " + tableBase;
+							alixapi.showPopupData({
+								master: {
+									raCenter: ra, 
+									decCenter: dec, 
+									raColumn: ra_name,
+									decColumn: dec_name,
+									//urlPath: urlPath, 
+									tablePath: tab, 
+									label: label	
+									},
+									label: label
+								}
+							);
 						
 						});
 					}	
@@ -205,7 +170,7 @@ ValueFormator = function() {
 		} else {
 			tdNode.html(value);
 		}
-	}
+	};
 	var addInfoControl = function(columnName, tdNode, url){
 		tdNode.append("<a class='dl_info' title='Get info about' href='#' onclick='resultPaneView.fireGetProductInfo(\"" + url + "\"); return false;'></a>");
 	};
@@ -217,14 +182,14 @@ ValueFormator = function() {
 	};	
 	var addCartControl = function(columnName, tdNode, url, secureMode){
 		if( secureMode ){
-			tdNode.append("<a class='dl_securecart' title='Add to cart' href='#' onclick='cartView.fireRestrictedUrl(\"" + dataTreeView.dataTreePath.nodekey + "\", \"" + url + "\"); return false;'/></a>");
+			tdNode.append("<a class='dl_securecart' title='Add to cart' href='#' onclick='cartView.fireRestrictedUrl(\"" + dataTreePath.nodekey + "\", \"" + url + "\"); return false;'/></a>");
 		} else {
-			tdNode.append("<a class='dl_cart' title='Add to cart' href='#' onclick='cartView.fireAddUrl(\"" + dataTreeView.dataTreePath.nodekey + "\", \"" + url + "\"); return false;'/></a>");
+			tdNode.append("<a class='dl_cart' title='Add to cart' href='#' onclick='cartView.fireAddUrl(\"" + dataTreePath.nodekey + "\", \"" + url + "\"); return false;'/></a>");
 		}
 	};	
 	var addSampControl = function(columnName, tdNode, url, sampMType, fileName){
-		tdNode.append("<a class='dl_samp'     title='Broadcast to SAMP'   href='#' onclick='WebSamp_mVc.fireSendVoreport(\"" 
-				+ url + "\",\"" + sampMType + "\", \"" + fileName + "\"); return false;'/></a>");
+		tdNode.append("<a class='dl_samp'     title='Broadcast to SAMP'   href='#' onclick='WebSamp_mVc.fireSendVoreport(\"" +
+				url + "\",\"" + sampMType + "\", \"" + fileName + "\"); return false;'/></a>");
 	};	
 	var addPreviewControl = function(columnName, tdNode, url, fileName){
 		var title = ((fileName != undefined)?fileName: "") + " preview";
@@ -238,38 +203,6 @@ ValueFormator = function() {
 			DataLinkBrowser.startCompliantBrowser(url, "forwardxmlresource", fovObject);
 		});
 	};
-	/*var addSTCRegionControl = function(tdNode, stcRegion) {
-		var region =  new SRegion(stcRegion);
-		tdNode.html("");
-		tdNode.append("<a title='" + stcRegion + " (click to plot)' class='dl_stc' href='#'></a>");
-		tdNode.append("<a class='dl_samp' title='Broadcast to SAMP'   href='#' onclick='WebSamp_mVc.fireSendAladinScript(&quot;" + region.getAladinScript() + "&quot;); return false;'/></a>");
-		tdNode.first().click(function() {
-			var tableBase=  dataTreeView.dataTreePath.schema+"."+dataTreeView.dataTreePath.table;
-			var tab=  tableBase.quotedTableName().qualifiedName;
-			var title = dataTreeView.dataTreePath.nodekey+">"+tab;
-			var label = "TAP "+ dataTreeView.dataTreePath.nodekey + " " + tableBase;
-			alixapi.showPopupData({
-				     /*master: {
-						 raCenter: ra, 
-					     decCenter: dec, 
-	                     raColumn: ra_name,
-	                     decColumn: dec_name,
-	                     urlPath: urlPath, 
-	                     tablePath: tableBase,     
-					 },*//*
-					 stcRegion: stcRegion,
-					 region:region,
-					 label: label
-				});
-			/*alixapi.showPopup(alixapi.getCenter(region));
-			console.log("COORDS => "+alixapi.getCoords(stcRegion));
-			alixapi.drawPolygone(region,stcRegion);*/
-			//ModalAladin.aladinExplorer({ region: region, fov: 0.016, title:"STC Region", surveyKeyword: targetName}, []);
-			//return false;
-		//})
-	//}*/
-	
-	
 	
 	/**************  another test of region control for this one we added ra,dec,rac_name,dec_name in our function. note that we can also use the first one that is commented  *********** */
 	
@@ -279,18 +212,18 @@ ValueFormator = function() {
 			tdNode.append("<a title='" + stcRegion + " (click to plot)' class='dl_stc' href='#'></a>");
 			tdNode.append("<a class='dl_samp' title='Broadcast to SAMP'   href='#' onclick='WebSamp_mVc.fireSendAladinScript(&quot;" + region.getAladinScript() + "&quot;); return false;'/></a>");
 			tdNode.first().click(function() {
-				var tableBase=  dataTreeView.dataTreePath.schema+"."+dataTreeView.dataTreePath.table;
+				var tableBase=  dataTreePath.schema+"."+dataTreePath.table;
 				var tab=  tableBase.quotedTableName().qualifiedName;
-				var title = dataTreeView.dataTreePath.nodekey+">"+tab;
-		    	var label = "TAP "+ dataTreeView.dataTreePath.nodekey + " " + tableBase;
-				var urlPath = myNodeInfo(dataTreeView.dataTreePath.nodekey).info.url;
+				var title = dataTreePath.nodekey+">"+tab;
+		    	var label = "TAP "+ dataTreePath.nodekey + " " + tableBase;
+				//var urlPath = myNodeInfo(dataTreeView.dataTreePath.nodekey).info.url;
 				alixapi.showPopupData({
 					     master: {
 							 raCenter: ra, 
 						     decCenter: dec, 
 		                     raColumn: ra_name,
 		                     decColumn: dec_name,
-		                     urlPath: urlPath, 
+		                     //urlPath: urlPath, 
 		                     tablePath: tab,  
 							 label: label   
 						 },
@@ -298,13 +231,9 @@ ValueFormator = function() {
 						 region:region,
 						 label: label
 					});
-				/*alixapi.showPopup(alixapi.getCenter(region));
-				console.log("COORDS => "+alixapi.getCoords(stcRegion));
-				alixapi.drawPolygone(region,stcRegion);*/
-				//ModalAladin.aladinExplorer({ region: region, fov: 0.016, title:"STC Region", surveyKeyword: targetName}, []);
 				return false;
 			});
-	 }
+	 };
 
 	/**
 	 * Get the URL infos asynchronously: formating must be achieved inside the callback
@@ -374,7 +303,7 @@ ValueFormator = function() {
 				}
 			}
 		});
-	}
+	};
 	/*
 	 * exports
 	 */

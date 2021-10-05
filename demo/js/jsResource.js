@@ -71,13 +71,16 @@ async function buildTableNameTable(api,shortName,qce){
                     qce.fireSetTreepath(new DataTreePath(dataTreePath));
                 }
                 let fieldsData = await api.getTableSelectedField(params.table);
+                let fields = await api.getAllSelectedFields(params.table);
                 if(fieldsData.status){
                     let data = {"aaData":fieldsData.field_values,"aoColumns":[]};
                     let ah = MetadataSource.getTableAtt(dataTreePath).hamap;
                     let ahmap = {};
                     for (let i=0;i<ah.length;i++){
-                        data.aoColumns.push({"sTitle":ah[i].nameattr});
                         ahmap[ah[i].nameattr] = ah[i];
+                    }
+                    for (let i=0;i<fields.length;i++){
+                        data.aoColumns.push({"sTitle":fields[i]});
                     }
                     showTapResult(dataTreePath,"",data,ahmap);
                 }
@@ -174,10 +177,7 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
             for( var c=0 ; c<aData.length ; c++ ) {
                 var copiedcolumnMap = jQuery.extend(true, {}, columnMap);
                 var colName = $(this.fnSettings().aoColumns[c].sTitle).text();
-                console.log(colName);
-                console.log(aData);
-                console.log(nRow);
-                console.log($('td:eq(' + c + ')', nRow));
+                console.error("ui");
                 /*
                  * Makes sure the mime type is for the current column 
                  */
@@ -190,7 +190,7 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
                  */
                 if( schema != "rr")
                 
-                    ValueFormator.formatValue(colName, aData, $('td:eq(' + c + ')', nRow), copiedcolumnMap);
+                    ValueFormator.formatValue(colName, aData, $('td:eq(' + c + ')', nRow), copiedcolumnMap,dataTreePath);
                     //console.log(colName+"=> "+ aData +"<br>/n")
                     
             }
