@@ -967,7 +967,7 @@ CustomDataTable = function () {
 		// Positioning the elements
 		if (position != undefined) {
 			options = addSimpleParameter(options, "sDom", changePosition(position));
-		}				
+		}		
 		var table = $('#' + id).dataTable(options);
 
 		// Adding the custom content

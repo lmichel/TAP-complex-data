@@ -84,6 +84,7 @@ async function buildTableNameTable(api,shortName,qce){
                     }
                     // adding job id before using fireSetTreepath make the editor not showing the columns
                     dataTreePath.jobid="what a job";
+                    $("#resultpane").html('');
                     showTapResult(dataTreePath,"",data,ahmap);
                 }
             });
