@@ -1,4 +1,4 @@
-function override(){
+function MetadataSourceOverride(){
     MetadataSource = function() {
         var getMetaTableUrl = null;
         var getJoinedTablesUrl = null;

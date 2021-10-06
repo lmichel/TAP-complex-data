@@ -272,9 +272,6 @@ function setupEventHandlers(){
                         $("label[name=radioLabel]").each((i,btn)=>{
                             disableButton(btn.id);
                         });
-                        
-                        // applying all the needed override of jsResource before using it
-                        override();
 
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 

@@ -33,21 +33,39 @@
 
         <script type="text/javascript" src="../js/shared.js"></script>
         <script type="text/javascript" src="../js/jsResource.js"></script>
-        <script type="text/javascript" src="../js/overrides.js"></script>
         
         <!-- End of Custum scripts -->
+
+        <!-- Imported Scripts -->
 
         <script type="text/javascript" src="../js/datatreeView.js"></script>
         <script type="text/javascript" src="../js/formator.js"></script>
 
         <script type="text/javascript" src="../../import/saadajsbasics/jsimports/jquery.js"></script>
-        <script type="text/javascript" src="../../import/saadajsbasics/loader.js"></script>
+        <script type="text/javascript" src="../js/loader.js"></script>
+
+        <!-- End of Imported Scripts -->
+
+        <!-- Early Overrides Scripts -->
+
+        <script type="text/javascript" src="../js/overrides/MetadataSource.js"></script>
+        <script type="text/javascript" src="../js/overrides/overrides.js"></script>
+
+        <!-- End of Early Overrides Scripts -->
 
         <script>
             resourceLoader.setCss([]);
             resourceLoader.setScripts([]);
-            resourceLoader.loadAll();
+            resourceLoader.loadAll().then((result) => {
+                // applying IIFE overrides right after jsResources ended his loading
+                overrides();
+            });
         </script>
+
+        <!-- Late Overrides Scripts -->
+
+        <!-- End Late Overrides Scripts -->
+        
         <!-- CSS imports -->
 
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/github.min.css">
