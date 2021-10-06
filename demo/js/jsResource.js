@@ -85,7 +85,7 @@ async function buildTableNameTable(api,shortName,qce){
                     // adding job id before using fireSetTreepath make the editor not showing the columns
                     dataTreePath.jobid="what a job";
                     $("#resultpane").html('');
-                    showTapResult(dataTreePath,"",data,ahmap);
+                    showTapResult(dataTreePath,data,ahmap,"#resultpane");
                 }
             });
         });
@@ -94,17 +94,17 @@ async function buildTableNameTable(api,shortName,qce){
 
 // stolen code from tap handle
 
-showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
+showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid) {
     var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"datatable\" class=\"display\"></table>";
     
     var job = ( !dataTreePath.jobid || dataTreePath.jobid == "")? "": '&gt;'+ dataTreePath.jobid;
     
-    $("#resultpane").prepend('<p id="title-table" class="pagetitlepath"></p>');
+    $(tid).prepend('<p id="title-table" class="pagetitlepath"></p>');
     if (dataTreePath.schema != undefined && dataTreePath.table != undefined) {
         $("#title-table").html('&nbsp;' + dataTreePath.nodekey + '&gt;' + dataTreePath.schema + '&gt;'+ dataTreePath.table + job);
     }
     
-    $("#resultpane").append(table);
+    $(tid).append(table);
     
     var aoColumns = [];
     var columnMap = {access_format: -1, s_ra: -1, s_dec: -1, s_fov: -1, currentColumn: -1};
@@ -137,16 +137,13 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
                 " - UCD: " + ah.ucd +
                 " - UType: " + ah.utype +
                 " - DataType: " + ah.dataType;
-                //alert(ah.ucd);
+                
                 if( ah.nameorg == "access_format" || ah.ucd == "meta.code.mime" ) {
                     columnMap.access_format = i;
                 } else if( ah.nameorg == "s_ra" || ah.ucd == "pos.eq.ra;meta.main" || ah.ucd == "pos.eq.ra" || ah.ucd == "POS_EQ_RA_MAIN") {
                     columnMap.s_ra = i ; 
                 } else if( ah.nameorg == "s_dec" || ah.ucd == "pos.eq.dec;meta.main" || ah.ucd == "pos.eq.dec" ||ah.ucd == "POS_EQ_DEC_MAIN") {
                     columnMap.s_dec = i;
-                    //var h = document.getElementById("alix-id");
-                    //h.insertAdjacentHTML("afterend", "<p> <button class='btn btn-success mt-5 ' onclick='Alix_Modalinfo.showPopup("+01557316 +301442.99+");'> &nbsp &nbsp Load &nbsp  Alix s</button></p>");
-                
                 }else if( ah.nameorg == "s_fov" || ah.nameorg.match(/.*instr\.fov/) ) {
                     columnMap.s_fov = i;
                 } else if( ah.nameorg == "target_name"  ) {
@@ -154,7 +151,6 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
                     
                 }
             }
-            
         }
     
         aoColumns[i] = {sTitle: '<span title="' + title + '">' + jsdata.aoColumns[i].sTitle + '</span>'};
@@ -164,9 +160,10 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
     var ra =0;
     var schema = dataTreePath.schema;
     var getCurrentName = function (){
-                var tableBase=  dataTreePath.schema+"."+dataTreePath.table;
-                return tableBase;
-                };
+        var tableBase=  dataTreePath.schema+"."+dataTreePath.table;
+        return tableBase;
+    };
+
     var options = {
         "aLengthMenu": [5, 10, 25, 50, 100],
         "aoColumns" : aoColumns,
@@ -187,13 +184,12 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
                     copiedcolumnMap.access_format = -1;
                 }
                 copiedcolumnMap.currentColumn = c;
+
                 /*
                  * Not formatting for the relational registry
                  */
                 if( schema != "rr")
-                
                     ValueFormator.formatValue(colName, aData, $('td:eq(' + c + ')', nRow), copiedcolumnMap,dataTreePath);
-                    //console.log(colName+"=> "+ aData +"<br>/n")
                     
             }
             
@@ -211,7 +207,7 @@ showTapResult = function(dataTreePath, jid, jsdata, attributeHandlers) {
                 var urlPath = myNodeInfo(dataTreePath.nodekey).info.url;
                 //ValueFormator.addAlixButton(nameTitle,ra,dec,urlPath,tab,ra_name,dec_name);
                 }
-            }	*/
+            }*/
             return nRow;
         }
             
