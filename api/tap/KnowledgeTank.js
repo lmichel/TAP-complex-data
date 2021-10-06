@@ -28,31 +28,31 @@ var KnowledgeTank = (function(){
 
         this.serviceDescriptors = { 
             "Simbad" : {
-                "tapService" : "http://simbad.u-strasbg.fr/simbad/sim-tap/sync",
+                "tapService" : "//simbad.u-strasbg.fr/simbad/sim-tap/sync",
                 "schema" : "public",
                 "table" : "basic"
             },
             
             "Gavo" : {
-                "tapService" : "http://dc.zah.uni-heidelberg.de/tap/sync",
+                "tapService" : "//dc.zah.uni-heidelberg.de/tap/sync",
                 "schema" : "rr",
                 "table" : "resource"
             },
         
             "CAOM" : {
-                "tapService" : "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync",
+                "tapService" : "//vao.stsci.edu/CAOMTAP/tapservice.aspx/sync",
                 "schema" : "dbo",
                 "table" : "CaomObservation"
             },
             
             "3XMM" : {
-                "tapService" : "https://xcatdb.unistra.fr/4xmmdr10/tap/sync",
+                "tapService" : "//xcatdb.unistra.fr/4xmmdr10/tap/sync",
                 "schema" : "EPIC",
                 "table" : "EPIC_IMAGE"
             },
             
             "Vizier" : {
-                "tapService" : "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
+                "tapService" : "//tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
                 "schema" : "metaviz",
                 "table" : "METAcat"
             }
