@@ -1,3 +1,4 @@
 function overrides(){
     MetadataSourceOverride();
+    QueryConstraintEditorOverride();
 }

@@ -275,7 +275,7 @@ function setupEventHandlers(){
 
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
 
-                        qce = QueryConstraintEditor.tapConstraintEditor({parentDivId:'tapColEditor',
+                        qce = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
                                 formName: 'tapFormColName',
                                 sesameUrl:"sesame",
                                 upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
