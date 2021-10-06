@@ -634,7 +634,7 @@ tapQEditor_mVc.prototype = Object.create(tapColSelector_mVc.prototype, {
 		}
 	},
 	updateQuery  :  { 
-		value:function(consts, joins) {	
+		value:function(consts, joins) { 
 			if( this.queryView != null ) {
 				this.queryView.fireAddConstraint(this.formName, "column", consts, joins);
 			} else {

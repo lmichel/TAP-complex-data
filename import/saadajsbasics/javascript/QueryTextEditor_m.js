@@ -181,7 +181,7 @@ ADQLTextEditor_Mvc.prototype = Object.create(QueryTextEditor_Mvc.prototype, {
 				this.delConst(label, this.fitConst);
 				this.addConstraintToArray(label, constraints, this.fitConst) ;
 			}else if( type == "limit" && constraints.length > 0) {
-				this.limConst = {label:label, constraints: constraints[0]};;				
+				this.limConst = {label:label, constraints: constraints[0]};				
 			} else {
 				Modalinfo.error("QueryTextEditor does not know what to do with a constraint typed as " +type);
 				return;

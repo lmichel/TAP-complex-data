@@ -702,7 +702,7 @@ tapQEditor_Mvc.prototype = Object.create(tapColSelector_Mvc.prototype, {
 			var retour= "    ";
 			// queried table path
 			var st = this.dataTreePath.schema + "." + this.dataTreePath.table;
-			var joins = new Array();
+			var joins = {};
 			/*
 			 * Merge all constraints
 			 */
