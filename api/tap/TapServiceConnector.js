@@ -133,32 +133,7 @@ var TapServiceConnector = (function() {
      * 
      */
     TapServiceConnector.prototype.postProcessObjectMap = function(){
-        if (this.connector.service.shortName == "CAOM"){
-            let renameCOAM = function(obj){
-                if(obj.ObsPointing !== undefined){
-                    obj.ObsPointing.from = "obs_id";
-                }
-                if(obj.CaomPlane !== undefined){
-                    obj.CaomPlane.from = "planeTID";
-                }
-                for (let key in obj){
-                    if(obj[key].target == "obsID"){
-                        obj[key].target = "observationID";
-                    }
-                    if(obj[key].target == "obsTID"){
-                        obj[key].target = "observationTID";
-                    }
-                    if(obj[key].join_tables!== undefined){
-                        renameCOAM(obj[key].join_tables);
-                    }
-                }
-                
-            };
-            
-            for (let key in this.objectMapWithAllDescription.map){
-                renameCOAM(this.objectMapWithAllDescription.map[key].join_tables);
-            }
-        }
+        // no post process required right now.
     };
 
     /**
