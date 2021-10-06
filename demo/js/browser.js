@@ -13,7 +13,7 @@ function OnRadioChange(radio) {
         if(lastLab !== undefined ){
             enableButton(lastLab.id);
         }
-        successButton("label_" + radio.value.toLowerCase());
+        successButton("label_" + radio.value);
     }
 }
 
@@ -247,6 +247,7 @@ function setupEventHandlers(){
 }
 
 $(document).ready(function() {
+    buildButtonSelector("#mainButtonHolder");
     // ensure no radio button is check by default
     $("input:radio[name=radio]:checked").prop('checked', false);
     setupEventHandlers();
