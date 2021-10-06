@@ -12,6 +12,12 @@ function OnRadioChange(radio) {
             enableButton("btnApiConnect");
         }
 
+        let lastLab=$("label.btn-success[name=radioLabel]")[0];
+        if(lastLab !== undefined ){
+            enableButton(lastLab.id);
+        }
+        successButton("label_" + radio.value);
+
         display(radio.value + " is now selected click now to the connect button to connect service.", "getStatus");
     } else {
         display("Another database is already in use please disconect it first.", "getStatus");
@@ -300,8 +306,8 @@ function setupEventHandlers(){
         
         if (isEnable("btnApiConnect")) {
             let KT = new KnowledgeTank();
-            let params = KT.getDescriptors().descriptors[$("input:radio[name=sex]:checked")[0].value];
-            params.shortName = $("input:radio[name=sex]:checked")[0].value;
+            let params = KT.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
+            params.shortName = $("input:radio[name=radio]:checked")[0].value;
             
             let connect = api.connect(params);
             let status = false;
@@ -317,7 +323,7 @@ function setupEventHandlers(){
                 if (status){
 
                     /*/ disable all radio buttons so the user can't change their value /*/
-                    $("input:radio[name=sex]").attr("disabled",true);
+                    $("input:radio[name=radio]").attr("disabled",true);
                     $("label[name=radioLabel]").each((i,btn)=>{
                         disableButton(btn.id);
                     });
@@ -382,7 +388,7 @@ function setupEventHandlers(){
 
         enableButton("btnApiConnect");
 
-        $("input:radio[name=sex]").attr("disabled",false);
+        $("input:radio[name=radio]").attr("disabled",false);
         $("label[name=radioLabel]").each((i,btn)=>{
             enableButton(btn.id);
         });
@@ -580,8 +586,9 @@ function setupEventHandlers(){
 }
 
 $(document).ready(function() {
+    buildButtonSelector("#mainButtonHolder");
     // ensure no radio button is check by default
-    $("input:radio[name=sex]:checked").prop('checked', false);
+    $("input:radio[name=radio]:checked").prop('checked', false);
     setupEventHandlers();
 });
 

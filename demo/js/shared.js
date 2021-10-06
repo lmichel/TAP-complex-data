@@ -130,3 +130,19 @@ function bindClickAsyncEvent(elemId,handler,disableText){
         }
     });});
 }
+
+/*/ Builds buttons to select between all known TAP services /*/
+function buildButtonSelector(holderID){
+    let desc = (new KnowledgeTank()).getDescriptors().descriptors;
+    for (let shortName in desc){
+        $(holderID).append("<input style=\"display: none;\" type=\"radio\" name=\"radio\" id=\"radio_"+ shortName +
+            "\" value=\"" + shortName + 
+            "\" onclick=\"OnRadioChange(this)\" />");
+
+        $(holderID).append("<label style=\"margin: 0.5em;width: 100%;\" for=\"radio_"+ shortName +
+            "\" class=\"btn btn-primary\" id=\"label_"+ shortName +
+            "\" name=\"radioLabel\">"+ shortName +
+            "</label>");
+    }
+
+}
