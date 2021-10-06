@@ -645,7 +645,7 @@ tapQEditor_Mvc.prototype = Object.create(tapColSelector_Mvc.prototype, {
 			currentTreePath  = this.listener.controlCurrentTreePath();
 
 			var divKey = this.constEditorRootId + ah.nameattr + this.const_key;
-			Out.debug("mv constraint " + ah.nameattr + " to #" + this.constListId);
+			Out.debug("mv constraint " + ah.nameattr + " to #" + constListId);
 			var v = new TapKWConstraint_mVc({divId: divKey
 				, constListId: constListId
 				, isFirst: first
