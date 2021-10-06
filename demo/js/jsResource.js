@@ -16,21 +16,6 @@ function OnRadioChange(radio) {
     }
 }
 
-/*/ Builds buttons to select between all known TAP services /*/
-function buildButtonSelctor(){
-    let desc = (new KnowledgeTank()).getDescriptors().descriptors;
-    for (let shortName in desc){
-        $("#mainButtonHolder").append("<input style=\"display: none;\" type=\"radio\" name=\"radio\" id=\"radio_"+ shortName +
-            "\" value=\"" + shortName + 
-            "\" onclick=\"OnRadioChange(this)\" />");
-
-        $("#mainButtonHolder").append("<label style=\"margin: 0.5em;width: 100%;\" for=\"radio_"+ shortName +
-            "\" class=\"btn btn-primary\" id=\"label_"+ shortName +
-            "\" name=\"radioLabel\">"+ shortName +
-            "</label>");
-    }
-
-}
 
 /*/ Builds the selecting table for tables /*/
 async function buildTableNameTable(api,shortName,qce){
@@ -344,7 +329,7 @@ function setupEventHandlers(){
 
 
 $(document).ready(function() {
-    buildButtonSelctor();
+    buildButtonSelector("#mainButtonHolder");
     // ensure no radio button is check by default
     $("input:radio[name=radio]:checked").prop('checked', false);
     setupEventHandlers();
