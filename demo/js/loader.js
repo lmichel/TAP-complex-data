@@ -115,7 +115,7 @@ resourceLoader = function() {
 	 */
 	loadNextCss = async function() {
 		for (let i=0;i<css.length;i++){
-			let  href = css[0];
+			let  href = css[i];
 			await  $.ajax({
 				url: href,
 				dataType: 'text',
@@ -217,6 +217,7 @@ resourceLoader = function() {
 	 */
 	var loadAll = async function() {
 		await loadNextCss();
+		this.media='all';
 		await loadNextScript();
 	};
 
