@@ -45,10 +45,10 @@ var KnowledgeTank = (function(){
                 "table" : "CaomObservation"
             },
             
-            "3XMM" : {
-                "tapService" : "//xcatdb.unistra.fr/4xmmdr10/tap/sync",
-                "schema" : "EPIC",
-                "table" : "EPIC_IMAGE"
+            "4XMM" : {
+                "tapService" : "//xcatdb.unistra.fr/4xmmdr10/tap",
+                "schema" : "ivoa",
+                "table" : "ObsCore"
             },
             
             "Vizier" : {
