@@ -85,7 +85,9 @@ async function selectConstraints(tableName, txtInput,api){
     let td = $("td");
     for (let i = 0; i < td.length; i++) {
         $(td[i]).click( () => {
-            let id = $(this).attr("id");
+            console.log(td[i]);
+            let id = td[i].id;
+            
             if ($("#" + txtInput).val().length !==1) {
                 var content = $("#" + txtInput).val();
                 let formatValue = schema+"."+tableName;
@@ -134,7 +136,7 @@ async function createButton(api) {
             return true;
         });
 
-        bindClickEvent(key, () => {
+        bindClickAsyncEvent(key, async () => {
             if($("#txt" + key).val().length > 1){
                 let constraint = $("#txt" + key).val().trim();
 
@@ -154,7 +156,7 @@ async function createButton(api) {
                 let result = api.setTableConstraint(key, constraint);
                 if (result.status ){
                     display(result.status,"getStatus");
-                    display((api.getRootQuery()).query,"getJsonAll");
+                    display((await api.getRootQuery()).query,"getJsonAll");
                     return true;
                 }else{
                     display(result.status,"getStatus");
@@ -188,7 +190,7 @@ async function createHandlersButton(api){
                 handlers.attribute_handlers[i].column_name + "' style=\"margin-top: 7px;width: 100%;\">Click to show " + 
                 handlers.attribute_handlers[i].column_name + "'s handler</button> ");
 
-            map["handler_" + handlers.attribute_handlers[i].column_name] = handlers.attribute_handlers[i]
+            map["handler_" + handlers.attribute_handlers[i].column_name] = handlers.attribute_handlers[i];
         }
 
         $("#loadButtonsHandler").append(buttons);
@@ -222,7 +224,7 @@ async function createTableIDsButton(api){
             "See Table Query for " + key + "</button>" +
             "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryID" + key + "' value='" + key + 
             "' style=\"margin-top: 7px;width: 100%;\">Run Table Query for " + key + "</button> " +
-            " <input type='text' class='form form-control' id='txtJointValID" + key + "' value='' placeholder='value for joint key'> <hr>"
+            " <input type='text' class='form form-control' id='txtJointValID" + key + "' value='' placeholder='value for joint key'> <hr>";
         
         tapButton.push(buttons);
         
@@ -230,9 +232,9 @@ async function createTableIDsButton(api){
     $("#loadTableQueryIds").append(tapButton);
 
     for (let key in (await api.getObjectMap()).object_map.tables) {
-        bindClickEvent("btnSeeQueryID" + key, () =>{
+        bindClickAsyncEvent("btnSeeQueryID" + key, async () =>{
             let val = $("#txtJointValID" + key).val().trim();
-            let query = api.getTableQuery(key, val ==="" ? undefined : val);
+            let query = await api.getTableQuery(key, val ==="" ? undefined : val);
             display(query.status,"getStatus");
             display(query.query,"getJsonAll");
             return query.status;
@@ -288,47 +290,6 @@ async function createTableFieldsButton(api){
     }
 }
 
-/*/ Data storage /*/
-
-let connectorParams = {
-    "Simbad" : {
-        "tapService" : "http://simbad.u-strasbg.fr/simbad/sim-tap/sync",
-        "schema" : "public",
-        "table" : "basic",
-        "shortName" : "Simbad"
-    },
-    
-    "Gavo" : {
-        "tapService" : "http://dc.zah.uni-heidelberg.de/tap/sync",
-        "schema" : "rr",
-        "table" : "resource",
-        "shortName" : "Gavo"
-    },
-
-    "CAOM" : {
-        "tapService" : "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync",
-        "schema" : "dbo",
-        "table" : "CaomObservation",
-        "shortName" : "CAOM"
-    },
-    
-    "3XMM" : {
-        "tapService" : "https://xcatdb.unistra.fr/4xmmdr10/tap/sync",
-        "schema" : "EPIC",
-        "table" : "EPIC_IMAGE",
-        "shortName" : "3XMM"
-    },
-    
-    "Vizier" : {
-        "tapService" : "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
-        "schema" : "metaviz",
-        "table" : "METAcat",
-        "shortName" : "Vizier"
-    }, 
-            
-    
-};
-
 let api = new TapApi();
 
 /*/ Steup of Event handlers functions /*/
@@ -338,8 +299,9 @@ function setupEventHandlers(){
     bindClickAsyncEvent("btnApiConnect",async () => {
         
         if (isEnable("btnApiConnect")) {
-
-            let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
+            let KT = new KnowledgeTank();
+            let params = KT.getDescriptors().descriptors[$("input:radio[name=sex]:checked")[0].value];
+            params.shortName = $("input:radio[name=sex]:checked")[0].value;
             
             let connect = api.connect(params);
             let status = false;
@@ -371,6 +333,7 @@ function setupEventHandlers(){
                     enableButton("btnGetTableQueryIds");
                     enableButton("btnGetTableFields");
                     enableButton("btnGetAdqlJsonMap");
+                    enableButton("btnGetSelectedAH");
                     enableButton("btnConstraint");
                     enableButton("btnRemoveConstraint");
                     enableButton("btnRemoveAllConstraint");
@@ -411,6 +374,7 @@ function setupEventHandlers(){
         disableButton("btnGetTableQueryIds");
         disableButton("btnGetTableFields");
         disableButton("btnGetAdqlJsonMap");
+        disableButton("btnGetSelectedAH");
         disableButton("btnConstraint");
         disableButton("btnRemoveConstraint");
         disableButton("btnRemoveAllConstraint");
@@ -456,9 +420,7 @@ function setupEventHandlers(){
 
     bindClickEvent("btnGetJoinTable",() => {
 
-        let params = connectorParams[$("input:radio[name=sex]:checked")[0].value];
-
-        let joinTables = api.getJoinedTables(params.table);
+        let joinTables = api.getJoinedTables(api.getConnector().connector.service.table);
         let status = joinTables.status;
 
         display(status, "getStatus");
@@ -468,9 +430,9 @@ function setupEventHandlers(){
         
     });
 
-    bindClickEvent("btnGetRootQuery", () => {
+    bindClickAsyncEvent("btnGetRootQuery", async () => {
 
-        let rootQuery = api.getRootQuery();
+        let rootQuery = await api.getRootQuery();
 
         if (rootQuery.status){
             display(rootQuery.status, "getStatus");
@@ -545,6 +507,21 @@ function setupEventHandlers(){
         display("Internal Object State Debug purpose only", "getStatus");
         display(JSON.stringify(api.jsonAdqlBuilder.adqlJsonMap,undefined,4), "getJsonAll");
         return true;
+    });
+
+    bindClickAsyncEvent("btnGetSelectedAH", async () => {
+        let AHS = await api.getTableAttributeHandlers(api.getConnector().connector.service.table);
+        if(AHS.status){
+            let KT = new KnowledgeTank();
+            display(AHS.attribute_handlers,"getJsonAll");
+            AHS = KT.selectAH(AHS.attribute_handlers);
+            display(AHS.selected,"getJsonAll");
+            display("true","getStatus");
+            return true;
+        }
+        display("false","getStatus");
+        display(AHS.error,"getJsonAll");
+        return false;
     });
 
     bindClickEvent("btnConstraint",() => {
