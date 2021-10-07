@@ -29,90 +29,90 @@ function OnRadioChange(radio) {
 async function selectConstraints(tableName, txtInput,api){
     
     let schema = api.getConnector().connector.service.schema;
-    let adql = api.tapServiceConnector.attributsHandler.addAllColumn(tableName, schema);
-    let QObject = await api.tapServiceConnector.Query(adql);
-    QObject = QObject.answer;
-    let dataTable = VOTableTools.votable2Rows(QObject);
-    let contentText = QObject.responseText;
-    let Field = VOTableTools.genererField(QObject, contentText);
-    let nb = Field.length;
-    
-    let out = "\n" +
-        "  <!-- The Modal -->\n" +
-        "  <div class=\"modal fade\" id=\"myModal\">\n" +
-        "    <div class=\"modal-dialog modal-xl\">\n" +
-        "      <div class=\"modal-content\">"+
-        "    <div class=\"modal-content\">\n" +
-        "      <div class=\"modal-body\">\n"+
-        "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + tableName + "</span>" +
-        "<button class='delete_right btn btn-danger'  data-dismiss=\"modal\" id='d_right'><i class='fa fa-close ' ></i></button><br></br>";//head
-    out += "<table  class = 'table table-bordered table-striped table-hover'  role = 'grid' >";
-    out += "<thead class='thead-dark'><tr role='row'>";
-    
-    for (let j = 0; j < nb; j++) {
-        out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + Field[j] + "</th>";
-    }
-    out += "</tr></thead>";
-    out += "<tbody>";
-    let column = 0;
-    
-    for (let j = 0; j < dataTable.length; j++) {//table  content
-        if (column == 0) {
-            var judge = (j + nb) / nb;
-            if (judge % 2 == 1) {
+    let AHList = await api.getTableAttributeHandlers(tableName);
+    if(AHList.status){
+        AHList = AHList.attribute_handlers;
+        
+        let out = "\n" +
+            "  <!-- The Modal -->\n" +
+            "  <div class=\"modal fade\" id=\"myModal\">\n" +
+            "    <div class=\"modal-dialog modal-xl\">\n" +
+            "      <div class=\"modal-content\">"+
+            "    <div class=\"modal-content\">\n" +
+            "      <div class=\"modal-body\">\n"+
+            "<span style='text-align: left;font-weight: bold;font-size: x-large;'> Columns of table " + tableName + "</span>" +
+            "<button class='delete_right btn btn-danger'  data-dismiss=\"modal\" id='d_right'><i class='fa fa-close ' ></i></button><br></br>";//head
+        out += "<table  class = 'table table-bordered table-striped table-hover table-responsive'  role = 'grid' >";
+        out += "<thead class='thead-dark'><tr role='row'>";
+        
+        for (let field in AHList[0]) {
+            out += "<th rowspan='1'  colspan='1' style='text-align:center;vertical-align:bottom'>" + field + "</th>";
+        }
+        out += "</tr></thead>";
+        out += "<tbody>";
+        
+        for (let j = 0; j < AHList.length; j++) {//table  content
+            if (j % 2 == 1) {
                 out += "<tr class = 'odd table-primary' >";
             } else {
                 out += "<tr class = 'even table-primary'>";
             }
-            out += "<td id = '" + dataTable[j] + "' style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + dataTable[j] + "</td>";
-        } else {
-            out += "<td style='text-align: center;vertical-align:bottom'>" + dataTable[j] + "</td>";
-        }
-        column = column + 1;
-        if (column == nb) {
-            out += "</tr>";
-            column = 0;
-        }
 
-    }
-    out += "</tbody>";
-    out += "</table>  </div>";
-    out+=    "</div>\n" +
-        "      <div class=\"modal-footer\">\n" +
-        "        <button type=\"button\" class=\"btn btn-danger\" data-dismiss=\"modal\">Close</button>\n" +
-        "      </div>\n" +
-        "    </div>\n" +
-        "\n" +
-        "  </div>\n" +
-        "</div>"
-
-    ;//head
-    $("body").prepend(out);
-    let td = $("td");
-    for (let i = 0; i < td.length; i++) {
-        $(td[i]).click( () => {
-            console.log(td[i]);
-            let id = td[i].id;
-            
-            if ($("#" + txtInput).val().length !==1) {
-                var content = $("#" + txtInput).val();
-                let formatValue = schema+"."+tableName;
-                let correctValue = formatValue.quotedTableName().qualifiedName;
-                if($("#" + txtInput).val().indexOf(" AND " + correctValue + "." + id)!==-1){
-                    alert(id+" already added");
+            for (let field in AHList[j]){
+                if (field == "nameattr"){
+                    out += "<td id = '" + AHList[j][field] + "'";
                 }else{
-                    $("#" + txtInput).val(content + " AND " + correctValue + "." + id + "=");
-                    alert(id+" is added to constraint");
+                    out += "<td";
                 }
-            } else {
-                let formatValue = schema+"."+tableName;
-                let correctValue = formatValue.quotedTableName().qualifiedName;
-                $("#" + txtInput).val(correctValue + "." + id + "=");
-                alert(id+" is added to constraint");
+                out += " style='text-align: center;vertical-align:bottom;text-decoration:underline' >" + AHList[j][field] + "</td>";
             }
 
-        });
+            out += "</tr>";
+
+        }
+        out += "</tbody>";
+        out += "</table>  </div>";
+        out+=    "</div>\n" +
+            "      <div class=\"modal-footer\">\n" +
+            "        <button type=\"button\" class=\"btn btn-danger\" data-dismiss=\"modal\">Close</button>\n" +
+            "      </div>\n" +
+            "    </div>\n" +
+            "\n" +
+            "  </div>\n" +
+            "</div>"
+
+        ;//head
+        $("body").prepend(out);
+        let td = $("td");
+        for (let i = 0; i < td.length; i++) {
+            $(td[i]).click( () => {
+                let id = td[i].id;
+                
+                if(id.length > 0){
+                    if ($("#" + txtInput).val().length !==1) {
+                        var content = $("#" + txtInput).val();
+                        let formatValue = schema+"."+tableName;
+                        let correctValue = formatValue.quotedTableName().qualifiedName;
+                        if($("#" + txtInput).val().indexOf(correctValue + "." + id)!==-1){
+                            alert(id+" already added");
+                        }else{
+                            $("#" + txtInput).val(content + " AND " + correctValue + "." + id + "=");
+                            alert(id+" is added to constraint");
+                        }
+                    } else {
+                        let formatValue = schema+"."+tableName;
+                        let correctValue = formatValue.quotedTableName().qualifiedName;
+                        $("#" + txtInput).val(correctValue + "." + id + "=");
+                        alert(id+" is added to constraint");
+                    }
+                }
+                
+
+            });
+        }
     }
+    
+    
 }
 
 /*/ Button creation for constrain selection /*/
