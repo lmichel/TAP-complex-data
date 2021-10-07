@@ -12,7 +12,7 @@ var TapServiceConnector = (function() {
         this.testApiRooQuery = false;
         this.table = [];
 
-        this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}};
+        this.objectMapWithAllDescription = undefined;
         this.connector = {status: "", message: "", service: {}, votable: ""};
         this.api ="";
         this.attributsHandler = new HandlerAttributs();
@@ -74,51 +74,55 @@ var TapServiceConnector = (function() {
     
     TapServiceConnector.prototype.getObjectMapAndConstraints = async function () {
         try {
-            let api = this.api;
-            let rootTable = api.getConnector().connector.service.table;
-            let jsonWithaoutDescription = await this.loadJson();
-            if(jsonWithaoutDescription.status){
-                jsonWithaoutDescription = jsonWithaoutDescription.json;
-            } else {
-                return {"status":false,"error":{
-                    "logs": "Error while loading base data : \n" + jsonWithaoutDescription.error.logs,
-                }};
-            }
-            this.objectMapWithAllDescription.root_table.name = rootTable;
-            this.schema = api.getConnector().connector.service.schema;
-            this.objectMapWithAllDescription.root_table.schema = this.schema;
-            this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map.handler_attributs;
-            let formatJoinTable = "";
-            let correctJoinFormaTable = "";
+            if( this.objectMapWithAllDescription === undefined){
+                this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}};
             
-            let testMap = false;
-            let map = {};
-            if (testMap == false) {
-                map = this.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
-            }
-
-            let allJoinRootTable = this.createAllJoinTable(map);
-            let allTables = allJoinRootTable;
-            for (let k = 0; k < allTables.length; k++) {
-                for (let tableKey in jsonWithaoutDescription) {
-                    if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
-
-                        formatJoinTable = this.schema + "." + tableKey;
-                        correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
-                        let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:"";
-
-                        this.objectMapWithAllDescription.tables[tableKey] = {
-                            "description": jsonWithaoutDescription[tableKey].description,
-                            "columns": attributHanler !== undefined ? attributHanler : [],
-                        };
-
-                    } 
+                let api = this.api;
+                let rootTable = api.getConnector().connector.service.table;
+                let jsonWithaoutDescription = await this.loadJson();
+                if(jsonWithaoutDescription.status){
+                    jsonWithaoutDescription = jsonWithaoutDescription.json;
+                } else {
+                    return {"status":false,"error":{
+                        "logs": "Error while loading base data : \n" + jsonWithaoutDescription.error.logs,
+                    }};
+                }
+                this.objectMapWithAllDescription.root_table.name = rootTable;
+                this.schema = api.getConnector().connector.service.schema;
+                this.objectMapWithAllDescription.root_table.schema = this.schema;
+                this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map.handler_attributs;
+                let formatJoinTable = "";
+                let correctJoinFormaTable = "";
+                
+                let testMap = false;
+                let map = {};
+                if (testMap == false) {
+                    map = this.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
                 }
 
+                let allJoinRootTable = this.createAllJoinTable(map);
+                let allTables = allJoinRootTable;
+                for (let k = 0; k < allTables.length; k++) {
+                    for (let tableKey in jsonWithaoutDescription) {
+                        if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
+
+                            formatJoinTable = this.schema + "." + tableKey;
+                            correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
+                            let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:"";
+
+                            this.objectMapWithAllDescription.tables[tableKey] = {
+                                "description": jsonWithaoutDescription[tableKey].description,
+                                "columns": attributHanler !== undefined ? attributHanler : [],
+                            };
+
+                        } 
+                    }
+
+                }
+                this.objectMapWithAllDescription.map = map;
+                this.objectMapWithAllDescription.status = true;
+                this.postProcessObjectMap();
             }
-            this.objectMapWithAllDescription.map = map;
-            this.objectMapWithAllDescription.status = true;
-            this.postProcessObjectMap();
             return this.objectMapWithAllDescription;
         } catch (error) {
             console.error(error);
@@ -126,11 +130,11 @@ var TapServiceConnector = (function() {
                 "logs":error.toString(),
             }};
         }
-
     };
 
     /**Apply custom post processing on the object map in order to fix various issues like wrong columns name declared in joints
-     * 
+     * this method is meant to hold quick fixes ensuring the api still work while waiting for the orignal issue to be fixed
+     * meaning no permanent code should be written here
      */
     TapServiceConnector.prototype.postProcessObjectMap = function(){
         // no post process required right now.
