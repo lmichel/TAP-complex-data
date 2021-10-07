@@ -99,7 +99,6 @@ var TapApi = (function(){
         if (this.getConnector().status) {
             let map = await this.getObjectMapWithAllDescriptions();
             objectMap.status = map.status;
-            delete map.status;
 
             if(objectMap.status){
                 objectMap.object_map = map;
@@ -199,6 +198,9 @@ var TapApi = (function(){
      */
     TapApi.prototype.getTableSelectedField = async function(table,joinKeyVal){
         if (this.getConnector().status) {
+            if(table === undefined){
+                table = this.getConnector().connector.service.table;
+            }
             let query = await this.getTableQuery(table,joinKeyVal);
             if(!query.status){
                 return query;
@@ -335,7 +337,12 @@ var TapApi = (function(){
      * @return {*} : Json the json containing all handler Attribut of the table
      * */
     TapApi.prototype.getTableAttributeHandlers = async function (table) {
-        return await this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table);
+        let connector = this.getConnector();
+        if(connector.status){
+            return await this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table, connector.connector.service.schema);
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
+        }
     };
 
     /**
@@ -376,7 +383,6 @@ var TapApi = (function(){
         }
         fields = Array.from(new Set(fields));
         if(obj.status){
-            obj = obj.object_map;
             if(obj.tables[table] !== undefined){
                 obj.tables[table].columns= fields;
             }
