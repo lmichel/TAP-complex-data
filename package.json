@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "prebuild": "babel api -d /tmp/$npm_package_name/build/api;mkdir -p build",
-    "build": "./node_modules/.bin/uglifyjs /tmp/$npm_package_name/build/api/**/*.js /tmp/$npm_package_name/build/api/**/**/*.js -c passes=2 -o build/$npm_package_name-$npm_package_version.min.js",
+    "build": "./node_modules/.bin/uglifyjs /tmp/$npm_package_name/build/api/**/*.js -c passes=2 -o build/$npm_package_name-$npm_package_version.min.js",
     "postbuild": "tar -Jcf build/$npm_package_name-$npm_package_version-source.tar.xz api/;tar -Jcf build/$npm_package_name-$npm_package_version-es2015.tar.xz -C /tmp/$npm_package_name/build/ api/;rm -rf /tmp/$npm_package_name"
   },
   "devDependencies": {
