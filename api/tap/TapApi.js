@@ -337,7 +337,12 @@ var TapApi = (function(){
      * @return {*} : Json the json containing all handler Attribut of the table
      * */
     TapApi.prototype.getTableAttributeHandlers = async function (table) {
-        return await this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table);
+        let connector = this.getConnector();
+        if(connector.status){
+            return await this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table, connector.connector.service.schema);
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
+        }
     };
 
     /**
