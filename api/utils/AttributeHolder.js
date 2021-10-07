@@ -52,7 +52,7 @@ AttributeHolder = function(queryAble){
         ",TAP_SCHEMA.columns.description" +
         " FROM TAP_SCHEMA.columns" +
         " WHERE TAP_SCHEMA.columns.table_name = " + "\'" + replaceAll(table,"\"","\\\"") + "\'" + 
-        "OR TAP_SCHEMA.columns.table_name = " + "\'" + replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","\\\"") + "\'";
+        " OR TAP_SCHEMA.columns.table_name = " + "\'" + replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","\\\"") + "\'";
     };
 
     function queryResultToDoubleArray(queryResult){
