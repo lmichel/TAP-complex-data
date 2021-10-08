@@ -1,8 +1,9 @@
 var ComplexQEditor_Mvc;
 
 function ComplexQEditor_MvcExtends(){
-	ComplexQEditor_Mvc = function(){
+	ComplexQEditor_Mvc = function(complexEditor){
 		tapQEditor_Mvc.call(this);
+		this.complexEditor = complexEditor;
 	};
 	/**
 	 * Tap Complex custom model extends the tapQEditor_Mvc class
@@ -30,6 +31,14 @@ function ComplexQEditor_MvcExtends(){
 				this.const_key++;
 			}
 		},
+		
+		updateQuery : {
+			value: function(){
+				this.complexEditor.updateQuery("constraint",this);
+			}
+		}
 	});
+
+	
 }
 

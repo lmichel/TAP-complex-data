@@ -274,14 +274,19 @@ function setupEventHandlers(){
                         });
 
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
+                        let editor = new ComplexQueryEditor(api, $("#controlPane"));
 
                         qce = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
                                 formName: 'tapFormColName',
                                 sesameUrl:"sesame",
                                 upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
-                                queryView: adqlQueryView});
+                                queryView: adqlQueryView,
+                                complexEditor: editor});
 
                         await buildTableNameTable(api,params.shortName,qce);
+
+                        $("#controlPane").append('<div><button class="btn btn-primary" style="margin-top: 0.5em;" id="queryRun">Run Query</button></div>');
+                        
 
                         enableButton("btnApiDisconnect");
 
