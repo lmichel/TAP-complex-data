@@ -13,7 +13,7 @@ var KnowledgeTank = (function(){
          * at most 4 AH can be selected based on the criteria of ucd2 but if at least one is found it may lock ucd3 from being selected if ucd1 has been selected.
          */
         this.ucdStorage = {
-            "name":["meta.id;meta.main","meta.main"],
+            "name":["meta.id;meta.main","meta.id;src","meta.main"],
             "position" : ["pos;meta.main","pos"],
             "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon"],
             "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat"],
