@@ -52,6 +52,7 @@ var TapApi = (function(){
                 this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
                 let obj = await this.getObjectMap();
+                console.log(obj);
 
                 if (obj.status){
                     this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
@@ -69,6 +70,7 @@ var TapApi = (function(){
                 "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
             }};
         } catch (error) {
+            console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
                 "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
