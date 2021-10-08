@@ -46,7 +46,7 @@ var KnowledgeTank = (function(){
             },
             
             "4XMM" : {
-                "tapService" : "//xcatdb.unistra.fr/4xmmdr10/tap",
+                "tapService" : "https://xcatdb.unistra.fr/4xmmdr10/tap/sync",
                 "schema" : "ivoa",
                 "table" : "ObsCore"
             },

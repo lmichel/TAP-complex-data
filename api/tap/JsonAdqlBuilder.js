@@ -75,7 +75,7 @@ var JsonAdqlBuilder = (function(){
      */
     JsonAdqlBuilder.prototype.setTableConstraint = function(table,constraint){
 
-        if(this.adqlJsonMap.joints[table] === undefined){
+        if(this.adqlJsonMap.joints[table] === undefined && table !== this.adqlJsonMap.rootTable){
             return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table,"constraint":constraint}}};
         }
 
