@@ -70,7 +70,7 @@ async function buildTableNameTable(api,shortName,qce){
                      * this is a two layer recusive event binding function 
                      * what could go wrong ?
                      */
-                    let rowEventFactory = function(joints,data){
+                    let rowEventFactory = function(joints,data,holder){
                         return function(nRow, aData){
                             $(nRow).click(() => {
                             
@@ -79,38 +79,39 @@ async function buildTableNameTable(api,shortName,qce){
                                 let lData;
                                 let fClick;
                                 let lJoints;
+                                let elem;
 
                                 for (let joint in joints){
                                     fClick = function(div){
                                         syncIt(async ()=>{
                                             lJoints = api.getJoinedTables(joint).joined_tables;
-                                            index = data.data.aaData.indexOf(joint); //TODO add condition
+                                            elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target); //TODO add condition
+                                            index = data.data.aoColumns.indexOf(elem[0]);
                                             treePath.table = joint;
                                             treePath.tableorg = joint;
                                             treePath.jobid = joint;
-                                            lData = await buildData(joint,treePath,api);
-                                            showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData));
+                                            lData = await buildData(joint,treePath,api,aData[index]);
+                                            showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
                                         });
                                     };
-                                    let div=makeCollapsableDiv($("#resultpane"),joint,joint,true,fClick);
+                                    makeCollapsableDiv(holder,joint,joint,true,fClick);
                                     
                                 }
-                                
                             });
                         };
                     };
                     
-                    
                     $("#resultpane").html('');
-                    showTapResult(dataTreePath,data.data,data.ahmap,makeCollapsableDiv($("#resultpane"),params.table,params.table,false),rowEventFactory(joints,data));
+                    let div = makeCollapsableDiv($("#resultpane"),params.table,params.table,false);
+                    showTapResult(dataTreePath,data.data,data.ahmap,div,rowEventFactory(joints,data,div));
                 }
             });
         });
     }
 }
 
-async function buildData(table,dataTreePath,api){
-    let fieldsData = await api.getTableSelectedField(table);
+async function buildData(table,dataTreePath,api,constraint){
+    let fieldsData = await api.getTableSelectedField(table,constraint);
     let fields = await api.getAllSelectedFields(table);
     if(fieldsData.status){
         let data = {"aaData":fieldsData.field_values,"aoColumns":[]};
