@@ -19,17 +19,16 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
             let constraint;
             let that = this;
             for (let c in constraints){
-                constraint = "";// this.api.getTableConstraint();
+                constraint = this.api.getTableConstraint( constraints[c].treePath.table).constraint;
                 let r = this.api.setTableConstraint( constraints[c].treePath.table,
-                    constraint + constraints[c].getAndOr() + constraints[c].fireGetADQL() + this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand())
+                    constraint + " " + constraints[c].getAndOr() + constraints[c].fireGetADQL() + this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand())
                 );
-                this.api.getTableQuery(constraints[c].treePath.table).then((val)=>{
-                    if(val.status){
-                        console.log(val.query);
-                        that.editor.html(val.query);
-                    }
-                });
             }
+            this.api.getTableQuery(constraints[0] === undefined ? undefined: constraints[0].treePath.table).then((val)=>{ //TODO proper selection of the wanted table
+                if(val.status){
+                    that.editor.html(val.query);
+                }
+            });
         } break;
     }
 
