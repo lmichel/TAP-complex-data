@@ -55,41 +55,119 @@ async function buildTableNameTable(api,shortName,qce){
                 if(hijack){
                     qce.fireSetTreepath(new DataTreePath(dataTreePath));
                 }
-                let fieldsData = await api.getTableSelectedField(params.table);
-                let fields = await api.getAllSelectedFields(params.table);
-                if(fieldsData.status){
-                    let data = {"aaData":fieldsData.field_values,"aoColumns":[]};
-                    let ah = MetadataSource.getTableAtt(dataTreePath).hamap;
-                    let ahmap = {};
-                    for (let i=0;i<ah.length;i++){
-                        ahmap[ah[i].nameattr] = ah[i];
-                    }
-                    for (let i=0;i<fields.length;i++){
-                        data.aoColumns.push({"sTitle":fields[i]});
-                    }
-                    // adding job id before using fireSetTreepath make the editor not showing the columns
-                    dataTreePath.jobid="what a job";
+                let data = await buildData(params.table,dataTreePath,api);
+                
+                let joints = api.getJoinedTables(params.table).joined_tables;
+                // adding job id before using fireSetTreepath make the editor not showing the columns
+                dataTreePath.jobid="what a job";
+                if(data.status){
+
+                    /**This function create and return another function 
+                     * this other function setup event listener for a selected row of a data table 
+                     * the event handler create a collapsable div for each table joints to the table which the row contains related data 
+                     * the collapsable div when first expanded querry data for the correct table and use the main function 
+                     * to create a function which will bind the event as described above
+                     * this is a two layer recusive event binding function 
+                     * what could go wrong ?
+                     */
+                    let rowEventFactory = function(joints,data){
+                        return function(nRow, aData){
+                            $(nRow).click(() => {
+                            
+                                let index;
+                                let treePath = $.extend({},dataTreePath);
+                                let lData;
+                                let fClick;
+                                let lJoints;
+
+                                for (let joint in joints){
+                                    fClick = function(div){
+                                        syncIt(async ()=>{
+                                            lJoints = api.getJoinedTables(joint).joined_tables;
+                                            index = data.data.aaData.indexOf(joint); //TODO add condition
+                                            treePath.table = joint;
+                                            treePath.tableorg = joint;
+                                            treePath.jobid = joint;
+                                            lData = await buildData(joint,treePath,api);
+                                            showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData));
+                                        });
+                                    };
+                                    let div=makeCollapsableDiv($("#resultpane"),joint,joint,true,fClick);
+                                    
+                                }
+                                
+                            });
+                        };
+                    };
+                    
+                    
                     $("#resultpane").html('');
-                    showTapResult(dataTreePath,data,ahmap,"#resultpane");
+                    showTapResult(dataTreePath,data.data,data.ahmap,makeCollapsableDiv($("#resultpane"),params.table,params.table,false),rowEventFactory(joints,data));
                 }
             });
         });
     }
 }
 
+async function buildData(table,dataTreePath,api){
+    let fieldsData = await api.getTableSelectedField(table);
+    let fields = await api.getAllSelectedFields(table);
+    if(fieldsData.status){
+        let data = {"aaData":fieldsData.field_values,"aoColumns":[]};
+        let ah = MetadataSource.getTableAtt(dataTreePath).hamap;
+        let ahmap = {};
+        for (let i=0;i<ah.length;i++){
+            ahmap[ah[i].nameattr] = ah[i];
+        }
+        for (let i=0;i<fields.length;i++){
+            data.aoColumns.push({"sTitle":fields[i]});
+        }
+        return {"data":data,"ahmap":ahmap,"status":true};
+    }
+    return {"status":false};
+}
+
+function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler){
+    let holderid = "collapsable-holder-" + name;
+    if($("#" + holderid,holder).length>0){
+        $("#" + holderid,holder).html("");
+    }else{
+        holder.append("<div class='collapsable-holder' id = '" + holderid + "' ></div>");
+    }
+    holder = $("#" + holderid,holder)[0];
+
+    $("#" + holderid).append("<div class='collapsable-header' id = 'collapsable-header-" + name + "'> <p id='collapsable-title'>" + title + "</p> </div>");
+    $("#" + holderid).append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
+    let div = $("#collapsable-div-" + name );
+    if(collapsed){
+        div.hide();
+    }
+    div.data("clicked",false);
+    $("#collapsable-header-" + name).click(()=>{
+        if(!div.data("clicked")){
+            div.data("clicked",true);
+            if(firstClickHandler!==undefined){
+                firstClickHandler(div);
+            }
+        }
+        div.toggle();
+    });
+    return div;
+}
+
 // stolen code from tap handle
 
-showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid) {
-    var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"datatable\" class=\"display\"></table>";
+showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid,handler) {
+    var job = ( !dataTreePath.jobid || dataTreePath.jobid == "")? "": dataTreePath.jobid;
+    let tableID = "datatable_" + replaceAll(`${job}`," ","_");
+    var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"" + tableID + "\" class=\"display\"></table>";
     
-    var job = ( !dataTreePath.jobid || dataTreePath.jobid == "")? "": '&gt;'+ dataTreePath.jobid;
-    
-    $(tid).prepend('<p id="title-table" class="pagetitlepath"></p>');
+    tid.prepend('<p id="title-table" class="pagetitlepath"></p>');
     if (dataTreePath.schema != undefined && dataTreePath.table != undefined) {
-        $("#title-table").html('&nbsp;' + dataTreePath.nodekey + '&gt;' + dataTreePath.schema + '&gt;'+ dataTreePath.table + job);
+        $("#title-table").html('&nbsp;' + dataTreePath.nodekey + '&gt;' + dataTreePath.schema + '&gt;'+ dataTreePath.table + '&gt;'+ job);
     }
     
-    $(tid).append(table);
+    tid.append(table);
     
     var aoColumns = [];
     var columnMap = {access_format: -1, s_ra: -1, s_dec: -1, s_fov: -1, currentColumn: -1};
@@ -193,6 +271,9 @@ showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid) {
                 //ValueFormator.addAlixButton(nameTitle,ra,dec,urlPath,tab,ra_name,dec_name);
                 }
             }*/
+            if(handler){
+                handler( nRow, aData, iDisplayIndex);
+            }
             return nRow;
         }
             
@@ -220,9 +301,9 @@ showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid) {
         }
     ];
     
-    CustomDataTable.create("datatable", options, positions);
+    CustomDataTable.create(tableID, options, positions);
 
-    $('#datatable span').tooltip( { 
+    $("#"+tableID+" span").tooltip( { 
         track: true, 
         delay: 0, 
         showURL: false, 
@@ -233,7 +314,7 @@ showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid) {
         left: 5 	
     });
     
-    $("#datatable_wrapper").css("overflow", "hidden");
+    $("#"+tableID+"_wrapper").css("overflow", "hidden");
     
     // Shows query panel
     if (!$("#queryformpane").is(":visible")) {
