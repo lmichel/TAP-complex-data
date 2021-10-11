@@ -570,7 +570,7 @@ TapColList_mVc.prototype = Object.create(FieldList_mVc.prototype, {
 	displayFields : {
 		value : function(){
 			var that = this;
-			this.attributesHandlers =new Array();
+			this.attributesHandlers ={};
 			MetadataSource.getTableAtt(
 					this.dataTreePath
 					, function(cache) {
@@ -578,7 +578,7 @@ TapColList_mVc.prototype = Object.create(FieldList_mVc.prototype, {
 						var ahm = cache.hamap;
 						var table  = "<table id=" + that.fieldTableId + " style='width: 100%; border-spacing: 0px; border-collapse:collapse' class='table'></table>";
 						$('#' + that.fieldListId).html(table);
-						that.attributesHandlers = new Array();
+						that.attributesHandlers = {};
 						for( var k=0 ; k<ahm.length ; k++) {
 							var ah = ahm[k];
 							that.attributesHandlers[ah.nameattr] = ah;				
