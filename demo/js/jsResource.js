@@ -85,6 +85,7 @@ async function buildTableNameTable(api,shortName,qce){
                                 let fClick;
                                 let lJoints;
                                 let elem;
+                                let oJoints;
 
                                 for (let joint in joints){
                                     fClick = function(div){
@@ -102,7 +103,8 @@ async function buildTableNameTable(api,shortName,qce){
                                             showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
                                         });
                                     };
-                                    makeCollapsableDiv(holder,joint,joint,true,fClick);
+                                    oJoints = api.getJoinedTables(joint).joined_tables;
+                                    makeCollapsableDiv(holder,joint,joint,true,fClick, Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":"");
                                     
                                 }
                             });
@@ -145,17 +147,22 @@ async function buildData(table,dataTreePath,api,constraint){
     return {"status":false};
 }
 
-function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler){
+function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler,leftTitle){
     let holderid = "collapsable-holder-" + name;
     if($("#" + holderid,holder).length>0){
         $("#" + holderid,holder).html("");
     }else{
         holder.append("<div class='collapsable-holder' id = '" + holderid + "' ></div>");
     }
-    holder = $("#" + holderid,holder)[0];
+    holder = $("#" + holderid,holder);
 
-    $("#" + holderid).append("<div class='collapsable-header' id = 'collapsable-header-" + name + "'> <p id='collapsable-title'>" + title + "</p> </div>");
-    $("#" + holderid).append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
+    let header = "<div class='collapsable-header' id = 'collapsable-header-" + name + "'> <p class='collapsable-title'>" + title + "</p>";
+    if(leftTitle !== undefined){
+        header += "<p class = 'txt-right' >" + leftTitle + "</p>";
+    }
+    header += "</div>";
+    holder.append(header);
+    holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
     let div = $("#collapsable-div-" + name );
     if(collapsed){
         div.hide();
