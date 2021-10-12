@@ -73,7 +73,12 @@ async function buildTableNameTable(api,shortName,qce){
                     let rowEventFactory = function(joints,data,holder){
                         return function(nRow, aData){
                             $(nRow).click(() => {
-                            
+                                let h = $(".rHighlight",$(nRow).parent());
+                                if(h.get(0)==nRow){
+                                    return;
+                                }
+                                h.removeClass("rHighlight");
+                                $(nRow).addClass("rHighlight");
                                 let index;
                                 let treePath = $.extend({},dataTreePath);
                                 let lData;
@@ -85,12 +90,12 @@ async function buildTableNameTable(api,shortName,qce){
                                     fClick = function(div){
                                         syncIt(async ()=>{
                                             lJoints = api.getJoinedTables(joint).joined_tables;
-                                            elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target); //TODO add condition
+                                            elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target);
                                             index = data.data.aoColumns.indexOf(elem[0]);
                                             treePath.table = joint;
                                             treePath.tableorg = joint;
                                             treePath.jobid = joint;
-                                            lData = await buildData(joint,treePath,api,aData[index]);
+                                            lData = await buildData(joint,treePath,api,quoteIfString(aData[index]));
                                             showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
                                         });
                                     };
@@ -108,6 +113,15 @@ async function buildTableNameTable(api,shortName,qce){
             });
         });
     }
+}
+
+function quoteIfString(str){
+
+    if(isNaN(str) || isNaN(parseInt(str)) || isNaN(+str) ){
+        return "'" + str+ "'";
+    }
+
+    return  str ;
 }
 
 async function buildData(table,dataTreePath,api,constraint){
@@ -162,11 +176,6 @@ showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid,handler) {
     var job = ( !dataTreePath.jobid || dataTreePath.jobid == "")? "": dataTreePath.jobid;
     let tableID = "datatable_" + replaceAll(`${job}`," ","_");
     var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"" + tableID + "\" class=\"display\"></table>";
-    
-    tid.prepend('<p id="title-table" class="pagetitlepath"></p>');
-    if (dataTreePath.schema != undefined && dataTreePath.table != undefined) {
-        $("#title-table").html('&nbsp;' + dataTreePath.nodekey + '&gt;' + dataTreePath.schema + '&gt;'+ dataTreePath.table + '&gt;'+ job);
-    }
     
     tid.append(table);
     
@@ -288,17 +297,17 @@ showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid,handler) {
             
     
     var positions = [
+        { "name": "information",
+            "pos" : "top-center"
+        },
         { "name": "pagination",
-            "pos": "bottom-left"
+            "pos": "top-center"
         },
         { "name": "length",
             "pos": "top-left"
         },
         { "name": 'filter',
             "pos" : "top-right"
-        },
-        { "name": "information",
-            "pos" : "top-center"
         }
     ];
     
