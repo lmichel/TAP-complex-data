@@ -2,7 +2,7 @@ function ComplexQueryEditor(api,holder){
     this.api = api;
     this.holder = holder;
     //@todo nicer editor
-    holder.append('<div id="queryPrettyText" contenteditable="true" style="width:35em;height:100%;overflow:auto;border: black inset;"></div>');
+    holder.append('<div class = "sql" id="queryPrettyText" style="width:35em;height:100%;overflow:auto;border: black inset;"></div>');
     this.editor = holder.children().last();
 }
 /**
@@ -24,14 +24,13 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
                     constraint + " " + constraints[c].getAndOr() + constraints[c].fireGetADQL() + this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand())
                 );
             }
-            this.api.getTableQuery(constraints[0] === undefined ? undefined: constraints[0].treePath.table).then((val)=>{ //TODO proper selection of the wanted table
+            this.api.getTableQuery().then((val)=>{ //TODO proper selection of the wanted table
                 if(val.status){
-                    that.editor.html(val.query);
+                    that.editor.html(hljs.highlight( val.query,{"language":"SQL", "ignoreIllegals":true}).value);
                 }
             });
         } break;
     }
-
 };
 
 ComplexQueryEditor.prototype.formatCondition = function(operator,operand){

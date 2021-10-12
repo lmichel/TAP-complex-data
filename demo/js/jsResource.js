@@ -53,67 +53,7 @@ async function buildTableNameTable(api,shortName,qce){
                 // remember to always hijack the cache before risquing using it.
                 let hijack = await MetadataSource.hijackCache(dataTreePath,api);
                 if(hijack){
-                    qce.fireSetTreepath(new DataTreePath(dataTreePath));
-                }
-                let data = await buildData(params.table,dataTreePath,api);
-                
-                let joints = api.getJoinedTables(params.table).joined_tables;
-                // adding job id before using fireSetTreepath make the editor not showing the columns
-                dataTreePath.jobid="what a job";
-                if(data.status){
-
-                    /**This function create and return another function 
-                     * this other function setup event listener for a selected row of a data table 
-                     * the event handler create a collapsable div for each table joints to the table which the row contains related data 
-                     * the collapsable div when first expanded querry data for the correct table and use the main function 
-                     * to create a function which will bind the event as described above
-                     * this is a two layer recusive event binding function 
-                     * what could go wrong ?
-                     */
-                    let rowEventFactory = function(joints,data,holder){
-                        return function(nRow, aData){
-                            $(nRow).click(() => {
-                                let h = $(".rHighlight",$(nRow).parent());
-                                if(h.get(0)==nRow){
-                                    return;
-                                }
-                                h.removeClass("rHighlight");
-                                $(nRow).addClass("rHighlight");
-                                let index;
-                                let treePath = $.extend({},dataTreePath);
-                                let lData;
-                                let fClick;
-                                let lJoints;
-                                let elem;
-                                let oJoints;
-
-                                for (let joint in joints){
-                                    fClick = function(div){
-                                        syncIt(async ()=>{
-                                            lJoints = api.getJoinedTables(joint).joined_tables;
-                                            elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target);
-                                            index = data.data.aoColumns.indexOf(elem[0]);
-                                            treePath.table = joint;
-                                            treePath.tableorg = joint;
-                                            treePath.jobid = joint;
-                                            // remember to always hijack the cache before risquing using it.
-                                            await MetadataSource.hijackCache(treePath,api);
-                                            lData = await buildData(joint,treePath,api,quoteIfString(aData[index]));
-                                            console.log(lData);
-                                            showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
-                                        });
-                                    };
-                                    oJoints = api.getJoinedTables(joint).joined_tables;
-                                    makeCollapsableDiv(holder,joint,joint,true,fClick, Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":"");
-                                    
-                                }
-                            });
-                        };
-                    };
-                    
-                    $("#resultpane").html('');
-                    let div = makeCollapsableDiv($("#resultpane"),params.table,params.table,false);
-                    showTapResult(dataTreePath,data.data,data.ahmap,div,rowEventFactory(joints,data,div));
+                    //qce.fireUpdateTreepath(new DataTreePath(dataTreePath));
                 }
             });
         });
@@ -384,10 +324,80 @@ function setupEventHandlers(){
                                 queryView: adqlQueryView,
                                 complexEditor: editor});
 
-                        await buildTableNameTable(api,params.shortName,qce);
-
                         $("#controlPane").append('<div><button class="btn btn-primary" style="margin-top: 0.5em;" id="queryRun">Run Query</button></div>');
                         
+                        bindClickAsyncEvent("queryRun",async ()=>{
+                            let dataTreePath = qce.dataTreePath;
+                            let data = await buildData(params.table,dataTreePath,api);
+                            
+                            let joints = api.getJoinedTables(params.table).joined_tables;
+                            // adding job id before using fireSetTreepath make the editor not showing the columns
+                            dataTreePath.jobid="what a job";
+                            if(data.status){
+
+                                /**This function create and return another function 
+                                 * this other function setup event listener for a selected row of a data table 
+                                 * the event handler create a collapsable div for each table joints to the table which the row contains related data 
+                                 * the collapsable div when first expanded querry data for the correct table and use the main function 
+                                 * to create a function which will bind the event as described above
+                                 * this is a two layer recusive event binding function 
+                                 * what could go wrong ?
+                                 */
+                                let rowEventFactory = function(joints,data,holder){
+                                    return function(nRow, aData){
+                                        $(nRow).click(() => {
+                                            let h = $(".rHighlight",$(nRow).parent());
+                                            if(h.get(0)==nRow){
+                                                return;
+                                            }
+                                            h.removeClass("rHighlight");
+                                            $(nRow).addClass("rHighlight");
+                                            let index;
+                                            let treePath = $.extend({},dataTreePath);
+                                            let lData;
+                                            let fClick;
+                                            let lJoints;
+                                            let elem;
+                                            let oJoints;
+
+                                            for (let joint in joints){
+                                                fClick = function(div){
+                                                    syncIt(async ()=>{
+                                                        lJoints = api.getJoinedTables(joint).joined_tables;
+                                                        elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target);
+                                                        index = data.data.aoColumns.indexOf(elem[0]);
+                                                        treePath.table = joint;
+                                                        treePath.tableorg = joint;
+                                                        treePath.jobid = joint;
+                                                        // remember to always hijack the cache before risquing using it.
+                                                        await MetadataSource.hijackCache(treePath,api);
+                                                        lData = await buildData(joint,treePath,api,quoteIfString(aData[index]));
+                                                        console.log(lData);
+                                                        showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
+                                                    });
+                                                };
+                                                oJoints = api.getJoinedTables(joint).joined_tables;
+                                                makeCollapsableDiv(holder,joint,joint,true,fClick, Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":"");
+                                                
+                                            }
+                                        });
+                                    };
+                                };
+                                
+                                $("#resultpane").html('');
+                                let div = makeCollapsableDiv($("#resultpane"),params.table,params.table,false);
+                                showTapResult(dataTreePath,data.data,data.ahmap,div,rowEventFactory(joints,data,div));
+                            }
+                        });
+
+                        await buildTableNameTable(api,params.shortName,qce);
+                        let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
+                        await MetadataSource.hijackCache(dt,api);
+                        qce.fireSetTreepath(new DataTreePath(dt));
+
+                        qce.model.updateQuery();
+                        $("#queryRun").click();
+
 
                         enableButton("btnApiDisconnect");
 
