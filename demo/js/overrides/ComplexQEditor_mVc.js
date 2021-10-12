@@ -3,6 +3,13 @@ var ComplexQEditor_mVc;
 function ComplexQEditor_mVcExtends(){
 	ComplexQEditor_mVc = function(params){
 		tapQEditor_mVc.call(this,params);
+        this.fieldListView = new ComplexFieldList(params.parentDivId, 
+            this.formName ,
+            {
+                stackHandler: function(ahName){ that.fireAttributeEvent(ahName);} ,
+                radec: false
+            }
+        );
 	};
 	/**
 	 * Tap Complex custom model extends the tapQEditor_mVc class
