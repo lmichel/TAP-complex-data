@@ -66,9 +66,7 @@ function MetadataSourceOverride(){
          * @param {*} api instance of TapApi
          */
         var hijackCache = async function(dataTreePath,api){
-            if(dataTreePath.key === undefined){
-                dataTreePath.key = [dataTreePath.nodekey , dataTreePath.schema , dataTreePath.tableorg].join(".");
-            }
+            dataTreePath.key = [dataTreePath.nodekey , dataTreePath.schema , dataTreePath.tableorg].join(".");
             if(cache[dataTreePath.key] !== undefined){
                 return true;
             }

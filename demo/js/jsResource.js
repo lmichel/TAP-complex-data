@@ -95,7 +95,10 @@ async function buildTableNameTable(api,shortName,qce){
                                             treePath.table = joint;
                                             treePath.tableorg = joint;
                                             treePath.jobid = joint;
+                                            // remember to always hijack the cache before risquing using it.
+                                            await MetadataSource.hijackCache(treePath,api);
                                             lData = await buildData(joint,treePath,api,quoteIfString(aData[index]));
+                                            console.log(lData);
                                             showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
                                         });
                                     };
