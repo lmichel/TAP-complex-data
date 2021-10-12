@@ -6,7 +6,7 @@ function QueryConstraintEditorOverride(){
             Modalinfo.error("Div #" + params.parentDivId + " not found");
             return ;
         }
-        var view  = new tapQEditor_mVc(params /*parentDivId, formName, sesameUrl*/);
+        var view  = new ComplexQEditor_mVc(params /*parentDivId, formName, sesameUrl*/);
         view.model = new ComplexQEditor_Mvc(params.complexEditor);
         new ConstQEditor_mvC(view,view.model );
         view.draw();

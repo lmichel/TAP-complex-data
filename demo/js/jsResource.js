@@ -53,7 +53,7 @@ async function buildTableNameTable(api,shortName,qce){
                 // remember to always hijack the cache before risquing using it.
                 let hijack = await MetadataSource.hijackCache(dataTreePath,api);
                 if(hijack){
-                    //qce.fireUpdateTreepath(new DataTreePath(dataTreePath));
+                    qce.fireUpdateTreepath(new DataTreePath(dataTreePath));
                 }
             });
         });
