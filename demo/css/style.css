@@ -31,7 +31,7 @@ ul, #myUL {
 .collapsable-header {
   background-color: #444444;
   display: flex;
-  margin-bottom: 1em;
+  margin-bottom: 0.25em;
 }
 
 .collapsable-holder {
@@ -40,7 +40,7 @@ ul, #myUL {
 
 .collapsable-header p {
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.5em;
   margin-bottom: 0px;
   margin-left: .5em;
   text-transform: capitalize;
@@ -48,6 +48,41 @@ ul, #myUL {
 
 .collapsable-div {
   overflow-x: scroll;
+}
+
+label {
+  margin: 0px;
+}
+
+tr.odd.rHighlight,
+tr.even.rHighlight,
+.rHighlight {
+  background-color: #e7e700 !important;
+}
+
+input.form-control{
+  font-size: small;
+}
+
+.align-items{
+  align-items: center;
+}
+
+a.first.paginate_button, 
+a.next.paginate_button, 
+a.previous.paginate_button, 
+a.last.paginate_button, 
+a.paginate_active, 
+a.paginate_button {
+  padding: 0 1em;
+}
+
+div.dataTables_paginate{
+  position: initial;
+}
+
+.dataTables_filter label{
+  width:100%;
 }
 
 /* Hide the nested list */

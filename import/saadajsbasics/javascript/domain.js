@@ -1029,50 +1029,30 @@ CustomDataTable = function () {
 		});	
 
 		// Search the number of position asked for which row to know the size of the div columns
-		var nb_top = 0;
-		if (top_left.length > 0) {
-			nb_top++;
-		}
-		if (top_center.length > 0) {
-			nb_top++;
-		}
-		if (top_right.length > 0) {
-			nb_top++;
-		}
-		nb_top = Math.floor(12/nb_top);
+		var nb_top = top_left.length + top_center.length + top_right.length;
 
-		var nb_bot = 0;
-		if (bot_left.length > 0) {
-			nb_bot++;
-		}
-		if (bot_center.length > 0) {
-			nb_bot++;
-		}
-		if (bot_right.length > 0) {
-			nb_bot++;
-		}
-		nb_bot = Math.floor(12/nb_bot);
+		var nb_bot = bot_left.length + bot_center.length + bot_right.length;
 
 		if (nb_top > 0) {
-			dom += '<"row"'
+			dom += '<"row align-items"'
 		}
 
 		if (top_left.length > 0) {
-			dom += '<"txt-left col-'+nb_top+'"';
+			dom += '<"txt-left col-'+Math.floor(top_left.length/nb_top*12)+'"';
 			top_left.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (top_center.length > 0) {
-			dom += '<"txt-center col-'+nb_top+'"';
+			dom += '<"txt-center col-'+Math.floor(top_center.length/nb_top*12)+'"';
 			top_center.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (top_right.length > 0) {
-			dom += '<"txt-right col-'+nb_top+'"';
+			dom += '<"txt-right col-'+Math.floor(top_right.length/nb_top*12)+'"';
 			top_right.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
@@ -1086,25 +1066,25 @@ CustomDataTable = function () {
 		dom += '<"custom-dt" rt>'
 
 			if (nb_bot > 0) {
-				dom += '<"row"';
+				dom += '<"row align-items"';
 			}	
 
 		if (bot_left.length > 0) {
-			dom += '<"txt-left col-'+nb_bot+'"';
+			dom += '<"txt-left col-'+Math.floor(bot_left.length/nb_bot*12)+'"';
 			bot_left.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (bot_center.length > 0) {
-			dom += '<"txt-center col-'+nb_bot+'"';
+			dom += '<"txt-center col-'+Math.floor(bot_center.length/nb_bot*12)+'"';
 			bot_center.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (bot_right.length > 0) {
-			dom += '<"txt-right col-'+nb_bot+'"';
+			dom += '<"txt-right col-'+Math.floor(bot_right.length/nb_bot*12)+'"';
 			bot_right.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
