@@ -18,7 +18,7 @@ function OnRadioChange(radio) {
 
 
 /*/ Builds the selecting table for tables /*/
-async function buildTableNameTable(api,shortName,qce){
+async function buildTableNameTable(holder,api,qce){
     let map = await api.getObjectMap();
     if(map.status){
 
@@ -26,8 +26,10 @@ async function buildTableNameTable(api,shortName,qce){
         let tables = Object.keys(map.object_map.tables);
         tables.unshift(map.object_map.root_table.name);
 
+        let connector = api.getConnector().connector;
+
         let header = "<table class=\"table table-hover table-bordered table-sm text-center \">";
-        let body = "<thead><tr><th scope=\"col\"> Tables of " + shortName + "</th></tr></thead><tbody>";
+        let body = "<thead><tr><th scope=\"col\"> Tables of " + connector.service.shortName + "</th></tr></thead><tbody>";
         let footer = "</table>";
 
         for (let i=0;i<tables.length;i++){
@@ -36,24 +38,19 @@ async function buildTableNameTable(api,shortName,qce){
 
         body+="</tbody>";
 
-        $("#tableNameTable").html(header+body+footer);
+        holder.html(header+body+footer);
+
+        let dataTreePath = {"nodekey":connector.service.shortName, "schema": connector.service.schema};
 
         /*/ Binding events of the cells /*/
-        $("[data-table-id='tableName']").click((cell)=>{
+        $("[data-table-id='tableName']",holder).click((cell)=>{
             syncIt(async ()=>{
-                //we gather the selected service
-                let KT = new KnowledgeTank();
-                let params = $.extend(true,{}, KT.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value] );
-                params.shortName = $("input:radio[name=radio]:checked")[0].value;
-                // override the root table using the table selected by the user
-                params.table = cell.target.dataset.table;
-
-                let dataTreePath = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
-
+                let treepath = $.extend({ "table": cell.target.dataset.table, "tableorg": cell.target.dataset.table},dataTreePath);
+                
                 // remember to always hijack the cache before risquing using it.
-                let hijack = await MetadataSource.hijackCache(dataTreePath,api);
+                let hijack = await MetadataSource.hijackCache(treepath,api);
                 if(hijack){
-                    qce.fireUpdateTreepath(new DataTreePath(dataTreePath));
+                    qce.fireUpdateTreepath(new DataTreePath(treepath));
                 }
             });
         });
@@ -69,22 +66,28 @@ function quoteIfString(str){
     return  str ;
 }
 
-async function buildData(table,dataTreePath,api,constraint){
-    let fieldsData = await api.getTableSelectedField(table,constraint);
-    let fields = await api.getAllSelectedFields(table);
+async function buildData(dataTreePath,api,constraint){
+    let fieldsData = await api.getTableSelectedField(dataTreePath.table,constraint);
+    let fields = await api.getAllSelectedFields(dataTreePath.table);
+
     if(fieldsData.status){
+
         let data = {"aaData":fieldsData.field_values,"aoColumns":[]};
         let ah = MetadataSource.getTableAtt(dataTreePath).hamap;
         let ahmap = {};
+
         for (let i=0;i<ah.length;i++){
             ahmap[ah[i].nameattr] = ah[i];
         }
+
         for (let i=0;i<fields.length;i++){
             data.aoColumns.push({"sTitle":fields[i]});
         }
-        if (table == api.getConnector().connector.service.table){
-            normalize(data,api,table);
+        // we only normalize the root table
+        if (dataTreePath.table == api.getConnector().connector.service.table){
+            normalize(data,api,dataTreePath.table);
         }
+
         return {"data":data,"ahmap":ahmap,"status":true};
     }
     return {"status":false};
@@ -158,9 +161,11 @@ function showTapResult(dataTreePath, data,tid,handler) {
     let tableID = "datatable_" + replaceAll(`${job}`/* create a new instance of the string to avoid possible troubles */," ","_");
     var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"" + tableID + "\" class=\"display\"></table>";
     let jsdata = data.data;
+    
     if(jsdata.lost>0){
         tid.append("<p>duplacted data has been removed " + jsdata.lost + " duplicated entrie(s) were removed</p>");
     }
+
     tid.append(table);
     let attributeHandlers = data.ahmap;
     var aoColumns = [];
@@ -309,13 +314,6 @@ function showTapResult(dataTreePath, data,tid,handler) {
     });
     
     $("#"+tableID+"_wrapper").css("overflow", "hidden");
-    
-    // Shows query panel
-    if (!$("#queryformpane").is(":visible")) {
-        $("#toggle-query").trigger( "click" );
-        $("#queryformpane").show();	
-        $("#toggle-query").show();
-    }
 }
 
 function setupEventHandlers(){
@@ -362,8 +360,10 @@ function setupEventHandlers(){
                         
                         bindClickAsyncEvent("queryRun",async ()=>{
                             qce.model.updateQuery();
-                            let dataTreePath = qce.dataTreePath;
-                            let data = await buildData(params.table,dataTreePath,api);
+                            let dataTreePath = $.extend({}, qce.dataTreePath);
+                            dataTreePath.table = params.table;
+                            dataTreePath.tableorg = params.table;
+                            let data = await buildData(dataTreePath,api);
                             
                             let joints = api.getJoinedTables(params.table).joined_tables;
                             // adding job id before using fireSetTreepath make the editor not showing the columns
@@ -407,7 +407,7 @@ function setupEventHandlers(){
                                                         treePath.jobid = joint;
                                                         // remember to always hijack the cache before risquing using it.
                                                         await MetadataSource.hijackCache(treePath,api);
-                                                        lData = await buildData(joint,treePath,api,quoteIfString(aData[index]));
+                                                        lData = await buildData(treePath,api,quoteIfString(aData[index]));
                                                         if(lData.status){
                                                             showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div));
                                                         }else {
@@ -430,7 +430,7 @@ function setupEventHandlers(){
                             }
                         });
 
-                        await buildTableNameTable(api,params.shortName,qce);
+                        await buildTableNameTable($("#tableNameTable"),api,qce);
                         let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
                         await MetadataSource.hijackCache(dt,api);
                         qce.fireSetTreepath(new DataTreePath(dt));
