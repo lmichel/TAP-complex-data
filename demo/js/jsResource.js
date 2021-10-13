@@ -372,8 +372,12 @@ function setupEventHandlers(){
                                                         // remember to always hijack the cache before risquing using it.
                                                         await MetadataSource.hijackCache(treePath,api);
                                                         lData = await buildData(joint,treePath,api,quoteIfString(aData[index]));
-                                                        console.log(lData);
-                                                        showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
+                                                        if(lData.status){
+                                                            showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
+                                                        }else {
+                                                            div.append("An unexpected error has append, unable to gather data. see logs for more information");
+                                                        }
+                                                        
                                                     });
                                                 };
                                                 oJoints = api.getJoinedTables(joint).joined_tables;
