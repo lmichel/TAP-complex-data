@@ -82,9 +82,40 @@ async function buildData(table,dataTreePath,api,constraint){
         for (let i=0;i<fields.length;i++){
             data.aoColumns.push({"sTitle":fields[i]});
         }
+        if (table == api.getConnector().connector.service.table){
+            normalize(data,api,table);
+        }
         return {"data":data,"ahmap":ahmap,"status":true};
     }
     return {"status":false};
+}
+
+function normalize(data,api,table){
+    let keys = api.getJoinKeys(table);
+    let indexs=[];
+    let keySet = new Set();
+    for (let i=0;i<data.aoColumns.length;i++){
+        if(keys.includes( data.aoColumns[i].sTitle)){
+            indexs.push(i);
+        }
+    }
+
+    let compKey;
+    let j;
+    let normData = [];
+    for (let i = 0;i<data.aaData.length;i++){
+        compKey = "";
+        for(j=0;j<indexs.length;j++){
+            compKey += data.aaData[i][j];
+        }
+        if(!keySet.has(compKey)){
+            keySet.add(compKey);
+            normData.push(data.aaData[i]);
+        }
+    }
+    data.lost = data.aaData.length-normData.length;
+    data.aaData = normData;
+    
 }
 
 function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler,leftTitle){
@@ -122,13 +153,16 @@ function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler,leftTi
 
 // stolen code from tap handle
 
-showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid,handler) {
+function showTapResult(dataTreePath, data,tid,handler) {
     var job = ( !dataTreePath.jobid || dataTreePath.jobid == "")? "": dataTreePath.jobid;
-    let tableID = "datatable_" + replaceAll(`${job}`," ","_");
+    let tableID = "datatable_" + replaceAll(`${job}`/* create a new instance of the string to avoid possible troubles */," ","_");
     var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"" + tableID + "\" class=\"display\"></table>";
-    
+    let jsdata = data.data;
+    if(jsdata.lost>0){
+        tid.append("<p>duplacted data has been removed " + jsdata.lost + " duplicated entrie(s) were removed</p>");
+    }
     tid.append(table);
-    
+    let attributeHandlers = data.ahmap;
     var aoColumns = [];
     var columnMap = {access_format: -1, s_ra: -1, s_dec: -1, s_fov: -1, currentColumn: -1};
     var isloadAlix=false;
@@ -282,7 +316,7 @@ showTapResult = function(dataTreePath, jsdata, attributeHandlers,tid,handler) {
         $("#queryformpane").show();	
         $("#toggle-query").show();
     }
-};
+}
 
 function setupEventHandlers(){
 
@@ -327,6 +361,7 @@ function setupEventHandlers(){
                         $("#controlPane").append('<div><button class="btn btn-primary" style="margin-top: 0.5em;" id="queryRun">Run Query</button></div>');
                         
                         bindClickAsyncEvent("queryRun",async ()=>{
+                            qce.model.updateQuery();
                             let dataTreePath = qce.dataTreePath;
                             let data = await buildData(params.table,dataTreePath,api);
                             
@@ -363,6 +398,7 @@ function setupEventHandlers(){
                                             for (let joint in joints){
                                                 fClick = function(div){
                                                     syncIt(async ()=>{
+                                                        api.resetAllTableConstraint();
                                                         lJoints = api.getJoinedTables(joint).joined_tables;
                                                         elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target);
                                                         index = data.data.aoColumns.indexOf(elem[0]);
@@ -373,7 +409,7 @@ function setupEventHandlers(){
                                                         await MetadataSource.hijackCache(treePath,api);
                                                         lData = await buildData(joint,treePath,api,quoteIfString(aData[index]));
                                                         if(lData.status){
-                                                            showTapResult(treePath,lData.data,lData.ahmap,div,rowEventFactory(lJoints,lData,div));
+                                                            showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div));
                                                         }else {
                                                             div.append("An unexpected error has append, unable to gather data. see logs for more information");
                                                         }
@@ -390,7 +426,7 @@ function setupEventHandlers(){
                                 
                                 $("#resultpane").html('');
                                 let div = makeCollapsableDiv($("#resultpane"),params.table,params.table,false);
-                                showTapResult(dataTreePath,data.data,data.ahmap,div,rowEventFactory(joints,data,div));
+                                showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div));
                             }
                         });
 
