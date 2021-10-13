@@ -347,7 +347,7 @@ function setupEventHandlers(){
                         });
 
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
-                        let editor = new ComplexQueryEditor(api, $("#controlPane"));
+                        let editor = new ComplexQueryEditor(api, $("#query"));
 
                         qce = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
                                 formName: 'tapFormColName',
@@ -438,6 +438,8 @@ function setupEventHandlers(){
                         qce.model.updateQuery();
                         $("#queryRun").click();
 
+                        $("#multiTabDiv").tabs();
+                        $("#multiTabDiv").toggle();
 
                         enableButton("btnApiDisconnect");
 

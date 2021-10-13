@@ -127,7 +127,7 @@
 
             </div>
 
-            <div style="display: flex;flex-grow : 1;; overflow:auto" >
+            <div style="display: flex;flex-grow : 1; overflow:auto;" >
                 <div class="col-1" ></div>
 
                 <div class="col-10" style="display: flex;flex-direction: column;">
@@ -135,12 +135,29 @@
 
                     </div>
                     <div style="justify-content: center;display: flex;margin-top: auto;" id="controlPane">
-                        <div id="tableNameTable" style="overflow:scroll; max-height: 12em;">
+                        <div id="multiTabDiv" style="flex-grow : 1;display: none;">
+                            <ul>
+                                <li><a href="#what">Select what</a></li>
+                                <li><a href="#where">Where</a></li>
+                                <li><a href="#query">Adql Query</a></li>
+                            </ul>
+                            <div id="what">
+
+                            </div>
+                            <div id="where" style="justify-content: center;display: flex;">
+                                <div id="tableNameTable" style="overflow:scroll; max-height: 12em;">
+                            
+                                </div>
+                                <div id="tapColEditor" style="display: flex;">
+        
+                                </div>
+                            </div>
+                            <div id="query">
+
+                            </div>
                             
                         </div>
-                        <div id="tapColEditor" style="display: flex;">
 
-                        </div>
                     </div>
                 </div>
 
