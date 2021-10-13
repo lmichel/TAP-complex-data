@@ -164,7 +164,8 @@ ValueFormator = function() {
 		} else if( decimaleRegexp.test(value)){
 			tdNode.html((new Number(value)).toPrecision(8));
 		} else if( bibcodeRegexp.test(value)){
-			tdNode.html("<a title=\"bibcode\" HREF='http://cdsads.u-strasbg.fr/cgi-bin/nph-bib_query?" + value + "\" target=blank>" + value + "</A>");
+			console.log(value);
+			tdNode.html("<a title=\"bibcode\" href='http://cdsads.u-strasbg.fr/cgi-bin/nph-bib_query?" + value + "\"' target=blank>" + value + "</a>");
 		} else {
 			tdNode.html(value);
 		}
@@ -237,7 +238,7 @@ ValueFormator = function() {
 	 * Get the URL infos asynchronously: formating must be achieved inside the callback
 	 */
 	var processURLInfo = function(columnName, url, tdNode, fovObject) {
-		$.getJSON("getproductinfo", {jsessionid: sessionID, url: url}, function(jsdata) {
+		$.getJSON("getproductinfo", {jsessionid: "123456789", url: url}, function(jsdata) {
 			if( Processing.jsonError(jsdata, "Cannot connect data") ) {
 				tdNode.html("Error");
 			} else {

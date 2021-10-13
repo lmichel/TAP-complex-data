@@ -2,6 +2,7 @@ var ComplexQEditor_mVc;
 
 function ComplexQEditor_mVcExtends(){
 	ComplexQEditor_mVc = function(params){
+        let that = this;
 		tapQEditor_mVc.call(this,params);
         this.fieldListView = new ComplexFieldList(params.parentDivId, 
             this.formName ,
