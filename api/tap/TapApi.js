@@ -359,6 +359,74 @@ var TapApi = (function(){
         return await this.tapServiceConnector.getObjectMapAndConstraints();
     };
 
+
+    /**add the wanted fields to the selection of fields to query data from
+     * apply verification on both the table name and the field name and will return an errored status if one of them is no correct
+     */
+    TapApi.prototype.selectField = async function(fieldName,table){
+        let obj = await this.getObjectMap();
+        let has_field = async function(table,fieldName){
+            let handler = await this.getTableAttributeHandlers(table);
+            handler = handler.filter((val)=>val.nameattr === fieldName);
+            return handler.length>0;
+        };
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined ){
+                
+                if(await has_field(table,fieldName)){
+                    if(!obj.tables[table].columns.includes(fieldName))
+                        obj.tables[table].columns.push(fieldName);
+                    return {"status":true};
+                }
+                return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
+            
+            } else if(table === obj.root_table.name){
+                
+                if(await has_field(table,fieldName)){
+                    if(!obj.root_table.columns.includes(fieldName))
+                        obj.root_table.columns.push(fieldName);
+                    return {"status":true};
+                }
+                return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
+            
+            }
+            return {"status" : false , "error":{"logs" :"Unkown table" + table, "params":{"table":table,"fieldName":fieldName}} };
+        }
+        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+    };
+
+    /**add the wanted fields to the selection of fields to query data from
+     * handle non existing fields and table
+     */
+    TapApi.prototype.unselectField = async function(fieldName,table){
+        let obj = await this.getObjectMap();
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined ){
+                obj.tables[table].columns.remove(fieldName);
+            } else if(table === obj.root_table.name){
+                obj.root_table.columns.remove(fieldName);
+            }
+            return {"status":true};
+        }
+        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+    };
+
+    TapApi.prototype.unselectAllFields = async function(table){
+        let obj = await this.getObjectMap();
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined ){
+                obj.tables[table].columns=[];
+            } else if(table === obj.root_table.name){
+                obj.root_table.columns=[];
+            }
+            return {"status":true};
+        }
+        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+    };
+
     TapApi.prototype.getSelectedFields = async function (table){
         let obj = await this.getObjectMap();
         if(obj.status){
@@ -366,6 +434,10 @@ var TapApi = (function(){
             if(obj.tables[table] !== undefined){
                 if(obj.tables[table].columns.length>0){
                     return obj.tables[table].columns;
+                }
+            } else if (table === obj.root_table.name){
+                if(obj.root_table.columns.length>0){
+                    return obj.root_table.columns;
                 }
             }
         }
@@ -378,7 +450,7 @@ var TapApi = (function(){
             if(AH.length<1){ //there is no ucd set or no good field has been found 
                 AH = KT.selectAHByUtypes(handler.attribute_handlers).selected;   
             }
-            if(AH.length<1){
+            if(AH.length<1){//there is no Utypes set or no good field has been found 
                 let m = Math.min(3,handler.attribute_handlers.length);
                 for (let i=0;i<m;i++){
                     AH.push(handler.attribute_handlers[i]);
