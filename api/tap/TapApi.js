@@ -364,17 +364,27 @@ var TapApi = (function(){
      * apply verification on both the table name and the field name and will return an errored status if one of them is no correct
      */
     TapApi.prototype.selectField = async function(fieldName,table){
+        if(table === undefined){
+            return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
+        if(fieldName === undefined){
+            return {"status" : false , "error":{"logs" :"no field selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
         let obj = await this.getObjectMap();
-        let has_field = async function(table,fieldName){
-            let handler = await this.getTableAttributeHandlers(table);
-            handler = handler.filter((val)=>val.nameattr === fieldName);
-            return handler.length>0;
+        let has_field = async function(table,fieldName,api){
+            let handler = await api.getTableAttributeHandlers(table);
+            if(handler.status){
+                handler= handler.attribute_handlers;
+                handler = handler.filter((val)=>val.nameattr === fieldName);
+                return handler.length>0;
+            }
+            return false;
         };
         if(obj.status){
             obj = obj.object_map;
             if(obj.tables[table] !== undefined ){
                 
-                if(await has_field(table,fieldName)){
+                if(await has_field(table,fieldName,this)){
                     if(!obj.tables[table].columns.includes(fieldName))
                         obj.tables[table].columns.push(fieldName);
                     return {"status":true};
@@ -383,7 +393,7 @@ var TapApi = (function(){
             
             } else if(table === obj.root_table.name){
                 
-                if(await has_field(table,fieldName)){
+                if(await has_field(table,fieldName,this)){
                     if(!obj.root_table.columns.includes(fieldName))
                         obj.root_table.columns.push(fieldName);
                     return {"status":true};
@@ -400,6 +410,12 @@ var TapApi = (function(){
      * handle non existing fields and table
      */
     TapApi.prototype.unselectField = async function(fieldName,table){
+        if(table === undefined){
+            return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
+        if(fieldName === undefined){
+            return {"status" : false , "error":{"logs" :"no field selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
         let obj = await this.getObjectMap();
         if(obj.status){
             obj = obj.object_map;
