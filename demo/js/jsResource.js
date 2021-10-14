@@ -68,7 +68,7 @@ function quoteIfString(str){
 
 async function buildData(dataTreePath,api,constraint){
     let fieldsData = await api.getTableSelectedField(dataTreePath.table,constraint);
-    let fields = await api.getAllSelectedFields(dataTreePath.table);
+    let fields = await api.getSelectedFields(dataTreePath.table);
 
     if(fieldsData.status){
 

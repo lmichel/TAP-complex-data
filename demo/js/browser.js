@@ -63,7 +63,7 @@ async function getTableData(api,table,jointVal){
     display(data,"codeOutput");
 
     if(data.status){
-        let dataCols = await api.getAllSelectedFields(table);
+        let dataCols = await api.getSelectedFields(table);
         let subJoint = api.getJoinedTables(table).joined_tables;
 
         let subTables = Object.keys(subJoint);
