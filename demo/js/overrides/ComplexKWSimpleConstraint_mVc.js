@@ -4,6 +4,7 @@ function ComplexKWSimpleConstraint_mVcExtends(){
 	ComplexKWSimpleConstraint_mVc = function(params){
 		TapKWSimpleConstraint_mVc.call(this,params);
         this.editorModel = params.editorModel;
+        this.cantTouchThis = params.cantTouchThis;
 	};
 	/**
 	 * Tap Complex custom model extends the tapQEditor_Mvc class
@@ -15,8 +16,9 @@ function ComplexKWSimpleConstraint_mVcExtends(){
                 $('#' + this.constListId).append("<div class='kwConstraint' id=" + this.rootId + " style='overflow: hidden;'>");
                 var baseSelector  = '#' + this.constListId + ' div[id="' + this.rootId + '"]';
                 var rootDiv = $(baseSelector);		
-
-                rootDiv.append('&nbsp;<a id="' + this.rootId + '_close" href="javascript:void(0);" class=closekw title="Remove this Constraint"></a>&nbsp;');
+                if(!this.cantTouchThis){
+                    rootDiv.append('&nbsp;<a id="' + this.rootId + '_close" href="javascript:void(0);" class=closekw title="Unselect this columns"></a>&nbsp;');
+                }
                 rootDiv.append('<span style="cursor: pointer;" id="' + this.rootId + '_name" style="float: left;">' + this.name + '</span>&nbsp;');
 
                 $("#" + this.rootId + " span").click(function(){
@@ -29,12 +31,14 @@ function ComplexKWSimpleConstraint_mVcExtends(){
                 $('#' + this.constListId).append("</div>");	
 
                 var closeInput = $('#' + this.constListId + ' a[id="' + this.rootId + '_close"]');
-
-                closeInput.click(function() {
-                    rootDiv.remove();
-                    that.fireRemoveFirstAndOr(this.rootId);
-                    that.editorModel.updateQuery();	
-                });
+                if(!this.cantTouchThis){
+                    closeInput.click(function() {
+                        rootDiv.remove();
+                        that.fireRemoveFirstAndOr(this.rootId);
+                        that.editorModel.updateQuery();	
+                    });
+                }
+                
                 that.editorModel.updateQuery();	
             }
         } ,

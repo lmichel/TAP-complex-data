@@ -442,6 +442,13 @@ function setupEventHandlers(){
                         constraintEditor.fireSetTreepath(new DataTreePath(dt));
                         qce.fireSetTreepath(new DataTreePath(dt));
 
+                        let fields = await api.getSelectedFields(params.table);
+                        let keys = api.getJoinKeys(params.table);
+                        let ah = (await api.getTableAttributeHandlers(params.table)).attribute_handlers;
+                        
+                        qce.hardSelect(ah.filter(val=>keys.includes(val.nameattr)));
+                        qce.select(ah.filter(val=>fields.includes(val.nameattr)));
+
                         constraintEditor.model.updateQuery();
                         $("#queryRun").click();
 

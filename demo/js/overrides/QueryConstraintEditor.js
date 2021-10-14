@@ -18,8 +18,9 @@ function QueryConstraintEditorOverride(){
 			Modalinfo.error("Div #" +params. parentDivId + " not found");
 			return ;
 		}
-		var view  = new tapColSelector_mVc(params);
-		new ConstQEditor_mvC(view, new ComplexColSelector_Mvc(params.complexEditor));
+		var view  = new ComplexColSelector_mVc(params);
+        view.model =new ComplexColSelector_Mvc(params.complexEditor);
+		new ConstQEditor_mvC(view,view.model );
 		view.draw();
 		return view;
 	};
