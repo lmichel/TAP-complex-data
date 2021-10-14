@@ -6,8 +6,8 @@ function ComplexQueryEditor(api,holder){
     this.editor = $("#queryPrettyText",holder);
 }
 /**
- * @param {String} type what is updated chose between the folowing valid options : "constraint" 
- * @param {*} data depends on `type` "constraint" : tapQEditor_Mvc
+ * @param {String} type what is updated chose between the folowing valid options : "constraint"  "columns"
+ * @param {*} data depends on `type` "constraint" : tapQEditor_Mvc "columns" tapColSelector
  * 
  */
 ComplexQueryEditor.prototype.updateQuery = function(type, data){
@@ -35,6 +35,12 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
                 }
             });
         } break;
+        case "columns":{
+            let columns = data.editors;
+            for (let c in columns){
+                console.log(columns[c].fireGetADQL());
+            }
+        }break;
     }
 };
 
