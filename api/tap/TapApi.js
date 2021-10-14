@@ -52,7 +52,6 @@ var TapApi = (function(){
                 this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
                 let obj = await this.getObjectMap();
-                console.log(obj);
 
                 if (obj.status){
                     this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
@@ -138,23 +137,29 @@ var TapApi = (function(){
     };
 
     /**
-     * @returns Returns all fields of root table rows returned by the ADQL query on the root table filtered by all constraints put on joined tables at any levels.
+     * DEPRACTED use `getTableFields`
      */
     TapApi.prototype.getRootFields = async function () {
         return this.getTableFields();
     };
 
     /**
-     * Create and return the correct adql querry to get the value of all fields of the selected root table, taking in account all user's defined constraints
+     * DEPRACTED use `getTableFieldsQuery`
      */
     TapApi.prototype.getRootFieldsQuery = async function(){
     return this.getTableFieldsQuery();
     };
 
+    /**
+     * DEPRACTED use `getTableSelectedField`
+     */
     TapApi.prototype.getRootQueryIds = async function () {
         return this.getTableSelectedField();
     };
 
+    /**
+     * DEPRACTED use `getTableQuery`
+     */
     TapApi.prototype.getRootQuery = async function () {
         return await this.getTableQuery();
     };
@@ -173,7 +178,7 @@ var TapApi = (function(){
             if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
-            let allField = this.formatColNames(table,await this.getAllSelectedFields(table));
+            let allField = this.formatColNames(table,await this.getSelectedFields(table));
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -212,7 +217,7 @@ var TapApi = (function(){
 
             let dataTable = [];
 
-            let Field = await this.getAllSelectedFields(table);
+            let Field = await this.getSelectedFields(table);
 
             if (votable.status) {
                 votable = votable.answer;
@@ -354,13 +359,101 @@ var TapApi = (function(){
         return await this.tapServiceConnector.getObjectMapAndConstraints();
     };
 
-    TapApi.prototype.getAllSelectedFields = async function (table){
+
+    /**add the wanted fields to the selection of fields to query data from
+     * apply verification on both the table name and the field name and will return an errored status if one of them is no correct
+     */
+    TapApi.prototype.selectField = async function(fieldName,table){
+        if(table === undefined){
+            return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
+        if(fieldName === undefined){
+            return {"status" : false , "error":{"logs" :"no field selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
+        let obj = await this.getObjectMap();
+        let has_field = async function(table,fieldName,api){
+            let handler = await api.getTableAttributeHandlers(table);
+            if(handler.status){
+                handler= handler.attribute_handlers;
+                handler = handler.filter((val)=>val.nameattr === fieldName);
+                return handler.length>0;
+            }
+            return false;
+        };
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined ){
+                
+                if(await has_field(table,fieldName,this)){
+                    if(!obj.tables[table].columns.includes(fieldName))
+                        obj.tables[table].columns.push(fieldName);
+                    return {"status":true};
+                }
+                return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
+            
+            } else if(table === obj.root_table.name){
+                
+                if(await has_field(table,fieldName,this)){
+                    if(!obj.root_table.columns.includes(fieldName))
+                        obj.root_table.columns.push(fieldName);
+                    return {"status":true};
+                }
+                return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
+            
+            }
+            return {"status" : false , "error":{"logs" :"Unkown table" + table, "params":{"table":table,"fieldName":fieldName}} };
+        }
+        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+    };
+
+    /**add the wanted fields to the selection of fields to query data from
+     * handle non existing fields and table
+     */
+    TapApi.prototype.unselectField = async function(fieldName,table){
+        if(table === undefined){
+            return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
+        if(fieldName === undefined){
+            return {"status" : false , "error":{"logs" :"no field selected", "params":{"table":table,"fieldName":fieldName}} };
+        }
+        let obj = await this.getObjectMap();
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined ){
+                obj.tables[table].columns.remove(fieldName);
+            } else if(table === obj.root_table.name){
+                obj.root_table.columns.remove(fieldName);
+            }
+            return {"status":true};
+        }
+        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+    };
+
+    TapApi.prototype.unselectAllFields = async function(table){
+        let obj = await this.getObjectMap();
+        if(obj.status){
+            obj = obj.object_map;
+            if(obj.tables[table] !== undefined ){
+                obj.tables[table].columns=[];
+            } else if(table === obj.root_table.name){
+                obj.root_table.columns=[];
+            }
+            return {"status":true};
+        }
+        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+    };
+
+    TapApi.prototype.getSelectedFields = async function (table){
         let obj = await this.getObjectMap();
         if(obj.status){
             obj = obj.object_map;
             if(obj.tables[table] !== undefined){
                 if(obj.tables[table].columns.length>0){
                     return obj.tables[table].columns;
+                }
+            } else if (table === obj.root_table.name){
+                if(obj.root_table.columns.length>0){
+                    return obj.root_table.columns;
                 }
             }
         }
@@ -373,7 +466,7 @@ var TapApi = (function(){
             if(AH.length<1){ //there is no ucd set or no good field has been found 
                 AH = KT.selectAHByUtypes(handler.attribute_handlers).selected;   
             }
-            if(AH.length<1){
+            if(AH.length<1){//there is no Utypes set or no good field has been found 
                 let m = Math.min(3,handler.attribute_handlers.length);
                 for (let i=0;i<m;i++){
                     AH.push(handler.attribute_handlers[i]);

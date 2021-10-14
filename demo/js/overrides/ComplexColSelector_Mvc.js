@@ -10,13 +10,13 @@ function ComplexColSelector_MvcExtends(){
 	 */
      ComplexColSelector_Mvc.prototype = Object.create(tapColSelector_Mvc.prototype, {
 		processAttributeHandlerEvent : {
-			value: function(ah, constListId){
+			value: function(ah, constListId,cantTouchThis){
 				let first = Object.entries(this.editors).length === 0;
 				let currentTreePath = this.listener.controlCurrentTreePath();
 
 				let divKey = this.constEditorRootId + ah.nameattr;
 				if(this.editors[divKey] === undefined){
-					Out.debug("mv constraint " + ah.nameattr + " to #" + this.constListId);
+					Out.debug("mv constraint " + ah.nameattr + " to #" + constListId);
 
 					let v = new ComplexKWSimpleConstraint_mVc({divId: divKey,
 						constListId: constListId,
@@ -24,6 +24,7 @@ function ComplexColSelector_MvcExtends(){
 						attributeHandler: ah,
 						editorModel: this,
 						defValue: '',
+						cantTouchThis:cantTouchThis,
 						treePath: jQuery.extend({}, currentTreePath)});
 
 					this.editors[divKey] = v;

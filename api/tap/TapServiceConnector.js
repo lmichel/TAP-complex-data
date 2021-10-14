@@ -75,7 +75,7 @@ var TapServiceConnector = (function() {
     TapServiceConnector.prototype.getObjectMapAndConstraints = async function () {
         try {
             if( this.objectMapWithAllDescription === undefined){
-                this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {"handler_attributs": {}}};
+                this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {}};
             
                 let api = this.api;
                 let rootTable = api.getConnector().connector.service.table;
@@ -90,7 +90,6 @@ var TapServiceConnector = (function() {
                 this.objectMapWithAllDescription.root_table.name = rootTable;
                 this.schema = api.getConnector().connector.service.schema;
                 this.objectMapWithAllDescription.root_table.schema = this.schema;
-                this.objectMapWithAllDescription.root_table.columns =  api.tapServiceConnector.objectMapWithAllDescription.map.handler_attributs;
                 let formatJoinTable = "";
                 let correctJoinFormaTable = "";
                 
@@ -108,11 +107,10 @@ var TapServiceConnector = (function() {
 
                             formatJoinTable = this.schema + "." + tableKey;
                             correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
-                            let attributHanler = this.json[tableKey]!==undefined?this.json[tableKey].attribute_handlers:"";
 
                             this.objectMapWithAllDescription.tables[tableKey] = {
                                 "description": jsonWithaoutDescription[tableKey].description,
-                                "columns": attributHanler !== undefined ? attributHanler : [],
+                                "columns": [],
                             };
 
                         } 

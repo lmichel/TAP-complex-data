@@ -1,4 +1,5 @@
 function extend(){
+    ComplexColSelector_mVcExtends();
     ComplexKWSimpleConstraint_mVcExtends();
     ComplexColSelector_MvcExtends();
     ComplexKWConstraint_mVcExtends();

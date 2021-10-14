@@ -29,9 +29,13 @@ ul, #myUL {
 
 /*  */
 .collapsable-header {
-  background-color: #444444;
   display: flex;
-  margin-bottom: 0.25em;
+}
+
+.collapsable-separator{
+  margin-left: .9em ;
+  margin-right: .9em;
+  border-bottom: 0.1em solid #2e2e2e;
 }
 
 .collapsable-holder {
@@ -46,11 +50,15 @@ ul, #myUL {
 .collapsable-title {
   font-weight: bold;
   text-transform: capitalize;
-  font-size: 1.5em;
+  font-size: 1em;
 }
 
 .collapsable-div {
-  overflow-x: scroll;
+  overflow:hidden;
+  border: 0.1em solid #2e2e2e;
+  border-radius: 1em;
+  padding: 0.2em;
+  padding-top: 0.25em;
 }
 
 label {
