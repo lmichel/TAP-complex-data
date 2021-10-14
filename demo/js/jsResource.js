@@ -349,18 +349,23 @@ function setupEventHandlers(){
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
                         let editor = new ComplexQueryEditor(api, $("#query"));
 
-                        qce = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
+                        let constraintEditor = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
                                 formName: 'tapFormColName',
                                 sesameUrl:"sesame",
                                 upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
                                 queryView: adqlQueryView,
                                 complexEditor: editor});
 
+                        let qce = QueryConstraintEditor.complexColumnSelector({parentDivId:'tapColSelector',
+                                formName: 'tapFormColSelector',
+                                queryView: adqlQueryView,
+                                complexEditor: editor});
+
                         $("#controlPane").append('<div><button class="btn btn-primary" style="margin-top: 0.5em;" id="queryRun">Run Query</button></div>');
                         
                         bindClickAsyncEvent("queryRun",async ()=>{
-                            qce.model.updateQuery();
-                            let dataTreePath = $.extend({}, qce.dataTreePath);
+                            constraintEditor.model.updateQuery();
+                            let dataTreePath = $.extend({}, constraintEditor.dataTreePath);
                             dataTreePath.table = params.table;
                             dataTreePath.tableorg = params.table;
                             let data = await buildData(dataTreePath,api);
@@ -430,12 +435,14 @@ function setupEventHandlers(){
                             }
                         });
 
-                        await buildTableNameTable($("#tableNameTable"),api,qce);
+                        await buildTableNameTable($("#tableNameTable"),api,constraintEditor);
                         let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
                         await MetadataSource.hijackCache(dt,api);
+
+                        constraintEditor.fireSetTreepath(new DataTreePath(dt));
                         qce.fireSetTreepath(new DataTreePath(dt));
 
-                        qce.model.updateQuery();
+                        constraintEditor.model.updateQuery();
                         $("#queryRun").click();
 
                         $("#multiTabDiv").tabs();

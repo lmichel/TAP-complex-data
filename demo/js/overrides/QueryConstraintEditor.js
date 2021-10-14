@@ -12,4 +12,15 @@ function QueryConstraintEditorOverride(){
         view.draw();
         return view;
     };
+    QueryConstraintEditor.complexColumnSelector = function (params /*{parentDivId, formName, queryView, currentNode}*/) {
+		var parentdiv = $('#' + params.parentDivId);
+		if( !parentdiv.length) {
+			Modalinfo.error("Div #" +params. parentDivId + " not found");
+			return ;
+		}
+		var view  = new tapColSelector_mVc(params);
+		new ConstQEditor_mvC(view, new ComplexColSelector_Mvc(params.complexEditor));
+		view.draw();
+		return view;
+	};
 }
