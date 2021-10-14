@@ -136,10 +136,13 @@ function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler,leftTi
     }
     header += "</div>";
     holder.append(header);
+    holder.append("<div class='collapsable-separator'></div>");
     holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
     let div = $("#collapsable-div-" + name );
     if(collapsed){
         div.hide();
+    }else{
+        $(".collapsable-separator",holder).hide();
     }
     div.data("clicked",false);
     $("#collapsable-header-" + name).click(()=>{
@@ -150,6 +153,7 @@ function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler,leftTi
             }
         }
         div.toggle();
+        $(".collapsable-separator",holder).toggle();
     });
     return div;
 }
