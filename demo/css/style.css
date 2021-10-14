@@ -1,41 +1,102 @@
 ul, #myUL {
-    list-style-type: none;
-  }
-  
-  /* Remove margins and padding from the parent ul */
-  #myUL {
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* Style the caret/arrow */
-  .caret {
-    cursor: pointer;
-    user-select: none; /* Prevent text selection */
-  }
-  
-  /* Create the caret/arrow with a unicode, and style it */
-  .caret::before {
-    content: "\25B6";
-    color: black;
-    display: inline-block;
-    margin-right: 6px;
-  }
-  
-  /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
-  .caret-down::before {
-    transform: rotate(90deg);
-  }
-  
-  /* Hide the nested list */
-  .nested {
-    display: none;
-  }
-  
-  /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
-  .active {
-    display: block;
-  }
+  list-style-type: none;
+}
+
+/* Remove margins and padding from the parent ul */
+#myUL {
+  margin: 0;
+  padding: 0;
+}
+
+/* Style the caret/arrow */
+.caret {
+  cursor: pointer;
+  user-select: none; /* Prevent text selection */
+}
+
+/* Create the caret/arrow with a unicode, and style it */
+.caret::before {
+  content: "\25B6";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+.caret-down::before {
+  transform: rotate(90deg);
+}
+
+/*  */
+.collapsable-header {
+  background-color: #444444;
+  display: flex;
+  margin-bottom: 0.25em;
+}
+
+.collapsable-holder {
+  margin-left: 3rem;
+}
+
+.collapsable-header p {
+  margin-bottom: 0px;
+  margin-left: .5em;
+}
+
+.collapsable-title {
+  font-weight: bold;
+  text-transform: capitalize;
+  font-size: 1.5em;
+}
+
+.collapsable-div {
+  overflow-x: scroll;
+}
+
+label {
+  margin: 0px;
+}
+
+tr.odd.rHighlight,
+tr.even.rHighlight,
+.rHighlight {
+  background-color: #e7e700 !important;
+}
+
+input.form-control{
+  font-size: small;
+}
+
+.align-items{
+  align-items: center;
+}
+
+a.first.paginate_button, 
+a.next.paginate_button, 
+a.previous.paginate_button, 
+a.last.paginate_button, 
+a.paginate_active, 
+a.paginate_button {
+  padding: 0 1em;
+}
+
+div.dataTables_paginate{
+  position: initial;
+}
+
+.dataTables_filter label{
+  width:100%;
+}
+
+/* Hide the nested list */
+.nested {
+  display: none;
+}
+
+/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+.active {
+  display: block;
+}
 
 .inherit {
   background-color: inherit;

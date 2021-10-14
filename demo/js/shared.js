@@ -10,10 +10,13 @@ function display(data, id) {
         highlight = true;
         data = JSON.stringify(data,undefined,4);
     }
-    // html escaping usefull sometimes.
-    data = data.replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    if(data !== undefined){
+        // html escaping usefull sometimes.
+        data = data.replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+    
 
     $("#" + id).html(data);
     try {
