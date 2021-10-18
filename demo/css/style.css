@@ -33,8 +33,8 @@ ul, #myUL {
 }
 
 .collapsable-separator{
-  margin-left: .9em ;
-  margin-right: .9em;
+  margin-left: .45em ;
+  margin-right: .45em;
   border-bottom: 0.1em solid #2e2e2e;
 }
 
@@ -56,7 +56,7 @@ ul, #myUL {
 .collapsable-div {
   overflow:hidden;
   border: 0.1em solid #2e2e2e;
-  border-radius: 1em;
+  border-radius: .5em;
   padding: 0.2em;
   padding-top: 0.25em;
 }
