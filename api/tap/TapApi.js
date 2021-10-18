@@ -354,13 +354,24 @@ var TapApi = (function(){
 
     /**add the wanted fields to the selection of fields to query data from
      * apply verification on both the table name and the field name and will return an errored status if one of them is no correct
+     * unless checkNames is set to false in this case the method is synchronous and no check is done on fieldName, no error are returned if table is unknown
+     * note that other types of errors can still be returned
      */
-    TapApi.prototype.selectField = async function(fieldName,table){
-        if(table === undefined){
-            return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
+    TapApi.prototype.selectField = async function(fieldName,table,checkNames){
+        if(checkNames === undefined){
+            checkNames = true;
+        }
+        if(table === undefined ){
+            if(checkNames){
+                return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
+            }
+            return {"status":true};
         }
         if(fieldName === undefined){
-            return {"status" : false , "error":{"logs" :"no field selected", "params":{"table":table,"fieldName":fieldName}} };
+            if(checkNames){
+                return {"status" : false , "error":{"logs" :"no field selected", "params":{"table":table,"fieldName":fieldName}} };
+            }
+            return {"status":true};
         }
         let obj = this.getObjectMap();
         let has_field = async function(table,fieldName,api){
@@ -374,26 +385,53 @@ var TapApi = (function(){
         };
         if(obj.status){
             obj = obj.object_map;
+            /*this parts handle async code in a way that keep the method sync if checkNames is set to false
+            * async methods just wrap the whole function in a promise thus you can use .then to handle them
+            * in addition the .then method of a promise return another promise allowing us to return the result of 
+            * the .then method
+            * this way of handling async adds a little overhead due to the user who may await the function while the function not returning a promise
+            * another source of overhead may comme from the fact that most of the methods work in the main loop
+            */
             if(obj.tables[table] !== undefined ){
-                
-                if(await has_field(table,fieldName,this)){
+                if(checkNames){
+                    return has_field(table,fieldName,this).then((val)=>{
+                        if(val){
+                            if(!obj.tables[table].columns.includes(fieldName))
+                                obj.tables[table].columns.push(fieldName);
+                            return {"status":true};
+                        } else {
+                            return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
+                        }
+                    });
+                    
+                } else{
                     if(!obj.tables[table].columns.includes(fieldName))
                         obj.tables[table].columns.push(fieldName);
                     return {"status":true};
                 }
-                return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
-            
-            } else if(table === obj.root_table.name){
                 
-                if(await has_field(table,fieldName,this)){
+            } else if(table === obj.root_table.name){
+                if(checkNames){
+                    return has_field(table,fieldName,this).then((val)=>{
+                        if(val){
+                            if(!obj.root_table.columns.includes(fieldName))
+                                obj.root_table.columns.push(fieldName);
+                            return {"status":true};
+                        }
+                        return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
+                    });
+                }else {
                     if(!obj.root_table.columns.includes(fieldName))
                         obj.root_table.columns.push(fieldName);
                     return {"status":true};
                 }
-                return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
-            
             }
-            return {"status" : false , "error":{"logs" :"Unkown table" + table, "params":{"table":table,"fieldName":fieldName}} };
+
+            if(checkNames){
+                return {"status" : false , "error":{"logs" :"Unkown table" + table, "params":{"table":table,"fieldName":fieldName}} };
+            }
+            return {"status":true};
+            
         }
         return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
     };
