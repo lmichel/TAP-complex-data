@@ -18,8 +18,8 @@ function OnRadioChange(radio) {
 
 
 /*/ Builds the selecting table for tables /*/
-async function buildTableNameTable(holder,api,qce){
-    let map = await api.getObjectMap();
+function buildTableNameTable(holder,api,qce){
+    let map = api.getObjectMap();
     if(map.status){
 
         /*/ Table building /*/
@@ -79,7 +79,6 @@ async function buildData(dataTreePath,api,constraint){
         for (let i=0;i<ah.length;i++){
             ahmap[ah[i].nameattr] = ah[i];
         }
-
         for (let i=0;i<fields.length;i++){
             data.aoColumns.push({"sTitle":fields[i]});
         }
@@ -121,7 +120,7 @@ function normalize(data,api,table){
     
 }
 
-function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler,leftTitle){
+function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems){
     let holderid = "collapsable-holder-" + name;
     if($("#" + holderid,holder).length>0){
         $("#" + holderid,holder).html("");
@@ -130,10 +129,55 @@ function makeCollapsableDiv(holder,name,title,collapsed,firstClickHandler,leftTi
     }
     holder = $("#" + holderid,holder);
 
-    let header = "<div class='collapsable-header' id = 'collapsable-header-" + name + "'> <p class='collapsable-title'>" + title + "</p>";
-    if(leftTitle !== undefined){
-        header += "<p class = 'txt-right' >" + leftTitle + "</p>";
+    let header = "<div class='collapsable-header' id = 'collapsable-header-" + name + "'>";
+    if(elems){
+        let r=[],c=[],l=[];
+        for (let i=0;i<elems.length;i++){
+            if(elems[i].txt){
+                if (elems[i].type){
+                    elems[i].toDom = "<p class = 'collapsable-" + elems[i].type +"'>" + elems[i].txt + "</p>";
+                }else {
+                    elems[i].toDom = "<p>" + elems[i].txt + "</p>";
+                }
+            }
+
+            switch(elems[i].pos){
+                case "center":{
+                    c.push(elems[i]);
+                }break;
+                case "left":{
+                    l.push(elems[i]);
+                }break;
+                case "right":{
+                    r.push(elems[i]);
+                }break;
+            }
+        }
+
+        if(l.length>0){
+            header += '<div class="txt-left col-'+Math.floor(l.length/elems.length*12)+'">';
+                l.forEach(function(element) {
+                    header += '<div class="side-div">'+ element.toDom + "</div>";
+                });
+                header += "</div>";
+        }
+        if(c.length>0){
+            header += '<div class="txt-center col-'+Math.floor(c.length/elems.length*12)+'">';
+                c.forEach(function(element) {
+                    header += '<div class="side-div">'+ element.toDom + "</div>";
+                });
+                header += "</div>";
+        }
+        if(r.length>0){
+            header += '<div class="txt-right col-'+Math.floor(r.length/elems.length*12)+'">';
+                r.forEach(function(element) {
+                    header += '<div class="side-div">'+ element.toDom + "</div>";
+                });
+                header += "</div>";
+        }
     }
+    
+
     header += "</div>";
     holder.append(header);
     holder.append("<div class='collapsable-separator'></div>");
@@ -364,9 +408,13 @@ function setupEventHandlers(){
                                 formName: 'tapFormColSelector',
                                 queryView: adqlQueryView,
                                 complexEditor: editor});
-
-                        $("#controlPane").append('<div><button class="btn btn-primary" style="margin-top: 0.5em;" id="queryRun">Run Query</button></div>');
-                        
+                        $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
+                        let object_map = api.getObjectMap();
+                        if(object_map.status){
+                            object_map=object_map.object_map;
+                        }else{
+                            object_map.tables = {};
+                        }
                         bindClickAsyncEvent("queryRun",async ()=>{
                             constraintEditor.model.updateQuery();
                             let dataTreePath = $.extend({}, constraintEditor.dataTreePath);
@@ -426,7 +474,12 @@ function setupEventHandlers(){
                                                     });
                                                 };
                                                 oJoints = api.getJoinedTables(joint).joined_tables;
-                                                makeCollapsableDiv(holder,joint,joint,true,fClick, Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":"");
+                                                makeCollapsableDiv(holder,joint,true,fClick, 
+                                                    [
+                                                        {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
+                                                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc"}:{}
+                                                    ]
+                                                    );
                                                 
                                             }
                                         });
@@ -434,12 +487,23 @@ function setupEventHandlers(){
                                 };
                                 
                                 $("#resultpane").html('');
-                                let div = makeCollapsableDiv($("#resultpane"),params.table,params.table,false);
+                                let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
+                                    [
+                                        {txt:params.table,type:"title",pos:"left"},
+                                        {pos:"right",txt:object_map.root_table.description,type:"desc"}
+                                    ]
+                                );
                                 showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div));
                             }
                         });
+                        $("#rButtonPane").append('<div style="height:11.8em" id="rPaneSpacer"></div>');
+                        $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;margin-bottom: 0.5em; width:100%" id="harold">Toggle control pane</button>');
+                        $("#harold").click(()=>{
+                            $("#controlPane").toggle();
+                            $("#rPaneSpacer").toggle();
+                        });
 
-                        await buildTableNameTable($("#tableNameTable"),api,constraintEditor);
+                        buildTableNameTable($("#tableNameTable"),api,constraintEditor);
                         let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
                         await MetadataSource.hijackCache(dt,api);
 

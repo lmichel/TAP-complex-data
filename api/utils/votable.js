@@ -850,8 +850,13 @@ function VOTableParser() {
         start;
 
     endParsingB64 = false;
-
-    dataB64 = selected.table.xml.getElementsByTagName(prefix + 'STREAM')[0].childNodes[0].nodeValue;
+    let child = selected.table.xml.getElementsByTagName(prefix + 'STREAM')[0].childNodes;
+    if(child.length>0){
+      dataB64 = child[0].nodeValue;
+    }else {
+      dataB64 = "";
+    }
+    
     
     // We must clean the B64 data from all the spaces and tabs it could contains
     dataB64 = dataB64.replace(/[ \t\r\n]+/g, '');

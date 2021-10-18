@@ -29,7 +29,6 @@ function ComplexColSelector_MvcExtends(){
 
 					this.editors[divKey] = v;
 					v.fireInit();
-					this.updateQuery();
 				}
 				
 			}

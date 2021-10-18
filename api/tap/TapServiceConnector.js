@@ -72,7 +72,7 @@ var TapServiceConnector = (function() {
         return  VOTableTools.votable2Rows(votableQueryResult);
     };
     
-    TapServiceConnector.prototype.getObjectMapAndConstraints = async function () {
+    TapServiceConnector.prototype.buildObjectMapAndConstraints = async function () {
         try {
             if( this.objectMapWithAllDescription === undefined){
                 this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {}};
@@ -88,6 +88,7 @@ var TapServiceConnector = (function() {
                     }};
                 }
                 this.objectMapWithAllDescription.root_table.name = rootTable;
+                this.objectMapWithAllDescription.root_table.description = jsonWithaoutDescription[rootTable].description;
                 this.schema = api.getConnector().connector.service.schema;
                 this.objectMapWithAllDescription.root_table.schema = this.schema;
                 let formatJoinTable = "";
@@ -122,12 +123,24 @@ var TapServiceConnector = (function() {
                 this.postProcessObjectMap();
             }
             return this.objectMapWithAllDescription;
-        } catch (error) {
+        }
+        catch (error) {
             console.error(error);
             return {"status":false,"error":{
                 "logs":error.toString(),
             }};
         }
+    };
+    TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
+        if(this.objectMapWithAllDescription !== undefined){
+            return this.objectMapWithAllDescription;
+        }
+        else {
+            return {"status":false,"error":{
+                "logs":"Object Map hasn't been build",
+            }};
+        }
+         
     };
 
     /**Apply custom post processing on the object map in order to fix various issues like wrong columns name declared in joints

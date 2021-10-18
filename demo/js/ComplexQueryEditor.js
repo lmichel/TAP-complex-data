@@ -2,7 +2,7 @@ function ComplexQueryEditor(api,holder){
     this.api = api;
     this.holder = holder;
     //@todo nicer editor
-    holder.append('<pre id="queryPrettyText" style="max-height:16em;overflow-wrap: break-word;overflow:auto"></pre>');
+    holder.append('<pre style="max-height:16em;overflow:scroll;height:100%"><code id="queryPrettyText"></code></pre>');
     this.editor = $("#queryPrettyText",holder);
 }
 /**
@@ -30,11 +30,9 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
             let columns = data.editors;
             let table = this.api.getConnector().connector.service.table;
             this.api.unselectAllFields(table);
-            asyncProm = (async ()=>{
-                for (let c in columns){
-                    await this.api.selectField(columns[c].fireGetADQL(),table);
-                }
-            })();
+            for (let c in columns){
+                    this.api.selectField(columns[c].fireGetADQL(),table,false);
+            }
         }break;
     }
 
@@ -42,17 +40,13 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
     /**The following code is a mess which aims to reduce any troubles comming from the fact that jsResources doesn't handle async methods
      * we execute most of the code outside of promises when async/await behavior is needed we store the code inside an async IIFE named asyncProm
      * we then use the `then` methods of the promise to update the showed query ensuring that we don't update the showed query before the query hasn't fully updated
-     * the rProm is a rather empty promise used in a way to be able to return a promise which will resolve once everything has ended thus enabling to await 
-     * the method when possible. 
+     * note that the .then method of promise returns promises and awaiting the outer promise await all the inners promises 
+     * this way if anyone await the returned value of this method we can ensure that the query will have been correctly updated
      */
 
     let that = this;
-    let resolv;
-    let rProm = new Promise((resolve)=>{
-        resolv = resolve;
-    });
-    asyncProm.then( ()=>{
-        this.api.getTableQuery().then((val)=>{ //TODO proper selection of the wanted table
+    return asyncProm.then( ()=>{
+        return this.api.getTableQuery().then((val)=>{ //TODO proper selection of the wanted table
             if(val.status){
                 let query = val.query;
                 query = replaceAll(query,"\n (","(");
@@ -60,10 +54,8 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
                 query = replaceAll(query,"  (","(");
                 that.editor.html(hljs.highlight(query ,{"language":"SQL", "ignoreIllegals":true}).value);
             }
-            resolv();
         });
     });
-    return rProm;
     
 };
 
