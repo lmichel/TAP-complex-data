@@ -79,7 +79,6 @@ async function buildData(dataTreePath,api,constraint){
         for (let i=0;i<ah.length;i++){
             ahmap[ah[i].nameattr] = ah[i];
         }
-
         for (let i=0;i<fields.length;i++){
             data.aoColumns.push({"sTitle":fields[i]});
         }
@@ -488,7 +487,12 @@ function setupEventHandlers(){
                                 };
                                 
                                 $("#resultpane").html('');
-                                let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,[{txt:params.table,type:"title",pos:"left"}]);
+                                let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
+                                    [
+                                        {txt:params.table,type:"title",pos:"left"},
+                                        {pos:"right",txt:object_map.root_table.description,type:"desc"}
+                                    ]
+                                );
                                 showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div));
                             }
                         });

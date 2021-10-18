@@ -29,7 +29,6 @@ function ComplexQEditor_MvcExtends(){
 				this.editors[divKey] = v;
 				v.fireInit();
 				this.const_key++;
-				this.updateQuery();
 			}
 		},
 		

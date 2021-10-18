@@ -164,7 +164,7 @@ ValueFormator = function() {
 		} else if( decimaleRegexp.test(value)){
 			tdNode.html((new Number(value)).toPrecision(8));
 		} else if( bibcodeRegexp.test(value)){
-			tdNode.html("<a title=\"bibcode\" href='http://cdsads.u-strasbg.fr/cgi-bin/nph-bib_query?" + value + "\"' target=blank>" + value + "</a>");
+			tdNode.html("<a title=\"bibcode\" href='http://cdsads.u-strasbg.fr/cgi-bin/nph-bib_query?" + value + "' target=blank>" + value + "</a>");
 		} else {
 			tdNode.html(value);
 		}
