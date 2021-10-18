@@ -18,8 +18,8 @@ function OnRadioChange(radio) {
 
 
 /*/ Builds the selecting table for tables /*/
-async function buildTableNameTable(holder,api,qce){
-    let map = await api.getObjectMap();
+function buildTableNameTable(holder,api,qce){
+    let map = api.getObjectMap();
     if(map.status){
 
         /*/ Table building /*/
@@ -409,7 +409,7 @@ function setupEventHandlers(){
                                 queryView: adqlQueryView,
                                 complexEditor: editor});
                         $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
-                        let object_map = await api.getObjectMap();
+                        let object_map = api.getObjectMap();
                         if(object_map.status){
                             object_map=object_map.object_map;
                         }else{
@@ -503,7 +503,7 @@ function setupEventHandlers(){
                             $("#rPaneSpacer").toggle();
                         });
 
-                        await buildTableNameTable($("#tableNameTable"),api,constraintEditor);
+                        buildTableNameTable($("#tableNameTable"),api,constraintEditor);
                         let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
                         await MetadataSource.hijackCache(dt,api);
 

@@ -121,7 +121,7 @@ async function createButton(api) {
     let buttons = "";
     let tapButton = [];
 
-    for (let key in (await api.getObjectMapWithAllDescriptions()).tables) {
+    for (let key in await api.getObjectMap().object_map.tables) {
 
         buttons = "<span>" + "<button type='button' class=\"btn btn-primary\" " +
             "id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">" +
@@ -223,7 +223,7 @@ async function createTableIDsButton(api){
     let buttons = "";
     let tapButton = [];
 
-    for (let key in (await api.getObjectMap()).object_map.tables) {
+    for (let key in api.getObjectMap().object_map.tables) {
 
         buttons ="<button type='button' class=\"btn btn-primary\" " +
             "id='btnSeeQueryID" + key + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
@@ -237,7 +237,7 @@ async function createTableIDsButton(api){
     }
     $("#loadTableQueryIds").append(tapButton);
 
-    for (let key in (await api.getObjectMap()).object_map.tables) {
+    for (let key in  api.getObjectMap().object_map.tables) {
         bindClickAsyncEvent("btnSeeQueryID" + key, async () =>{
             let val = $("#txtJointValID" + key).val().trim();
             let query = await api.getTableQuery(key, val ==="" ? undefined : val);
@@ -261,7 +261,7 @@ async function createTableFieldsButton(api){
     let buttons = "";
     let tapButton = [];
 
-    for (let key in (await api.getObjectMap()).object_map.tables) {
+    for (let key in api.getObjectMap().object_map.tables) {
 
         buttons ="<button type='button' class=\"btn btn-primary\" " +
             "id='btnSeeQueryField" + key + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
@@ -275,7 +275,7 @@ async function createTableFieldsButton(api){
     }
     $("#loadTableFields").append(tapButton);
 
-    for (let key in (await api.getObjectMap()).object_map.tables) {
+    for (let key in api.getObjectMap().object_map.tables) {
         
         bindClickAsyncEvent("btnSeeQueryField" + key, async () =>{
             let val = $("#txtJointValField" + key).val().trim();
@@ -414,7 +414,7 @@ function setupEventHandlers(){
 
     bindClickAsyncEvent("btnGetObjectMap",async () => {
 
-        let objectMap = await api.getObjectMap();
+        let objectMap = api.getObjectMap();
         let status = objectMap.status;
 
         display(status, "getStatus");
