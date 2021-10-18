@@ -2,7 +2,7 @@ function ComplexQueryEditor(api,holder){
     this.api = api;
     this.holder = holder;
     //@todo nicer editor
-    holder.append('<pre id="queryPrettyText" style="max-height:16em;overflow-wrap: break-word;overflow:auto"></pre>');
+    holder.append('<pre style="max-height:16em;overflow:scroll;height:100%"><code id="queryPrettyText"></code></pre>');
     this.editor = $("#queryPrettyText",holder);
 }
 /**

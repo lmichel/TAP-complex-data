@@ -364,8 +364,7 @@ function setupEventHandlers(){
                                 formName: 'tapFormColSelector',
                                 queryView: adqlQueryView,
                                 complexEditor: editor});
-
-                        $("#controlPane").append('<div><button class="btn btn-primary" style="margin-top: 0.5em;" id="queryRun">Run Query</button></div>');
+                        $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
                         
                         bindClickAsyncEvent("queryRun",async ()=>{
                             constraintEditor.model.updateQuery();
@@ -437,6 +436,12 @@ function setupEventHandlers(){
                                 let div = makeCollapsableDiv($("#resultpane"),params.table,params.table,false);
                                 showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div));
                             }
+                        });
+                        $("#rButtonPane").append('<div style="height:11.8em" id="rPaneSpacer"></div>');
+                        $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;margin-bottom: 0.5em; width:100%" id="harold">Toggle control pane</button>');
+                        $("#harold").click(()=>{
+                            $("#controlPane").toggle();
+                            $("#rPaneSpacer").toggle();
                         });
 
                         await buildTableNameTable($("#tableNameTable"),api,constraintEditor);

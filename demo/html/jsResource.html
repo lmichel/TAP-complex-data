@@ -131,14 +131,18 @@
             </div>
 
             <div style="display: flex;flex-grow : 1; overflow:auto;" >
-                <div class="col-1" ></div>
+                <div class="col-1" style="display: flex;flex-direction: column;">
+                    <div style="justify-content: center;display: flex;flex-direction: column;margin-top: auto;" id="lButtonPane">
+
+                    </div>
+                </div>
 
                 <div class="col-10" style="display: flex;flex-direction: column;">
                     <div id=resultpane style="overflow:auto;flex-shrink:1">
 
                     </div>
                     <div style="justify-content: center;display: flex;margin-top: auto;" id="controlPane">
-                        <div id="multiTabDiv" style="flex-grow : 1;display: none;">
+                        <div id="multiTabDiv" style="width: 100%;display: none;">
                             <ul>
                                 <li><a href="#what">Select what</a></li>
                                 <li><a href="#where">Where</a></li>
@@ -166,7 +170,11 @@
                     </div>
                 </div>
 
-                <div class="col-1" ></div>
+                <div class="col-1" style="display: flex;flex-direction: column;">
+                    <div style="justify-content: center;display: flex;flex-direction: column;margin-top: auto;" id="rButtonPane">
+
+                    </div>
+                </div>
 
             </div>
         </div>
