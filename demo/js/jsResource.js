@@ -44,15 +44,9 @@ function buildTableNameTable(holder,api,qce){
 
         /*/ Binding events of the cells /*/
         $("[data-table-id='tableName']",holder).click((cell)=>{
-            syncIt(async ()=>{
-                let treepath = $.extend({ "table": cell.target.dataset.table, "tableorg": cell.target.dataset.table},dataTreePath);
-                
-                // remember to always hijack the cache before risquing using it.
-                let hijack = await MetadataSource.hijackCache(treepath,api);
-                if(hijack){
-                    qce.fireUpdateTreepath(new DataTreePath(treepath));
-                }
-            });
+            let treepath = $.extend({ "table": cell.target.dataset.table, "tableorg": cell.target.dataset.table},dataTreePath);
+            
+            qce.fireUpdateTreepath(new DataTreePath(treepath));
         });
     }
 }
@@ -387,6 +381,25 @@ function setupEventHandlers(){
                 thenFun = async () =>{
 
                     if (status){
+                        let object_map = api.getObjectMap();
+                        if(object_map.status){
+                            object_map=object_map.object_map;
+                        }else{
+                            object_map.tables = {};
+                        }
+                        let tables = [params.table];
+                        tables = tables.concat(Object.keys(object_map.tables));
+                        let t =await api.getTablesAttributeHandlers(tables);
+                        if(!t.status){
+                            console.log(t.error.logs);
+                        }
+
+                        let treepath = {"nodekey":params.shortName, "schema": params.schema};
+                        for (let i =0;i<tables.length;i++){
+                            // remember to always hijack the cache before risquing using it.
+                            await MetadataSource.hijackCache($.extend({ "table": tables[i], "tableorg": tables[i]},treepath),api);
+                        }
+                        
 
                         /*/ disable all radio buttons so the user can't change their value /*/
                         $("input:radio[name=radio]").attr("disabled",true);
@@ -409,12 +422,7 @@ function setupEventHandlers(){
                                 queryView: adqlQueryView,
                                 complexEditor: editor});
                         $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
-                        let object_map = api.getObjectMap();
-                        if(object_map.status){
-                            object_map=object_map.object_map;
-                        }else{
-                            object_map.tables = {};
-                        }
+                        
                         bindClickAsyncEvent("queryRun",async ()=>{
                             constraintEditor.model.updateQuery();
                             let dataTreePath = $.extend({}, constraintEditor.dataTreePath);
