@@ -3,6 +3,7 @@
 AttributeHolder = function(queryAble){
 
     let AHTemplate = {
+        "table_name":"",
         "nameattr":"",
         "nameorg":"",
         "column_name": "",
@@ -25,7 +26,7 @@ AttributeHolder = function(queryAble){
             schema = "";
         }
         let fullName = [schema, table].join('.').quotedTableName().qualifiedName;
-        if(cache[fullName ]=== undefined){
+        if(cache[fullName]=== undefined){
             let adql = Holder.getAHAdql(table,schema);
             let queryResult = await queryAble.Query(adql);
             if(queryResult.status){
@@ -39,10 +40,68 @@ AttributeHolder = function(queryAble){
             }
             
         }
-        return {"status":true,"attribute_handlers":cache[ fullName]};
+        return {"status":true,"attribute_handlers":Array.from(cache[fullName])};
     };
 
-    Holder.getAHAdql = function(table,schema){
+    Holder.getTablesAttributeHandlers = async function(tables,schema){
+        if(schema === undefined){
+            console.warn("Missing argument `schema` to getTableAttributeHandler you may get an empty list depending on the TAP sevirce ");
+            schema = "";
+        }
+        let fullNames = {};
+        let nameMap = {};
+        let ahMap = {};
+        let fName;
+        for (let i =0 ;i<tables.length;i++){
+            fName = [schema, tables[i]].join('.').quotedTableName().qualifiedName;
+            if(cache[fName]!== undefined){
+                ahMap[tables[i]]=Array.from(cache[fName]);
+                nameMap[tables[i]]=fName;
+            }else {
+                fullNames[tables[i]]=fName;
+            }
+        }
+        let adql = Holder.getAHsAdql(fullNames);
+        let queryResult = await queryAble.Query(adql);
+        
+        if(queryResult.status){
+            let data = queryResultToDoubleArray(queryResult.answer);
+            let AHList = doubleArrayToAHList(data);
+            for (let i=0;i<AHList.length;i++){
+                if(ahMap[AHList[i].table_name]!==undefined){
+                    ahMap[AHList[i].table_name].push(AHList[i]);
+                } else if (fullNames[AHList[i].table_name] !== undefined){
+                    if(ahMap[fullNames[AHList[i].table_name]]===undefined){
+                        ahMap[fullNames[AHList[i].table_name]] = [];
+                    }
+                    ahMap[fullNames[AHList[i].table_name]].push(AHList[i]);
+                }else if(Object.values(fullNames).includes(AHList[i].table_name)){
+                    ahMap[AHList[i].table_name] = [];
+                    ahMap[AHList[i].table_name].push(AHList[i]);
+                } else {
+                    console.error(data,fullNames,ahMap);
+                    return {"status":false,"error":{
+                        "logs":"Parsing error unexpected table name " + AHList[i].table_name,
+                        "params":{"tables":tables, "schema":schema}
+                    }};
+                }
+            }
+            for(let name in ahMap){
+                if(cache[name] === undefined){
+                    cache[name] = Array.from(ahMap[name]);
+                }
+            }
+            return {"status":true,"attribute_handlers":ahMap,"name_map":$.extend(nameMap, fullNames)};
+
+        } else {
+            return {"status":false,"error":{
+                "logs":"Query failed:\n " + queryResult.error.logs,
+                "params":{"tables":tables, "schema":schema}
+            }};
+        }
+    };
+
+    Holder.getAHColAdql = function(){
         return "SELECT " +
         "TAP_SCHEMA.columns.column_name" +
         ",TAP_SCHEMA.columns.unit" +
@@ -50,9 +109,24 @@ AttributeHolder = function(queryAble){
         ",TAP_SCHEMA.columns.utype" +
         ",TAP_SCHEMA.columns.dataType" +
         ",TAP_SCHEMA.columns.description" +
-        " FROM TAP_SCHEMA.columns" +
+        ",TAP_SCHEMA.columns.table_name" +
+        " FROM TAP_SCHEMA.columns";
+    };
+
+    Holder.getAHAdql = function(table,schema){
+        return Holder.getAHColAdql() +
         " WHERE TAP_SCHEMA.columns.table_name = " + "\'" + replaceAll(table,"\"","\\\"") + "\'" + 
         " OR TAP_SCHEMA.columns.table_name = " + "\'" + replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","\\\"") + "\'";
+    };
+
+    Holder.getAHsAdql = function(names){
+        let full = [];
+        for (let name in names){
+            full.push("\'" + replaceAll(names[name],"\"","\\\"") + "\'");
+            full.push("\'" + replaceAll(name,"\"","\\\"") + "\'");
+        }
+        return Holder.getAHColAdql() +
+        " WHERE TAP_SCHEMA.columns.table_name IN ( " + full.join(" , ") + " ) ";
     };
 
     function queryResultToDoubleArray(queryResult){
@@ -87,6 +161,7 @@ AttributeHolder = function(queryAble){
             AH.utype = data[i][3];
             AH.type = data[i][4];
             AH.description = data[i][5];
+            AH.table_name = data[i][6];
             AHList.push(AH);
         }
         return AHList;
