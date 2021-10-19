@@ -88,6 +88,18 @@ a.paginate_button {
   padding: 0 1em;
 }
 
+div.fielddiv{
+  width: 25em;
+}
+
+div.kwConstraint{
+  width: auto;
+}
+
+div.fieldlist{
+  width:auto;
+}
+
 div.dataTables_paginate{
   position: initial;
 }

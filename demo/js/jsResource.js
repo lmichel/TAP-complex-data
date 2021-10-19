@@ -415,7 +415,9 @@ function setupEventHandlers(){
                                 sesameUrl:"sesame",
                                 upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
                                 queryView: adqlQueryView,
-                                complexEditor: editor});
+                                complexEditor: editor,
+                                tables:tables
+                            });
 
                         let qce = QueryConstraintEditor.complexColumnSelector({parentDivId:'tapColSelector',
                                 formName: 'tapFormColSelector',
@@ -524,7 +526,7 @@ function setupEventHandlers(){
                             $("#rPaneSpacer").toggle();
                         });
 
-                        buildTableNameTable($("#tableNameTable"),api,constraintEditor);
+                        //buildTableNameTable($("#tableNameTable"),api,constraintEditor);
                         let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
                         await MetadataSource.hijackCache(dt,api);
 
