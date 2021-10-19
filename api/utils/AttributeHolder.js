@@ -25,7 +25,7 @@ AttributeHolder = function(queryAble){
             console.warn("Missing argument `schema` to getTableAttributeHandler you may get an empty list depending on the TAP sevirce ");
             schema = "";
         }
-        let fullName = [schema, table].join('.').quotedTableName().qualifiedName;
+        let fullName = [schema, table].join('.').quotedTableName().qualifiedName.toLowerCase();
         if(cache[fullName]=== undefined){
             let adql = Holder.getAHAdql(table,schema);
             let queryResult = await queryAble.Query(adql);
@@ -53,12 +53,12 @@ AttributeHolder = function(queryAble){
         let ahMap = {};
         let fName;
         for (let i =0 ;i<tables.length;i++){
-            fName = [schema, tables[i]].join('.').quotedTableName().qualifiedName;
+            fName = [schema, tables[i]].join('.').quotedTableName().qualifiedName.toLowerCase();
             if(cache[fName]!== undefined){
-                ahMap[tables[i]]=Array.from(cache[fName]);
-                nameMap[tables[i]]=fName;
+                ahMap[tables[i].toLowerCase()]=Array.from(cache[fName]);
+                nameMap[tables[i].toLowerCase()]=fName;
             }else {
-                fullNames[tables[i]]=fName;
+                fullNames[tables[i].toLowerCase()]=fName;
             }
         }
         let adql = Holder.getAHsAdql(fullNames);
@@ -68,18 +68,18 @@ AttributeHolder = function(queryAble){
             let data = queryResultToDoubleArray(queryResult.answer);
             let AHList = doubleArrayToAHList(data);
             for (let i=0;i<AHList.length;i++){
-                if(ahMap[AHList[i].table_name]!==undefined){
-                    ahMap[AHList[i].table_name].push(AHList[i]);
-                } else if (fullNames[AHList[i].table_name] !== undefined){
-                    if(ahMap[fullNames[AHList[i].table_name]]===undefined){
-                        ahMap[fullNames[AHList[i].table_name]] = [];
+                if(ahMap[AHList[i].table_name.toLowerCase()]!==undefined){
+                    ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);
+                } else if (fullNames[AHList[i].table_name.toLowerCase()] !== undefined){
+                    if(ahMap[fullNames[AHList[i].table_name.toLowerCase()]]===undefined){
+                        ahMap[fullNames[AHList[i].table_name.toLowerCase()]] = [];
                     }
-                    ahMap[fullNames[AHList[i].table_name]].push(AHList[i]);
-                }else if(Object.values(fullNames).includes(AHList[i].table_name)){
-                    ahMap[AHList[i].table_name] = [];
-                    ahMap[AHList[i].table_name].push(AHList[i]);
+                    ahMap[fullNames[AHList[i].table_name.toLowerCase()]].push(AHList[i]);
+                }else if(Object.values(fullNames).includes(AHList[i].table_name.toLowerCase())){
+                    ahMap[AHList[i].table_name.toLowerCase()] = [];
+                    ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);
                 } else {
-                    console.error(data,fullNames,ahMap);
+                    console.error(AHList[i],AHList,fullNames,ahMap);
                     return {"status":false,"error":{
                         "logs":"Parsing error unexpected table name " + AHList[i].table_name,
                         "params":{"tables":tables, "schema":schema}
