@@ -17,14 +17,21 @@ function ComplexQEditor_MvcExtends(){
 				var divKey = this.constEditorRootId + ah.nameattr + this.const_key;
 
 				Out.debug("mv constraint " + ah.nameattr + " to #" + constListId);
-
+				let tree = jQuery.extend({}, currentTreePath);
+				tree.table =  ah.table_name;
+				if(ah.table_name.includes(tree.schema)){
+					tree.table = tree.table.substr(tree.schema.length);
+					tree.table = tree.table.substr(tree.table.indexOf("."));
+				}
+				tree.tableorg = tree.table;
 				var v = new ComplexKWConstraint_mVc({divId: divKey,
 					constListId: constListId ,
 					isFirst: first ,
 					attributeHandler: ah ,
 					editorModel: this ,
 					defValue: '' ,
-					treePath: jQuery.extend({}, currentTreePath)});
+					treePath: tree
+				});
 
 				this.editors[divKey] = v;
 				v.fireInit();

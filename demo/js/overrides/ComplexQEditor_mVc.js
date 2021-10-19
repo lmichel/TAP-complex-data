@@ -4,12 +4,13 @@ function ComplexQEditor_mVcExtends(){
 	ComplexQEditor_mVc = function(params){
         let that = this;
 		tapQEditor_mVc.call(this,params);
-        this.fieldListView = new ComplexFieldList(params.parentDivId, 
+        this.fieldListView = new ComplexFullFieldList_mVc(params.parentDivId, 
             this.formName ,
             {
                 stackHandler: function(ahName){ that.fireAttributeEvent(ahName);} ,
                 radec: false
-            }
+            },
+            params.tables
         );
 	};
 	/**
@@ -28,6 +29,13 @@ function ComplexQEditor_mVcExtends(){
                 this.orderByView.fireClearAllConst();
                 this.listener.controlLoadFields(that.dataTreePath, handler);
                 this.fieldListView.setDataTreePath(this.dataTreePath);
+            }
+        },
+        fireAttributeEvent : { 
+            value: function(ahname){
+                let ah = this.fieldListView.getAttributeHandler(ahname);
+                this.listener.controlAttributeHandlerEvent(ah, this.constListId);
+                $("#" + this.constListId + " span.help").attr("style","display:none;");
             }
         }
     });

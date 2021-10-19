@@ -88,7 +88,7 @@ var TapServiceConnector = (function() {
                     }};
                 }
                 this.objectMapWithAllDescription.root_table.name = rootTable;
-                this.objectMapWithAllDescription.root_table.description = jsonWithaoutDescription[rootTable].description;
+                this.objectMapWithAllDescription.root_table.description = jsonWithaoutDescription[rootTable] !== undefined ? jsonWithaoutDescription[rootTable].description:"";
                 this.schema = api.getConnector().connector.service.schema;
                 this.objectMapWithAllDescription.root_table.schema = this.schema;
                 let formatJoinTable = "";

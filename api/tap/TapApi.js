@@ -341,7 +341,7 @@ var TapApi = (function(){
 
     /**
      * @param {*} table : String the name of table you want get handlerAttribut associeted with
-     * @return {*} : Json the json containing all handler Attribut of the table
+     * @return {*} : Json the json containing all handler Attribut of the table as an array stored in the `attribute_handlers` field
      * */
     TapApi.prototype.getTableAttributeHandlers = async function (table) {
         let connector = this.getConnector();
@@ -351,6 +351,21 @@ var TapApi = (function(){
             return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
         }
     };
+
+    /**Bulk methods to get a lot of AH, this method is more efficient than using a for loop with `getTableAttributeHandlers`.
+     * @param {*} table : String the name of table you want get handlerAttribut associeted with
+     * @return {*} : Json the json containing all handler Attribut of the table as a map stored in the `attribute_handlers` field 
+     * the map uses the full names as keys the field `name_map` constains a map fromp short names to full names.
+     * */
+    TapApi.prototype.getTablesAttributeHandlers = async function (tables) {
+        let connector = this.getConnector();
+        if(connector.status){
+            return await this.tapServiceConnector.attributsHandler.getTablesAttributeHandlers(tables, connector.connector.service.schema);
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"tables":tables}} };
+        }
+    };
+
 
     /**add the wanted fields to the selection of fields to query data from
      * apply verification on both the table name and the field name and will return an errored status if one of them is no correct

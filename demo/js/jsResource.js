@@ -44,15 +44,9 @@ function buildTableNameTable(holder,api,qce){
 
         /*/ Binding events of the cells /*/
         $("[data-table-id='tableName']",holder).click((cell)=>{
-            syncIt(async ()=>{
-                let treepath = $.extend({ "table": cell.target.dataset.table, "tableorg": cell.target.dataset.table},dataTreePath);
-                
-                // remember to always hijack the cache before risquing using it.
-                let hijack = await MetadataSource.hijackCache(treepath,api);
-                if(hijack){
-                    qce.fireUpdateTreepath(new DataTreePath(treepath));
-                }
-            });
+            let treepath = $.extend({ "table": cell.target.dataset.table, "tableorg": cell.target.dataset.table},dataTreePath);
+            
+            qce.fireUpdateTreepath(new DataTreePath(treepath));
         });
     }
 }
@@ -120,7 +114,7 @@ function normalize(data,api,table){
     
 }
 
-function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems){
+function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,reop){
     let holderid = "collapsable-holder-" + name;
     if($("#" + holderid,holder).length>0){
         $("#" + holderid,holder).html("");
@@ -387,6 +381,25 @@ function setupEventHandlers(){
                 thenFun = async () =>{
 
                     if (status){
+                        let object_map = api.getObjectMap();
+                        if(object_map.status){
+                            object_map=object_map.object_map;
+                        }else{
+                            object_map.tables = {};
+                        }
+                        let tables = [params.table];
+                        tables = tables.concat(Object.keys(object_map.tables));
+                        let t =await api.getTablesAttributeHandlers(tables);
+                        if(!t.status){
+                            console.log(t.error.logs);
+                        }
+
+                        let treepath = {"nodekey":params.shortName, "schema": params.schema};
+                        for (let i =0;i<tables.length;i++){
+                            // remember to always hijack the cache before risquing using it.
+                            await MetadataSource.hijackCache($.extend({ "table": tables[i], "tableorg": tables[i]},treepath),api);
+                        }
+                        
 
                         /*/ disable all radio buttons so the user can't change their value /*/
                         $("input:radio[name=radio]").attr("disabled",true);
@@ -402,19 +415,16 @@ function setupEventHandlers(){
                                 sesameUrl:"sesame",
                                 upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
                                 queryView: adqlQueryView,
-                                complexEditor: editor});
+                                complexEditor: editor,
+                                tables:tables
+                            });
 
                         let qce = QueryConstraintEditor.complexColumnSelector({parentDivId:'tapColSelector',
                                 formName: 'tapFormColSelector',
                                 queryView: adqlQueryView,
                                 complexEditor: editor});
                         $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
-                        let object_map = api.getObjectMap();
-                        if(object_map.status){
-                            object_map=object_map.object_map;
-                        }else{
-                            object_map.tables = {};
-                        }
+                        
                         bindClickAsyncEvent("queryRun",async ()=>{
                             constraintEditor.model.updateQuery();
                             let dataTreePath = $.extend({}, constraintEditor.dataTreePath);
@@ -426,7 +436,6 @@ function setupEventHandlers(){
                             // adding job id before using fireSetTreepath make the editor not showing the columns
                             dataTreePath.jobid="what a job";
                             if(data.status){
-
                                 /**This function create and return another function 
                                  * this other function setup event listener for a selected row of a data table 
                                  * the event handler create a collapsable div for each table joints to the table which the row contains related data 
@@ -444,27 +453,29 @@ function setupEventHandlers(){
                                             }
                                             h.removeClass("rHighlight");
                                             $(nRow).addClass("rHighlight");
-                                            let index;
-                                            let treePath = $.extend({},dataTreePath);
-                                            let lData;
                                             let fClick;
-                                            let lJoints;
-                                            let elem;
                                             let oJoints;
 
+                                            let open =[];
+                                            $(".collapsable-div:visible",holder).each((i,e)=>{
+                                                open.push($(e).attr('id'));
+                                            });
+                                            let c =0;
                                             for (let joint in joints){
-                                                fClick = function(div){
-                                                    syncIt(async ()=>{
+                                                c++;
+                                                fClick = async function(div){
+                                                    await syncIt(async ()=>{
                                                         api.resetAllTableConstraint();
-                                                        lJoints = api.getJoinedTables(joint).joined_tables;
-                                                        elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target);
-                                                        index = data.data.aoColumns.indexOf(elem[0]);
+                                                        let treePath = $.extend({},dataTreePath);
+                                                        let lJoints = api.getJoinedTables(joint).joined_tables;
+                                                        let elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target);
+                                                        let index = data.data.aoColumns.indexOf(elem[0]);
                                                         treePath.table = joint;
                                                         treePath.tableorg = joint;
                                                         treePath.jobid = joint;
                                                         // remember to always hijack the cache before risquing using it.
                                                         await MetadataSource.hijackCache(treePath,api);
-                                                        lData = await buildData(treePath,api,quoteIfString(aData[index]));
+                                                        let lData = await buildData(treePath,api,quoteIfString(aData[index]));
                                                         if(lData.status){
                                                             showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div));
                                                         }else {
@@ -479,8 +490,20 @@ function setupEventHandlers(){
                                                         {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
                                                         object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc"}:{}
                                                     ]
-                                                    );
-                                                
+                                                );
+                                                // re-opening previously opened div(s)
+                                                if (open.includes("collapsable-div-" + joint)){
+                                                    $("#collapsable-header-" + joint ,holder).click();
+                                                }
+                                            }
+                                            // auto opening the div(s) when there is less than a defined number of possible divs to open
+                                            if (c<2){
+                                                for (let joint in joints){
+                                                    //avoid openning two times the div 
+                                                    if(!open.includes("collapsable-div-" + joint)){
+                                                        $("#collapsable-header-" + joint ,holder).click();
+                                                    }
+                                                }
                                             }
                                         });
                                     };
@@ -503,7 +526,7 @@ function setupEventHandlers(){
                             $("#rPaneSpacer").toggle();
                         });
 
-                        buildTableNameTable($("#tableNameTable"),api,constraintEditor);
+                        //buildTableNameTable($("#tableNameTable"),api,constraintEditor);
                         let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
                         await MetadataSource.hijackCache(dt,api);
 
