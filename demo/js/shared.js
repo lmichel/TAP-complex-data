@@ -12,9 +12,7 @@ function display(data, id) {
     }
     if(data !== undefined){
         // html escaping usefull sometimes.
-        data = data.replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        data = data.toHtmlSafe();
     }
     
 
@@ -23,6 +21,14 @@ function display(data, id) {
         if (highlight)
             hljs.highlightElement(document.getElementById(id));
     }catch(error){}
+}
+
+if(!String.prototype.toHtmlSafe){
+    String.prototype.toHtmlSafe = function(){
+        return this.replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    };
 }
 
 function addClass(elemId,className){

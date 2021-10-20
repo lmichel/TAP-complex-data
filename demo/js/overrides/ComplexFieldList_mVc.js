@@ -59,7 +59,7 @@ function ComplexFieldList_mVcExtends(){
                 var that = this;
                 let trId = `${ah.table_name}`.replace(".","_") +"_"+ah.nameattr;
                 var id = this.formName + "_" +trId;
-                var title = this.getAttributeTitle(ah);
+                var title = this.getAttributeTitle(ah).toHtmlSafe();
                 var row ="<tr class=attlist id=" + trId + ">" +
                 "<td class=attlist><span title='" + title + "'>"+ ah.table_name +"." + ah.nameorg+"</span></td>" +
                 "<td class='attlist help'>" + ah.type +"</td>" +
@@ -133,7 +133,7 @@ function ComplexFieldList_mVcExtends(){
                             var ahm = cache.hamap;
                             for( var k=0 ; k<ahm.length ; k++) {
                                 var ah = ahm[k];
-                                that.attributesHandlers[ah.table_name +"_"+ ah.nameattr] = ah;				
+                                that.attributesHandlers[`${ah.table_name}`.replace(".","_") +"_"+ ah.nameattr] = ah;				
                                 that.displayField(ah);
                             }
                             that.lookForAlphaKeyword();

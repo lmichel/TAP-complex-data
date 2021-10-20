@@ -60,16 +60,6 @@
 
 
         <!-- End of Overrides Scripts -->
-
-        <script>
-            resourceLoader.setCss([]);
-            resourceLoader.setScripts([]);
-            resourceLoader.loadAll().then((result) => {
-                // applying IIFE overrides right after jsResources ended his loading
-                overrides();
-                extend();
-            });
-        </script>
             
         <!-- CSS imports -->
 
