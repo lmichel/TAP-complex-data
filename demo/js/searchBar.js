@@ -52,7 +52,7 @@ async function setupEventHandlers(){
     // default conditions
     let defaultConditions ={
         "capability":"rr.capability.standard_id='ivo://ivoa.net/std/tap'",
-        "interface":"rr.interface.intf_type = 'vs:paramhttp'"
+        "interface":"(rr.interface.intf_type = 'vs:paramhttp' AND rr.interface.url_use ='base')"
     }; 
 
     api.selectField("short_name","resource",false);
@@ -66,7 +66,7 @@ async function setupEventHandlers(){
             if(conditions[i].indexOf("%")==-1){
                 condition += base + "= " + conditions[i];
             }else {
-                condition += base + "LIKE " + conditions[i];
+                condition += "UPPER(" + base + ") LIKE " + conditions[i].toUpperCase();
             }
         }
         return condition;
@@ -161,14 +161,13 @@ async function setupEventHandlers(){
             }
         }
         
-        let select = "SELECT TOP 10 ";
+        let select = "SELECT ";
         for (let field in fields){
             select +=  field + " AS " + fields[field] + ", ";
         }
         return select.substr(0,select.length-2) + " ";
     }
-
-    $("#searchBar").keyup(()=>{
+    $("#searchBar").keyup((event)=>{
         let parsedData = parseString($("#searchBar").val(),Object.keys(allowedFieldsMap),":");
         let allCond = processConditions(parsedData,allowedFieldsMap);
 
@@ -194,6 +193,12 @@ async function setupEventHandlers(){
             query = getSelect(parsedData,allowedFieldsMap) + query.substr(query.toLowerCase().indexOf("from"));
 
             display(query,"querrySend");
+            if(event.originalEvent.keyCode == 13){
+                api.query(query).then((val)=>{
+                    display(val,"codeOutput");
+                });
+            }
+            
         });
     });
 
