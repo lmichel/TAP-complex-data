@@ -258,16 +258,13 @@ var JsonAdqlBuilder = (function(){
      * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
      */
     JsonAdqlBuilder.prototype.getAdqlJoints = function(table){
-        
-        let whitelist = this.getSubTables(table);
-        
-        if(whitelist.status){
-            whitelist = whitelist.subTables;
-        }else{
-            return whitelist;
-        }
+        let joints = this.getActiveJoints(table);
 
-        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value));
+        if(joints.status){
+            joints = joints.joints;
+        }else{
+            return joints;
+        }
 
         let adqlJoints = "";
 
@@ -280,6 +277,20 @@ var JsonAdqlBuilder = (function(){
 
         return {"status":true,"adqlJoints":adqlJoints};
 
+    };
+
+    JsonAdqlBuilder.prototype.getActiveJoints = function(table){
+        let whitelist = this.getSubTables(table);
+        
+        if(whitelist.status){
+            whitelist = whitelist.subTables;
+        }else{
+            return whitelist;
+        }
+
+        let joints = this.adqlJsonMap.activeJoints.filter(value => whitelist.includes(value));
+
+        return {"status":true,"joints":joints};
     };
 
     /**

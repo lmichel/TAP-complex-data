@@ -21,7 +21,7 @@ function ComplexQEditor_MvcExtends(){
 				tree.table =  ah.table_name;
 				if(ah.table_name.includes(tree.schema)){
 					tree.table = tree.table.substr(tree.schema.length);
-					tree.table = tree.table.substr(tree.table.indexOf("."));
+					tree.table = tree.table.substr(tree.table.indexOf(".")+1);
 				}
 				tree.tableorg = tree.table;
 				var v = new ComplexKWConstraint_mVc({divId: divKey,
