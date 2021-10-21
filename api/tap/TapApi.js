@@ -164,6 +164,37 @@ var TapApi = (function(){
         return await this.getTableQuery();
     };
 
+    TapApi.prototype.query = async function(query){
+        if(this.getConnector().status){
+            let votable = await this.tapServiceConnector.Query(query);
+            
+            if (votable.status) {
+                votable = votable.answer;
+                dataTable = this.tapServiceConnector.getDataTable(votable);
+                let fields = VOTableTools.genererField(votable,votable.responseText);
+                let nbCols = fields.length;
+                let singleArrayValue = [];
+                let doubleArrayValue = [];
+                if(nbCols <1 && dataTable.length > 0){
+                    return {"status" : false , "error":{"logs" :"Error in columns parsing" } };
+                }
+                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
+                    for (let col = 0; col < nbCols; col++) {
+                        singleArrayValue.push(dataTable[rowNb+col]);
+                    }
+                    doubleArrayValue.push(singleArrayValue);
+
+                    singleArrayValue = [];
+                }
+
+                return {"status" : true , "field_values" :doubleArrayValue,"field_names":fields};
+            } else {
+                return {"status" :false , "error":{"logs" :votable.error.logs }};
+            }
+        } else {
+            return {"status":false,"error" :{ "logs": "No active TAP connection","params":{"query":query}}};
+        }
+    };
 
     /**
      * Create and return the correct adql query to get the value of the slected fields (or joining keys if none are selected) of the selected table any constraint put on sub tables are added to the query
@@ -213,30 +244,12 @@ var TapApi = (function(){
                 return query;
             }
             query = query.query;
-            let votable = await this.tapServiceConnector.Query(query);
+            let data = await this.query(query);
 
-            let dataTable = [];
-
-            let Field = await this.getSelectedFields(table);
-
-            if (votable.status) {
-                votable = votable.answer;
-                dataTable = this.tapServiceConnector.getDataTable(votable);
-                let nbCols = Field.length;
-                let singleArrayValue = [];
-                let doubleArrayValue = [];
-                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
-                    for (let col = 0; col < nbCols; col++) {
-                        singleArrayValue.push(dataTable[rowNb+col]);
-                    }
-                    doubleArrayValue.push(singleArrayValue);
-
-                    singleArrayValue = [];
-                }
-
-                return {"status" : true , "field_values" :doubleArrayValue};
+            if (data.status) {
+                return data;
             } else {
-                return {"status" :false , "error":{"logs" :"Error while running query :" + query + "\n" + votable.error.logs }};
+                return {"status" :false , "error":{"logs" :"Error while running query :" + query + "\n" + data.error.logs }};
             }
             
         } else {
@@ -291,31 +304,13 @@ var TapApi = (function(){
             if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
-            let votable = await this.tapServiceConnector.Query((await this.getTableFieldsQuery(table,joinKeyVal)).query);
-            let dataTable = [];
-            let Field = await this.getAllTableField(table);
-            if (votable.status) {
 
-                votable = votable.answer;
-                dataTable = this.tapServiceConnector.getDataTable(votable);
-                let nbCols = Field.length;
-                let singleArrayValue = [];
-                let doubleArrayValue = [];
-                if(nbCols <1 && dataTable.length > 0){
-                    return {"status" : false , "error":{"logs" :"Error in columns parsing" } };
-                }
-                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
-                    for (let col = 0; col < nbCols; col++) {
-                        singleArrayValue.push(dataTable[rowNb+col]);
-                    }
-                    doubleArrayValue.push(singleArrayValue);
+            let data = await this.query((await this.getTableFieldsQuery(table,joinKeyVal)).query);
+            if (data.status) {
 
-                    singleArrayValue = [];
-                }
-
-                return {"status" : true , "field_values" :doubleArrayValue};
+                return data;
             } else {
-                return {"status" :false , "error":{"logs" :votable.error.logs }};
+                return {"status" :false , "error":{"logs" :data.error.logs }};
             }
             
         } else {
