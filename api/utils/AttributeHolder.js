@@ -74,7 +74,6 @@ AttributeHolder = function(queryAble){
         if(queryResult.status){
             let data = queryResultToDoubleArray(queryResult.answer);
             let AHList = doubleArrayToAHList(data);
-            console.log(AHList);
             for (let i=0;i<AHList.length;i++){
                 if(ahMap[AHList[i].table_name.toLowerCase()]!==undefined){
                     ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);

@@ -77,7 +77,7 @@ async function buildData(dataTreePath,api,constraint){
             data.aoColumns.push({"sTitle":fields[i]});
         }
         // we only normalize the root table
-        if (dataTreePath.table == api.getConnector().connector.service.table){
+        if (dataTreePath.table == api.getConnector().connector.service.table && api.getActiveJoints(dataTreePath.table).joints.length>0){
             normalize(data,api,dataTreePath.table);
         }
 
@@ -88,30 +88,33 @@ async function buildData(dataTreePath,api,constraint){
 
 function normalize(data,api,table){
     let keys = api.getJoinKeys(table);
-    let indexs=[];
-    let keySet = new Set();
-    for (let i=0;i<data.aoColumns.length;i++){
-        if(keys.includes( data.aoColumns[i].sTitle)){
-            indexs.push(i);
+    if(keys.length>0){
+        let indexs=[];
+        let keySet = new Set();
+        for (let i=0;i<data.aoColumns.length;i++){
+            if(keys.includes( data.aoColumns[i].sTitle)){
+                indexs.push(i);
+            }
         }
-    }
 
-    let compKey;
-    let j;
-    let normData = [];
-    for (let i = 0;i<data.aaData.length;i++){
-        compKey = "";
-        for(j=0;j<indexs.length;j++){
-            compKey += data.aaData[i][j];
+        let compKey;
+        let j;
+        let normData = [];
+        for (let i = 0;i<data.aaData.length;i++){
+            compKey = "";
+            for(j=0;j<indexs.length;j++){
+                compKey += data.aaData[i][j];
+            }
+            if(!keySet.has(compKey)){
+                keySet.add(compKey);
+                normData.push(data.aaData[i]);
+            }
         }
-        if(!keySet.has(compKey)){
-            keySet.add(compKey);
-            normData.push(data.aaData[i]);
-        }
+        data.lost = data.aaData.length-normData.length;
+        data.aaData = normData;
+    }else{
+        data.lost = 0;
     }
-    data.lost = data.aaData.length-normData.length;
-    data.aaData = normData;
-    
 }
 
 function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,reop){

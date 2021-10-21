@@ -136,6 +136,14 @@ var TapApi = (function(){
         return jsonContaintJoinTable;
     };
 
+    TapApi.prototype.getActiveJoints = function(table){
+        if (this.getConnector().status) {
+            return this.jsonAdqlBuilder.getActiveJoints(table);
+        } else {
+            return {"logs":"No active TAP connection","prams":{"table":table}};
+        }
+    };
+
     /**
      * DEPRACTED use `getTableFields`
      */
