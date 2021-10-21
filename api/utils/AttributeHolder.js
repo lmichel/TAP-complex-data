@@ -53,28 +53,36 @@ AttributeHolder = function(queryAble){
         let ahMap = {};
         let fName;
         for (let i =0 ;i<tables.length;i++){
-            fName = [schema, tables[i]].join('.').quotedTableName().qualifiedName.toLowerCase();
+            fName = [schema, tables[i]].join('.').quotedTableName().qualifiedName;
             if(cache[fName]!== undefined){
                 ahMap[tables[i].toLowerCase()]=Array.from(cache[fName]);
-                nameMap[tables[i].toLowerCase()]=fName;
+                nameMap[tables[i].toLowerCase()]=fName.toLowerCase();
             }else {
-                fullNames[tables[i].toLowerCase()]=fName;
+                fullNames[tables[i]]=fName;
             }
         }
         let adql = Holder.getAHsAdql(fullNames);
         let queryResult = await queryAble.Query(adql);
-        
+
+        let fuzzyNames = {};
+
+        for(let name in fullNames){
+            fuzzyNames[name.toLowerCase()]= fullNames[name].toLowerCase();
+        }
+        fullNames = fuzzyNames;
+
         if(queryResult.status){
             let data = queryResultToDoubleArray(queryResult.answer);
             let AHList = doubleArrayToAHList(data);
+            console.log(AHList);
             for (let i=0;i<AHList.length;i++){
                 if(ahMap[AHList[i].table_name.toLowerCase()]!==undefined){
                     ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);
                 } else if (fullNames[AHList[i].table_name.toLowerCase()] !== undefined){
-                    if(ahMap[fullNames[AHList[i].table_name.toLowerCase()]]===undefined){
-                        ahMap[fullNames[AHList[i].table_name.toLowerCase()]] = [];
+                    if(ahMap[fullNames[AHList[i].table_name.toLowerCase()].toLowerCase()]===undefined){
+                        ahMap[fullNames[AHList[i].table_name.toLowerCase()].toLowerCase()] = [];
                     }
-                    ahMap[fullNames[AHList[i].table_name.toLowerCase()]].push(AHList[i]);
+                    ahMap[fullNames[AHList[i].table_name.toLowerCase()].toLowerCase()].push(AHList[i]);
                 }else if(Object.values(fullNames).includes(AHList[i].table_name.toLowerCase())){
                     ahMap[AHList[i].table_name.toLowerCase()] = [];
                     ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);
