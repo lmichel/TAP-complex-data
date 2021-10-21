@@ -51,13 +51,11 @@ async function setupEventHandlers(){
 
     // default conditions
     let defaultConditions ={
-        "cabability":"rr.cabability.standard_id='ivo://ivoa.net/std/tap'",
+        "capability":"rr.capability.standard_id='ivo://ivoa.net/std/tap'",
         "interface":"rr.interface.intf_type = 'vs:paramhttp'"
     }; 
-    
-    for (let table in defaultConditions){
-        api.setTableConstraint(table,defaultConditions[table]);
-    }
+
+    api.selectField("short_name","resource",false);
 
     function simpleStringMerger(conditions,base){
         let condition = "";
@@ -106,10 +104,10 @@ async function setupEventHandlers(){
     * to return a single string which will be use as condition
     */
     let allowedFieldsMap = {
-        "name":{tableName:"ressource",conditionBase:"rr.ressource.short_name ",transform:simpleStringFormator,merger:simpleStringMerger},
-        "ivoid":{tableName:"ressource",conditionBase:"rr.ressource.ivoid ",transform:simpleStringFormator,merger:simpleStringMerger},
-        "desc":{tableName:"ressource",conditionBase:"rr.ressource.res_description ",transform:simpleStringFormator,merger:simpleStringMerger},
-        "title":{tableName:"ressource",conditionBase:"rr.ressource.res_title ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "name":{tableName:"resource",conditionBase:"rr.resource.short_name ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "ivoid":{tableName:"resource",conditionBase:"rr.resource.ivoid ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "desc":{tableName:"resource",conditionBase:"rr.resource.res_description ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "title":{tableName:"resource",conditionBase:"rr.resource.res_title ",transform:simpleStringFormator,merger:simpleStringMerger},
         "role_ivoid":{tableName:"res_role",conditionBase:"rr.res_role.role_ivoid ",transform:simpleStringFormator,merger:simpleStringMerger},
         "subject":{tableName:"res_subject",conditionBase:"rr.res_subject.res_subject ",transform:simpleStringFormator,merger:simpleStringMerger},
         "subject_uat":{tableName:"subject_uat",conditionBase:"rr.subject_uat.uat_concept ",transform:simpleStringFormator,merger:simpleStringMerger},
@@ -118,8 +116,8 @@ async function setupEventHandlers(){
         "utype":{tableName:"res_table",conditionBase:"rr.res_table.table_utype ",transform:simpleStringFormator,merger:simpleStringMerger},
         "url":{tableName:"interface",conditionBase:"rr.interface.access_url ",transform:simpleStringFormator,merger:simpleStringMerger},
         "default":{
-            tableName:"ressource",
-            conditionBase:"rr.ressource.short_name ::rr.ressource.ivoid ::rr.ressource.res_title ",
+            tableName:"resource",
+            conditionBase:"rr.resource.short_name ::rr.resource.ivoid ::rr.resource.res_title ",
             transform:lazyStringFormator,
             merger:multiTableStringMerger
         },
@@ -151,9 +149,52 @@ async function setupEventHandlers(){
         return processed;
     }
 
+    function getSelect(conditionMap,fieldsMap){
+        let fields = {
+            "rr.resource.res_title":"title",
+            "rr.interface.access_url":"url",
+            "rr.resource.ivoid":"ivoid"
+        };
+        for (let consName in conditionMap){
+            if(conditionMap[consName].length>0 && consName != "default"){
+                fields[fieldsMap[consName].conditionBase] = consName;
+            }
+        }
+        
+        let select = "SELECT TOP 10 ";
+        for (let field in fields){
+            select +=  field + " AS " + fields[field] + ", ";
+        }
+        return select.substr(0,select.length-2) + " ";
+    }
+
     $("#searchBar").keyup(()=>{
         let parsedData = parseString($("#searchBar").val(),Object.keys(allowedFieldsMap),":");
-        display(processConditions(parsedData,allowedFieldsMap),"codeOutput") ;
+        let allCond = processConditions(parsedData,allowedFieldsMap);
+
+        for (let table in defaultConditions){
+            if(allCond[table]!== undefined){
+                allCond[table] += " AND ( " + defaultConditions[table] + " )";
+            } else {
+                allCond[table] = defaultConditions[table];
+            }
+        }
+
+        api.resetAllTableConstraint();
+
+        for (let table in allCond){
+            api.setTableConstraint(table,allCond[table]);
+        }
+
+        display(allCond,"codeOutput");
+
+        api.getTableQuery("resource").then((val)=>{
+            let query = val.query;
+
+            query = getSelect(parsedData,allowedFieldsMap) + query.substr(query.toLowerCase().indexOf("from"));
+
+            display(query,"querrySend");
+        });
     });
 
 }
