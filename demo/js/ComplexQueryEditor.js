@@ -66,8 +66,8 @@ ComplexQueryEditor.prototype.formatCondition = function(operator,operand){
     } else if( /^\s*$/.test(operand)  ) {
         operator = 'IS NOT NULL';
         operand = '';			
-    } else {
-        if(isNaN(operand) || isNaN(parseInt(operand)) || isNaN(+operand)) {
+    } else { //ERROR_BUILDER : Revert condition
+        if( ( isNaN(operand) || isNaN(parseInt(operand)) || isNaN(+operand) ) ) {
             operand = "'" + operand + "'";
         }
         operator = operator;	
