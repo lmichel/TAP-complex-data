@@ -413,19 +413,23 @@ function setupEventHandlers(){
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
                         let editor = new ComplexQueryEditor(api, $("#query"));
 
-                        let constraintEditor = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
-                                formName: 'tapFormColName',
-                                sesameUrl:"sesame",
-                                upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
-                                queryView: adqlQueryView,
-                                complexEditor: editor,
-                                tables:tables
-                            });
-
                         let qce = QueryConstraintEditor.complexColumnSelector({parentDivId:'tapColSelector',
-                                formName: 'tapFormColSelector',
-                                queryView: adqlQueryView,
-                                complexEditor: editor});
+                            formName: 'tapFormColSelector',
+                            queryView: adqlQueryView,
+                            complexEditor: editor
+                        });
+
+                        let constraintEditor = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
+                            formName: 'tapFormColName',
+                            sesameUrl:"sesame",
+                            upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
+                            queryView: adqlQueryView,
+                            complexEditor: editor,
+                            tables:tables,
+                            colSelector:qce,
+                        });
+
+                        
                         $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
                         
                         bindClickAsyncEvent("queryRun",async ()=>{
