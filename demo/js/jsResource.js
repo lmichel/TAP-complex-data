@@ -129,7 +129,15 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,reop){
     let header = "<div class='collapsable-header' id = 'collapsable-header-" + name + "'>";
     if(elems){
         let r=[],c=[],l=[];
+        let totWeight=0,lWeight=0,rWeight=0,cWeight=0;
+
         for (let i=0;i<elems.length;i++){
+
+            if(elems[i].weight === undefined){
+                elems[i].weight=1;
+            }
+            totWeight +=elems[i].weight;
+
             if(elems[i].txt){
                 if (elems[i].type){
                     elems[i].toDom = "<p class = 'collapsable-" + elems[i].type +"'>" + elems[i].txt + "</p>";
@@ -141,32 +149,35 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,reop){
             switch(elems[i].pos){
                 case "center":{
                     c.push(elems[i]);
+                    cWeight+=elems[i].weight;
                 }break;
                 case "left":{
                     l.push(elems[i]);
+                    lWeight+=elems[i].weight;
                 }break;
                 case "right":{
                     r.push(elems[i]);
+                    rWeight+=elems[i].weight;
                 }break;
             }
         }
 
         if(l.length>0){
-            header += '<div class="txt-left col-'+Math.floor(l.length/elems.length*12)+'">';
+            header += '<div class="txt-left col-'+Math.floor(lWeight/totWeight*12)+'">';
                 l.forEach(function(element) {
                     header += '<div class="side-div">'+ element.toDom + "</div>";
                 });
                 header += "</div>";
         }
         if(c.length>0){
-            header += '<div class="txt-center col-'+Math.floor(c.length/elems.length*12)+'">';
+            header += '<div class="txt-center col-'+Math.floor(cWeight/totWeight*12)+'">';
                 c.forEach(function(element) {
                     header += '<div class="side-div">'+ element.toDom + "</div>";
                 });
                 header += "</div>";
         }
         if(r.length>0){
-            header += '<div class="txt-right col-'+Math.floor(r.length/elems.length*12)+'">';
+            header += '<div class="txt-right col-'+Math.floor(rWeight/totWeight*12)+'">';
                 r.forEach(function(element) {
                     header += '<div class="side-div">'+ element.toDom + "</div>";
                 });
@@ -413,19 +424,23 @@ function setupEventHandlers(){
                         let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
                         let editor = new ComplexQueryEditor(api, $("#query"));
 
-                        let constraintEditor = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
-                                formName: 'tapFormColName',
-                                sesameUrl:"sesame",
-                                upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
-                                queryView: adqlQueryView,
-                                complexEditor: editor,
-                                tables:tables
-                            });
-
                         let qce = QueryConstraintEditor.complexColumnSelector({parentDivId:'tapColSelector',
-                                formName: 'tapFormColSelector',
-                                queryView: adqlQueryView,
-                                complexEditor: editor});
+                            formName: 'tapFormColSelector',
+                            queryView: adqlQueryView,
+                            complexEditor: editor
+                        });
+
+                        let constraintEditor = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
+                            formName: 'tapFormColName',
+                            sesameUrl:"sesame",
+                            upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
+                            queryView: adqlQueryView,
+                            complexEditor: editor,
+                            tables:tables,
+                            colSelector:qce,
+                        });
+
+                        
                         $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
                         
                         bindClickAsyncEvent("queryRun",async ()=>{
@@ -438,6 +453,15 @@ function setupEventHandlers(){
                             let joints = api.getJoinedTables(params.table).joined_tables;
                             // adding job id before using fireSetTreepath make the editor not showing the columns
                             dataTreePath.jobid="what a job";
+
+                            $("#resultpane").html('');
+                            let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
+                                [
+                                    {txt:params.table,type:"title",pos:"left"},
+                                    {pos:"right",txt:object_map.root_table.description,type:"desc",weight:3}
+                                ]
+                            );
+
                             if(data.status){
                                 /**This function create and return another function 
                                  * this other function setup event listener for a selected row of a data table 
@@ -491,7 +515,7 @@ function setupEventHandlers(){
                                                 makeCollapsableDiv(holder,joint,true,fClick, 
                                                     [
                                                         {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
-                                                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc"}:{}
+                                                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3}:{}
                                                     ]
                                                 );
                                                 // re-opening previously opened div(s)
@@ -512,14 +536,9 @@ function setupEventHandlers(){
                                     };
                                 };
                                 
-                                $("#resultpane").html('');
-                                let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
-                                    [
-                                        {txt:params.table,type:"title",pos:"left"},
-                                        {pos:"right",txt:object_map.root_table.description,type:"desc"}
-                                    ]
-                                );
                                 showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div));
+                            } else {
+                                div.append("An unexpected error has append, unable to gather data. see logs for more information");
                             }
                         });
                         $("#rButtonPane").append('<div style="height:11.8em" id="rPaneSpacer"></div>');

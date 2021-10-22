@@ -7,7 +7,7 @@ function QueryConstraintEditorOverride(){
             return ;
         }
         var view  = new ComplexQEditor_mVc(params /*parentDivId, formName, sesameUrl*/);
-        view.model = new ComplexQEditor_Mvc(params.complexEditor);
+        view.model = new ComplexQEditor_Mvc(params.complexEditor,params.colSelector);
         new ConstQEditor_mvC(view,view.model );
         view.draw();
         return view;

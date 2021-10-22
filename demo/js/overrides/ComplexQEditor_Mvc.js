@@ -1,9 +1,10 @@
 var ComplexQEditor_Mvc;
 
 function ComplexQEditor_MvcExtends(){
-	ComplexQEditor_Mvc = function(complexEditor){
+	ComplexQEditor_Mvc = function(complexEditor,colSelector){
 		tapQEditor_Mvc.call(this);
 		this.complexEditor = complexEditor;
+		this.colSelector = colSelector;
 	};
 	/**
 	 * Tap Complex custom model extends the tapQEditor_Mvc class
@@ -32,6 +33,10 @@ function ComplexQEditor_MvcExtends(){
 					defValue: '' ,
 					treePath: tree
 				});
+
+				if(this.colSelector !== undefined){
+					this.colSelector.select([ah]);
+				}
 
 				this.editors[divKey] = v;
 				v.fireInit();

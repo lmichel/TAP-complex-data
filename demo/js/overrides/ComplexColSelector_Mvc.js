@@ -13,24 +13,24 @@ function ComplexColSelector_MvcExtends(){
 			value: function(ah, constListId,cantTouchThis){
 				let first = Object.entries(this.editors).length === 0;
 				let currentTreePath = this.listener.controlCurrentTreePath();
+				if( ah.table_name == currentTreePath.table || ah.table_name == [currentTreePath.schema,currentTreePath.table].join(".")){
+					let divKey = this.constEditorRootId + ah.nameattr;
+					if(this.editors[divKey] === undefined){
+						Out.debug("mv constraint " + ah.nameattr + " to #" + constListId);
 
-				let divKey = this.constEditorRootId + ah.nameattr;
-				if(this.editors[divKey] === undefined){
-					Out.debug("mv constraint " + ah.nameattr + " to #" + constListId);
+						let v = new ComplexKWSimpleConstraint_mVc({divId: divKey,
+							constListId: constListId,
+							isFirst: first,
+							attributeHandler: ah,
+							editorModel: this,
+							defValue: '',
+							cantTouchThis:cantTouchThis,
+							treePath: jQuery.extend({}, currentTreePath)});
 
-					let v = new ComplexKWSimpleConstraint_mVc({divId: divKey,
-						constListId: constListId,
-						isFirst: first,
-						attributeHandler: ah,
-						editorModel: this,
-						defValue: '',
-						cantTouchThis:cantTouchThis,
-						treePath: jQuery.extend({}, currentTreePath)});
-
-					this.editors[divKey] = v;
-					v.fireInit();
+						this.editors[divKey] = v;
+						v.fireInit();
+					}
 				}
-				
 			}
 		},
 		
