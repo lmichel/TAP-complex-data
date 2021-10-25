@@ -18,7 +18,6 @@ ValueFormator = function() {
 	 */
 	var formatValue = function(columnName, values, tdNode, columnMap,dataTreePat) {
 		dataTreePath = dataTreePat;
-		var value = values[columnName.currentColumn];
 		if( columnMap.currentColumn == undefined )  {
 			Modalinfo.error("formatValue: Missing column number in " + JSON.stringify(columnMap));
 			return;

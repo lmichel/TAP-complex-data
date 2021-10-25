@@ -5,7 +5,7 @@
  * @param {*} separator string putted after the keywords to better differenciate keywords from normal text 
  * @returns 
  */
-var stringParser = function(keyWords,separator){
+var StringParser = function(keyWords,separator){
     if (separator === undefined){
         separator = ":";
     }
@@ -60,7 +60,9 @@ var stringParser = function(keyWords,separator){
 };
 
 var dataQueryier = function(api,fieldMap,defaultConditions){
+    let nbRequest=0;
 
+    let cache,cachedMap;
     let publicObject = {};
     publicObject.defaultConditions = defaultConditions;
 
@@ -69,20 +71,18 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         let partialProcess;
         
         for (let consName in conditionMap){
-            if(conditionMap[consName].length>0){
-                partialProcess=[];
-                if(fieldMap[consName].transform){
-                    for(let i=0;i<conditionMap[consName].length;i++){
-                        partialProcess.push(fieldMap[consName].transform(conditionMap[consName][i]));
-                    }
-                } else {
-                    partialProcess = Array.from(conditionMap[consName]);
+            partialProcess=[];
+            if(fieldMap[consName].transform){
+                for(let i=0;i<conditionMap[consName].length;i++){
+                    partialProcess.push(fieldMap[consName].transform(conditionMap[consName][i]));
                 }
-                if(processed[fieldMap[consName].tableName] === undefined){
-                    processed[fieldMap[consName].tableName]=[];
-                }
-                processed[fieldMap[consName].tableName].push(fieldMap[consName].merger(partialProcess,fieldMap[consName].conditionBase));
+            } else {
+                partialProcess = Array.from(conditionMap[consName]);
             }
+            if(processed[fieldMap[consName].tableName] === undefined){
+                processed[fieldMap[consName].tableName]=[];
+            }
+            processed[fieldMap[consName].tableName].push(fieldMap[consName].merger(partialProcess,fieldMap[consName].conditionBase));
         }
         for(let table in processed){
             processed[table] = processed[table].join(" OR ");
@@ -94,11 +94,12 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         let fields = {
             "rr.resource.res_title":"title",
             "rr.interface.access_url":"url",
-            "rr.resource.ivoid":"ivoid"
+            "rr.resource.ivoid":"ivoid",
+            "rr.resource.short_name":"name"
         };
         for (let consName in conditionMap){
             if(conditionMap[consName].length>0 && consName != "default"){
-                fields[fieldsMap[consName].conditionBase] = consName;
+                fields[fieldMap[consName].conditionBase] = consName;
             }
         }
         
@@ -122,8 +123,93 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         return maps;
     }
 
+    
+    function arrayEquals(a, b) {
+        return Array.isArray(a) &&
+        Array.isArray(b) &&
+        a.length === b.length &&
+        a.every((val, index) => val === b[index]);
+    }
+
+    function getDelta(conditionMap){
+        let delta =0,min,max,d;
+        let changed =[];
+        for (let table in conditionMap){
+            for (let i=0;i<conditionMap[table].length;i++){
+                d = conditionMap[table][i].length-cachedMap[table][i].length;
+                if(min>d || min === undefined){
+                    min =d;
+                }else if(max<d || max === undefined){
+                    max=d;
+                }
+                delta += Math.abs(d);
+                if(d!=0){
+                    changed.push(table);
+                }
+            }
+        }
+        return {delta:delta,min:min,max:max,changed:Array.from(new Set(changed))};
+    }
+
+    function toCachedMap(conditionMap){
+        let map = {};
+        for (let table in conditionMap){
+            // removing fields without constraints
+            if(conditionMap[table].length>0){
+                // ignoring empty constraints
+                map[table]=Array.from(conditionMap[table]);
+                while(map[table].indexOf("")!== -1){
+                   map[table].remove("");
+                }
+                if(map[table].length<1){
+                    delete map[table];
+                }
+            }
+        }
+        return map;
+    }
+
+    let defaultToTables = ["name","ivoid","title"];
+
+    function fromCache(conditionMap,changed){
+        let vals = Array.from(cache);
+        return vals.filter((val)=>{
+            return changed.every((table)=>{
+                return conditionMap[table].every((condition)=>{
+                    if(table == "default"){
+                        return defaultToTables.every((table)=>{
+                            return val[table].toLowerCase().includes(condition.toLowerCase().replace("%",""));
+                        });
+                    }else{
+                        return val[table].toLowerCase().includes(condition.toLowerCase().replace("%",""));
+                    }
+                });
+            });
+        });
+    }
+
     publicObject.queryData = function(conditionMap){
+        conditionMap = toCachedMap(conditionMap);
+        //checking if no new constraint fields are set 
+        if(cache !== undefined && arrayEquals(Object.keys(conditionMap),Object.keys(cachedMap))){
+            //checking if no new constraint as been added to any field
+            if(Object.keys(conditionMap).every((table)=>conditionMap[table].length == cachedMap[table].length)){
+                let delta = getDelta(conditionMap);
+                if(delta.delta == 0){ // conditions are the same
+                    return cache;
+                // if some chars has been removed the condition is probably less restrictive, we can't assure accuraty of the result in this case
+                } else if( delta.delta < 5 && delta.min >= 0){ 
+                    return fromCache(conditionMap,delta.changed);
+                }
+            }
+            
+        }
+
+        nbRequest++;
+        console.log(nbRequest);
+
         let allCond = publicObject.processConditions(conditionMap);
+        cachedMap = conditionMap;
 
         for (let table in publicObject.defaultConditions){
             if(allCond[table]!== undefined){
@@ -144,14 +230,17 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         return api.getTableQuery("resource").then((val)=>{
             let query = val.query;
 
-            query = getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf("from"));
+            query = publicObject.getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf("from"));
 
             display(query,"querrySend");
             return api.query(query).then((val)=>{
                 display(val,"codeOutput");
-                return arraysToMaps(val);
+                cache = arraysToMaps(val);
+                return Array.from(cache);
             });
         });
+        
+        
     };
 
     return publicObject;
@@ -176,18 +265,44 @@ var searchBar = function(input,output,parser,queryier,elemBuilder,handler){ //TO
     "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'> </ul>");
     let list = $("ul",output);
 
+    let promList = [];
+
     input.keyup((event)=>{
         let parsed = parser.parseString(input.val());
-        if(event.originalEvent.keyCode == 13){
-            let data = queryier.queryData(parsed);
-            for (let i=0;i<data.length;i++){
-                list.append(elemBuilder(data[i]));
-                let last = $(":last-child",list); // the varaiable creation in loop is done on purpose.
-                last.click((event)=>{
-                    handler(data[i],last,event);
+        display(parsed,"codeOutput");
+        //if(event.originalEvent.keyCode == 13 ||event.originalEvent.keyCode == 32){
+            let data;
+            if(promList.length>0){
+                data = promList[promList.length-1].then(()=>{
+                    return queryier.queryData(parsed);
                 });
+            }else{
+                data = queryier.queryData(parsed);
             }
-        }
+
+            let endProcess= (data)=>{
+                list.html('');
+                for (let i=0;i<data.length;i++){
+                    list.append(elemBuilder(data[i]));
+                    let last = $(":last-child",list); // the varaiable creation in loop is done on purpose.
+                    if(handler !== undefined){
+                        last.click((event)=>{
+                            handler(data[i],last,event);
+                        });
+                    }
+                }
+            };
+            if (data.then !== undefined){
+                promList.push(data);
+                data.then((val)=>{
+                    endProcess(val);
+                    promList.remove(data);
+                });
+            } else {
+                endProcess(data);
+            }
+            
+        //}
     });
 };
 
@@ -314,123 +429,31 @@ async function setupEventHandlers(){
         },
     };
 
-    function processConditions(conditionMap,fieldMap){
-        let processed = {};
-        let partialProcess;
-        
-        for (let consName in conditionMap){
-            if(conditionMap[consName].length>0){
-                partialProcess=[];
-                if(fieldMap[consName].transform){
-                    for(let i=0;i<conditionMap[consName].length;i++){
-                        partialProcess.push(fieldMap[consName].transform(conditionMap[consName][i]));
-                    }
-                } else {
-                    partialProcess = Array.from(conditionMap[consName]);
-                }
-                if(processed[fieldMap[consName].tableName] === undefined){
-                    processed[fieldMap[consName].tableName]=[];
-                }
-                processed[fieldMap[consName].tableName].push(fieldMap[consName].merger(partialProcess,fieldMap[consName].conditionBase));
-            }
-        }
-        for(let table in processed){
-            processed[table] = processed[table].join(" OR ");
-        }
-        return processed;
-    }
-
-    function getSelect(conditionMap,fieldsMap){
-        let fields = {
-            "rr.resource.res_title":"title",
-            "rr.interface.access_url":"url",
-            "rr.resource.ivoid":"ivoid"
-        };
-        for (let consName in conditionMap){
-            if(conditionMap[consName].length>0 && consName != "default"){
-                fields[fieldsMap[consName].conditionBase] = consName;
-            }
-        }
-        
-        let select = "SELECT ";
-        for (let field in fields){
-            select +=  field + " AS " + fields[field] + ", ";
-        }
-        return select.substr(0,select.length-2) + " ";
-    }
-
-    function arraysToMaps(arrays){
-        let maps = [];
-        let map;
-        for (let i=0;i<arrays.field_values.length;i++){
-            map = {};
-            for(let j=0;j<arrays.field_names.length;j++){
-                map[arrays.field_names[j]] = arrays.field_values[i][j];
-            }
-            maps.push(map);
-        }
-        return maps;
-    }
-
     function dataToHtmlList(data){
-        let list = "<ul class = '' role='listbox' style='text-align: center; border-radius: 4px;"+
-            "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'>";
         let dat;
         let li;
-
-        for (let i =0;i<data.length;i++){
-            dat = $.extend({},data[i]);
-            li= "<li style='border-radius: 4px; margin: 0.5em;" +
-                "border: 1px solid #aaaaaa;background: #ffffff 50% 50%;color: #222222;'>" + 
-                dat.title + "<br><small>" + dat.url + "<br>" + dat.ivoid;
-            delete dat.title;
-            delete dat.url;
-            delete dat.ivoid;
-            for (let field in dat){
-                li += "<br>" + field + " : " + dat[field]; 
-            }
-            li += "</small></li>";
-            list += li;
+        dat = $.extend({},data);
+        li= "<li style='border-radius: 4px; margin: 0.5em;" +
+            "border: 1px solid #aaaaaa;background: #ffffff 50% 50%;color: #222222;'>" + 
+            "[" + dat.name +"]" +dat.title + "<br><small>" + dat.url + "<br>" + dat.ivoid;
+        delete dat.name;
+        delete dat.title;
+        delete dat.url;
+        delete dat.ivoid;
+        for (let field in dat){
+            li += "<br>" + field + " : " + dat[field]; 
         }
-        return list + "</ul>";
+        li += "</small></li>";
+        return li;
     }
 
-    $("#searchBar").keyup((event)=>{
-        let parsedData = parseString($("#searchBar").val(),Object.keys(allowedFieldsMap),":");
-        let allCond = processConditions(parsedData,allowedFieldsMap);
-
-        for (let table in defaultConditions){
-            if(allCond[table]!== undefined){
-                allCond[table] += " AND ( " + defaultConditions[table] + " )";
-            } else {
-                allCond[table] = defaultConditions[table];
-            }
-        }
-
-        api.resetAllTableConstraint();
-
-        for (let table in allCond){
-            api.setTableConstraint(table,allCond[table]);
-        }
-
-        display(allCond,"codeOutput");
-
-        api.getTableQuery("resource").then((val)=>{
-            let query = val.query;
-
-            query = getSelect(parsedData,allowedFieldsMap) + query.substr(query.toLowerCase().indexOf("from"));
-
-            display(query,"querrySend");
-            if(event.originalEvent.keyCode == 13){
-                api.query(query).then((val)=>{
-                    display(val,"codeOutput");
-                    $("#resultList").html(dataToHtmlList(arraysToMaps(val)));
-                });
-            }
-            
-        });
-    });
-
+    searchBar(
+        $("#searchBar"),
+        $("#resultList"),
+        StringParser(Object.keys(allowedFieldsMap),":"),
+        dataQueryier(api,allowedFieldsMap,defaultConditions),
+        dataToHtmlList
+    );
 }
 
 $(document).ready(()=>{

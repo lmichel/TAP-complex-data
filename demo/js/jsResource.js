@@ -303,11 +303,7 @@ function showTapResult(dataTreePath, data,tid,handler) {
                 }
                 copiedcolumnMap.currentColumn = c;
 
-                /*
-                 * Not formatting for the relational registry
-                 */
-                if( schema != "rr")
-                    ValueFormator.formatValue(colName, aData, $('td:eq(' + c + ')', nRow), copiedcolumnMap,dataTreePath);
+                ValueFormator.formatValue(colName, aData, $('td:eq(' + c + ')', nRow), copiedcolumnMap,dataTreePath);
                     
             }
             
