@@ -265,11 +265,20 @@ var searchBar = function(input,output,parser,queryier,elemBuilder,handler){ //TO
     "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'> </ul>");
     let list = $("ul",output);
 
+    let promList = [];
+
     input.keyup((event)=>{
         let parsed = parser.parseString(input.val());
         display(parsed,"codeOutput");
         //if(event.originalEvent.keyCode == 13 ||event.originalEvent.keyCode == 32){
-            let data = queryier.queryData(parsed);
+            let data;
+            if(promList.length>0){
+                data = promList[promList.length-1].then(()=>{
+                    return queryier.queryData(parsed);
+                });
+            }else{
+                data = queryier.queryData(parsed);
+            }
 
             let endProcess= (data)=>{
                 list.html('');
@@ -283,10 +292,11 @@ var searchBar = function(input,output,parser,queryier,elemBuilder,handler){ //TO
                     }
                 }
             };
-
             if (data.then !== undefined){
+                promList.push(data);
                 data.then((val)=>{
                     endProcess(val);
+                    promList.remove(data);
                 });
             } else {
                 endProcess(data);
