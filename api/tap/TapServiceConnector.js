@@ -12,9 +12,7 @@ var TapServiceConnector = (function() {
         this.testApiRooQuery = false;
         this.table = [];
 
-        this.objectMapWithAllDescription = undefined;
         this.connector = {status: "", message: "", service: {}, votable: ""};
-        this.api ="";
         this.attributsHandler = AttributeHolder(this);
         this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
         this.setAdqlConnectorQuery = function (correctTableNameFormat) {
@@ -22,6 +20,201 @@ var TapServiceConnector = (function() {
             return query;
         };
     }
+
+    /**
+     * Get all the table's name and description returned as a double array
+     */
+    TapServiceConnector.prototype.getAllTables = async function () {
+        try {
+            let schema  = this.connector.service.schema;
+            let request = 'SELECT DISTINCT tap_schema.tables.table_name as'+
+                ' table_name, tap_schema.tables.description FROM tap_schema.tables WHERE tap_schema.tables.schema_name = \'' + schema + '\' ';
+
+            let query =await this.Query(request);
+
+            for(let i=0;i<query.field_values.length;i++){
+                query.field_values[i][0] = unqualifyName(query.field_values[i][0],schema);
+            }
+
+            return {"status":true,"all_tables":query.field_values};
+
+        }catch(error){
+            console.error(error);
+            return {"status":false,"error":{
+                "logs":error.toString()
+            }};
+        }
+    };
+
+    TapServiceConnector.prototype.getAllJoins = async function(){
+        try {
+            let schema  = this.connector.service.schema;
+            let request = 'SELECT tap_schema.keys.from_table, tap_schema.keys.target_table,tap_schema.keys.key_id'+
+                ' , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys'+
+                ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
+                
+            let query =await this.Query(request);
+            
+            if(query.status){
+                let joins = [];
+                let join;
+                for (let i=0;i<query.field_values.length;i++){
+                    join={};
+                    join.from = {table:unqualifyName(query.field_values[i][0],schema),column:query.field_values[i][3]};
+                    join.target = {table:unqualifyName(query.field_values[i][1],schema),column:query.field_values[i][4]};
+                    joins.push(join);
+                }
+                return {"status":true,"all_joins":joins};
+            }else{
+                return {"status":false,"error":{
+                    "logs":query.error.logs
+                }};
+            }
+        }catch(error){
+            console.error(error);
+            return {"status":false,"error":{
+                "logs":error.toString()
+            }};
+        }
+    };
+
+    TapServiceConnector.prototype.buildRawJoinMap = function(allJoins){
+        
+        /** map = {
+         *      "T1":{
+         *          T2 : [
+         *              {from : "c1", target:"c2"}, ...
+         *          ], 
+         *          ...
+         *      },
+         *      T2:{
+         *          T1 : [
+         *              {from:"c2",target;"c1"},...
+         *          ],
+         *          ...
+         *      }, 
+         *      ...
+         *  }
+         * 
+         */
+
+        let map = {},partialDup,fullDup;
+        //map building
+        for(let i=0;i<allJoins.length;i++){
+
+            if(map[allJoins[i].from.table] === undefined){
+                map[allJoins[i].from.table] = {};
+            }
+            if(map[allJoins[i].target.table] === undefined){
+                map[allJoins[i].target.table] = {};
+            }
+
+            if(map[allJoins[i].from.table][allJoins[i].target.table] === undefined){
+                map[allJoins[i].from.table][allJoins[i].target.table] = [];
+            }
+            if(map[allJoins[i].target.table][allJoins[i].from.table] === undefined){
+                map[allJoins[i].target.table][allJoins[i].from.table] = [];
+            }
+            
+            /**Duplicated joins detection
+             * in the same time we check for suspicious joins ie 
+             * joins such that other joins use the same columns from one table but different columns from the second while both uses the same tables
+             */
+
+            partialDup = map[allJoins[i].from.table][allJoins[i].target.table].filter(val => val.from == allJoins[i].from.column);
+
+            if(partialDup.length>0){
+                fullDup = partialDup.filter(val => val.target == allJoins[i].target.column);
+                if (fullDup.length<partialDup.length){
+                    console.warn("suspicious joins found between tables " + allJoins[i].from.table + "and" + allJoins[i].target.table);
+                }
+                if(fullDup.length>0){
+                    continue;
+                }
+            }
+
+            map[allJoins[i].from.table][allJoins[i].target.table].push({from:allJoins[i].from.column,target:allJoins[i].target.column});
+            map[allJoins[i].target.table][allJoins[i].from.table].push({from:allJoins[i].target.column,target:allJoins[i].from.column});
+
+        }
+
+        return map;
+
+    };
+
+    TapServiceConnector.prototype.buildJoinTreeMap = function (rawJoinMap,root,listExist){
+        if(root === undefined){
+            root = this.connector.service.table;
+        }
+        if(listExist === undefined){
+            listExist = [];
+        }
+        listExist.push(root);
+        let treeMap = {};
+        treeMap[root] = {join_tables:{}};
+        for(let table in rawJoinMap[root]){
+            if(!listExist.includes(table)){
+                treeMap[root].join_tables[table] = this.buildJoinTreeMap(rawJoinMap,table,Array.from(listExist))[table];
+                treeMap[root].join_tables[table].joins = rawJoinMap[root][table];
+            }
+        }
+
+        if(Object.keys(treeMap[root].join_tables).length<1){
+            delete treeMap[root].join_tables;
+        }
+
+        return treeMap;
+    };
+
+    TapServiceConnector.prototype.buildObjectMap = async function() {
+        let allTables = await this.getAllTables();
+        if(allTables.status){
+            let allJoins = await this.getAllJoins();
+            if(allJoins.status){
+                allTables = allTables.all_tables;
+                allJoins = allJoins.all_joins;
+                let raw = this.buildRawJoinMap(allJoins);
+                let treeMap = this.buildJoinTreeMap(raw);
+
+                let map = {
+                    "root_table": {
+                        "name": this.connector.service.table,
+                        "schema": this.connector.service.schema,
+                        "columns":[]
+                    }, 
+                    "tables": {},
+                    "map": treeMap
+                };
+
+                for (let i=0;i<allTables.length;i++){
+                    if(allTables[i][0] == this.connector.service.table){
+                        map.root_table.description = allTables[i][1];
+                    } else {
+                        map.tables[allTables[i][0]]= {description:allTables[i][1],columns:[]};
+                    }
+                }
+                this.objectMap = map;
+                return {status:true,object_map:map};
+
+            } else{
+                return {"status":false,"error":{
+                    "logs":allJoins.error.logs
+                }};
+            }
+        }  else {
+            return {"status":false,"error":{
+                "logs":allJoins.error.logs
+            }};
+        }
+    };
+
+    TapServiceConnector.prototype.getObjectMap = function(){
+        if(this.objectMap === undefined){
+            return {status:false,error:{logs:"Object map isn't build run buildObjectMap before trying to use this method"}};
+        }else{
+            return {status:true,object_map:$.extend(true,{},this.objectMap)};
+        }
+    };
 
     /**
     * return the full json created by the method createJson()
@@ -40,109 +233,6 @@ var TapServiceConnector = (function() {
         return {"status":true,"json": this.jsonLoad};
     };
 
-    /**
-    *
-    * @param {*} root  represent the root table
-    * @param {*} json represent the main json create by the method createMainJson
-    * @returns return the list of id of join table
-    */
-    TapServiceConnector.prototype.joinAndId = function (root, json) {
-        try {
-            var list = [];
-            for (var key in json) {
-                if (key == root) {
-                    for (var join in json[key].join_tables) {
-                        list.push(json[key].join_tables[join].target);
-                        list.push(join);
-                    }
-                }
-            }
-            return {"status":true,"joinedTables":list};
-        } catch (error) {
-            console.error(error);
-            return {"status":false,"error":{
-                "logs":error.toString(),
-                "params":{"root":root,"json":json}
-            }};
-        }
-       
-    };
-
-    TapServiceConnector.prototype.getDataTable=function (votableQueryResult){
-        return  VOTableTools.votable2Rows(votableQueryResult);
-    };
-    
-    TapServiceConnector.prototype.buildObjectMapAndConstraints = async function () {
-        try {
-            if( this.objectMapWithAllDescription === undefined){
-                this.objectMapWithAllDescription = {"root_table": {"name": "root_table_name", "schema": "schema", "columns":[]}, "tables": {}, "map": {}};
-            
-                let api = this.api;
-                let rootTable = api.getConnector().connector.service.table;
-                let jsonWithaoutDescription = await this.loadJson();
-                if(jsonWithaoutDescription.status){
-                    jsonWithaoutDescription = jsonWithaoutDescription.json;
-                } else {
-                    return {"status":false,"error":{
-                        "logs": "Error while loading base data : \n" + jsonWithaoutDescription.error.logs,
-                    }};
-                }
-                this.objectMapWithAllDescription.root_table.name = rootTable;
-                this.objectMapWithAllDescription.root_table.description = jsonWithaoutDescription[rootTable] !== undefined ? jsonWithaoutDescription[rootTable].description:"";
-                this.schema = api.getConnector().connector.service.schema;
-                this.objectMapWithAllDescription.root_table.schema = this.schema;
-                let formatJoinTable = "";
-                let correctJoinFormaTable = "";
-                
-                let testMap = false;
-                let map = {};
-                if (testMap == false) {
-                    map = this.getObjectMapAndConstraint(jsonWithaoutDescription, rootTable);
-                }
-
-                let allJoinRootTable = this.createAllJoinTable(map);
-                let allTables = allJoinRootTable;
-                for (let k = 0; k < allTables.length; k++) {
-                    for (let tableKey in jsonWithaoutDescription) {
-                        if (tableKey == allTables[k] || this.schema + "." + tableKey == allTables[k]) {
-
-                            formatJoinTable = this.schema + "." + tableKey;
-                            correctJoinFormaTable = formatJoinTable.quotedTableName().qualifiedName;
-
-                            this.objectMapWithAllDescription.tables[tableKey] = {
-                                "description": jsonWithaoutDescription[tableKey].description,
-                                "columns": [],
-                            };
-
-                        } 
-                    }
-
-                }
-                this.objectMapWithAllDescription.map = map;
-                this.objectMapWithAllDescription.status = true;
-                this.postProcessObjectMap();
-            }
-            return this.objectMapWithAllDescription;
-        }
-        catch (error) {
-            console.error(error);
-            return {"status":false,"error":{
-                "logs":error.toString(),
-            }};
-        }
-    };
-    TapServiceConnector.prototype.getObjectMapAndConstraints = function () {
-        if(this.objectMapWithAllDescription !== undefined){
-            return this.objectMapWithAllDescription;
-        }
-        else {
-            return {"status":false,"error":{
-                "logs":"Object Map hasn't been build",
-            }};
-        }
-         
-    };
-
     /**Apply custom post processing on the object map in order to fix various issues like wrong columns name declared in joints
      * this method is meant to hold quick fixes ensuring the api still work while waiting for the orignal issue to be fixed
      * meaning no permanent code should be written here
@@ -151,96 +241,8 @@ var TapServiceConnector = (function() {
         // no post process required right now.
     };
 
-    /**
-     * In order to create the json with all join table
-     * @param data :json the return json file of createJson()
-     * @param root :the main table: root table
-     * @return the json with all join table
-     */
-    TapServiceConnector.prototype.getObjectMapAndConstraint = function (data, root) {
-        var reJson = {};
-        for (var key in data) {
-            var list_exist = [];
-            list_exist.push(key);
-            var joinJson = {};
-            if (root == key) {
-                var joinJsonJoin = {};
-                for (var join in data[key].join_tables) {
-                    var joinJsonJoin1 = {};
-                    list_exist.push(join);
-                    joinJsonJoin1.from = data[key].join_tables[join].from;
-                    joinJsonJoin1.target = data[key].join_tables[join].target;
-                    var a = this.verifiedJoin(data, list_exist, join);
-                    if (JSON.stringify(a) != '{}') {
-                        joinJsonJoin1.join_tables = a;
-                    }
-                    joinJsonJoin[join] = joinJsonJoin1;
-                    joinJson.join_tables = joinJsonJoin;
-                }
-                reJson[key] = joinJson;
-                break;
-            }
-        }
-        return reJson;
-    };
-
-    /***
-     * @param data: the main json
-     * @param list_exist:list of tables who are already recorded
-     * @param root: the root table
-     */
-    TapServiceConnector.prototype.verifiedJoin = function (data, list_exist, root) {
-        var joinJsonJoin = {};
-        for (var key in data) {
-            if (key == root) {
-                for (var join in data[key].join_tables) {
-                    if (list_exist.indexOf(join) == -1) {
-                        list_exist.push(join);
-                        var joinJsonJoin1 = {};
-                        joinJsonJoin1.from = data[key].join_tables[join].from;
-                        joinJsonJoin1.target = data[key].join_tables[join].target;
-                        var a = this.verifiedJoin(data, list_exist, join);
-                        if (JSON.stringify(a) != '{}') {
-                            joinJsonJoin1.join_tables = a;
-                        }
-                        joinJsonJoin[join] = joinJsonJoin1;
-                    }
-                }
-                break;
-            }
-        }
-        return joinJsonJoin;
-    };
-
     TapServiceConnector.prototype.Query = async function(adql){
         return await this.tapService.Query(adql);
-    };
-
-    TapServiceConnector.prototype.createAllJoinTable = function (map){
-        let table = [];
-        Object.keys(map).forEach(function (k) {
-            let json = map[k];
-            Object.keys(json.join_tables).forEach(function (k2) {
-                table.push(k2);
-                let json2 = json.join_tables[k2];
-                if (json2.join_tables !== undefined) {
-                    for (let f in json2.join_tables) {
-                        table.push(f);
-                        for (let c in json2.join_tables[f]) {
-                            let json3 = json2.join_tables[f].join_tables;
-                            if (json3 !== undefined) {
-                                for (let c1 in json3) {
-                                    table.push(c1);
-                                }
-                            }
-                        }
-                    }
-                }
-
-            });
-            table= Array.from(new Set(table));
-        });
-        return table;
     };
 
     return TapServiceConnector;

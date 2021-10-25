@@ -47,8 +47,8 @@ var TapService = /** @class */ (function () {
         } catch (error) {
             output = error;
         }
-        // just because CAOM always repond with code 200 even if something went wrong
-        if(this.url == "http://vao.stsci.edu/CAOMTAP/tapservice.aspx/sync"){
+        // just because CAOM always respond with code 200 even if something went wrong
+        if(this.url.includes("vao.stsci.edu/CAOMTAP/tapservice.aspx")){
             let status = $("INFO[name=\"QUERY_STATUS\"]",output.responseXML)[0];
             if(status !== undefined){
                 if(status.attributes.value.value == "ERROR"){
@@ -58,10 +58,27 @@ var TapService = /** @class */ (function () {
             }
             
         }
-        
-
         if (output.status === 200){
-            return {"status":true,"answer":output};
+            dataTable = VOTableTools.votable2Rows(output);
+            let fields = VOTableTools.genererField(output,output.responseText);
+            let nbCols = fields.length;
+            let singleArrayValue = [];
+            let doubleArrayValue = [];
+            let col;
+            if(nbCols <1 && dataTable.length > 0){
+                return {"status" : false , "error":{"logs" :"Error in columns parsing" } };
+            }
+            for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
+                for (col = 0; col < nbCols; col++) {
+                    singleArrayValue.push(dataTable[rowNb+col]);
+                }
+                doubleArrayValue.push(singleArrayValue);
+
+                singleArrayValue = [];
+            }
+
+            return {"status" : true , "field_values" :doubleArrayValue,"field_names":fields,"answer":output};
+
         } else {
             console.error(output);
             return {"status":false,"error":{
@@ -72,37 +89,6 @@ var TapService = /** @class */ (function () {
         
     };
 
-    /**
-     * Get the names of all the tables.
-     * It's for Simbad(schema_name = 'public'), GAVO(schema_name = 'rr'), VizieR(schema_name = 'metaviz'), CAOM(schema_name = 'dbo') XMM(schema_name = 'EPIC').
-     * @returns :votable object
-     */
-    TapService.prototype.allTableQuery = async function () {
-        try {
-            var checkstatus = this.checkstatus;
-            var schema_name = this.schema;
-            var reTable;
-            //By default, all are displayed.
-            var checkvalue = 'SELECT DISTINCT T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \'' + schema_name + '\' ';
-            if (checkstatus == true) {
-                checkvalue = 'SELECT DISTINCT TOP 100 T.table_name as table_name, T.description FROM tap_schema.tables as T WHERE T.schema_name = \'' + schema_name + '\' ';
-            }
-            reTable = await this.Query(checkvalue);
-            if(reTable.status){
-                return {"status":true,"votable":reTable.answer};
-            }
-            return {"status":false,"error":{
-                "logs":"Error while querying " + JSON.stringify(reTable.error.params) + " : \n" + reTable.error.logs
-            }};
-            
-        } catch (error) {
-            console.error(error);
-            return {"status":false,"error":{
-                "logs":error.toString()
-            }};
-        }
-        
-    };
     /**
      *  INPUT : Get the from_table, target_table, from_column, target_column
      * @returns : OUPUT : votable object
@@ -223,35 +209,6 @@ var TapService = /** @class */ (function () {
     };
 
     /**
-     * Get all the table's name object and convert them to a simple array
-     * @return Return an array containing the names of the tables
-     */
-    TapService.prototype.allTable = async function () {
-        try {
-            if (this.allTables === undefined) {
-                let allTableObject = await this.allTableQuery(); //Get all the tables
-                if(allTableObject.status){
-                    allTableObject=allTableObject.votable;
-                }else {
-                    return {"status":false,"error":{
-                        "logs":"Error while querrying data : \n" + allTableObject.error.logs
-                    }};
-                }
-                this.allTables = VOTableTools.votable2Rows(allTableObject);
-            }
-
-            return {"status":true, "allTables": this.allTables};
-        } catch (error) {
-            console.error(error);
-            return {"status":false,"error":{
-                "logs":error.toString()
-            }};
-        }
-        
-
-    };
-
-    /**
      * return all tables with the name of the join table.
      * @return json object contening table,and thier description
      */
@@ -278,6 +235,8 @@ var TapService = /** @class */ (function () {
                     "logs":"Error while querrying table's name data : \n" + allTtable.error.logs
                 }};
             }
+            console.log(allTtable); //OK
+            console.log(alllink); //NOK
             for (var k = 0; k < allTtable.length; k = k + 2) {
                 var arrLink = {};
                 var arrJoint = {};// correct json of join table 
