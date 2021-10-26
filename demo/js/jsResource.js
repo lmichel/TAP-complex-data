@@ -491,14 +491,21 @@ function setupEventHandlers(){
                                                         api.resetAllTableConstraint();
                                                         let treePath = $.extend({},dataTreePath);
                                                         let lJoints = api.getJoinedTables(joint).joined_tables;
-                                                        let elem = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].target);
-                                                        let index = data.data.aoColumns.indexOf(elem[0]);
+                                                        let elems = {};
+                                                        for (let i =0;i<joints[joint].keys.length;i++){
+                                                            elems[joints[joint].keys[i].target] = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].keys[i].from)[0];
+                                                        }
+
+                                                        for (let join in elems){
+                                                            elems[join] = quoteIfString(aData[data.data.aoColumns.indexOf(elems[join])]);
+                                                        }
+
                                                         treePath.table = joint;
                                                         treePath.tableorg = joint;
                                                         treePath.jobid = joint;
                                                         // remember to always hijack the cache before risquing using it.
                                                         await MetadataSource.hijackCache(treePath,api);
-                                                        let lData = await buildData(treePath,api,quoteIfString(aData[index]));
+                                                        let lData = await buildData(treePath,api,elems);
                                                         if(lData.status){
                                                             showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div));
                                                         }else {
