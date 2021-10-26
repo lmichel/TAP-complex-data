@@ -117,7 +117,7 @@ function normalize(data,api,table){
     }
 }
 
-function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,reop){
+function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expendOn){
     let holderid = "collapsable-holder-" + name;
     if($("#" + holderid,holder).length>0){
         $("#" + holderid,holder).html("");
@@ -197,7 +197,9 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,reop){
         $(".collapsable-separator",holder).hide();
     }
     div.data("clicked",false);
-    $("#collapsable-header-" + name).click(()=>{
+    header = $("#collapsable-header-" + name,holder);
+
+    let handler = ()=>{
         if(!div.data("clicked")){
             div.data("clicked",true);
             if(firstClickHandler!==undefined){
@@ -206,7 +208,19 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,reop){
         }
         div.toggle();
         $(".collapsable-separator",holder).toggle();
-    });
+    };
+
+    if(expendOn !== undefined){
+        let elem =  $(".collapsable-"+expendOn,header);
+        if(elem.length>0){
+            elem.click(handler);
+        }else{
+            header.click(handler);
+        }
+    }else{
+        header.click(handler);
+    }
+
     return div;
 }
 
@@ -440,7 +454,6 @@ function setupEventHandlers(){
                         $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
                         
                         bindClickAsyncEvent("queryRun",async ()=>{
-                            constraintEditor.model.updateQuery();
                             let dataTreePath = $.extend({}, constraintEditor.dataTreePath);
                             dataTreePath.table = params.table;
                             dataTreePath.tableorg = params.table;
@@ -476,7 +489,6 @@ function setupEventHandlers(){
                                             }
                                             h.removeClass("rHighlight");
                                             $(nRow).addClass("rHighlight");
-                                            let fClick;
                                             let oJoints;
 
                                             let open =[];
@@ -486,9 +498,8 @@ function setupEventHandlers(){
                                             let c =0;
                                             for (let joint in joints){
                                                 c++;
-                                                fClick = async function(div){
+                                                let fClick = async function(div){ // var declaration in loop on purpose
                                                     await syncIt(async ()=>{
-                                                        api.resetAllTableConstraint();
                                                         let treePath = $.extend({},dataTreePath);
                                                         let lJoints = api.getJoinedTables(joint).joined_tables;
                                                         let elems = {};
@@ -518,9 +529,34 @@ function setupEventHandlers(){
                                                 makeCollapsableDiv(holder,joint,true,fClick, 
                                                     [
                                                         {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
-                                                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3}:{}
-                                                    ]
+                                                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3}:{},
+                                                        {
+                                                            toDom:"<div><input type='checkbox' id='"+joint+"_constraint' name='"+joint+
+                                                                "' style='margin:.4em' checked><label for='"+joint+"'>Constraints</label></div>",
+                                                            pos:"center"
+                                                        }
+                                                    ],
+                                                    "title"
                                                 );
+                                                let check = $("#" + joint+"_constraint",holder);
+                                                check.click(()=>{
+                                                    let constraint = {};
+                                                    if(!check.is(":checked")){
+                                                        constraint = api.getAllTablesConstraints().constraints;
+                                                        api.resetAllTableConstraint();
+                                                    }
+                                                    
+                                                    let div = $("#collapsable-div-" + joint);
+                                                    div.html('');
+                                                    div.data("clicked",true);
+                                                    fClick(div).then(()=>{
+                                                        for (let table in constraint){
+                                                            api.setTableConstraint(table,constraint[table]);
+                                                        }
+                                                    });
+                                                    
+                                                });
+
                                                 // re-opening previously opened div(s)
                                                 if (open.includes("collapsable-div-" + joint)){
                                                     $("#collapsable-header-" + joint ,holder).click();
