@@ -53,10 +53,12 @@ async function getTableData(api,table,jointVal){
         // parseFloat doesn't agree on that so we get a better number detection by adding it
         // parseFloat allow things like 12.5px while isNaN refuse it
         // this may need some improvement over time with valid exemple of failure.
-        if(isNaN(jointVal) || isNaN(parseFloat(jointVal))){
-            // double quotes don't always work but single ones seems to
-            jointVal = "\'" + jointVal + "\'";
+        for (let join in jointVal){
+            if(isNaN(jointVal[join]) || isNaN(parseFloat(jointVal[join]))){
+                jointVal[join] = "'" + jointVal[join] + "'";
+            }
         }
+        
     }
     let data = await api.getTableSelectedField(table,jointVal);
 
@@ -88,13 +90,15 @@ async function getTableData(api,table,jointVal){
     return {"status":false};
 }
 
-function makeTableHeader(tableName,jointKey,jointVal){
+function makeTableHeader(tableName,jointVal){
     let head = "<hr><h4 class=\"text-center\" >";
     head += tableName + "</h4>";
-    if(jointKey !== undefined){
-        head += "<h5 class=\"text-center\" >";
-        head += "where " + jointKey + " = " + jointVal;
-        head += "</h5>" ;
+    if(jointVal !== undefined){
+        head += "<h5 class=\"text-center\" > where ";
+        for (let join in jointVal) {
+            head += join + " = " + jointVal[join] + " and ";
+        }
+        head = head.substring(0,head.length-5) + "</h5>" ;
     }
     return head;
 }
@@ -124,20 +128,24 @@ function bindTableEvent(api, tableID,data){
                 let joint = joints[table];
 
                 // if we have multiple colmuns of data we need to know which one contains the data we want in order to constrain the subtable.
-                let valCol = $("th[data-table-id='" + tableFullID + "'][data-table-row='0']").filter((i,val)=>{
-                    return val.textContent ==joint.target;
-                }).data("tableCol");
-
-                let jointVal = $("[data-table-id='" + tableFullID + "'][data-table-col='"+valCol+"'][data-table-row='"+row+"']").text();
+                let valCol = {};
+                for (let i=0;i<joint.keys.length;i++){
+                    valCol[joint.keys[i].target] = $("th[data-table-id='" + tableFullID + "'][data-table-row='0']").filter((j,val)=>{
+                        return val.textContent ==joint.keys[i].from;
+                    }).data("tableCol");
+                }
+                for (let join in valCol){
+                    valCol[join] = $("[data-table-id='" + tableFullID + "'][data-table-col='"+valCol[join]+"'][data-table-row='"+row+"']").text();
+                }
 
                 // creation and binding of a new sub table
-                let data = await getTableData(api,table,jointVal);
+                let data = await getTableData(api,table,valCol);
                 if(data.status){
                     let tableHtml = buildTable(data.data.colNames.concat(data.joinedTables),data.data.value,nextID);
                     if ($("#" + nextID).length == 0){
                         $("#dataHolder").append("<div id = '" + nextID + "'></div>");
                     }
-                    $("#" + nextID).html(makeTableHeader(table,joint.from,jointVal) + tableHtml);
+                    $("#" + nextID).html(makeTableHeader(table,valCol) + tableHtml);
                     bindTableEvent(api,tableID+1,data);
                     let offset = 2;
                     // we remove old tables which was generated from the table we are replacing
