@@ -7,6 +7,7 @@ var TapApi = (function(){
         this.votableQueryResult = undefined;
         this.dataTable1 = undefined;
         this.jsonAdqlBuilder = undefined;
+        this.limit = 10;
     }
 
     /** Internal function do not use.
@@ -202,7 +203,7 @@ var TapApi = (function(){
             let formatTableName = schema + "." + table;
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
-            adql = "SELECT TOP 10 " + allField;
+            adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit:"") + allField;
             adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
@@ -264,7 +265,7 @@ var TapApi = (function(){
             let formatTableName = schema + "." + table;
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
-            adql = "SELECT TOP 10 " + allField;
+            adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit:"") + allField;
             adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
@@ -604,6 +605,12 @@ var TapApi = (function(){
 
         return {"status":false, "error":{"logs": "No active TAP connection"}};
 
+    };
+
+    TapApi.prototype.setLimit = function(limit){
+        if(limit !== undefined && !isNaN(parseInt(limit)) && limit>0){
+            this.limit = parseInt(limit);
+        }
     };
 
     return TapApi;
