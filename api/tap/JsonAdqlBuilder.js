@@ -392,7 +392,15 @@ var JsonAdqlBuilder = (function(){
         if (constraint === undefined){
             constraint = "";
         }
-        return {"status": true, "constraint":constraint};
+        return {"status": true, "constraint":`${constraint}`};
+    };
+
+    JsonAdqlBuilder.prototype.getAllTablesConstraints = function(){
+        let constraints = {};
+        for(let table in this.adqlJsonMap.conditions){
+            constraints[table] = `${this.adqlJsonMap.conditions[table]}`;
+        }
+        return {"status": true, "constraints":constraints};
     };
 
     return JsonAdqlBuilder;

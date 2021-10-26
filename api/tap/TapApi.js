@@ -596,5 +596,15 @@ var TapApi = (function(){
         return {"status":false, "error":{"logs": "No active TAP connection","params":{"table":table}}};
     };
 
+    TapApi.prototype.getAllTablesConstraints = function(){
+        if (this.getConnector().status) {
+
+            return this.jsonAdqlBuilder.getAllTablesConstraints();
+        }
+
+        return {"status":false, "error":{"logs": "No active TAP connection"}};
+
+    };
+
     return TapApi;
 }());
