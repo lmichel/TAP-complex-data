@@ -382,6 +382,131 @@ function showTapResult(dataTreePath, data,tid,handler) {
     $("#"+tableID+"_wrapper").css("overflow", "hidden");
 }
 
+/**This function create and return another function 
+ * this other function setup event listener for a selected row of a data table 
+ * the event handler create a collapsable div for each table joints to the table which the row contains related data 
+ * the collapsable div when first expanded querry data for the correct table and use the main function 
+ * to create a function which will bind the event as described above
+ * this is a two layer recusive event binding function 
+ * what could go wrong ?
+ */
+let rowEventFactory = function(joints,data,holder,dataTreePath,api){
+    let object_map = api.getObjectMap().object_map;
+    return function(nRow, aData){
+        $(nRow).click(() => {
+            let h = $(".rHighlight",$(nRow).parent());
+            if(h.get(0)==nRow){
+                return;
+            }
+            h.removeClass("rHighlight");
+            $(nRow).addClass("rHighlight");
+            let oJoints;
+
+            let open =[];
+            $(".collapsable-div:visible",holder).each((i,e)=>{
+                open.push($(e).attr('id'));
+            });
+            for (let joint in joints){
+                let fClick = async function(div){ // var declaration in loop on purpose
+                    await syncIt(async ()=>{
+                        let treePath = $.extend({},dataTreePath);
+                        let lJoints = api.getJoinedTables(joint).joined_tables;
+                        let elems = {};
+                        for (let i =0;i<joints[joint].keys.length;i++){
+                            elems[joints[joint].keys[i].target] = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].keys[i].from)[0];
+                        }
+
+                        for (let join in elems){
+                            elems[join] = quoteIfString(aData[data.data.aoColumns.indexOf(elems[join])]);
+                        }
+
+                        treePath.table = joint;
+                        treePath.tableorg = joint;
+                        treePath.jobid = joint;
+                        // remember to always hijack the cache before risquing using it.
+                        await MetadataSource.hijackCache(treePath,api);
+                        let lData = await buildData(treePath,api,elems);
+                        if(lData.status){
+                            showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div,dataTreePath,api));
+                        }else {
+                            div.append("An unexpected error has append, unable to gather data. see logs for more information");
+                        }
+                        
+                    });
+                };
+                oJoints = api.getJoinedTables(joint).joined_tables;
+                makeCollapsableDiv(holder,joint,true,fClick, 
+                    [
+                        {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
+                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3}:{},
+                        {
+                            toDom:"<div><input type='checkbox' id='"+joint+"_constraint' name='"+joint+
+                                "' style='margin:.4em' checked><label for='"+joint+"'>Constraints</label></div>",
+                            pos:"center"
+                        },
+                        {
+                            toDom:"<div style='font-size: small; padding-left:0.5em;border-left:0.1em black solid;'><label for='" + joint + 
+                                "_limit'>Queryied entries :</label><select id='" +
+                                joint + "_limit'> <option value='10'>10</option>" +
+                                "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
+                                "<option value='0'>unlimited</option> </select></div>",
+                            pos:"center"
+                        }
+                    ],
+                    "title"
+                );
+                let check = $("#" + joint+"_constraint",holder);
+                let div = $("#collapsable-div-" + joint);
+                check.click( ()=>{
+                    syncIt(async ()=>{
+                        let constraint = {};
+                        if(!check.is(":checked")){
+                            constraint = api.getAllTablesConstraints().constraints;
+                            api.resetAllTableConstraint();
+                        }
+
+                        div.html('');
+                        div.data("clicked",true);
+                        await fClick(div);
+                        for (let table in constraint){
+                            api.setTableConstraint(table,constraint[table]);
+                        }
+                    });
+                    
+                });
+
+                let select = $("#" + joint+"_limit",holder);
+
+                select.on('change',()=>{
+                    syncIt(async ()=>{
+                        let val=$("option:selected",select).val();
+                        api.setLimit(val);
+                        div.html('');
+                        div.data("clicked",true);
+                        await fClick(div);
+                        api.setLimit(10);
+                    });
+                    
+                });
+
+                // re-opening previously opened div(s)
+                if (open.includes("collapsable-div-" + joint)){
+                    $("#collapsable-header-" + joint + " .collapsable-title" ,holder).click();
+                }
+            }
+            // auto opening the div(s) when there is less than a defined number of possible divs to open
+            if (Object.keys(joints).length<2){
+                for (let joint in joints){
+                    //avoid openning two times the div 
+                    if(!open.includes("collapsable-div-" + joint)){
+                        $("#collapsable-header-" + joint + " .collapsable-title" ,holder).click();
+                    }
+                }
+            }
+        });
+    };
+};
+
 function setupEventHandlers(){
 
     let api = new TapApi();
@@ -467,115 +592,40 @@ function setupEventHandlers(){
                             let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
                                 [
                                     {txt:params.table,type:"title",pos:"left"},
-                                    {pos:"right",txt:object_map.root_table.description,type:"desc",weight:3}
-                                ]
+                                    {pos:"right",txt:object_map.root_table.description,type:"desc",weight:3},
+                                    {
+                                        toDom:"<div style='font-size: small;'><label for='" + params.table + 
+                                            "_limit'>Queryied entries :</label><select id='" +
+                                            params.table + "_limit'> <option value='10'>10</option>" +
+                                            "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
+                                            "<option value='0'>unlimited</option> </select></div>",
+                                        pos:"center"
+                                    }
+                                ],
+                                "title"
                             );
 
                             if(data.status){
-                                /**This function create and return another function 
-                                 * this other function setup event listener for a selected row of a data table 
-                                 * the event handler create a collapsable div for each table joints to the table which the row contains related data 
-                                 * the collapsable div when first expanded querry data for the correct table and use the main function 
-                                 * to create a function which will bind the event as described above
-                                 * this is a two layer recusive event binding function 
-                                 * what could go wrong ?
-                                 */
-                                let rowEventFactory = function(joints,data,holder){
-                                    return function(nRow, aData){
-                                        $(nRow).click(() => {
-                                            let h = $(".rHighlight",$(nRow).parent());
-                                            if(h.get(0)==nRow){
-                                                return;
-                                            }
-                                            h.removeClass("rHighlight");
-                                            $(nRow).addClass("rHighlight");
-                                            let oJoints;
+                                let select = $("#" + params.table+"_limit",$("#resultpane"));
 
-                                            let open =[];
-                                            $(".collapsable-div:visible",holder).each((i,e)=>{
-                                                open.push($(e).attr('id'));
-                                            });
-                                            let c =0;
-                                            for (let joint in joints){
-                                                c++;
-                                                let fClick = async function(div){ // var declaration in loop on purpose
-                                                    await syncIt(async ()=>{
-                                                        let treePath = $.extend({},dataTreePath);
-                                                        let lJoints = api.getJoinedTables(joint).joined_tables;
-                                                        let elems = {};
-                                                        for (let i =0;i<joints[joint].keys.length;i++){
-                                                            elems[joints[joint].keys[i].target] = data.data.aoColumns.filter(elem => elem.sTitle === joints[joint].keys[i].from)[0];
-                                                        }
+                                select.on('change',()=>{
+                                    syncIt(async ()=>{
+                                        let val=$("option:selected",select).val();
+                                        api.setLimit(val);
+                                        div.html('');
+                                        div.data("clicked",true);
+                                        
+                                        let data = await buildData(dataTreePath,api);
+                                        if(data.status){
+                                            showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
+                                        } else{
+                                            div.append("An unexpected error has append, unable to gather data. see logs for more information");
+                                        }
+                                    });
+                                    
+                                });
 
-                                                        for (let join in elems){
-                                                            elems[join] = quoteIfString(aData[data.data.aoColumns.indexOf(elems[join])]);
-                                                        }
-
-                                                        treePath.table = joint;
-                                                        treePath.tableorg = joint;
-                                                        treePath.jobid = joint;
-                                                        // remember to always hijack the cache before risquing using it.
-                                                        await MetadataSource.hijackCache(treePath,api);
-                                                        let lData = await buildData(treePath,api,elems);
-                                                        if(lData.status){
-                                                            showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div));
-                                                        }else {
-                                                            div.append("An unexpected error has append, unable to gather data. see logs for more information");
-                                                        }
-                                                        
-                                                    });
-                                                };
-                                                oJoints = api.getJoinedTables(joint).joined_tables;
-                                                makeCollapsableDiv(holder,joint,true,fClick, 
-                                                    [
-                                                        {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
-                                                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3}:{},
-                                                        {
-                                                            toDom:"<div><input type='checkbox' id='"+joint+"_constraint' name='"+joint+
-                                                                "' style='margin:.4em' checked><label for='"+joint+"'>Constraints</label></div>",
-                                                            pos:"center"
-                                                        }
-                                                    ],
-                                                    "title"
-                                                );
-                                                let check = $("#" + joint+"_constraint",holder);
-                                                check.click(()=>{
-                                                    let constraint = {};
-                                                    if(!check.is(":checked")){
-                                                        constraint = api.getAllTablesConstraints().constraints;
-                                                        api.resetAllTableConstraint();
-                                                    }
-                                                    
-                                                    let div = $("#collapsable-div-" + joint);
-                                                    div.html('');
-                                                    div.data("clicked",true);
-                                                    fClick(div).then(()=>{
-                                                        for (let table in constraint){
-                                                            api.setTableConstraint(table,constraint[table]);
-                                                        }
-                                                    });
-                                                    
-                                                });
-
-                                                // re-opening previously opened div(s)
-                                                if (open.includes("collapsable-div-" + joint)){
-                                                    $("#collapsable-header-" + joint ,holder).click();
-                                                }
-                                            }
-                                            // auto opening the div(s) when there is less than a defined number of possible divs to open
-                                            if (c<2){
-                                                for (let joint in joints){
-                                                    //avoid openning two times the div 
-                                                    if(!open.includes("collapsable-div-" + joint)){
-                                                        $("#collapsable-header-" + joint ,holder).click();
-                                                    }
-                                                }
-                                            }
-                                        });
-                                    };
-                                };
-                                
-                                showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div));
+                                showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
                             } else {
                                 div.append("An unexpected error has append, unable to gather data. see logs for more information");
                             }
