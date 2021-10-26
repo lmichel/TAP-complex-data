@@ -47,17 +47,15 @@ var TapService = /** @class */ (function () {
         } catch (error) {
             output = error;
         }
-        // just because CAOM always respond with code 200 even if something went wrong
-        if(this.url.includes("vao.stsci.edu/CAOMTAP/tapservice.aspx")){
-            let status = $("INFO[name=\"QUERY_STATUS\"]",output.responseXML)[0];
-            if(status !== undefined){
-                if(status.attributes.value.value == "ERROR"){
-                    output.status = 400;
-                    output.statusText = "Bad Request";
-                }
+        // just because some services always send a status of 200 even if the request failed
+        let status = $("INFO[name=\"QUERY_STATUS\"]",output.responseXML)[0];
+        if(status !== undefined){
+            if(status.attributes.value.value == "ERROR"){
+                output.status = 400;
+                output.statusText = "Bad Request";
             }
-            
         }
+
         if (output.status === 200){
             dataTable = VOTableTools.votable2Rows(output);
             let fields = VOTableTools.genererField(output,output.responseText);

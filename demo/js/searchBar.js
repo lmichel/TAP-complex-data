@@ -172,14 +172,16 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
     let defaultToTables = ["name","ivoid","title"];
 
     function fromCache(conditionMap,changed){
-        let vals = Array.from(cache);
+        let vals = Array.from(cache),test;
         return vals.filter((val)=>{
             return changed.every((table)=>{
                 return conditionMap[table].every((condition)=>{
                     if(table == "default"){
-                        return defaultToTables.every((table)=>{
-                            return val[table].toLowerCase().includes(condition.toLowerCase().replace("%",""));
+                        test = false;
+                        defaultToTables.forEach((table)=>{
+                            test = test || val[table].toLowerCase().includes(condition.toLowerCase().replace("%",""));
                         });
+                        return test;
                     }else{
                         return val[table].toLowerCase().includes(condition.toLowerCase().replace("%",""));
                     }
@@ -229,8 +231,8 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
 
         return api.getTableQuery("resource").then((val)=>{
             let query = val.query;
-
-            query = publicObject.getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf("from"));
+            console.log(query);
+            query = publicObject.getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf(" from "));
 
             display(query,"querrySend");
             return api.query(query).then((val)=>{
