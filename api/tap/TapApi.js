@@ -53,15 +53,15 @@ var TapApi = (function(){
 
                 let obj = await this.tapServiceConnector.buildObjectMap();
 
-                /*if (obj.status){
-                    this.jsonAdqlBuilder = new JsonAdqlBuilder(obj);
+                if (obj.status){
+                    this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
                 } else {
                     this.tapServiceConnector.connector = undefined;
                     return {"status":false,"error":{
                         "logs":"Failed to initialize internal data structures :\n " + obj.error.logs,
                         "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
                     }};
-                }*/
+                }
                 return {"status":true};
             }
             return {"status":false,"error":{
