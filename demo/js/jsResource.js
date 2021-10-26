@@ -130,6 +130,7 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
     if(elems){
         let r=[],c=[],l=[];
         let totWeight=0,lWeight=0,rWeight=0,cWeight=0;
+        let addition;
 
         for (let i=0;i<elems.length;i++){
 
@@ -139,11 +140,15 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
             totWeight +=elems[i].weight;
 
             if(elems[i].txt){
+                addition="class ='";
                 if (elems[i].type){
-                    elems[i].toDom = "<p class = 'collapsable-" + elems[i].type +"'>" + elems[i].txt + "</p>";
-                }else {
-                    elems[i].toDom = "<p>" + elems[i].txt + "</p>";
+                    addition += " collapsable-" + elems[i].type;
                 }
+                if (elems[i].monoline){
+                    addition += " monoline";
+                }
+                addition += "'";
+                elems[i].toDom = "<p "+ addition +">" + elems[i].txt + "</p>";
             }
 
             switch(elems[i].pos){
@@ -184,21 +189,59 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
                 header += "</div>";
         }
     }
-    
 
     header += "</div>";
     holder.append(header);
+    header = $("#collapsable-header-" + name,holder);
+
+    let getNBLines = function(e,h){
+        return Math.round(e.clientHeight/h);
+    };
+    let o=0;
+    $("p.monoline",header).each((i,e)=>{
+        let h = 1.5*parseFloat(getComputedStyle(e).fontSize);
+        if(getNBLines(e,h)>1){
+            let a,b,text = e.innerText,c=getNBLines(e,h);
+            e.innerText = text.substr(0, Math.round(text.length/c));
+            if(getNBLines(e)>1){
+                b = e.innerText.length;
+                a = Math.round(text.length/(c+1));
+            } else {
+                a = e.innerText.length;
+                b = Math.round(text.length/(c-1));
+            }
+            while(a!=b){
+                o++;
+
+                c = Math.floor((a+b)/2);
+                e.innerText = text.substr(0,c);
+                if(getNBLines(e,h)>1){
+                    b=c;
+                }else{
+                    if(c==a){
+                        b=a;
+                    }
+                    a=c;
+                }
+            }
+            e.innerText = text.substr(0,c-3) + "...";
+        }
+    });
+    console.log(o);
+
+
+
     holder.append("<div class='collapsable-separator'></div>");
     holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
+    
     let div = $("#collapsable-div-" + name );
     if(collapsed){
         div.hide();
     }else{
         $(".collapsable-separator",holder).hide();
     }
-    div.data("clicked",false);
-    header = $("#collapsable-header-" + name,holder);
 
+    div.data("clicked",false);
     let handler = ()=>{
         if(!div.data("clicked")){
             div.data("clicked",true);
@@ -438,7 +481,7 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
                 makeCollapsableDiv(holder,joint,true,fClick, 
                     [
                         {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
-                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3}:{},
+                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3,monoline:true}:{},
                         {
                             toDom:"<div><input type='checkbox' id='"+joint+"_constraint' name='"+joint+
                                 "' style='margin:.4em' checked><label for='"+joint+"'>Constraints</label></div>",
@@ -592,7 +635,7 @@ function setupEventHandlers(){
                             let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
                                 [
                                     {txt:params.table,type:"title",pos:"left"},
-                                    {pos:"right",txt:object_map.root_table.description,type:"desc",weight:3},
+                                    {pos:"right",txt:object_map.root_table.description,type:"desc",weight:3,monoline:true},
                                     {
                                         toDom:"<div style='font-size: small;'><label for='" + params.table + 
                                             "_limit'>Queryied entries :</label><select id='" +
