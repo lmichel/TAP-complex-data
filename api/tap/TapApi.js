@@ -7,6 +7,7 @@ var TapApi = (function(){
         this.votableQueryResult = undefined;
         this.dataTable1 = undefined;
         this.jsonAdqlBuilder = undefined;
+        this.limit = 10;
     }
 
     /** Internal function do not use.
@@ -51,10 +52,10 @@ var TapApi = (function(){
                 }
                 this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
 
-                let obj = await this.tapServiceConnector.buildObjectMapAndConstraints();
+                let obj = await this.tapServiceConnector.buildObjectMap();
 
                 if (obj.status){
-                    this.jsonAdqlBuilder = new JsonAdqlBuilder(obj);
+                    this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
                 } else {
                     this.tapServiceConnector.connector = undefined;
                     return {"status":false,"error":{
@@ -98,11 +99,11 @@ var TapApi = (function(){
     TapApi.prototype.getObjectMap = function () {
         let objectMap = {};
         if (this.getConnector().status) {
-            let map = this.tapServiceConnector.getObjectMapAndConstraints();
+            let map = this.tapServiceConnector.getObjectMap();
             objectMap.status = map.status;
 
             if(objectMap.status){
-                objectMap.object_map = map;
+                objectMap.object_map = map.object_map;
                 return objectMap;
             } else {
                 objectMap.error = { "logs": map.error.logs};
@@ -115,7 +116,7 @@ var TapApi = (function(){
         }
     };
 
-    /**Search and return all direct joint from the selected table to another. Only joints which goes deeper une the tree representation are returned 
+    /**Search and return all direct joint from the selected table to another. Only joints which goes deeper in the tree representation are returned 
      * ie table 1 is joined to the root and to table 2 and 3 then this method will only return joints to table 2 and 3.
      * joints are described following the same pattern as in the JsonAdqlBuilder specs
      * 
@@ -174,31 +175,7 @@ var TapApi = (function(){
 
     TapApi.prototype.query = async function(query){
         if(this.getConnector().status){
-            let votable = await this.tapServiceConnector.Query(query);
-            
-            if (votable.status) {
-                votable = votable.answer;
-                dataTable = this.tapServiceConnector.getDataTable(votable);
-                let fields = VOTableTools.genererField(votable,votable.responseText);
-                let nbCols = fields.length;
-                let singleArrayValue = [];
-                let doubleArrayValue = [];
-                if(nbCols <1 && dataTable.length > 0){
-                    return {"status" : false , "error":{"logs" :"Error in columns parsing" } };
-                }
-                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
-                    for (let col = 0; col < nbCols; col++) {
-                        singleArrayValue.push(dataTable[rowNb+col]);
-                    }
-                    doubleArrayValue.push(singleArrayValue);
-
-                    singleArrayValue = [];
-                }
-
-                return {"status" : true , "field_values" :doubleArrayValue,"field_names":fields};
-            } else {
-                return {"status" :false , "error":{"logs" :votable.error.logs }};
-            }
+            return this.tapServiceConnector.Query(query);
         } else {
             return {"status":false,"error" :{ "logs": "No active TAP connection","params":{"query":query}}};
         }
@@ -226,7 +203,7 @@ var TapApi = (function(){
             let formatTableName = schema + "." + table;
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
-            adql = "SELECT TOP 10 " + allField;
+            adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit:"") + allField;
             adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
@@ -288,7 +265,7 @@ var TapApi = (function(){
             let formatTableName = schema + "." + table;
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
-            adql = "SELECT TOP 10 " + allField;
+            adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit:"") + allField;
             adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
@@ -618,6 +595,22 @@ var TapApi = (function(){
         }
 
         return {"status":false, "error":{"logs": "No active TAP connection","params":{"table":table}}};
+    };
+
+    TapApi.prototype.getAllTablesConstraints = function(){
+        if (this.getConnector().status) {
+
+            return this.jsonAdqlBuilder.getAllTablesConstraints();
+        }
+
+        return {"status":false, "error":{"logs": "No active TAP connection"}};
+
+    };
+
+    TapApi.prototype.setLimit = function(limit){
+        if(limit !== undefined && !isNaN(parseInt(limit)) && limit>0){
+            this.limit = parseInt(limit);
+        }
     };
 
     return TapApi;

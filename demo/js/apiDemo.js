@@ -120,8 +120,9 @@ async function selectConstraints(tableName, txtInput,api){
 async function createButton(api) {
     let buttons = "";
     let tapButton = [];
+    let map = (await api.getObjectMap()).object_map;
 
-    for (let key in await api.getObjectMap().object_map.tables) {
+    for (let key in map.tables) {
 
         buttons = "<span>" + "<button type='button' class=\"btn btn-primary\" " +
             "id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">" +
@@ -135,7 +136,7 @@ async function createButton(api) {
 
     $("#loadButton").append(tapButton);
 
-    for (let key in api.tapServiceConnector.objectMapWithAllDescription.tables) {
+    for (let key in map.tables) {
         bindClickAsyncEvent("bbb" + key,async () => {
             await selectConstraints(key, "txt" + key, api);
             $('#myModal').modal({"backdrop" : "static"});
@@ -301,6 +302,13 @@ let api = new TapApi();
 /*/ Steup of Event handlers functions /*/
 
 function setupEventHandlers(){
+
+    bindClickAsyncEvent("btnCustom",async ()=>{
+        if (isEnable("btnCustom")) {
+            let map = await api.tapServiceConnector.buildObjectMap();
+            display(map,"getJsonAll");
+        }
+    });
     
     bindClickAsyncEvent("btnApiConnect",async () => {
         
@@ -340,6 +348,7 @@ function setupEventHandlers(){
                     enableButton("btnGetTableFields");
                     enableButton("btnGetAdqlJsonMap");
                     enableButton("btnGetSelectedAH");
+                    enableButton("btnCustom");
                     enableButton("btnConstraint");
                     enableButton("btnRemoveConstraint");
                     enableButton("btnRemoveAllConstraint");

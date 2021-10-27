@@ -205,6 +205,13 @@ if (!String.prototype.getTreepath) {
 
 }
 
+function unqualifyName(table,schema){
+    if(table.indexOf(schema)!=-1){
+        return table.substring(table.indexOf(".",table.indexOf(schema))+1,table.length);
+    }
+    return table;
+}
+
 if(!Array.prototype.remove){
     Array.prototype.remove = function(elem){
         const index = this.indexOf(elem);
