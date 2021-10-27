@@ -320,7 +320,7 @@ function parseString(str,keyWords,separator){
         data[keyWords[i]]=[];
         newSplit = [];
         for (j=0;j<splitted.length;j++){
-            partialSplit = splitted[j].split(keyWords[i]+separator);
+            partialSplit = splitted[j].split(" " + keyWords[i] + separator);
 
             for(k=1;k<partialSplit.length;k++){
                 partialSplit[k] = keyWords[i]+separator + partialSplit[k].trim();
