@@ -50,7 +50,7 @@ var StringParser = function(keyWords,separator){
                 }
             }
         }
-        data.default = defaultVal;
+        data.default = data.default.concat(defaultVal);
 
         return data;
     };
@@ -231,13 +231,18 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
 
         return api.getTableQuery("resource").then((val)=>{
             let query = val.query;
-            console.log(query);
             query = publicObject.getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf(" from "));
+
+            while (query.indexOf("  ") !== -1){
+                query = query.replace("  "," ");
+            }
 
             display(query,"querrySend");
             return api.query(query).then((val)=>{
                 display(val,"codeOutput");
-                cache = arraysToMaps(val);
+                if(val.status){
+                    cache = arraysToMaps(val);
+                }
                 return Array.from(cache);
             });
         });
