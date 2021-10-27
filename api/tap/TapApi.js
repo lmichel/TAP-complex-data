@@ -610,6 +610,8 @@ var TapApi = (function(){
     TapApi.prototype.setLimit = function(limit){
         if(limit !== undefined && !isNaN(parseInt(limit)) && limit>0){
             this.limit = parseInt(limit);
+        }else {
+            this.limit = 0;
         }
     };
 

@@ -661,6 +661,7 @@ function setupEventHandlers(){
                                         } else{
                                             div.append("An unexpected error has append, unable to gather data. see logs for more information");
                                         }
+                                        api.setLimit(10);
                                     });
                                     
                                 });
