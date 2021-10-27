@@ -197,7 +197,6 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
     let getNBLines = function(e,h){
         return Math.round(e.clientHeight/h);
     };
-    let o=0;
     $("p.monoline",header).each((i,e)=>{
         let h = 1.5*parseFloat(getComputedStyle(e).fontSize);
         if(getNBLines(e,h)>1){
@@ -211,7 +210,6 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
                 b = Math.round(text.length/(c-1));
             }
             while(a!=b){
-                o++;
 
                 c = Math.floor((a+b)/2);
                 e.innerText = text.substr(0,c);
@@ -227,7 +225,6 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
             e.innerText = text.substr(0,c-3) + "...";
         }
     });
-    console.log(o);
 
 
 
