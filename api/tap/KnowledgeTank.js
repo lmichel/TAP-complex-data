@@ -55,6 +55,11 @@ var KnowledgeTank = (function(){
                 "tapService" : "//tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
                 "schema" : "metaviz",
                 "table" : "METAcat"
+            },
+            "google" : {
+                "tapService" : "//google.com",
+                "schema" : "ohno",
+                "table" : "ohno"
             }
         };
 

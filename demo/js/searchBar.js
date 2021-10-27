@@ -50,7 +50,7 @@ var StringParser = function(keyWords,separator){
                 }
             }
         }
-        data.default = defaultVal;
+        data.default = data.default.concat(defaultVal);
 
         return data;
     };
@@ -231,13 +231,18 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
 
         return api.getTableQuery("resource").then((val)=>{
             let query = val.query;
-            console.log(query);
             query = publicObject.getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf(" from "));
+
+            while (query.indexOf("  ") !== -1){
+                query = query.replace("  "," ");
+            }
 
             display(query,"querrySend");
             return api.query(query).then((val)=>{
                 display(val,"codeOutput");
-                cache = arraysToMaps(val);
+                if(val.status){
+                    cache = arraysToMaps(val);
+                }
                 return Array.from(cache);
             });
         });
@@ -320,7 +325,7 @@ function parseString(str,keyWords,separator){
         data[keyWords[i]]=[];
         newSplit = [];
         for (j=0;j<splitted.length;j++){
-            partialSplit = splitted[j].split(keyWords[i]+separator);
+            partialSplit = splitted[j].split(" " + keyWords[i] + separator);
 
             for(k=1;k<partialSplit.length;k++){
                 partialSplit[k] = keyWords[i]+separator + partialSplit[k].trim();
@@ -413,14 +418,14 @@ async function setupEventHandlers(){
     */
     let allowedFieldsMap = {
         "name":{tableName:"resource",conditionBase:"rr.resource.short_name ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "roleIvoid":{tableName:"res_role",conditionBase:"rr.res_role.role_ivoid ",transform:simpleStringFormator,merger:simpleStringMerger},
         "ivoid":{tableName:"resource",conditionBase:"rr.resource.ivoid ",transform:simpleStringFormator,merger:simpleStringMerger},
         "desc":{tableName:"resource",conditionBase:"rr.resource.res_description ",transform:simpleStringFormator,merger:simpleStringMerger},
         "title":{tableName:"resource",conditionBase:"rr.resource.res_title ",transform:simpleStringFormator,merger:simpleStringMerger},
-        "role_ivoid":{tableName:"res_role",conditionBase:"rr.res_role.role_ivoid ",transform:simpleStringFormator,merger:simpleStringMerger},
         "subject":{tableName:"res_subject",conditionBase:"rr.res_subject.res_subject ",transform:simpleStringFormator,merger:simpleStringMerger},
-        "subject_uat":{tableName:"subject_uat",conditionBase:"rr.subject_uat.uat_concept ",transform:simpleStringFormator,merger:simpleStringMerger},
-        "table_name":{tableName:"res_table",conditionBase:"rr.res_table.table_name ",transform:simpleStringFormator,merger:simpleStringMerger},
-        "table_desc":{tableName:"res_table",conditionBase:"rr.res_table.table_description ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "subjectUat":{tableName:"subject_uat",conditionBase:"rr.subject_uat.uat_concept ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "tableName":{tableName:"res_table",conditionBase:"rr.res_table.table_name ",transform:simpleStringFormator,merger:simpleStringMerger},
+        "tableDesc":{tableName:"res_table",conditionBase:"rr.res_table.table_description ",transform:simpleStringFormator,merger:simpleStringMerger},
         "utype":{tableName:"res_table",conditionBase:"rr.res_table.table_utype ",transform:simpleStringFormator,merger:simpleStringMerger},
         "url":{tableName:"interface",conditionBase:"rr.interface.access_url ",transform:simpleStringFormator,merger:simpleStringMerger},
         "default":{
@@ -456,6 +461,13 @@ async function setupEventHandlers(){
         dataQueryier(api,allowedFieldsMap,defaultConditions),
         dataToHtmlList
     );
+
+    for (let field in allowedFieldsMap){
+        $("#fieldNameBar").append("<p id='searchable_" + field + "' style='padding-left:.5em;'>" + field + "</p>");
+        $("#searchable_" + field).click(()=>{
+            $("#searchBar").val($("#searchBar").val() + " " + field + ": " );
+        });
+    }
 }
 
 $(document).ready(()=>{

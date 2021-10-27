@@ -203,7 +203,7 @@ var TapApi = (function(){
             let formatTableName = schema + "." + table;
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
 
-            adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit:"") + allField;
+            adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit + " ":"") + allField;
             adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
@@ -610,6 +610,8 @@ var TapApi = (function(){
     TapApi.prototype.setLimit = function(limit){
         if(limit !== undefined && !isNaN(parseInt(limit)) && limit>0){
             this.limit = parseInt(limit);
+        }else {
+            this.limit = 0;
         }
     };
 
