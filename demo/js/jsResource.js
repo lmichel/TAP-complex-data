@@ -699,6 +699,8 @@ function setupEventHandlers(){
 
                         enableButton("btnApiDisconnect");
 
+                    } else{
+                        alert("Connection error please reload the page and try again.\n if the error persist check the logs and either try later or report the bug");
                     }
                 };
             });
