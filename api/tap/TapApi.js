@@ -194,7 +194,7 @@ var TapApi = (function(){
             if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
-            let allField = this.formatColNames(table,await this.getSelectedFields(table));
+            let allField = this.formatColNames(table,(await this.getSelectedFields(table)).fields);
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -256,7 +256,7 @@ var TapApi = (function(){
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
 
-            let allField = this.formatColNames(table,await this.getAllTableField(table));
+            let allField = this.formatColNames(table,(await this.getAllTableFields(table)).fields);
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -468,6 +468,11 @@ var TapApi = (function(){
         return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
     };
 
+    /**
+     * this methods return a set of selected columns either selected via the `selectField` method or via a custom selection algorithm if none are selected
+     * @param {*} table the name of table you want get all selected columns of it
+     * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
+     */
     TapApi.prototype.getSelectedFields = async function (table){
         let obj = this.getObjectMap();
         if(obj.status){
@@ -506,34 +511,36 @@ var TapApi = (function(){
                 obj.tables[table].columns= fields;
             }
         }
-        return fields;
+        return {"status":true ,"fields":fields};
     };
 
     /**
-     * {"status": true|false,"error?":{},keys:[]}
+     * 
      * @param {*} table the table name of the table which you want all fields that are use in joins
-     * @returns {array} 
+     * @returns {*} {"status": true|false,"error?":{},"keys?":[]}
      */
     TapApi.prototype.getJoinKeys = function(table){
-        return this.jsonAdqlBuilder.getJoinKeys(table).keys;
+        return this.jsonAdqlBuilder.getJoinKeys(table);
     };
 
     /**
      * this methods return a set of all columns of the table `table` if you want more information than the column name use getTableAttributeHandlers instead
      * @param {String} table  the name of table you want get all columns in it
-     * @returns 
+     * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
      */
-    TapApi.prototype.getAllTableField = async function (table){
+    TapApi.prototype.getAllTableFields = async function (table){
+        if(this.getConnector().status){
+            let columns = [];
+            let jsonField = (await this.getTableAttributeHandlers(table)).attribute_handlers;
+            
+            for (let i =0;i<jsonField.length;i++){
+                columns.push(jsonField[i].column_name);
+            }
 
-        let columns = [];
-        let jsonField = (await this.getTableAttributeHandlers(table)).attribute_handlers;
-        
-        for (let i =0;i<jsonField.length;i++){
-            columns.push(jsonField[i].column_name);
+            return {"status":true,"fields":Array.from(new Set(columns))};
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
         }
-
-        return Array.from(new Set(columns));
-
     };
 
     /**this is an internal helping function useless outside of the TAP Complex API

@@ -63,6 +63,7 @@ function quoteIfString(str){
 async function buildData(dataTreePath,api,constraint){
     let fieldsData = await api.getTableSelectedField(dataTreePath.table,constraint);
     let fields = await api.getSelectedFields(dataTreePath.table);
+    fields=fields.fields;
 
     if(fieldsData.status){
 
@@ -685,7 +686,8 @@ function setupEventHandlers(){
                         qce.fireSetTreepath(new DataTreePath(dt));
 
                         let fields = await api.getSelectedFields(params.table);
-                        let keys = api.getJoinKeys(params.table);
+                        fields=fields.fields;
+                        let keys = api.getJoinKeys(params.table).keys;
                         let ah = (await api.getTableAttributeHandlers(params.table)).attribute_handlers;
                         
                         qce.hardSelect(ah.filter(val=>keys.includes(val.nameattr)));
