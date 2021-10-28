@@ -194,7 +194,7 @@ var TapApi = (function(){
             if(table === this.getConnector().connector.service.table && joinKeyVal !== undefined){
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
-            let allField = this.formatColNames(table,await this.getSelectedFields(table));
+            let allField = this.formatColNames(table,(await this.getSelectedFields(table)).fields);
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -256,7 +256,7 @@ var TapApi = (function(){
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
 
-            let allField = this.formatColNames(table,await this.getAllTableField(table));
+            let allField = this.formatColNames(table,(await this.getAllTableFields(table)).fields);
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -468,6 +468,11 @@ var TapApi = (function(){
         return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
     };
 
+    /**
+     * this methods return a set of selected columns either selected via the `selectField` method or via a custom selection algorithm if none are selected
+     * @param {*} table the name of table you want get all selected columns of it
+     * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
+     */
     TapApi.prototype.getSelectedFields = async function (table){
         let obj = this.getObjectMap();
         if(obj.status){
@@ -486,10 +491,9 @@ var TapApi = (function(){
         fields = fields.concat(this.jsonAdqlBuilder.getJoinKeys(table).keys);
         let handler = await this.getTableAttributeHandlers(table);
         if(handler.status){
-            let KT = new KnowledgeTank();
-            let AH = KT.selectAH(handler.attribute_handlers).selected;
+            let AH = KnowledgeTank.selectAH(handler.attribute_handlers).selected;
             if(AH.length<1){ //there is no ucd set or no good field has been found 
-                AH = KT.selectAHByUtypes(handler.attribute_handlers).selected;   
+                AH = KnowledgeTank.selectAHByUtypes(handler.attribute_handlers).selected;   
             }
             if(AH.length<1){//there is no Utypes set or no good field has been found 
                 let m = Math.min(3,handler.attribute_handlers.length);
@@ -507,36 +511,43 @@ var TapApi = (function(){
                 obj.tables[table].columns= fields;
             }
         }
-        return fields;
+        return {"status":true ,"fields":fields};
     };
 
+    /**
+     * 
+     * @param {*} table the table name of the table which you want all fields that are use in joins
+     * @returns {*} {"status": true|false,"error?":{},"keys?":[]}
+     */
     TapApi.prototype.getJoinKeys = function(table){
-        return this.jsonAdqlBuilder.getJoinKeys(table).keys;
+        return this.jsonAdqlBuilder.getJoinKeys(table);
     };
 
     /**
      * this methods return a set of all columns of the table `table` if you want more information than the column name use getTableAttributeHandlers instead
      * @param {String} table  the name of table you want get all columns in it
-     * @returns 
+     * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
      */
-    TapApi.prototype.getAllTableField = async function (table){
+    TapApi.prototype.getAllTableFields = async function (table){
+        if(this.getConnector().status){
+            let columns = [];
+            let jsonField = (await this.getTableAttributeHandlers(table)).attribute_handlers;
+            
+            for (let i =0;i<jsonField.length;i++){
+                columns.push(jsonField[i].column_name);
+            }
 
-        let columns = [];
-        let jsonField = (await this.getTableAttributeHandlers(table)).attribute_handlers;
-        
-        for (let i =0;i<jsonField.length;i++){
-            columns.push(jsonField[i].column_name);
+            return {"status":true,"fields":Array.from(new Set(columns))};
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
         }
-
-        return Array.from(new Set(columns));
-
     };
 
     /**this is an internal helping function useless outside of the TAP Complex API
      * this function takes a list of columns name and format them as a string taking care of request length limitation, last columns are the ones trucated if necessery
      * @param {*} table the base table 
      * @param {*} columns columns of the table `table`
-     * @returns 
+     * @returns {string}
      */
     TapApi.prototype.formatColNames = function(table,columns){
         let allField ="";
@@ -588,6 +599,11 @@ var TapApi = (function(){
         
     };
 
+    /**
+     * 
+     * @param {*} table the table name of which you want to get the constraint
+     * @returns {*} {"status": true|false,"error?":{},"constraint?":string}
+     */
     TapApi.prototype.getTableConstraint = function(table){
         if (this.getConnector().status) {
 
@@ -597,6 +613,10 @@ var TapApi = (function(){
         return {"status":false, "error":{"logs": "No active TAP connection","params":{"table":table}}};
     };
 
+    /**return all known constraints in the form of a map where the table names are the keys and the values are the related constraints as a string.
+     * 
+     * @returns {*} {"status": true|false,"error?":{},"constraints?":{table:constraint}}
+     */
     TapApi.prototype.getAllTablesConstraints = function(){
         if (this.getConnector().status) {
 
@@ -607,12 +627,18 @@ var TapApi = (function(){
 
     };
 
+    /**
+     * 
+     * @param {number} limit number of line to request set to 0 or undefined to disable the limit
+     * @returns {*} {"status": true}
+     */
     TapApi.prototype.setLimit = function(limit){
         if(limit !== undefined && !isNaN(parseInt(limit)) && limit>0){
             this.limit = parseInt(limit);
         }else {
             this.limit = 0;
         }
+        return {"status":true};
     };
 
     return TapApi;

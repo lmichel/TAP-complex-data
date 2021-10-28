@@ -142,7 +142,7 @@ function bindClickAsyncEvent(elemId,handler,disableText){
 
 /*/ Builds buttons to select between all known TAP services /*/
 function buildButtonSelector(holderID){
-    let desc = (new KnowledgeTank()).getDescriptors().descriptors;
+    let desc = KnowledgeTank.getDescriptors().descriptors;
     for (let shortName in desc){
         $(holderID).append("<input style=\"display: none;\" type=\"radio\" name=\"radio\" id=\"radio_"+ shortName +
             "\" value=\"" + shortName + 
