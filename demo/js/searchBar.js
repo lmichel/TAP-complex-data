@@ -105,7 +105,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         
         let select = "SELECT ";
         for (let field in fields){
-            select +=  field + " AS " + fields[field] + ", ";
+            select +=  field + " AS \"" + fields[field] + "\", ";
         }
         return select.substr(0,select.length-2) + " ";
     };

@@ -313,8 +313,7 @@ function setupEventHandlers(){
     bindClickAsyncEvent("btnApiConnect",async () => {
         
         if (isEnable("btnApiConnect")) {
-            let KT = new KnowledgeTank();
-            let params = KT.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
+            let params = KnowledgeTank.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
             params.shortName = $("input:radio[name=radio]:checked")[0].value;
             
             let connect = api.connect(params);
@@ -527,9 +526,8 @@ function setupEventHandlers(){
     bindClickAsyncEvent("btnGetSelectedAH", async () => {
         let AHS = await api.getTableAttributeHandlers(api.getConnector().connector.service.table);
         if(AHS.status){
-            let KT = new KnowledgeTank();
             display(AHS.attribute_handlers,"getJsonAll");
-            AHS = KT.selectAH(AHS.attribute_handlers);
+            AHS = KnowledgeTank.selectAH(AHS.attribute_handlers);
             display(AHS.selected,"getJsonAll");
             display("true","getStatus");
             return true;

@@ -486,10 +486,9 @@ var TapApi = (function(){
         fields = fields.concat(this.jsonAdqlBuilder.getJoinKeys(table).keys);
         let handler = await this.getTableAttributeHandlers(table);
         if(handler.status){
-            let KT = new KnowledgeTank();
-            let AH = KT.selectAH(handler.attribute_handlers).selected;
+            let AH = KnowledgeTank.selectAH(handler.attribute_handlers).selected;
             if(AH.length<1){ //there is no ucd set or no good field has been found 
-                AH = KT.selectAHByUtypes(handler.attribute_handlers).selected;   
+                AH = KnowledgeTank.selectAHByUtypes(handler.attribute_handlers).selected;   
             }
             if(AH.length<1){//there is no Utypes set or no good field has been found 
                 let m = Math.min(3,handler.attribute_handlers.length);
