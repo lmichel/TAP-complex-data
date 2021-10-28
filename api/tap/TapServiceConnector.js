@@ -121,12 +121,12 @@ var TapServiceConnector = (function() {
              * joins such that other joins use the same columns from one table but different columns from the second while both uses the same tables
              */
 
-            partialDup = map[allJoins[i].from.table][allJoins[i].target.table].filter(val => val.from == allJoins[i].from.column);
+            partialDup = map[allJoins[i].from.table][allJoins[i].target.table].filter(val => val.target == allJoins[i].target.column);
 
             if(partialDup.length>0){
-                fullDup = partialDup.filter(val => val.target == allJoins[i].target.column);
+                fullDup = partialDup.filter(val => val.from == allJoins[i].from.column);
                 if (fullDup.length<partialDup.length){
-                    console.warn("suspicious joins found between tables " + allJoins[i].from.table + "and" + allJoins[i].target.table);
+                    console.warn("suspicious joins found between tables " + allJoins[i].from.table + " and " + allJoins[i].target.table);
                 }
                 if(fullDup.length>0){
                     continue;

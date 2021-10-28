@@ -60,10 +60,15 @@ function quoteIfString(str){
     return  str ;
 }
 
-async function buildData(dataTreePath,api,constraint){
-    let fieldsData = await api.getTableSelectedField(dataTreePath.table,constraint);
-    let fields = await api.getSelectedFields(dataTreePath.table);
-    fields=fields.fields;
+async function buildData(dataTreePath,api,constraint,allColumns){
+    let fieldsData;
+    if(allColumns){
+        fieldsData = await api.getTableFields(dataTreePath.table,constraint);
+    }else{
+        fieldsData = await api.getTableSelectedField(dataTreePath.table,constraint);
+    }
+    
+    let fields = fieldsData.field_names;
 
     if(fieldsData.status){
 
@@ -448,7 +453,7 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
                 open.push($(e).attr('id'));
             });
             for (let joint in joints){
-                let fClick = async function(div){ // var declaration in loop on purpose
+                let fClick = async function(div,allColumns){ // var declaration in loop on purpose
                     await syncIt(async ()=>{
                         let treePath = $.extend({},dataTreePath);
                         let lJoints = api.getJoinedTables(joint).joined_tables;
@@ -466,7 +471,7 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
                         treePath.jobid = joint;
                         // remember to always hijack the cache before risquing using it.
                         await MetadataSource.hijackCache(treePath,api);
-                        let lData = await buildData(treePath,api,elems);
+                        let lData = await buildData(treePath,api,elems,allColumns);
                         if(lData.status){
                             showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div,dataTreePath,api));
                         }else {
@@ -478,12 +483,12 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
                 oJoints = api.getJoinedTables(joint).joined_tables;
                 makeCollapsableDiv(holder,joint,true,fClick, 
                     [
-                        {pos:"left",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
-                        object_map.tables[joint] !== undefined ? {pos:"right",txt:object_map.tables[joint].description,type:"desc",weight:3,monoline:true}:{},
+                        {pos:"center",txt:joint + " " + (Object.keys(oJoints).length>0 ?  Object.keys(oJoints).length + "+":""),type:"title"},
+                        object_map.tables[joint] !== undefined ? {pos:"left",txt:object_map.tables[joint].description,type:"desc",weight:2,monoline:true}:{},
                         {
                             toDom:"<div><input type='checkbox' id='"+joint+"_constraint' name='"+joint+
                                 "' style='margin:.4em' checked><label for='"+joint+"'>Constraints</label></div>",
-                            pos:"center"
+                            pos:"right"
                         },
                         {
                             toDom:"<div style='font-size: small; padding-left:0.5em;border-left:0.1em black solid;'><label for='" + joint + 
@@ -491,15 +496,27 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
                                 joint + "_limit'> <option value='10'>10</option>" +
                                 "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
                                 "<option value='0'>unlimited</option> </select></div>",
-                            pos:"center"
+                            pos:"right"
+                        },
+                        {
+                            toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + joint + "_fullTables'" +
+                                " style='margin:.4em' checked><label for='" + joint + "_fullTables'>Selected tables only</label></div>",
+                            pos:"right"
                         }
                     ],
                     "title"
                 );
                 let check = $("#" + joint+"_constraint",holder);
+                let select = $("#" + joint+"_limit",holder);
+                let allColumns = $("#" + joint+"_fullTables",holder);
+
                 let div = $("#collapsable-div-" + joint);
-                check.click( ()=>{
+                
+                let handler = ()=>{
                     syncIt(async ()=>{
+                        let val=$("option:selected",select).val();
+                        api.setLimit(val);
+
                         let constraint = {};
                         if(!check.is(":checked")){
                             constraint = api.getAllTablesConstraints().constraints;
@@ -508,27 +525,19 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
 
                         div.html('');
                         div.data("clicked",true);
-                        await fClick(div);
+                        await fClick(div,!allColumns.is(":checked"));
                         for (let table in constraint){
                             api.setTableConstraint(table,constraint[table]);
                         }
-                    });
-                    
-                });
-
-                let select = $("#" + joint+"_limit",holder);
-
-                select.on('change',()=>{
-                    syncIt(async ()=>{
-                        let val=$("option:selected",select).val();
-                        api.setLimit(val);
-                        div.html('');
-                        div.data("clicked",true);
-                        await fClick(div);
                         api.setLimit(10);
                     });
-                    
-                });
+                };
+
+                check.click(handler);
+                
+                allColumns.click(handler);
+
+                select.on('change',handler);
 
                 // re-opening previously opened div(s)
                 if (open.includes("collapsable-div-" + joint)){
@@ -631,31 +640,37 @@ function setupEventHandlers(){
                             $("#resultpane").html('');
                             let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
                                 [
-                                    {txt:params.table,type:"title",pos:"left"},
-                                    {pos:"right",txt:object_map.root_table.description,type:"desc",weight:3,monoline:true},
+                                    {txt:params.table,type:"title",pos:"center"},
+                                    {pos:"left",txt:object_map.root_table.description,type:"desc",weight:2,monoline:true},
                                     {
                                         toDom:"<div style='font-size: small;'><label for='" + params.table + 
                                             "_limit'>Queryied entries :</label><select id='" +
                                             params.table + "_limit'> <option value='10'>10</option>" +
                                             "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
                                             "<option value='0'>unlimited</option> </select></div>",
-                                        pos:"center"
+                                        pos:"right"
+                                    },
+                                    {
+                                        toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + params.table + "_fullTables'" +
+                                            " style='margin:.4em' checked><label for='" + params.table + "_fullTables'>Selected tables only</label></div>",
+                                        pos:"right"
                                     }
                                 ],
                                 "title"
                             );
 
                             if(data.status){
-                                let select = $("#" + params.table+"_limit",$("#resultpane"));
+                                let select = $("#" + params.table + "_limit",$("#resultpane"));
+                                let allColumns = $("#" + params.table + "_fullTables",$("#resultpane"));
 
-                                select.on('change',()=>{
+                                let handler = ()=>{
                                     syncIt(async ()=>{
                                         let val=$("option:selected",select).val();
                                         api.setLimit(val);
                                         div.html('');
                                         div.data("clicked",true);
                                         
-                                        let data = await buildData(dataTreePath,api);
+                                        let data = await buildData(dataTreePath,api,undefined,!allColumns.is(":checked"));
                                         if(data.status){
                                             showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
                                         } else{
@@ -664,7 +679,11 @@ function setupEventHandlers(){
                                         api.setLimit(10);
                                     });
                                     
-                                });
+                                };
+
+                                select.on('change',handler);
+
+                                allColumns.click( handler);
 
                                 showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
                             } else {
