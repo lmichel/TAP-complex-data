@@ -52,8 +52,8 @@ var KnowledgeTank = (function(){
             },
             "provtap" : {
                 "tapService" : "//saada.unistra.fr/provtap/sync",
-                "schema" : "ivoa",
-                "table" : "obscore"
+                "schema" : "provenance",
+                "table" : "entity"
             },
             
             "Vizier" : {
