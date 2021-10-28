@@ -50,6 +50,11 @@ var KnowledgeTank = (function(){
                 "schema" : "ivoa",
                 "table" : "ObsCore"
             },
+            "provtap" : {
+                "tapService" : "//saada.unistra.fr/provtap/sync",
+                "schema" : "ivoa",
+                "table" : "obscore"
+            },
             
             "Vizier" : {
                 "tapService" : "//tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",

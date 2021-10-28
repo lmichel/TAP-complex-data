@@ -509,6 +509,11 @@ var TapApi = (function(){
         return fields;
     };
 
+    /**
+     * {"status": true|false,"error?":{},keys:[]}
+     * @param {*} table the table name of the table which you want all fields that are use in joins
+     * @returns {array} 
+     */
     TapApi.prototype.getJoinKeys = function(table){
         return this.jsonAdqlBuilder.getJoinKeys(table).keys;
     };
@@ -535,7 +540,7 @@ var TapApi = (function(){
      * this function takes a list of columns name and format them as a string taking care of request length limitation, last columns are the ones trucated if necessery
      * @param {*} table the base table 
      * @param {*} columns columns of the table `table`
-     * @returns 
+     * @returns {string}
      */
     TapApi.prototype.formatColNames = function(table,columns){
         let allField ="";
@@ -587,6 +592,11 @@ var TapApi = (function(){
         
     };
 
+    /**
+     * 
+     * @param {*} table the table name of which you want to get the constraint
+     * @returns {*} {"status": true|false,"error?":{},"constraint?":string}
+     */
     TapApi.prototype.getTableConstraint = function(table){
         if (this.getConnector().status) {
 
@@ -596,6 +606,10 @@ var TapApi = (function(){
         return {"status":false, "error":{"logs": "No active TAP connection","params":{"table":table}}};
     };
 
+    /**return all known constraints in the form of a map where the table names are the keys and the values are the related constraints as a string.
+     * 
+     * @returns {*} {"status": true|false,"error?":{},"constraints?":{table:constraint}}
+     */
     TapApi.prototype.getAllTablesConstraints = function(){
         if (this.getConnector().status) {
 
@@ -606,12 +620,18 @@ var TapApi = (function(){
 
     };
 
+    /**
+     * 
+     * @param {number} limit number of line to request set to 0 or undefined to disable the limit
+     * @returns {*} {"status": true}
+     */
     TapApi.prototype.setLimit = function(limit){
         if(limit !== undefined && !isNaN(parseInt(limit)) && limit>0){
             this.limit = parseInt(limit);
         }else {
             this.limit = 0;
         }
+        return {"status":true};
     };
 
     return TapApi;
