@@ -231,6 +231,7 @@ bottom: .5em;
   no-repeat;
 }
 .cv-spinner {
+  flex-flow: column;
   height: 100%;
   display: flex;
   justify-content: center;
