@@ -85,17 +85,17 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
             processed[fieldMap[consName].tableName].push(fieldMap[consName].merger(partialProcess,fieldMap[consName].conditionBase));
         }
         for(let table in processed){
-            processed[table] = processed[table].join(" OR ");
+            processed[table] = processed[table].join(" AND ");
         }
         return processed;
     };
 
     publicObject.getSelect = function(conditionMap){
         let fields = {
-            "rr.resource.res_title":"title",
-            "rr.interface.access_url":"url",
-            "rr.resource.ivoid":"ivoid",
-            "rr.resource.short_name":"name"
+            "rr.resource.res_title ":"title",
+            "rr.interface.access_url ":"url",
+            "rr.resource.ivoid ":"ivoid",
+            "rr.resource.short_name ":"name"
         };
         for (let consName in conditionMap){
             if(conditionMap[consName].length>0 && consName != "default"){
@@ -172,8 +172,8 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
     let defaultToTables = ["name","ivoid","title"];
 
     function fromCache(conditionMap,changed){
-        let vals = Array.from(cache),test;
-        return vals.filter((val)=>{
+        let test;
+        return normalize(cache.filter((val)=>{
             return changed.every((table)=>{
                 return conditionMap[table].every((condition)=>{
                     if(table == "default"){
@@ -187,7 +187,18 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
                     }
                 });
             });
-        });
+        }));
+    }
+
+    function normalize(data){
+        let nDat=[],known =[];
+        for (let i=0;i<data.length;i++){
+            if(!known.includes(data[i].url)){
+                nDat.push(data[i]);
+                known.push(data[i].url);
+            }
+        }
+        return nDat;
     }
 
     publicObject.queryData = function(conditionMap){
@@ -198,7 +209,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
             if(Object.keys(conditionMap).every((table)=>conditionMap[table].length == cachedMap[table].length)){
                 let delta = getDelta(conditionMap);
                 if(delta.delta == 0){ // conditions are the same
-                    return cache;
+                    return normalize(cache);
                 // if some chars has been removed the condition is probably less restrictive, we can't assure accuraty of the result in this case
                 } else if( delta.delta < 5 && delta.min >= 0){ 
                     return fromCache(conditionMap,delta.changed);
@@ -243,7 +254,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
                 if(val.status){
                     cache = arraysToMaps(val);
                 }
-                return Array.from(cache);
+                return normalize(cache);
             });
         });
         

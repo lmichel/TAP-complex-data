@@ -1403,14 +1403,13 @@ function VOTableParser() {
    * @return {integer} - (8 bit)
    */
   function bin2ubyte8(bitArray) {
-    var arrayStructBuffer, dataview, binary;
-
-    arrayStructBuffer = new ArrayBuffer(1);
-    dataview = new DataView(arrayStructBuffer);
-    binary = bitArray.join('');
-    dataview.setUint8(0, parseInt(binary, 2));
-
-    return dataview.getUint8(0);
+    // sometimes the bitArray is of length 16 instead of 8 but the first 8 bits are 0s
+    let val=0,pow=1;
+    for (let i=bitArray.length-1;i>=0;--i){
+        val += pow*bitArray[i];
+        pow=pow<<1 ;
+    }
+    return val;
   };
 
   /**
