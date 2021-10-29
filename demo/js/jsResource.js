@@ -123,12 +123,15 @@ function normalize(data,api,table){
     }
 }
 
-function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expendOn){
+function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expendOn,parity){
     let holderid = "collapsable-holder-" + name;
+    if(parity === undefined){
+        parity =0;
+    }
     if($("#" + holderid,holder).length>0){
         $("#" + holderid,holder).html("");
     }else{
-        holder.append("<div class='collapsable-holder' id = '" + holderid + "' ></div>");
+        holder.append("<div class='collapsable-holder "+ (parity%2==0?"even":"odd") + "' id = '" + holderid + "' ></div>");
     }
     holder = $("#" + holderid,holder);
 
@@ -232,16 +235,11 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
         }
     });
 
-
-
-    holder.append("<div class='collapsable-separator'></div>");
     holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
     
     let div = $("#collapsable-div-" + name );
     if(collapsed){
         div.hide();
-    }else{
-        $(".collapsable-separator",holder).hide();
     }
 
     div.data("clicked",false);
@@ -253,7 +251,6 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
             }
         }
         div.toggle();
-        $(".collapsable-separator",holder).toggle();
     };
 
     if(expendOn !== undefined){
@@ -436,7 +433,10 @@ function showTapResult(dataTreePath, data,tid,handler) {
  * this is a two layer recusive event binding function 
  * what could go wrong ?
  */
-let rowEventFactory = function(joints,data,holder,dataTreePath,api){
+let rowEventFactory = function(joints,data,holder,dataTreePath,api,parity){
+    if(parity === undefined){
+        parity =1;
+    }
     let object_map = api.getObjectMap().object_map;
     return function(nRow, aData){
         $(nRow).click(() => {
@@ -473,7 +473,7 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
                         await MetadataSource.hijackCache(treePath,api);
                         let lData = await buildData(treePath,api,elems,allColumns);
                         if(lData.status){
-                            showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div,dataTreePath,api));
+                            showTapResult(treePath,lData,div,rowEventFactory(lJoints,lData,div,dataTreePath,api,parity+1));
                         }else {
                             div.append("An unexpected error has append, unable to gather data. see logs for more information");
                         }
@@ -504,7 +504,8 @@ let rowEventFactory = function(joints,data,holder,dataTreePath,api){
                             pos:"right"
                         }
                     ],
-                    "title"
+                    "title",
+                    parity
                 );
                 let check = $("#" + joint+"_constraint",holder);
                 let select = $("#" + joint+"_limit",holder);
