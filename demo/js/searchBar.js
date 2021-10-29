@@ -132,11 +132,12 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
     }
 
     function getDelta(conditionMap){
-        let delta =0,min,max,d;
+        let delta =0,min,max,d,percent=0;
         let changed =[];
         for (let table in conditionMap){
             for (let i=0;i<conditionMap[table].length;i++){
                 d = conditionMap[table][i].length-cachedMap[table][i].length;
+                percent += Math.abs(conditionMap[table][i].split('%').length-cachedMap[table][i].split('%').length);
                 if(min>d || min === undefined){
                     min =d;
                 }else if(max<d || max === undefined){
@@ -148,7 +149,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
                 }
             }
         }
-        return {delta:delta,min:min,max:max,changed:Array.from(new Set(changed))};
+        return {delta:delta,min:min,max:max,changed:Array.from(new Set(changed)),percent:percent};
     }
 
     function toCachedMap(conditionMap){
@@ -211,7 +212,8 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
                 if(delta.delta == 0){ // conditions are the same
                     return normalize(cache);
                 // if some chars has been removed the condition is probably less restrictive, we can't assure accuraty of the result in this case
-                } else if( delta.delta < 5 && delta.min >= 0){ 
+                // same thing if percents has appears this mean that some string are now less restrictive
+                } else if( delta.percent == 0 && delta.delta < 5 && delta.min >= 0){
                     return fromCache(conditionMap,delta.changed);
                 }
             }
