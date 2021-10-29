@@ -723,6 +723,7 @@ function setupEventHandlers(){
 
                     } else{
                         alert("Connection error please reload the page and try again.\n if the error persist check the logs and either try later or report the bug");
+                        console.log(value.error.logs);
                     }
                 };
             });
