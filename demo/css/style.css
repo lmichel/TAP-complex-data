@@ -39,7 +39,19 @@ ul, #myUL {
 }
 
 .collapsable-holder {
-  margin-left: 3rem;
+  margin : .2em;
+  margin-left: 2em;
+  padding: 0.2em;
+  padding-top: 0.25em;
+  border-radius: .5em;
+}
+
+.collapsable-holder.even {
+  background-color: #dddddd;
+}
+
+.collapsable-holder.odd {
+  background-color:white;
 }
 
 .collapsable-header p {
@@ -55,10 +67,6 @@ ul, #myUL {
 
 .collapsable-div {
   overflow:hidden;
-  border: 0.1em solid #2e2e2e;
-  border-radius: .5em;
-  padding: 0.2em;
-  padding-top: 0.25em;
 }
 
 label {
@@ -223,6 +231,7 @@ bottom: .5em;
   no-repeat;
 }
 .cv-spinner {
+  flex-flow: column;
   height: 100%;
   display: flex;
   justify-content: center;

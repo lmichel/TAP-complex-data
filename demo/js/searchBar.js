@@ -85,17 +85,17 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
             processed[fieldMap[consName].tableName].push(fieldMap[consName].merger(partialProcess,fieldMap[consName].conditionBase));
         }
         for(let table in processed){
-            processed[table] = processed[table].join(" OR ");
+            processed[table] = processed[table].join(" AND ");
         }
         return processed;
     };
 
     publicObject.getSelect = function(conditionMap){
         let fields = {
-            "rr.resource.res_title":"title",
-            "rr.interface.access_url":"url",
-            "rr.resource.ivoid":"ivoid",
-            "rr.resource.short_name":"name"
+            "rr.resource.res_title ":"title",
+            "rr.interface.access_url ":"url",
+            "rr.resource.ivoid ":"ivoid",
+            "rr.resource.short_name ":"name"
         };
         for (let consName in conditionMap){
             if(conditionMap[consName].length>0 && consName != "default"){
@@ -131,12 +131,31 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         a.every((val, index) => val === b[index]);
     }
 
+    // str1 = new str2 = old
+    function stringDelta(str1,str2){
+        let lcs ="";
+        for (let i=0;i<str2.length;i++){
+            if(str1[i]==str2[i]){
+                lcs += str1[i];
+            }else{
+                break;
+            }
+        }
+
+        if(lcs.length == str2.length){
+            return str1.length-str2.length;
+        }else {
+            return lcs.length - str2.length;
+        }
+    }
+
     function getDelta(conditionMap){
-        let delta =0,min,max,d;
+        let delta =0,min,max,d,percent=0;
         let changed =[];
         for (let table in conditionMap){
             for (let i=0;i<conditionMap[table].length;i++){
-                d = conditionMap[table][i].length-cachedMap[table][i].length;
+                d = stringDelta(conditionMap[table][i],cachedMap[table][i]);
+                percent += Math.abs(conditionMap[table][i].split('%').length-cachedMap[table][i].split('%').length);
                 if(min>d || min === undefined){
                     min =d;
                 }else if(max<d || max === undefined){
@@ -148,7 +167,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
                 }
             }
         }
-        return {delta:delta,min:min,max:max,changed:Array.from(new Set(changed))};
+        return {delta:delta,min:min,max:max,changed:Array.from(new Set(changed)),percent:percent};
     }
 
     function toCachedMap(conditionMap){
@@ -172,8 +191,8 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
     let defaultToTables = ["name","ivoid","title"];
 
     function fromCache(conditionMap,changed){
-        let vals = Array.from(cache),test;
-        return vals.filter((val)=>{
+        let test;
+        return normalize(cache.filter((val)=>{
             return changed.every((table)=>{
                 return conditionMap[table].every((condition)=>{
                     if(table == "default"){
@@ -187,20 +206,35 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
                     }
                 });
             });
-        });
+        }));
     }
 
-    publicObject.queryData = function(conditionMap){
+    function normalize(data){
+        let nDat=[],known =[];
+        for (let i=0;i<data.length;i++){
+            if(!known.includes(data[i].url)){
+                nDat.push(data[i]);
+                known.push(data[i].url);
+            }
+        }
+        return nDat;
+    }
+
+    publicObject.queryData = function(conditionMap,logger){
         conditionMap = toCachedMap(conditionMap);
-        //checking if no new constraint fields are set 
+        //checking if no new constraint fields are set
+        logger.log("Checking if cache is up to date");
+        console.log("checking cache");
         if(cache !== undefined && arrayEquals(Object.keys(conditionMap),Object.keys(cachedMap))){
             //checking if no new constraint as been added to any field
             if(Object.keys(conditionMap).every((table)=>conditionMap[table].length == cachedMap[table].length)){
                 let delta = getDelta(conditionMap);
                 if(delta.delta == 0){ // conditions are the same
-                    return cache;
+                    return normalize(cache);
                 // if some chars has been removed the condition is probably less restrictive, we can't assure accuraty of the result in this case
-                } else if( delta.delta < 5 && delta.min >= 0){ 
+                // same thing if percents has appears this mean that some string are now less restrictive
+                } else if( delta.percent == 0 && delta.delta < 5 && delta.min >= 0){
+                    logger.log("Gathering from cache");
                     return fromCache(conditionMap,delta.changed);
                 }
             }
@@ -210,6 +244,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         nbRequest++;
         console.log(nbRequest);
 
+        logger.log("Creating ADQL constraints");
         let allCond = publicObject.processConditions(conditionMap);
         cachedMap = conditionMap;
 
@@ -221,6 +256,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
             }
         }
 
+        logger.log("applying ADQL constraints");
         api.resetAllTableConstraint();
 
         for (let table in allCond){
@@ -229,6 +265,7 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
 
         display(allCond,"codeOutput");
 
+        logger.log("Creating request");
         return api.getTableQuery("resource").then((val)=>{
             let query = val.query;
             query = publicObject.getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf(" from "));
@@ -236,14 +273,15 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
             while (query.indexOf("  ") !== -1){
                 query = query.replace("  "," ");
             }
-
+            
+            logger.log("Waiting for server responce");
             display(query,"querrySend");
             return api.query(query).then((val)=>{
                 display(val,"codeOutput");
                 if(val.status){
                     cache = arraysToMaps(val);
                 }
-                return Array.from(cache);
+                return normalize(cache);
             });
         });
         
@@ -254,104 +292,131 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
 
 };
 
+class Timeout {
+    constructor(fn, delay) {
+        this.ended = false;
+        this.timedOut = false;
+        let that = this;
+        this.id = setTimeout(() => {
+            that.timedOut = true;
+            let result = fn();
+            if (result !== undefined && result.then) {
+                result.then(that.ended = true);
+            } else {
+                that.ended = true;
+            }
+        }, delay);
+    }
+    clear() {
+        this.ended = true;
+        this.timedOut = true;
+        clearTimeout(this.id);
+    }
+}
+
+class Logger {
+    constructor(div) {
+        this.div = div;
+    }
+    log(log) {
+        let writing = $("p#logger_text", this.div);
+        if (writing.length < 1) {
+            this.div.html("<div class='cv-spinner'><span class='spinner'></span> <p id='logger_text'></p></div>");
+            writing = $("p#logger_text", this.div);
+        }
+        writing.html(log);
+    }
+}
+
+
 /**
  * 
  * @param {*} input jQuery object from where the research string will be collected.
  * @param {*} output jQuery object where the list will be outputed.
- * @param {*} parser string parser used to parse the string from the input must have a `parseString` method taking.
- * a string as argument return type depend on the queryier.
+ * @param {*} parser string parser used to parse the string from the input must have a `parseString` method taking
+ * a string as argument return type depend on the queryier. The method can also handle an extra arg which is an object with a log method.
  * @param {*} queryier queryier use to get the data to build the result list must have a `queryData` (can be async) method taking as argument the object
  * returned by the parser, the queryier return type is an array of object where each object will be passed to the elemBuilder to build each
- * element of the list.
+ * element of the list. The method can also handle an extra arg which is an object with a log method.
  * @param {*} elemBuilder builder use to create each element of the html output list taking as input a element of the array returned by the queryier.
- * @param {*} handler handler which may take as argument the same object sent to the elemBuilder, a jQuery object representing
+ * The method can also handle an extra arg which is an object with a log method.
+ * @param {*} handler handler which may take as argument the same object sent to the elemBuilder, and a jQuery object representing
  * the object which has been clicked and a jQuery EventObject.
+ * @param {number} timeout the minimal amout of time between two requests.
  */
-var searchBar = function(input,output,parser,queryier,elemBuilder,handler){ //TO-DO : use a class
-    output.html("<ul class = '' role='listbox' style='text-align: center; border-radius: 4px;"+
-    "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'> </ul>");
+var searchBar = function(input,output,parser,queryier,elemBuilder,handler,timeout=2000){
+    
     let list = $("ul",output);
 
+    let logger = new Logger(output);
+
     let promList = [];
+    let time;
+    let lastTimeout;
+    let lastEvent = new Promise((resolve)=>{resolve();});
+
+    let processEvent = ()=>{
+        logger.log("Parsing search string");
+        let parsed = parser.parseString(input.val(),logger);
+        display(parsed,"codeOutput");
+        let data;
+
+        logger.log("Gathering data");
+        if(promList.length>0){
+            data = promList[promList.length-1].then(()=>{
+                return queryier.queryData(parsed,logger);
+            });
+        }else{
+            data = queryier.queryData(parsed,logger);
+        }
+
+        let endProcess= (data)=>{
+            logger.log("Building html");
+            list="";
+            for (let i=0;i<data.length;i++){
+                list+=elemBuilder(data[i],logger);
+            }
+
+            output.html("<ul class = '' role='listbox' style='text-align: center; border-radius: 4px;"+
+                "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'> </ul>");
+            $("ul",output).html(list);
+            $("ul",output).children().each((i,e)=>{
+                $(e).click((event)=>{
+                    handler(data[i],last,event);
+                });
+            });
+            time = Date.now();
+        };
+        if (data.then !== undefined){
+            promList.push(data);
+            data.then((val)=>{
+                endProcess(val);
+                promList.remove(data);
+            });
+        } else {
+            endProcess(data);
+        }
+    };
 
     input.keyup((event)=>{
-        let parsed = parser.parseString(input.val());
-        display(parsed,"codeOutput");
-        //if(event.originalEvent.keyCode == 13 ||event.originalEvent.keyCode == 32){
-            let data;
-            if(promList.length>0){
-                data = promList[promList.length-1].then(()=>{
-                    return queryier.queryData(parsed);
-                });
-            }else{
-                data = queryier.queryData(parsed);
-            }
-
-            let endProcess= (data)=>{
-                list.html('');
-                for (let i=0;i<data.length;i++){
-                    list.append(elemBuilder(data[i]));
-                    let last = $(":last-child",list); // the varaiable creation in loop is done on purpose.
-                    if(handler !== undefined){
-                        last.click((event)=>{
-                            handler(data[i],last,event);
-                        });
-                    }
-                }
-            };
-            if (data.then !== undefined){
-                promList.push(data);
-                data.then((val)=>{
-                    endProcess(val);
-                    promList.remove(data);
-                });
+        lastEvent = lastEvent.then(()=>{
+            if(time === undefined){
+                time = Date.now();
+                lastTimeout = new Timeout(processEvent,0);
             } else {
-                endProcess(data);
+                if(lastTimeout !== undefined && !lastTimeout.timedOut){
+                    lastTimeout.clear();
+                }
+                logger.log("Waiting for timeout");
+                if(lastTimeout.ended){
+                    lastTimeout = new Timeout(processEvent,Math.max(timeout-Date.now()+time,0));
+                }else{
+                    lastTimeout = new Timeout(processEvent,timeout);
+                }
             }
-            
-        //}
+        });
     });
 };
-
-function parseString(str,keyWords,separator){
-    let splitted = [str];
-    let newSplit, partialSplit;
-    let data = {"default":[]};
-    let j,k;
-
-    //splitting the string on all separator to get nice strings to work with
-    // can be optimized but would this worth the time spent ? 
-    for (let i=0;i<keyWords.length;i++){
-        data[keyWords[i]]=[];
-        newSplit = [];
-        for (j=0;j<splitted.length;j++){
-            partialSplit = splitted[j].split(" " + keyWords[i] + separator);
-
-            for(k=1;k<partialSplit.length;k++){
-                partialSplit[k] = keyWords[i]+separator + partialSplit[k].trim();
-            }
-            partialSplit[0] = partialSplit[0].trim();
-            if(partialSplit[0].length<1){
-                partialSplit.shift();
-            }
-            newSplit = newSplit.concat(partialSplit);
-        }
-        splitted = newSplit;
-    }
-    let defaultVal = Array.from(splitted);
-    // sorting all data in a convenient way
-    for (let i=0;i<keyWords.length;i++){
-        for (j=0;j<splitted.length;j++){
-            if(splitted[j].startsWith(keyWords[i]+separator)){
-                defaultVal.remove(splitted[j]);
-                data[keyWords[i]].push(splitted[j].substr(keyWords[i].length+separator.length));
-            }
-        }
-    }
-    data.default = defaultVal;
-
-    return data;
-}
 
 async function setupEventHandlers(){
     let api = new TapApi();
