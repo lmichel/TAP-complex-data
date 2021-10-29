@@ -131,12 +131,30 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
         a.every((val, index) => val === b[index]);
     }
 
+    // str1 = new str2 = old
+    function stringDelta(str1,str2){
+        let lcs ="";
+        for (let i=0;i<str2.length;i++){
+            if(str1[i]==str2[i]){
+                lcs += str1[i];
+            }else{
+                break;
+            }
+        }
+
+        if(lcs.length == str2.length){
+            return str1.length-str2.length;
+        }else {
+            return lcs.length - str2.length;
+        }
+    }
+
     function getDelta(conditionMap){
         let delta =0,min,max,d,percent=0;
         let changed =[];
         for (let table in conditionMap){
             for (let i=0;i<conditionMap[table].length;i++){
-                d = conditionMap[table][i].length-cachedMap[table][i].length;
+                d = stringDelta(conditionMap[table][i],cachedMap[table][i]);
                 percent += Math.abs(conditionMap[table][i].split('%').length-cachedMap[table][i].split('%').length);
                 if(min>d || min === undefined){
                     min =d;
@@ -267,6 +285,27 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
 
 };
 
+function Timeout(fn,delay){
+    this.ended = false;
+    this.timedOut=false;
+    let that = this;
+    this.id = setTimeout(()=>{
+        that.timedOut = true;
+        let result = fn();
+        if (result !== undefined && result.then){
+            result.then(that.ended=true);
+        }else {
+            that.ended=true;
+        }
+    },delay);
+}
+
+Timeout.prototype.clear = function(){
+    this.ended = true;
+    this.timedOut=true;
+    clearTimeout(this.id);
+};
+
 /**
  * 
  * @param {*} input jQuery object from where the research string will be collected.
@@ -280,49 +319,63 @@ var dataQueryier = function(api,fieldMap,defaultConditions){
  * @param {*} handler handler which may take as argument the same object sent to the elemBuilder, a jQuery object representing
  * the object which has been clicked and a jQuery EventObject.
  */
-var searchBar = function(input,output,parser,queryier,elemBuilder,handler){ //TO-DO : use a class
+var searchBar = function(input,output,parser,queryier,elemBuilder,handler,timeout=2000){
     output.html("<ul class = '' role='listbox' style='text-align: center; border-radius: 4px;"+
     "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'> </ul>");
     let list = $("ul",output);
 
     let promList = [];
+    let time;
+    let lastTimeout;
+    let lastEvent = new Promise((resolve)=>{resolve();});
 
-    input.keyup((event)=>{
+    let processEvent = ()=>{
         let parsed = parser.parseString(input.val());
         display(parsed,"codeOutput");
-        //if(event.originalEvent.keyCode == 13 ||event.originalEvent.keyCode == 32){
-            let data;
-            if(promList.length>0){
-                data = promList[promList.length-1].then(()=>{
-                    return queryier.queryData(parsed);
-                });
-            }else{
-                data = queryier.queryData(parsed);
-            }
+        let data;
+        if(promList.length>0){
+            data = promList[promList.length-1].then(()=>{
+                return queryier.queryData(parsed);
+            });
+        }else{
+            data = queryier.queryData(parsed);
+        }
 
-            let endProcess= (data)=>{
-                list.html('');
-                for (let i=0;i<data.length;i++){
-                    list.append(elemBuilder(data[i]));
-                    let last = $(":last-child",list); // the varaiable creation in loop is done on purpose.
-                    if(handler !== undefined){
-                        last.click((event)=>{
-                            handler(data[i],last,event);
-                        });
-                    }
+        let endProcess= (data)=>{
+            list.html('');
+            for (let i=0;i<data.length;i++){
+                list.append(elemBuilder(data[i]));
+                let last = $(":last-child",list); // the varaiable creation in loop is done on purpose.
+                if(handler !== undefined){
+                    last.click((event)=>{
+                        handler(data[i],last,event);
+                    });
                 }
-            };
-            if (data.then !== undefined){
-                promList.push(data);
-                data.then((val)=>{
-                    endProcess(val);
-                    promList.remove(data);
-                });
-            } else {
-                endProcess(data);
             }
-            
-        //}
+        };
+        if (data.then !== undefined){
+            promList.push(data);
+            data.then((val)=>{
+                endProcess(val);
+                promList.remove(data);
+            });
+        } else {
+            endProcess(data);
+        }
+    };
+
+    input.keyup((event)=>{
+        lastEvent = lastEvent.then(()=>{
+            if(time === undefined){
+                time = Date.now();
+                processEvent();
+            } else {
+                if(lastTimeout !== undefined && !lastTimeout.timedOut){
+                    lastTimeout.clear();
+                }
+                lastTimeout = new Timeout(processEvent,(Date.now()-time)%timeout);
+            }
+        });
     });
 };
 
