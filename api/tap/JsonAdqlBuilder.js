@@ -2,10 +2,10 @@
 
 var JsonAdqlBuilder = (function(){
 
-    function JsonAdqlBuilder(objectMap){
+    function JsonAdqlBuilder(objectMap,rootTable,schema){
         this.adqlJsonMap = {
-            "rootTable" :objectMap.root_table.name,
-            "scheme" : objectMap.root_table.schema.quotedTableName().qualifiedName, 
+            "rootTable" :rootTable,
+            "scheme" : schema, 
             "joints" : {}, 
             "nodeTreeBranches":{}, 
             "conditions":{}, 
@@ -14,9 +14,9 @@ var JsonAdqlBuilder = (function(){
 
         /*/ Building adqlJsonMap from objectMap /*/
 
-        if(objectMap.map[objectMap.root_table.name] !== undefined){
+        if(objectMap.map[rootTable] !== undefined){
             let map = {};
-            map[this.adqlJsonMap.rootTable] = objectMap.map[objectMap.root_table.name].join_tables;
+            map[this.adqlJsonMap.rootTable] = objectMap.map[rootTable].join_tables;
             let nextMap;
             let mapHasKey = true;
             while (mapHasKey){

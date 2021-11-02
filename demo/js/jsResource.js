@@ -568,169 +568,169 @@ function setupEventHandlers(){
             let params = KnowledgeTank.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
             params.shortName = $("input:radio[name=radio]:checked")[0].value;
             
-            let connect = api.connect(params);
+            let connect = await api.connectService(params.tapService,params.shortName);
+            if(connect.status){
+                connect = await api.selectSchema(params.schema);
+                if(connect.status){
+                    connect = await api.setRootTable(params.table);
+                }
+            }
+
+
             let status = false;
-            connect.catch((reason)=>console.error(reason));
 
             let thenFun = async ()=> {};
 
-            connect.then( (value) => {
-                status = value.status;
-                display(value,"codeOutput");
-                thenFun = async () =>{
+            if (connect.status) {
 
-                    if (status){
-                        let object_map = api.getObjectMap();
-                        if(object_map.status){
-                            object_map=object_map.object_map;
-                        }else{
-                            object_map.tables = {};
-                        }
-                        let tables = [params.table];
-                        tables = tables.concat(Object.keys(object_map.tables));
-                        let t =await api.getTablesAttributeHandlers(tables);
-                        if(!t.status){
-                            console.log(t.error.logs);
-                        }
+                status = connect.status;
+                display(connect,"codeOutput");
+                let object_map = api.getObjectMap();
+                if(object_map.status){
+                    object_map=object_map.object_map;
+                }else{
+                    object_map.tables = {};
+                }
+                let tables = [params.table];
+                tables = tables.concat(Object.keys(object_map.tables));
+                let t =await api.getTablesAttributeHandlers(tables);
+                if(!t.status){
+                    console.log(t.error.logs);
+                }
 
-                        let treepath = {"nodekey":params.shortName, "schema": params.schema};
-                        for (let i =0;i<tables.length;i++){
-                            // remember to always hijack the cache before risquing using it.
-                            await MetadataSource.hijackCache($.extend({ "table": tables[i], "tableorg": tables[i]},treepath),api);
-                        }
-                        
+                let treepath = {"nodekey":params.shortName, "schema": params.schema};
+                for (let i =0;i<tables.length;i++){
+                    // remember to always hijack the cache before risquing using it.
+                    await MetadataSource.hijackCache($.extend({ "table": tables[i], "tableorg": tables[i]},treepath),api);
+                }
+                
 
-                        /*/ disable all radio buttons so the user can't change their value /*/
-                        $("input:radio[name=radio]").attr("disabled",true);
-                        $("label[name=radioLabel]").each((i,btn)=>{
-                            disableButton(btn.id);
-                        });
+                /*/ disable all radio buttons so the user can't change their value /*/
+                $("input:radio[name=radio]").attr("disabled",true);
+                $("label[name=radioLabel]").each((i,btn)=>{
+                    disableButton(btn.id);
+                });
 
-                        let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
-                        let editor = new ComplexQueryEditor(api, $("#query"));
+                let adqlQueryView = QueryConstraintEditor.adqlTextEditor({ parentDivId: 'adql_query_div', defaultQuery: ''});
+                let editor = new ComplexQueryEditor(api, $("#query"));
 
-                        let qce = QueryConstraintEditor.complexColumnSelector({parentDivId:'tapColSelector',
-                            formName: 'tapFormColSelector',
-                            queryView: adqlQueryView,
-                            complexEditor: editor
-                        });
+                let qce = QueryConstraintEditor.complexColumnSelector({parentDivId:'tapColSelector',
+                    formName: 'tapFormColSelector',
+                    queryView: adqlQueryView,
+                    complexEditor: editor
+                });
 
-                        let constraintEditor = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
-                            formName: 'tapFormColName',
-                            sesameUrl:"sesame",
-                            upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
-                            queryView: adqlQueryView,
-                            complexEditor: editor,
-                            tables:tables,
-                            colSelector:qce,
-                        });
+                let constraintEditor = QueryConstraintEditor.complexConstraintEditor({parentDivId:'tapColEditor',
+                    formName: 'tapFormColName',
+                    sesameUrl:"sesame",
+                    upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
+                    queryView: adqlQueryView,
+                    complexEditor: editor,
+                    tables:tables,
+                    colSelector:qce,
+                });
 
-                        
-                        $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
-                        
-                        bindClickAsyncEvent("queryRun",async ()=>{
-                            let dataTreePath = $.extend({}, constraintEditor.dataTreePath);
-                            dataTreePath.table = params.table;
-                            dataTreePath.tableorg = params.table;
-                            let data = await buildData(dataTreePath,api);
-                            
-                            let joints = api.getJoinedTables(params.table).joined_tables;
-                            // adding job id before using fireSetTreepath make the editor not showing the columns
-                            dataTreePath.jobid="what a job";
+                
+                $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;width:100%" id="queryRun">Run Query</button>');
+                
+                bindClickAsyncEvent("queryRun",async ()=>{
+                    let dataTreePath = $.extend({}, constraintEditor.dataTreePath);
+                    dataTreePath.table = params.table;
+                    dataTreePath.tableorg = params.table;
+                    let data = await buildData(dataTreePath,api);
+                    
+                    let joints = api.getJoinedTables(params.table).joined_tables;
+                    // adding job id before using fireSetTreepath make the editor not showing the columns
+                    dataTreePath.jobid="what a job";
 
-                            $("#resultpane").html('');
-                            let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
-                                [
-                                    {txt:params.table,type:"title",pos:"center"},
-                                    {pos:"left",txt:object_map.root_table.description,type:"desc",weight:2,monoline:true},
-                                    {
-                                        toDom:"<div style='font-size: small;'><label for='" + params.table + 
-                                            "_limit'>Queryied entries :</label><select id='" +
-                                            params.table + "_limit'> <option value='10'>10</option>" +
-                                            "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
-                                            "<option value='0'>unlimited</option> </select></div>",
-                                        pos:"right"
-                                    },
-                                    {
-                                        toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + params.table + "_fullTables'" +
-                                            " style='margin:.4em' checked><label for='" + params.table + "_fullTables'>Selected tables only</label></div>",
-                                        pos:"right"
-                                    }
-                                ],
-                                "title"
-                            );
-
-                            if(data.status){
-                                let select = $("#" + params.table + "_limit",$("#resultpane"));
-                                let allColumns = $("#" + params.table + "_fullTables",$("#resultpane"));
-
-                                let handler = ()=>{
-                                    syncIt(async ()=>{
-                                        let val=$("option:selected",select).val();
-                                        api.setLimit(val);
-                                        div.html('');
-                                        div.data("clicked",true);
-                                        
-                                        let data = await buildData(dataTreePath,api,undefined,!allColumns.is(":checked"));
-                                        if(data.status){
-                                            showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
-                                        } else{
-                                            div.append("An unexpected error has append, unable to gather data. see logs for more information");
-                                        }
-                                        api.setLimit(10);
-                                    });
-                                    
-                                };
-
-                                select.on('change',handler);
-
-                                allColumns.click( handler);
-
-                                showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
-                            } else {
-                                div.append("An unexpected error has append, unable to gather data. see logs for more information");
+                    $("#resultpane").html('');
+                    let div = makeCollapsableDiv($("#resultpane"),params.table,false,undefined,
+                        [
+                            {txt:params.table,type:"title",pos:"center"},
+                            {pos:"left",txt:object_map.tables[params.table].description,type:"desc",weight:2,monoline:true},
+                            {
+                                toDom:"<div style='font-size: small;'><label for='" + params.table + 
+                                    "_limit'>Queryied entries :</label><select id='" +
+                                    params.table + "_limit'> <option value='10'>10</option>" +
+                                    "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
+                                    "<option value='0'>unlimited</option> </select></div>",
+                                pos:"right"
+                            },
+                            {
+                                toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + params.table + "_fullTables'" +
+                                    " style='margin:.4em' checked><label for='" + params.table + "_fullTables'>Selected tables only</label></div>",
+                                pos:"right"
                             }
-                        });
-                        $("#rButtonPane").append('<div style="height:11.8em" id="rPaneSpacer"></div>');
-                        $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;margin-bottom: 0.5em; width:100%" id="harold">Toggle control pane</button>');
-                        $("#harold").click(()=>{
-                            $("#controlPane").toggle();
-                            $("#rPaneSpacer").toggle();
-                        });
+                        ],
+                        "title"
+                    );
 
-                        //buildTableNameTable($("#tableNameTable"),api,constraintEditor);
-                        let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
-                        await MetadataSource.hijackCache(dt,api);
+                    if(data.status){
+                        let select = $("#" + params.table + "_limit",$("#resultpane"));
+                        let allColumns = $("#" + params.table + "_fullTables",$("#resultpane"));
 
-                        constraintEditor.fireSetTreepath(new DataTreePath(dt));
-                        qce.fireSetTreepath(new DataTreePath(dt));
+                        let handler = ()=>{
+                            syncIt(async ()=>{
+                                let val=$("option:selected",select).val();
+                                api.setLimit(val);
+                                div.html('');
+                                div.data("clicked",true);
+                                
+                                let data = await buildData(dataTreePath,api,undefined,!allColumns.is(":checked"));
+                                if(data.status){
+                                    showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
+                                } else{
+                                    div.append("An unexpected error has append, unable to gather data. see logs for more information");
+                                }
+                                api.setLimit(10);
+                            });
+                            
+                        };
 
-                        let fields = await api.getSelectedFields(params.table);
-                        fields=fields.fields;
-                        let keys = api.getJoinKeys(params.table).keys;
-                        let ah = (await api.getTableAttributeHandlers(params.table)).attribute_handlers;
-                        
-                        qce.hardSelect(ah.filter(val=>keys.includes(val.nameattr)));
-                        qce.select(ah.filter(val=>fields.includes(val.nameattr)));
+                        select.on('change',handler);
 
-                        constraintEditor.model.updateQuery();
-                        $("#queryRun").click();
+                        allColumns.click( handler);
 
-                        $("#multiTabDiv").tabs();
-                        $("#multiTabDiv").toggle();
-
-                        enableButton("btnApiDisconnect");
-
-                    } else{
-                        alert("Connection error please reload the page and try again.\n if the error persist check the logs and either try later or report the bug");
-                        console.log(value.error.logs);
+                        showTapResult(dataTreePath,data,div,rowEventFactory(joints,data,div,dataTreePath,api));
+                    } else {
+                        div.append("An unexpected error has append, unable to gather data. see logs for more information");
                     }
-                };
-            });
+                });
+                $("#rButtonPane").append('<div style="height:11.8em" id="rPaneSpacer"></div>');
+                $("#rButtonPane").append('<button class="btn btn-primary" style="margin-top: 0.5em;margin-bottom: 0.5em; width:100%" id="harold">Toggle control pane</button>');
+                $("#harold").click(()=>{
+                    $("#controlPane").toggle();
+                    $("#rPaneSpacer").toggle();
+                });
 
-            await connect;
+                //buildTableNameTable($("#tableNameTable"),api,constraintEditor);
+                let dt = {"nodekey":params.shortName, "schema": params.schema, "table": params.table, "tableorg": params.table};
+                await MetadataSource.hijackCache(dt,api);
 
-            await thenFun();
+                constraintEditor.fireSetTreepath(new DataTreePath(dt));
+                qce.fireSetTreepath(new DataTreePath(dt));
+
+                let fields = await api.getSelectedFields(params.table);
+                fields=fields.fields;
+                let keys = api.getJoinKeys(params.table).keys;
+                let ah = (await api.getTableAttributeHandlers(params.table));
+                ah = ah.attribute_handlers;
+                
+                qce.hardSelect(ah.filter(val=>keys.includes(val.nameattr)));
+                qce.select(ah.filter(val=>fields.includes(val.nameattr)));
+
+                constraintEditor.model.updateQuery();
+                $("#queryRun").click();
+
+                $("#multiTabDiv").tabs();
+                $("#multiTabDiv").toggle();
+
+                enableButton("btnApiDisconnect");
+
+            }else{
+                alert("Connection error please reload the page and try again.\n if the error persist check the logs and either try later or report the bug");
+                console.log(connect.error.logs);
+            }
 
             return status;
 

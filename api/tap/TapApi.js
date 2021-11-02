@@ -24,7 +24,7 @@ var TapApi = (function(){
         initJson.message = "Active TAP : " + shortName;
     };
 
-    TapApi.prototype.connectService = function(tapService, shortName){
+    TapApi.prototype.connectService = async function(tapService, shortName){
         if (shortName === undefined){
             shortName = "Unknown Tap";
         }
@@ -42,7 +42,7 @@ var TapApi = (function(){
             }
         }
         this.tapServiceConnector = new TapServiceConnector(tapService, shortName,this);
-        let test = this.tapServiceConnector.testService();
+        let test = await this.tapServiceConnector.testService();
         if(test.status){
             this.connectLevel = 1;
         }else {
@@ -78,11 +78,12 @@ var TapApi = (function(){
 
     TapApi.prototype.setRootTable = async function(table){
         if(this.connectLevel>1){
+
             if(Object.keys(this.tapServiceConnector.getTables()).includes(table)){
                 let test = await this.tapServiceConnector.selectRootTable(table);
-                if(test.statusText){
+                if(test.status){
                     this.connectLevel = 3;
-                    this.jsonAdqlBuilder = new JsonAdqlBuilder(this.tapServiceConnector.getObjectMap());
+                    this.jsonAdqlBuilder = new JsonAdqlBuilder(this.tapServiceConnector.getObjectMap().object_map,table,this.getConnector().connector.service.schema);
                 } else {
                     this.connectLevel = 2;
                 }
@@ -91,7 +92,7 @@ var TapApi = (function(){
             } else {
                 return {"status":false,"error":{
                     "logs":"Unknown table",
-                    "params":{"schema":schema}
+                    "params":{"table":table}
                 }};
             }
             
@@ -162,10 +163,10 @@ var TapApi = (function(){
     };
 
     TapApi.prototype.getConnector = function () {
-        if(this.tapServiceConnector === undefined || this.tapServiceConnector.connector===undefined){
+        if(this.tapServiceConnector === undefined || this.tapServiceConnector.getConnector()===undefined){
             return {"status" : false , "error":{"logs" :"No active TAP connection" } };
         }else {
-            return {"status" : true , "connector":this.tapServiceConnector};
+            return {"status" : true , "connector":this.tapServiceConnector.getConnector()};
         }
 
     };
@@ -406,7 +407,7 @@ var TapApi = (function(){
      * */
     TapApi.prototype.getTableAttributeHandlers = function (table) {
         
-        if(this.connectLevel>2){
+        if(this.connectLevel>1){
             let connector = this.getConnector();
             return this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table, connector.connector.service.schema);
         } else {

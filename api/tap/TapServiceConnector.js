@@ -13,7 +13,7 @@ var TapServiceConnector = (function() {
 
     TapServiceConnector.prototype.testService = async function (){
         let result = await this.query("SELECT tap_schema.schemas.schema_name, tap_schema.schemas.description from tap_schema.schemas");
-        if(this.result){
+        if(result){
             this.connector.service.schemas = {};
             for (let i =0;i<result.field_values.length;i++){
                 this.connector.service.schemas[result.field_values[i][0]] = {
@@ -33,13 +33,18 @@ var TapServiceConnector = (function() {
         this.connector.service.schema = schema;
         if(this.connector.service.schemas[schema].tables !== undefined){
             this.tables = this.connector.service.schemas[schema].tables;
+            for (let table in this.tables){
+                this.tables[table].columns=[];
+            }
             if(!cache){
+                this.connector.service.schemas[schema].tables= undefined;
                 delete this.connector.service.schemas[schema].tables;
             }
             return {"status":true};
         }
         let allTables = await this.getAllTables();
         if (allTables.status ){
+            allTables = allTables.all_tables;
             for (let i=0;i<allTables.length;i++){
                 this.tables[allTables[i][0]]= {description:allTables[i][1],columns:[],type:allTables[i][2]};
             }
