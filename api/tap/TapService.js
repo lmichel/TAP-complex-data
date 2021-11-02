@@ -1,15 +1,8 @@
 "use strict;";
 
 var TapService = /** @class */ (function () {
-    function TapService(url, schema, label, checkstatus) {
+    function TapService(url) {
         this.url = url;
-        this.schema = schema;
-        this.label = label;
-        this.checkstatus = checkstatus;// the result
-        this.allTables = undefined;
-        this.tableRemoveView = undefined;
-        this.rootQuery = '';
-
     }
 
     /***
@@ -17,7 +10,7 @@ var TapService = /** @class */ (function () {
      * @params String :receive adql statements and perform queries
      * @returns :votable object, result of adql query
      */
-    TapService.prototype.Query = async function (adql) {
+    TapService.prototype.query = async function (adql) {
         try {
         
             var site = this.url;

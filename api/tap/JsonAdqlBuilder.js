@@ -149,7 +149,7 @@ var JsonAdqlBuilder = (function(){
      * @param {String} table unqualified name of the table
      */
     JsonAdqlBuilder.prototype.removeTableConstraints = function(table){
-        if(this.adqlJsonMap.joints[table] === undefined){
+        if(this.adqlJsonMap.joints[table] === undefined && table !== this.adqlJsonMap.rootTable){
             return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
         }
 

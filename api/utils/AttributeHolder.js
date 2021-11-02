@@ -28,7 +28,7 @@ AttributeHolder = function(queryAble){
         let fullName = [schema, table].join('.').quotedTableName().qualifiedName.toLowerCase();
         if(cache[fullName]=== undefined){
             let adql = Holder.getAHAdql(table,schema);
-            let queryResult = await queryAble.Query(adql);
+            let queryResult = await queryAble.query(adql);
             if(queryResult.status){
                 let data = queryResultToDoubleArray(queryResult.answer);
                 cache[fullName] = doubleArrayToAHList(data);
@@ -62,7 +62,7 @@ AttributeHolder = function(queryAble){
             }
         }
         let adql = Holder.getAHsAdql(fullNames);
-        let queryResult = await queryAble.Query(adql);
+        let queryResult = await queryAble.query(adql);
 
         let fuzzyNames = {};
 

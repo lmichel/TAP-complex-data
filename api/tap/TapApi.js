@@ -3,10 +3,9 @@
 var TapApi = (function(){
 
     function TapApi() {
-        this.tapServiceConnector = "";
-        this.votableQueryResult = undefined;
-        this.dataTable1 = undefined;
+        this.tapServiceConnector = undefined;
         this.jsonAdqlBuilder = undefined;
+        this.connectLevel = 0;
         this.limit = 10;
     }
 
@@ -25,13 +24,92 @@ var TapApi = (function(){
         initJson.message = "Active TAP : " + shortName;
     };
 
-    TapApi.prototype.connect = async function ({tapService, schema, table, shortName}) {
+    TapApi.prototype.connectService = function(tapService, shortName){
+        if (shortName === undefined){
+            shortName = "Unknown Tap";
+        }
+        if(tapService === undefined){
+            return {"status":false,"error":{
+                "logs":"Can't initialize Tap service : Missing required Argument",
+                "params":{"tapService":tapService, "shortName":shortName}
+            }};
+        }
+        if(!tapService.endsWith("sync") && !tapService.endsWith("sync/")){
+            if(tapService.endsWith("/")){
+                tapService += "sync/";
+            }else {
+                tapService += "/sync/";
+            }
+        }
+        this.tapServiceConnector = new TapServiceConnector(tapService, shortName,this);
+        let test = this.tapServiceConnector.testService();
+        if(test.status){
+            this.connectLevel = 1;
+        }else {
+            this.connectLevel = 0;
+            test.error.params = {"tapService":tapService,"shortName":shortName};
+        }
+        return test;
+    };
+
+    TapApi.prototype.selectSchema = async function(schema){
+        if(this.connectLevel>0){
+            if(Object.keys(this.tapServiceConnector.getConnector().service.schemas).includes(schema)){
+                let test = await this.tapServiceConnector.selectSchema(schema);
+                if (test.status){
+                    this.connectLevel = 2;
+                } else {
+                    this.connectLevel = 1;
+                }
+                return test;
+            } else {
+                return {"status":false,"error":{
+                    "logs":"Unknown schema",
+                    "params":{"schema":schema}
+                }};
+            }
+        } else {
+            return {"status":false,"error":{
+                "logs":"Can't connect to selected schema : connect to a service first",
+                "params":{"schema":schema}
+            }};
+        }
+    };
+
+    TapApi.prototype.setRootTable = async function(table){
+        if(this.connectLevel>1){
+            if(Object.keys(this.tapServiceConnector.getTables()).includes(table)){
+                let test = await this.tapServiceConnector.selectRootTable(table);
+                if(test.statusText){
+                    this.connectLevel = 3;
+                    this.jsonAdqlBuilder = new JsonAdqlBuilder(this.tapServiceConnector.getObjectMap());
+                } else {
+                    this.connectLevel = 2;
+                }
+
+                return test;
+            } else {
+                return {"status":false,"error":{
+                    "logs":"Unknown table",
+                    "params":{"schema":schema}
+                }};
+            }
+            
+        }else {
+            return {"status":false,"error":{
+                "logs":"Can't set the root table : select a schema first",
+                "params":{"table":table}
+            }};
+        }
+    };
+
+    /*TapApi.prototype.connect = async function ({tapService, schema, table, shortName}) {
         try {
             let formatTableName = schema + "." + table;
             let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
             this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
             this.tapServiceConnector.api = this;
-            this.tapServiceConnector.connector.votable = await this.tapServiceConnector.Query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
+            this.tapServiceConnector.connector.votable = await this.tapServiceConnector.query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
             if (this.tapServiceConnector.connector.votable.status){ // status = true mean you get an answer
                 
                 this.tapServiceConnector.connector.votable = this.tapServiceConnector.connector.votable.answer;
@@ -39,7 +117,7 @@ var TapApi = (function(){
                 if (this.tapServiceConnector.connector.votable.status === 200) {// status = 200 mean the answer is positive
                     this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector);
                 }
-                /* for vizier only*/
+                /* for vizier only
                 else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
                     this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector);
                 } else {
@@ -76,29 +154,25 @@ var TapApi = (function(){
                 "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
             }};
         }
-        
-        
-    };
+    };*/
 
     TapApi.prototype.disconnect = function () {
-        /*this.tapServiceConnector = "";
-        this.votableQueryResult = undefined;
-        this.dataTable1 = undefined;*/
+        /*this.tapServiceConnector = "";*/
         document.location.reload();
     };
 
     TapApi.prototype.getConnector = function () {
-        if(this.tapServiceConnector.connector===undefined){
+        if(this.tapServiceConnector === undefined || this.tapServiceConnector.connector===undefined){
             return {"status" : false , "error":{"logs" :"No active TAP connection" } };
         }else {
-            return {"status" : true , "connector":this.tapServiceConnector.connector};
+            return {"status" : true , "connector":this.tapServiceConnector};
         }
 
     };
 
     TapApi.prototype.getObjectMap = function () {
         let objectMap = {};
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
             let map = this.tapServiceConnector.getObjectMap();
             objectMap.status = map.status;
 
@@ -124,7 +198,7 @@ var TapApi = (function(){
      */
     TapApi.prototype.getJoinedTables = function (baseTable) {
         let jsonContaintJoinTable = {};
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
             
             jsonContaintJoinTable.joined_tables = this.jsonAdqlBuilder.getLowerJoints(baseTable).joints;
             jsonContaintJoinTable.status = true;
@@ -138,7 +212,7 @@ var TapApi = (function(){
     };
 
     TapApi.prototype.getActiveJoints = function(table){
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
             return this.jsonAdqlBuilder.getActiveJoints(table);
         } else {
             return {"logs":"No active TAP connection","prams":{"table":table}};
@@ -174,8 +248,8 @@ var TapApi = (function(){
     };
 
     TapApi.prototype.query = async function(query){
-        if(this.getConnector().status){
-            return this.tapServiceConnector.Query(query);
+        if(this.connectLevel==3){
+            return this.tapServiceConnector.query(query);
         } else {
             return {"status":false,"error" :{ "logs": "No active TAP connection","params":{"query":query}}};
         }
@@ -187,7 +261,7 @@ var TapApi = (function(){
      * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
     TapApi.prototype.getTableQuery = async function(table,joinKeyVal){
-        if(this.getConnector().status){
+        if(this.connectLevel==3){
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
             }
@@ -220,7 +294,7 @@ var TapApi = (function(){
      * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
     TapApi.prototype.getTableSelectedField = async function(table,joinKeyVal){
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
             }
@@ -248,7 +322,7 @@ var TapApi = (function(){
      *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
     TapApi.prototype.getTableFieldsQuery = async function(table,joinKeyVal){
-        if(this.getConnector().status){
+        if(this.connectLevel==3){
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
             }
@@ -282,7 +356,7 @@ var TapApi = (function(){
      *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
     TapApi.prototype.getTableFields = async function(table,joinKeyVal){
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
             }
@@ -308,25 +382,33 @@ var TapApi = (function(){
     * @return {*} {status: true|false, "error?": {}}
     **/
     TapApi.prototype.resetTableConstraint = function (table) {
-
-        return this.jsonAdqlBuilder.removeTableConstraints(table);
+        if(this.connectLevel==3){
+            return this.jsonAdqlBuilder.removeTableConstraints(table);
+        }else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection"} };
+        }
     };
 
     /**
     * @return {*} {status: true|false, "error?": {}}
     **/
     TapApi.prototype.resetAllTableConstraint = function () {
-        return this.jsonAdqlBuilder.removeAllTableConstraints();
+        if(this.connectLevel==3){
+            return this.jsonAdqlBuilder.removeAllTableConstraints();
+        }else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection"} };
+        }
     };
 
     /**
      * @param {*} table : String the name of table you want get handlerAttribut associeted with
      * @return {*} : Json the json containing all handler Attribut of the table as an array stored in the `attribute_handlers` field
      * */
-    TapApi.prototype.getTableAttributeHandlers = async function (table) {
-        let connector = this.getConnector();
-        if(connector.status){
-            return await this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table, connector.connector.service.schema);
+    TapApi.prototype.getTableAttributeHandlers = function (table) {
+        
+        if(this.connectLevel>2){
+            let connector = this.getConnector();
+            return this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table, connector.connector.service.schema);
         } else {
             return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
         }
@@ -337,10 +419,10 @@ var TapApi = (function(){
      * @return {*} : Json the json containing all handler Attribut of the table as a map stored in the `attribute_handlers` field 
      * the map uses the full names as keys the field `name_map` constains a map fromp short names to full names.
      * */
-    TapApi.prototype.getTablesAttributeHandlers = async function (tables) {
-        let connector = this.getConnector();
-        if(connector.status){
-            return await this.tapServiceConnector.attributsHandler.getTablesAttributeHandlers(tables, connector.connector.service.schema);
+    TapApi.prototype.getTablesAttributeHandlers = function (tables) {
+        if(this.connectLevel>1){
+            let connector = this.getConnector();
+            return this.tapServiceConnector.attributsHandler.getTablesAttributeHandlers(tables, connector.connector.service.schema);
         } else {
             return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"tables":tables}} };
         }
@@ -474,6 +556,9 @@ var TapApi = (function(){
      * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
      */
     TapApi.prototype.getSelectedFields = async function (table){
+        if(this.connectLevel <3){
+            return {"status":false,"error":{"logs":"No Tap service conneted","params":{"table":table}}};
+        }
         let obj = this.getObjectMap();
         if(obj.status){
             obj = obj.object_map;
@@ -520,7 +605,12 @@ var TapApi = (function(){
      * @returns {*} {"status": true|false,"error?":{},"keys?":[]}
      */
     TapApi.prototype.getJoinKeys = function(table){
-        return this.jsonAdqlBuilder.getJoinKeys(table);
+        if(this.connectLevel==3){
+            return this.jsonAdqlBuilder.getJoinKeys(table);
+        } else {
+            return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
+        }
+        
     };
 
     /**
@@ -529,7 +619,7 @@ var TapApi = (function(){
      * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
      */
     TapApi.prototype.getAllTableFields = async function (table){
-        if(this.getConnector().status){
+        if(this.connectLevel>1){
             let columns = [];
             let jsonField = (await this.getTableAttributeHandlers(table)).attribute_handlers;
             
@@ -552,7 +642,7 @@ var TapApi = (function(){
     TapApi.prototype.formatColNames = function(table,columns){
         let allField ="";
         let schema;
-        schema = this.tapServiceConnector.connector.service.schema;
+        schema = this.getConnector().connector.service.schema;
         
         for(let i=0;i<columns.length; i++){
             allField +=(schema+'.'+table+'.'+columns[i]).quotedTableName().qualifiedName+" , ";
@@ -588,7 +678,7 @@ var TapApi = (function(){
      * @returns {*} {"status": true|false,"error?":{}}
      */
     TapApi.prototype.setTableConstraint = function(table, constraint){
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
 
             constraint = constraint.trim();
             return this.jsonAdqlBuilder.setTableConstraint(table, constraint);
@@ -605,7 +695,7 @@ var TapApi = (function(){
      * @returns {*} {"status": true|false,"error?":{},"constraint?":string}
      */
     TapApi.prototype.getTableConstraint = function(table){
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
 
             return this.jsonAdqlBuilder.getTableConstraint(table);
         }
@@ -618,7 +708,7 @@ var TapApi = (function(){
      * @returns {*} {"status": true|false,"error?":{},"constraints?":{table:constraint}}
      */
     TapApi.prototype.getAllTablesConstraints = function(){
-        if (this.getConnector().status) {
+        if (this.connectLevel==3) {
 
             return this.jsonAdqlBuilder.getAllTablesConstraints();
         }

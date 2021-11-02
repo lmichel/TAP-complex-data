@@ -1,25 +1,82 @@
 "use strict;";
 var TapServiceConnector = (function() {
-    function TapServiceConnector(_serviceUrl, _schema, _shortname){
-        this.tapService = new TapService(_serviceUrl, _schema, _shortname, true);
-        
-        this.jsonLoad = undefined;
+    function TapServiceConnector(_serviceUrl, _shortname,api){
+        this.tapService = new TapService(_serviceUrl);
 
-        this.testforConstrain = false;
-        this.json = {};
+        this.api = api;
+        this.tables = {};
 
-        this.tabContaninBtnRemoveConstraint = [];
-        this.testApiRooQuery = false;
-        this.table = [];
+        this.connector = {status: false, service: {"shortName":_shortname,"tapService":_serviceUrl}};
 
-        this.connector = {status: "", message: "", service: {}, votable: ""};
         this.attributsHandler = AttributeHolder(this);
-        this.jsonCorrectTableColumnDescription = {"addAllColumn": {}};
-        this.setAdqlConnectorQuery = function (correctTableNameFormat) {
-            let query = "SELECT TOP 5 * FROM " + correctTableNameFormat;
-            return query;
-        };
     }
+
+    TapServiceConnector.prototype.testService = async function (){
+        let result = await this.query("SELECT tap_schema.schemas.schema_name, tap_schema.schemas.description from tap_schema.schemas");
+        if(this.result){
+            this.connector.service.schemas = {};
+            for (let i =0;i<result.field_values.length;i++){
+                this.connector.service.schemas[result.field_values[i][0]] = {
+                    description : result.field_values[i][1]
+                };
+            }
+            this.connector.status =true;
+            return {"status":true};
+        }else{
+            return {"status":false,"error":{
+                "logs":result.error.logs
+            }};
+        }
+    };
+
+    TapServiceConnector.prototype.selectSchema = async function(schema,cache=true){
+        this.connector.service.schema = schema;
+        if(this.connector.service.schemas[schema].tables !== undefined){
+            this.tables = this.connector.service.schemas[schema].tables;
+            if(!cache){
+                delete this.connector.service.schemas[schema].tables;
+            }
+            return {"status":true};
+        }
+        let allTables = await this.getAllTables();
+        if (allTables.status ){
+            for (let i=0;i<allTables.length;i++){
+                this.tables[allTables[i][0]]= {description:allTables[i][1],columns:[],type:allTables[i][2]};
+            }
+            if(cache){
+                this.connector.service.schemas[schema].tables = this.tables;
+            }
+            return {"status":true};
+        }else{
+            delete this.connector.service.schema;
+            this.tables = {};
+            return {"status":false,"error":{
+                "logs":allTables.error.logs,
+                "params":{"schema":schema}
+            }};
+        }
+    };
+
+    TapServiceConnector.prototype.getTables = function(){
+        return this.tables;
+    };
+
+    TapServiceConnector.prototype.selectRootTable = async function(table){
+        this.connector.service.table = table;
+        let map = await this.buildObjectMap();
+        if(map.status){
+            return {"status":true};
+        }else {
+            return {"status":false,"error":{
+                "logs":map.error.logs,
+                "params":{"table":table}
+            }};
+        }
+    };
+
+    TapServiceConnector.prototype.getConnector = function (){
+        return this.connector;
+    };
 
     /**
      * Get all the table's name and description returned as a double array
@@ -28,9 +85,9 @@ var TapServiceConnector = (function() {
         try {
             let schema  = this.connector.service.schema;
             let request = 'SELECT DISTINCT tap_schema.tables.table_name as'+
-                ' table_name, tap_schema.tables.description FROM tap_schema.tables WHERE tap_schema.tables.schema_name = \'' + schema + '\' ';
+                ' table_name, tap_schema.tables.description, tap_schema.tables.table_type  FROM tap_schema.tables WHERE tap_schema.tables.schema_name = \'' + schema + '\' ';
 
-            let query =await this.Query(request);
+            let query =await this.query(request);
 
             for(let i=0;i<query.field_values.length;i++){
                 query.field_values[i][0] = unqualifyName(query.field_values[i][0],schema);
@@ -53,7 +110,7 @@ var TapServiceConnector = (function() {
                 ' , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys'+
                 ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
                 
-            let query =await this.Query(request);
+            let query =await this.query(request);
             
             if(query.status){
                 let joins = [];
@@ -177,22 +234,9 @@ var TapServiceConnector = (function() {
                 let treeMap = this.buildJoinTreeMap(raw);
 
                 let map = {
-                    "root_table": {
-                        "name": this.connector.service.table,
-                        "schema": this.connector.service.schema,
-                        "columns":[]
-                    }, 
-                    "tables": {},
+                    "tables": this.tables, // setup in selectSchema
                     "map": treeMap
                 };
-
-                for (let i=0;i<allTables.length;i++){
-                    if(allTables[i][0] == this.connector.service.table){
-                        map.root_table.description = allTables[i][1];
-                    } else {
-                        map.tables[allTables[i][0]]= {description:allTables[i][1],columns:[]};
-                    }
-                }
                 this.objectMap = map;
                 return {status:true,object_map:map};
 
@@ -216,23 +260,6 @@ var TapServiceConnector = (function() {
         }
     };
 
-    /**
-    * return the full json created by the method createJson()
-    */
-    TapServiceConnector.prototype.loadJson = async function () {
-        if(this.jsonLoad === undefined){
-            this.jsonLoad = await this.tapService.createJson();
-            if(this.jsonLoad.status){
-                this.jsonLoad = this.jsonLoad.json;
-            }else{
-                let val = this.jsonLoad;
-                this.jsonLoad = undefined;
-                return val;
-            }
-        }
-        return {"status":true,"json": this.jsonLoad};
-    };
-
     /**Apply custom post processing on the object map in order to fix various issues like wrong columns name declared in joints
      * this method is meant to hold quick fixes ensuring the api still work while waiting for the orignal issue to be fixed
      * meaning no permanent code should be written here
@@ -241,8 +268,8 @@ var TapServiceConnector = (function() {
         // no post process required right now.
     };
 
-    TapServiceConnector.prototype.Query = async function(adql){
-        return await this.tapService.Query(adql);
+    TapServiceConnector.prototype.query = async function(adql){
+        return await this.tapService.query(adql);
     };
 
     return TapServiceConnector;
