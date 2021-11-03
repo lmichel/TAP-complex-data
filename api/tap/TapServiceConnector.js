@@ -229,28 +229,20 @@ var TapServiceConnector = (function() {
     };
 
     TapServiceConnector.prototype.buildObjectMap = async function() {
-        let allTables = await this.getAllTables();
-        if(allTables.status){
-            let allJoins = await this.getAllJoins();
-            if(allJoins.status){
-                allTables = allTables.all_tables;
-                allJoins = allJoins.all_joins;
-                let raw = this.buildRawJoinMap(allJoins);
-                let treeMap = this.buildJoinTreeMap(raw);
+        let allJoins = await this.getAllJoins();
+        if(allJoins.status){
+            allJoins = allJoins.all_joins;
+            let raw = this.buildRawJoinMap(allJoins);
+            let treeMap = this.buildJoinTreeMap(raw);
 
-                let map = {
-                    "tables": this.tables, // setup in selectSchema
-                    "map": treeMap
-                };
-                this.objectMap = map;
-                return {status:true,object_map:map};
+            let map = {
+                "tables": this.tables, // setup in selectSchema
+                "map": treeMap
+            };
+            this.objectMap = map;
+            return {status:true,object_map:map};
 
-            } else{
-                return {"status":false,"error":{
-                    "logs":allJoins.error.logs
-                }};
-            }
-        }  else {
+        } else{
             return {"status":false,"error":{
                 "logs":allJoins.error.logs
             }};

@@ -104,59 +104,6 @@ var TapApi = (function(){
         }
     };
 
-    /*TapApi.prototype.connect = async function ({tapService, schema, table, shortName}) {
-        try {
-            let formatTableName = schema + "." + table;
-            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
-            this.tapServiceConnector = new TapServiceConnector(tapService, schema, shortName);
-            this.tapServiceConnector.api = this;
-            this.tapServiceConnector.connector.votable = await this.tapServiceConnector.query(this.tapServiceConnector.setAdqlConnectorQuery(correctTableNameFormat));
-            if (this.tapServiceConnector.connector.votable.status){ // status = true mean you get an answer
-                
-                this.tapServiceConnector.connector.votable = this.tapServiceConnector.connector.votable.answer;
-
-                if (this.tapServiceConnector.connector.votable.status === 200) {// status = 200 mean the answer is positive
-                    this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector);
-                }
-                /* for vizier only
-                else if (this.tapServiceConnector.connector.votable !== undefined && shortName === "Vizier") {
-                    this.initConnetor(tapService, schema, table, shortName,this.tapServiceConnector.connector);
-                } else {
-                    let status = this.tapServiceConnector.connector.votable.statusText;
-                    this.tapServiceConnector.connector = undefined;
-                    return {"status":false,"error":{
-                        "logs":"Failed to initialize TAP connection:\n " + status,
-                        "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-                    }};
-                }
-                this.tapServiceConnector.attributsHandler.api = this.tapServiceConnector.api;
-
-                let obj = await this.tapServiceConnector.buildObjectMap();
-
-                if (obj.status){
-                    this.jsonAdqlBuilder = new JsonAdqlBuilder(obj.object_map);
-                } else {
-                    this.tapServiceConnector.connector = undefined;
-                    return {"status":false,"error":{
-                        "logs":"Failed to initialize internal data structures :\n " + obj.error.logs,
-                        "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-                    }};
-                }
-                return {"status":true};
-            }
-            return {"status":false,"error":{
-                "logs":"Failed to initialize TAP connection:\n " + this.tapServiceConnector.connector.votable.error.logs,
-                "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-            }};
-        } catch (error) {
-            console.error(error);
-            return {"status":false,"error":{
-                "logs":error.toString(),
-                "params":{"tapService":tapService, "schema":schema, "table":table, "shortName":shortName}
-            }};
-        }
-    };*/
-
     TapApi.prototype.disconnect = function () {
         /*this.tapServiceConnector = "";*/
         document.location.reload();
@@ -730,6 +677,25 @@ var TapApi = (function(){
             this.limit = 0;
         }
         return {"status":true};
+    };
+
+    TapApi.prototype.getSchemas = function(){
+        if(this.connectLevel>0){
+            let co = this.tapServiceConnector.getConnector();
+            if(co.status){
+                return {"status":true,"schemas": co.service.schemas};
+            }else {
+                return {"status":false,"error": co.error};
+            }
+        }
+        return {"status":false,"error": {"logs":"No active TAP connection"}};
+    };
+
+    TapApi.prototype.getTables = function(){
+        if(this.connectLevel>1){
+            return { "status":true,"tables":this.tapServiceConnector.getTables()};
+        }
+        return {"status":false,"error": {"logs":"No active TAP connection"}};
     };
 
     return TapApi;
