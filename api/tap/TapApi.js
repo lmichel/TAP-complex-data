@@ -105,8 +105,10 @@ var TapApi = (function(){
     };
 
     TapApi.prototype.disconnect = function () {
-        /*this.tapServiceConnector = "";*/
-        document.location.reload();
+        this.connectLevel = 0;
+        delete this.tapServiceConnector;
+        delete this.jsonAdqlBuilder;
+        return {"status":true};
     };
 
     TapApi.prototype.getConnector = function () {
@@ -513,10 +515,6 @@ var TapApi = (function(){
             if(obj.tables[table] !== undefined){
                 if(obj.tables[table].columns.length>0){
                     return obj.tables[table].columns;
-                }
-            } else if (table === obj.root_table.name){
-                if(obj.root_table.columns.length>0){
-                    return obj.root_table.columns;
                 }
             }
         }

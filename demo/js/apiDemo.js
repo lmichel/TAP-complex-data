@@ -2,28 +2,6 @@
  * JS file containing all the function used to embed the Tap Complex API in the demo web page.
  */
 
-
-/*/ Trigers function for radio button /*/
-
-function OnRadioChange(radio) {
-    if (!isSuccess("btnApiConnect")){
-
-        if(isDisable("btnApiConnect")){
-            enableButton("btnApiConnect");
-        }
-
-        let lastLab=$("label.btn-success[name=radioLabel]")[0];
-        if(lastLab !== undefined ){
-            enableButton(lastLab.id);
-        }
-        successButton("label_" + radio.value);
-
-        display(radio.value + " is now selected click now to the connect button to connect service.", "getStatus");
-    } else {
-        display("Another database is already in use please disconect it first.", "getStatus");
-    }
-}
-
 /*/ modal generation /*/
 
 async function selectConstraints(tableName, txtInput,api){
@@ -297,7 +275,137 @@ async function createTableFieldsButton(api){
     }
 }
 
+function tableHandlerFactory(table,api){
+    return async () =>{
+        let tableCo = await api.setRootTable(table);
+        display(tableCo, "getJsonAll");
+        if (tableCo.status){
+
+            enableButton("btnGetObjectMap");
+            enableButton("btnGetJoinTable");
+            enableButton("btnGetRootQuery");
+            enableButton("btnGetRootFieldsQuery");
+            enableButton("btnGetRootQueryIds");
+            enableButton("btnGetRootFields");
+            enableButton("btnGetTableQueryIds");
+            enableButton("btnGetTableFields");
+            enableButton("btnGetAdqlJsonMap");
+            enableButton("btnGetSelectedAH");
+            enableButton("btnCustom");
+            enableButton("btnConstraint");
+            enableButton("btnRemoveConstraint");
+            enableButton("btnRemoveAllConstraint");
+            enableButton("btnLoadButtonsHandler");
+
+            await createButton(api);
+            await createHandlersButton(api);
+            await createTableIDsButton(api);
+            await createTableFieldsButton(api);
+        }
+        return tableCo.status;
+    };
+
+}
+
+function schemasHandlerFactory(schema,api){
+    return async () => {
+        let tableHolder = $("#tableList");
+        tableHolder.html("");
+
+        disableButton("btnGetObjectMap");
+        disableButton("btnGetJoinTable");
+        disableButton("btnGetRootQuery");
+        disableButton("btnGetRootFieldsQuery");
+        disableButton("btnGetRootQueryIds");
+        disableButton("btnGetRootFields");
+        disableButton("btnGetTableQueryIds");
+        disableButton("btnGetTableFields");
+        disableButton("btnGetAdqlJsonMap");
+        disableButton("btnGetSelectedAH");
+        disableButton("btnCustom");
+        disableButton("btnConstraint");
+        disableButton("btnRemoveConstraint");
+        disableButton("btnRemoveAllConstraint");
+        disableButton("btnLoadButtonsHandler");
+
+        let schemCo = await api.selectSchema(schema);
+        display(schemCo,"getJsonAll");
+        if(schemCo.status){
+            let tables = api.getTables();
+            display(tables,"getJsonAll");
+            if(tables.status){
+                tables = tables.tables;
+                for(let table in tables){
+                    tableHolder.append("<button  type='button' class=\"btn btn-primary\" id='table_" + 
+                    table + "' style=\"margin-top: 7px;width: 100%;\">" + 
+                    table + "</button> ");
+                    bindClickAsyncEvent("table_" + table,tableHandlerFactory(table,api));
+                }
+                return true;
+            }
+        }
+        return false;
+    };
+}
+
+
 let api = new TapApi();
+
+/*/ Trigers function for radio button /*/
+
+function OnRadioChange(radio) {
+    syncIt(async ()=>{
+        $("#tableList").html("");
+        $("#schemas").html("");
+        disableButton("btnApiDisconnect");
+        disableButton("btnGetObjectMap");
+        disableButton("btnGetJoinTable");
+        disableButton("btnGetRootQuery");
+        disableButton("btnGetRootFieldsQuery");
+        disableButton("btnGetRootQueryIds");
+        disableButton("btnGetRootFields");
+        disableButton("btnGetTableQueryIds");
+        disableButton("btnGetTableFields");
+        disableButton("btnGetAdqlJsonMap");
+        disableButton("btnGetSelectedAH");
+        disableButton("btnCustom");
+        disableButton("btnConstraint");
+        disableButton("btnRemoveConstraint");
+        disableButton("btnRemoveAllConstraint");
+        disableButton("btnLoadButtonsHandler");
+
+        let lastLab=$("label.btn-success[name=radioLabel]")[0];
+        if(lastLab !== undefined ){
+            enableButton(lastLab.id);
+        }
+
+        let params = KnowledgeTank.getDescriptors().descriptors[radio.value];
+        let connect = await api.connectService(params.tapService,params.shortName);
+        display(connect,"getJsonAll");
+        if(connect.status){
+
+            enableButton("btnApiDisconnect");
+            enableButton("btnGetConnector");
+
+            let schemas = api.getSchemas();
+            display(schemas,"getJsonAll");
+            if(schemas.status){
+                let holder = $("#schemas");
+                holder.html("");
+                for (let schema in schemas.schemas){
+                    holder.append("<button  type='button' class=\"btn btn-primary\" id='schema_" + 
+                        schema + "' style=\"margin-top: 7px;width: 100%;\">" + 
+                        schema + "</button> ");
+                    bindClickAsyncEvent("schema_" + schema , schemasHandlerFactory(schema,api));
+                }
+                successButton("label_" + radio.value);
+                display(radio.value + " is now connected selected the wanted schema to use", "getStatus");
+                return;
+            }
+        }
+        errorButton("label_" + radio.value);
+    });
+}
 
 /*/ Steup of Event handlers functions /*/
 
@@ -309,153 +417,12 @@ function setupEventHandlers(){
             display(map,"getJsonAll");
         }
     });
-    
-    bindClickAsyncEvent("btnApiConnect",async () => {
-        
-        if (isEnable("btnApiConnect")) {
-            let params = KnowledgeTank.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
-            params.shortName = $("input:radio[name=radio]:checked")[0].value;
-            
-            let connect = await api.connectService(params.tapService,params.shortName);
-            let error;
-
-            if(connect.status){
-                let schemas = api.getSchemas();
-                if(schemas.status){
-                    let holder = $("#schemas");
-                    holder.html("");
-                    for (let schema in schemas.schemas){
-                        holder.append("<button  type='button' class=\"btn btn-primary\" id='schema_" + 
-                        schema + "' style=\"margin-top: 7px;width: 100%;\">" + 
-                        schema + "</button> ");
-                        bindClickAsyncEvent("schema_" + schema , async ()=>{
-                            let schemCo = await api.selectSchema(schema);
-                            if(schemCo.status){
-                                let tableHolder = $("#tableList");
-                                let tables = api.getTables();
-                                if(tables.status){
-                                    tables = tables.tables;
-                                }
-                                tableHolder.html("");
-                                for(let table in tables){
-                                    tableHolder.append("<button  type='button' class=\"btn btn-primary\" id='table_" + 
-                                    table + "' style=\"margin-top: 7px;width: 100%;\">" + 
-                                    table + "</button> ");
-                                    bindClickAsyncEvent("table_" + table, async ()=> {
-                                        let tableCo = await api.setRootTable(table);
-                                        display(tableCo, "getJsonAll");
-                                        if (tableCo.status){
-
-                                            /*/ disable all radio buttons so the user can't change their value /*/
-                                            $("input:radio[name=radio]").attr("disabled",true);
-                                            $("label[name=radioLabel]").each((i,btn)=>{
-                                                disableButton(btn.id);
-                                            });
-                        
-                                            enableButton("btnApiDisconnect");
-                                            enableButton("btnGetConnector");
-                                            enableButton("btnGetObjectMap");
-                                            enableButton("btnGetJoinTable");
-                                            enableButton("btnGetRootQuery");
-                                            enableButton("btnGetRootFieldsQuery");
-                                            enableButton("btnGetRootQueryIds");
-                                            enableButton("btnGetRootFields");
-                                            enableButton("btnGetTableQueryIds");
-                                            enableButton("btnGetTableFields");
-                                            enableButton("btnGetAdqlJsonMap");
-                                            enableButton("btnGetSelectedAH");
-                                            enableButton("btnCustom");
-                                            enableButton("btnConstraint");
-                                            enableButton("btnRemoveConstraint");
-                                            enableButton("btnRemoveAllConstraint");
-                                            enableButton("btnLoadButtonsHandler");
-                        
-                                            await createButton(api);
-                                            await createHandlersButton(api);
-                                            await createTableIDsButton(api);
-                                            await createTableFieldsButton(api);
-                                        }
-                                        return tableCo.status;
-                                    });
-                                }
-                            }
-                            display(schemCo, "getJsonAll");
-                            return schemCo.status;
-                        });
-                    }
-                    return schemas.status;
-                }else{
-                    error = schemas.error;
-                }
-            }else{
-                error = connect.error;
-            }
-
-            display(error, "getJsonAll");
-            return false;
-
-            /*let connect = api.connect(params);
-            let status = false;
-            connect.catch((reason)=>console.error(reason));
-
-            let thenFun = async ()=> {};
-
-            connect.then((value) => {
-                status = value.status;
-                display(value , "getJsonAll");
-                thenFun = async () =>{
-
-                if (status){
-
-                    /*//* disable all radio buttons so the user can't change their value /*//*
-                    $("input:radio[name=radio]").attr("disabled",true);
-                    $("label[name=radioLabel]").each((i,btn)=>{
-                        disableButton(btn.id);
-                    });
-
-                    enableButton("btnApiDisconnect");
-                    enableButton("btnGetConnector");
-                    enableButton("btnGetObjectMap");
-                    enableButton("btnGetJoinTable");
-                    enableButton("btnGetRootQuery");
-                    enableButton("btnGetRootFieldsQuery");
-                    enableButton("btnGetRootQueryIds");
-                    enableButton("btnGetRootFields");
-                    enableButton("btnGetTableQueryIds");
-                    enableButton("btnGetTableFields");
-                    enableButton("btnGetAdqlJsonMap");
-                    enableButton("btnGetSelectedAH");
-                    enableButton("btnCustom");
-                    enableButton("btnConstraint");
-                    enableButton("btnRemoveConstraint");
-                    enableButton("btnRemoveAllConstraint");
-                    enableButton("btnLoadButtonsHandler");
-
-                    await createButton(api);
-                    await createHandlersButton(api);
-                    await createTableIDsButton(api);
-                    await createTableFieldsButton(api);
-                }
-            };
-            });
-
-            display(""+status , "getStatus");
-
-            await connect;
-            await thenFun();
-
-            return status;*/
-
-        } else {
-            display("The service is  already connected ! disconnect the service and try again ...", "getStatus");
-        }
-
-    },"no service selected... Choose service first and try again" );
 
     bindClickEvent("btnApiDisconnect",() => {
         api.disconnect();
+        $("#tableList").html("");
+        $("#schemas").html("");
         
-        disableButton("btnApiDisconnect");
         disableButton("btnGetConnector");
         disableButton("btnGetObjectMap");
         disableButton("btnGetJoinTable");
@@ -467,6 +434,7 @@ function setupEventHandlers(){
         disableButton("btnGetTableFields");
         disableButton("btnGetAdqlJsonMap");
         disableButton("btnGetSelectedAH");
+        disableButton("btnCustom");
         disableButton("btnConstraint");
         disableButton("btnRemoveConstraint");
         disableButton("btnRemoveAllConstraint");
@@ -474,16 +442,10 @@ function setupEventHandlers(){
 
         enableButton("btnApiConnect");
 
-        $("input:radio[name=radio]").attr("disabled",false);
-        $("label[name=radioLabel]").each((i,btn)=>{
-            enableButton(btn.id);
-        });
-
         $("loadButton").html("");
         $("loadButtonsHandler").html("");
 
         return false;
-
     });
 
     bindClickEvent("btnGetConnector",() => {
@@ -676,4 +638,3 @@ $(document).ready(function() {
     $("input:radio[name=radio]:checked").prop('checked', false);
     setupEventHandlers();
 });
-
