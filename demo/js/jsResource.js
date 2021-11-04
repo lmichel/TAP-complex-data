@@ -579,8 +579,6 @@ function setupEventHandlers(){
 
             let status = false;
 
-            let thenFun = async ()=> {};
-
             if (connect.status) {
 
                 status = connect.status;

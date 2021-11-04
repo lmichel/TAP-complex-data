@@ -54,6 +54,7 @@ var TapApi = (function(){
 
     TapApi.prototype.selectSchema = async function(schema){
         if(this.connectLevel>0){
+            schema = schema.quotedTableName().qualifiedName;
             if(Object.keys(this.tapServiceConnector.getConnector().service.schemas).includes(schema)){
                 let test = await this.tapServiceConnector.selectSchema(schema);
                 if (test.status){

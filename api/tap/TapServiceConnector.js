@@ -16,7 +16,7 @@ var TapServiceConnector = (function() {
         if(result){
             this.connector.service.schemas = {};
             for (let i =0;i<result.field_values.length;i++){
-                this.connector.service.schemas[result.field_values[i][0]] = {
+                this.connector.service.schemas[result.field_values[i][0].quotedTableName().qualifiedName] = {
                     description : result.field_values[i][1]
                 };
             }
@@ -90,7 +90,8 @@ var TapServiceConnector = (function() {
         try {
             let schema  = this.connector.service.schema;
             let request = 'SELECT DISTINCT tap_schema.tables.table_name as'+
-                ' table_name, tap_schema.tables.description, tap_schema.tables.table_type  FROM tap_schema.tables WHERE tap_schema.tables.schema_name = \'' + schema + '\' ';
+                ' table_name, tap_schema.tables.description, tap_schema.tables.table_type  FROM tap_schema.tables WHERE tap_schema.tables.schema_name = \'' + 
+                schema + '\' OR  tap_schema.tables.schema_name = \'' +  replaceAll(schema,'"',"") + '\'';
 
             let query =await this.query(request);
 

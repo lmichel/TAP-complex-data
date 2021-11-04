@@ -65,7 +65,7 @@ async function getTableData(api,table,jointVal){
     display(data,"codeOutput");
 
     if(data.status){
-        let dataCols = await api.getSelectedFields(table);
+        let dataCols = (await api.getSelectedFields(table)).fields;
         let subJoint = api.getJoinedTables(table).joined_tables;
 
         let subTables = Object.keys(subJoint);
@@ -171,49 +171,44 @@ function setupEventHandlers(){
         if (isEnable("btnApiConnect")) {
             let params = KnowledgeTank.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
             params.shortName = $("input:radio[name=radio]:checked")[0].value;
-            
-            let connect = api.connect(params);
+            console.log("yeeee");
+            let connect = await api.connectService(params.tapService,params.shortName);
+            if(connect.status){
+                connect = await api.selectSchema(params.schema);
+                if(connect.status){
+                    connect = await api.setRootTable(params.table);
+                }
+            }
             let status = false;
-            connect.catch((reason)=>console.error(reason));
+            display(connect,"codeOutput");
+            if (connect.status){
+                status = connect.status;
+                if (status){
 
-            let thenFun = async ()=> {};
+                    /*/ disable all radio buttons so the user can't change their value /*/
+                    $("input:radio[name=radio]").attr("disabled",true);
+                    $("label[name=radioLabel]").each((i,btn)=>{
+                        disableButton(btn.id);
+                    });
 
-            connect.then( (value) => {
-                status = value.status;
-                display(value,"codeOutput");
-                thenFun = async () =>{
+                    enableButton("btnApiDisconnect");
 
-                    if (status){
+                    // create and bind the main table
+                    let root = api.getConnector().connector.service.table;
+                    let rootData = await getTableData(api,root);
+                    if (rootData.status){
+                        let table = buildTable(rootData.data.colNames.concat(rootData.joinedTables),rootData.data.value,"table_1");
+                        
+                        $("#dataHolder").append("<div id = \"table_1\"></div>");
+                        $("#table_1").html(table);
 
-                        /*/ disable all radio buttons so the user can't change their value /*/
-                        $("input:radio[name=radio]").attr("disabled",true);
-                        $("label[name=radioLabel]").each((i,btn)=>{
-                            disableButton(btn.id);
-                        });
-
-                        enableButton("btnApiDisconnect");
-
-                        // create and bind the main table
-                        let root = api.getConnector().connector.service.table;
-                        let rootData = await getTableData(api,root);
-
-                        if (rootData.status){
-                            let table = buildTable(rootData.data.colNames.concat(rootData.joinedTables),rootData.data.value,"table_1");
-                            
-                            $("#dataHolder").append("<div id = \"table_1\"></div>");
-                            $("#table_1").html(table);
-
-                            bindTableEvent(api,1,rootData);
-                        }
+                        bindTableEvent(api,1,rootData);
                     }
-                };
-            });
-
-            await connect;
+                }
+            }
 
             display(""+status , "getStatus");
 
-            await thenFun();
 
             return status;
 
@@ -224,6 +219,7 @@ function setupEventHandlers(){
     },"no service selected... Choose service first and try again" );
 
     bindClickEvent("btnApiDisconnect",() => {
+        document.location.reload(); // flemme : nom féminin 
         api.disconnect();
 
         enableButton("btnApiConnect");
