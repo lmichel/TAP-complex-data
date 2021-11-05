@@ -392,11 +392,13 @@ function OnRadioChange(radio) {
             if(schemas.status){
                 let holder = $("#schemas");
                 holder.html("");
+                let unqSchem;
                 for (let schema in schemas.schemas){
+                    unqSchem = replaceAll(schema,'"',"");
                     holder.append("<button  type='button' class=\"btn btn-primary\" id='schema_" + 
-                        schema + "' style=\"margin-top: 7px;width: 100%;\">" + 
+                        unqSchem + "' style=\"margin-top: 7px;width: 100%;\">" + 
                         schema + "</button> ");
-                    bindClickAsyncEvent("schema_" + schema , schemasHandlerFactory(schema,api));
+                    bindClickAsyncEvent("schema_" + unqSchem , schemasHandlerFactory(schema,api));
                 }
                 successButton("label_" + radio.value);
                 display(radio.value + " is now connected selected the wanted schema to use", "getStatus");
