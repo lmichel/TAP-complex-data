@@ -420,12 +420,12 @@ var searchBar = function(input,output,parser,queryier,elemBuilder,handler,timeou
 
 async function setupEventHandlers(){
     let api = new TapApi();
-    await api.connect({
-        "tapService" : "//dc.zah.uni-heidelberg.de/tap/sync",
-        "schema" : "rr",
-        "table" : "resource",
-        "shortName":"Gavo"
-    });
+    
+    await api.connectService("//dc.zah.uni-heidelberg.de/tap/sync","Gavo");
+
+    await api.selectSchema("rr");
+
+    await api.setRootTable("resource");
 
     // default conditions
     let defaultConditions ={
