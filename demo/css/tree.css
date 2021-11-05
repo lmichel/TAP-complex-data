@@ -1,0 +1,15 @@
+.tooltip {
+    z-index: 3000;
+    border: 1px solid #111;
+    background-color: lightBlue;
+    padding: 5px;
+    opacity: 0.85;
+}
+.tooltip .tooltip-inner{
+    background-color: inherit;
+    color: inherit;
+}
+
+.tooltip h4 {
+    margin: 0;
+}
