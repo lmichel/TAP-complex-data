@@ -43,6 +43,7 @@ var TapServiceConnector = (function() {
             return {"status":true};
         }
         let allTables = await this.getAllTables();
+        this.tables = {};
         if (allTables.status ){
             allTables = allTables.all_tables;
             for (let i=0;i<allTables.length;i++){
@@ -54,7 +55,6 @@ var TapServiceConnector = (function() {
             return {"status":true};
         }else{
             delete this.connector.service.schema;
-            this.tables = {};
             return {"status":false,"error":{
                 "logs":allTables.error.logs,
                 "params":{"schema":schema}

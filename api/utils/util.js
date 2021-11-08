@@ -111,8 +111,8 @@ if (!String.prototype.quotedTableName) {
            if ((!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || KnowledgeTank.sqlKeyWord.includes(tbl[j].toUpperCase()) ) && tbl[j] !== "*") {
                tbl[j] = '"' + tbl[j] + '"';
            }
-       }		
-       return {qualifiedName: tbl.join("."), tableName: tbl[tbl.length - 1]};
+       }
+       return {qualifiedName:tbl.join("."), tableName: tbl[tbl.length - 1]};
    };
 }
 /**
