@@ -2,29 +2,44 @@
 
 var ExtraDrawer ={
     "data":{},
-    "drawExtra" : function(holder,nodeID,drawer){
+    "eventMap":{},
+    "drawExtra" : function(holder,nodeID,drawer,events = ["redraw.jstree"]){
         for(let i=0;i<holder.length;i++){
-            if(ExtraDrawer.data[holder[i]] === undefined){
-                ExtraDrawer.data[holder[i]] = {};
-                $(holder[i]).on("redraw.jstree",ExtraDrawer.reDrawer(holder[i]));
+            for (let j=0;j<events.length;j++){
+                if(ExtraDrawer.data[holder[i]] === undefined){
+                    ExtraDrawer.data[holder[i]] = {};
+                }
+                if(ExtraDrawer.data[holder[i]][events[i]] === undefined){
+                    ExtraDrawer.data[holder[i]][events[i]] = {};
+                    $(holder[i]).on(events[i],ExtraDrawer.reDrawer(holder[i],events[i]));
+                }
+                if(ExtraDrawer.data[holder[i]][events[i]][nodeID] === undefined){
+                    ExtraDrawer.data[holder[i]][events[i]][nodeID] = [];
+                }
+                ExtraDrawer.data[holder[i]][events[i]][nodeID].push(drawer);
             }
-            if(ExtraDrawer.data[holder[i]][nodeID] === undefined){
-                ExtraDrawer.data[holder[i]][nodeID] = [];
-            }
-            ExtraDrawer.data[holder[i]][nodeID].push(drawer);
         }
         drawer(nodeID);
     },
-    "reDrawer" : function(holder){
+    "reDrawer" : function(holder,eventName){
         return function(event,node){
-            for (let i=0;i<node.nodes.length;i++){
+            if( node.nodes){
+                for (let i=0;i<node.nodes.length;i++){
 
-                if(ExtraDrawer.data[holder][node.nodes[i]] !== undefined){
+                    if(ExtraDrawer.data[holder][eventName][node.nodes[i]] !== undefined){
 
-                    console.log("ID ok");
-                    for (let j=0;j<ExtraDrawer.data[holder][node.nodes[i]].length;j++){
+                        for (let j=0;j<ExtraDrawer.data[holder][eventName][node.nodes[i]].length;j++){
 
-                        ExtraDrawer.data[holder][node.nodes[i]][j](node.nodes[i]);
+                            ExtraDrawer.data[holder][eventName][node.nodes[i]][j](node.nodes[i]);
+                        }
+                    }
+                }
+            } else if(node.node) {
+                if(ExtraDrawer.data[holder][eventName][node.node.id] !== undefined){
+
+                    for (let j=0;j<ExtraDrawer.data[holder][eventName][node.node.id].length;j++){
+
+                        ExtraDrawer.data[holder][eventName][node.node.id][j](node.node.id);
                     }
                 }
             }
@@ -33,7 +48,7 @@ var ExtraDrawer ={
 };
 
 function vizierToID(schema){
-    let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`"];
+    let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`","."];
     for (let i=0;i<chars.length;i++){
         schema = replaceAll(schema,chars[i],"");
     }
@@ -46,10 +61,11 @@ var TapTree = function(){
      * 
      * @param {TapApi} api 
      */
-    function TapTree(api,tree,rootHolder){
+    function TapTree(api,tree,rootHolder,meta={}){
         this.api = api;
         this.tree = tree;
         this.rootHolder = rootHolder;
+        this.meta = meta;
 
         let short_name = api.getConnector().connector.service.shortName;
         this.treeID = tree.create_node("#",{
@@ -104,7 +120,7 @@ var TapTree = function(){
             $("#" + id + "_meta").click(this.showMetaData);
 
 
-            let span = '<span style="font-style: normal; font-size: small ; background-color:';
+            let span = '<span style="font-style: normal; font-size: x-small ; background-color:';
             $("#" + id + "_anchor").after("<span id='" + id + "_info'></span>");
             let infoSpan = $("#" + id + "_info");
 
@@ -136,32 +152,10 @@ var TapTree = function(){
                                 },
                                 "icon": false,
                             });
-                            let editing=false;
-                            let f= ()=>{
-                                console.log("eddited " + tableSafe);
-                                if(editing){
-                                    return;
-                                }
-                                editing = true;
-                                console.log("drawing " + this.treeID + "_" + safeSchem + "_" + tableSafe);
-                                $("#" + this.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + this.treeID + "_" + safeSchem + "_" + tableSafe + 
-                                    "_meta' class='metadata' src='../images/info.png' title='Show metadata (Does not work with Vizier)'/>");
-                                if(tables[table].type === "view"){
-                                    $("#" + this.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + this.treeID + "_" + safeSchem + "_" + tableSafe + 
-                                        "_view' src='../images/viewer_23.png' title='this table is defined as a view query may be slower than usual ...'/>");
-                                    $("#" + this.treeID + "_" + safeSchem + "_" + tableSafe +"_view" ).click(this.metaDataShowerFactory(table));
-                                }
-                                editing = false;
-                            };
-                            $("#" + this.treeID + "_" + safeSchem + "_" + tableSafe).on("DOMSubtreeModified",f );
-                            f();
                         }
                         this.tree.delete_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem + "_dummy"));
-                        // this is done in two step becose jsTree rewrite the whole node when doing some updates to it ...
-                        for (let table in tables){
-                            tableSafe = vizierToID(table);
-                            
-                        }
+
+                        ExtraDrawer.drawExtra(this.rootHolder,this.treeID + "_" + safeSchem,this.reDrawerFactory(safeSchem,tables),["before_open.jstree"]);
                     }else {
                         alert(tables.error.logs);
                     }
@@ -172,6 +166,25 @@ var TapTree = function(){
             }
         };
         return fun;
+    };
+
+    TapTree.prototype.reDrawerFactory = function(safeSchem,tables){
+        let that = this;
+        return (id)=>{
+            let tableSafe;
+            for(let table in tables){
+                tableSafe = vizierToID(table);
+                if($("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_meta").length == 0){
+                    $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
+                        "_meta' class='metadata' src='../images/info.png' title='Show metadata (Does not work with Vizier)'/>");
+                    if(tables[table].type === "view"){
+                        $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
+                            "_view' src='../images/viewer_23.png' title='this table is defined as a view query may be slower than usual ...'/>");
+                        $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe +"_view" ).click(that.metaDataShowerFactory(table));
+                    }
+                }
+            }
+        };
     };
 
     TapTree.prototype.getID = function(){
@@ -228,10 +241,10 @@ var TapTreeList = function(){
     /**
      * @param {TapApi} tap 
      */
-    TapTreeList.prototype.append = function(tap){
+    TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
         if(connector.status && !this.contains(tap)){
-            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.holder)};
+            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.holder,meta)};
         }
         return connector.status;
     };
