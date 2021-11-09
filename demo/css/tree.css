@@ -13,3 +13,20 @@
 .tooltip h4 {
     margin: 0;
 }
+
+.modal-header {
+    padding-top: .5em;
+    padding-bottom: .5em;
+}
+
+.modal-icon {
+    background-position: center center;
+    background-size: auto;
+    height:24px;
+    width:24px;
+    display:inline-block;
+    background-repeat:
+    no-repeat;
+    vertical-align: top;
+    margin-right:5px
+}

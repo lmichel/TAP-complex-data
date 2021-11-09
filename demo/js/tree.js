@@ -67,9 +67,9 @@ var TapTree = function(){
         this.rootHolder = rootHolder;
         this.meta = meta;
 
-        let short_name = api.getConnector().connector.service.shortName;
+        this.short_name = api.getConnector().connector.service.shortName;
         this.treeID = tree.create_node("#",{
-            "text":short_name,
+            "text":this.short_name,
             "icon": "../images/database.png",
             "a_attr":{
                 "title":"Double click to filter the visible tables"
@@ -117,7 +117,7 @@ var TapTree = function(){
         }
         ExtraDrawer.drawExtra(rootHolder,this.treeID,(id)=>{
             $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='../images/info.png' title='Show metadata (Does not work with Vizier)'/>");
-            $("#" + id + "_meta").click(this.showMetaData);
+            $("#" + id + "_meta").click(this.serviceMetaDataShowerFactory());
 
 
             let span = '<span style="font-style: normal; font-size: x-small ; background-color:';
@@ -180,7 +180,7 @@ var TapTree = function(){
                     if(tables[table].type === "view"){
                         $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
                             "_view' src='../images/viewer_23.png' title='this table is defined as a view query may be slower than usual ...'/>");
-                        $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe +"_view" ).click(that.metaDataShowerFactory(table));
+                        $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe +"_view" ).click(that.tableMetaDataShowerFactory(table));
                     }
                 }
             }
@@ -191,11 +191,15 @@ var TapTree = function(){
         return this.api.getConnector().connector.service.tapService;
     };
 
-    TapTree.prototype.showMetaData = function(){
-
+    // factory patern needed because of `this` which doesn't represent a TapTree anymore when the method is used as an external handler ...
+    TapTree.prototype.serviceMetaDataShowerFactory = function(){
+        let that = this;
+        return ()=>{
+            ModalInfo.infoObject({"Info":this.meta},this.short_name).show();
+        };
     };
 
-    TapTree.prototype.metaDataShowerFactory = function(table){
+    TapTree.prototype.tableMetaDataShowerFactory = function(table){
         return () => {};
     };
 
@@ -264,7 +268,7 @@ function OnRadioChange(radio) {
             let params = KnowledgeTank.getDescriptors().descriptors[radio.value];
             let connect = await api.connectService(params.tapService,radio.value);
             if(connect.status){
-                tree.append(api);
+                tree.append(api,params);
 
                 successButton("label_" + radio.value);
                 return;
