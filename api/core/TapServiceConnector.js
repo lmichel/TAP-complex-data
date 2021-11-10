@@ -1,6 +1,12 @@
 "use strict;";
-var TapServiceConnector = (function() {
-    function TapServiceConnector(_serviceUrl, _shortname,api){
+
+if (typeof jw === "undefined") {
+    //Jill Will Core
+    var jw = {core:{}};
+}
+
+(function() {
+    jw.core.ServiceConnector = function(_serviceUrl, _shortname,api){
         this.tapService = new TapService(_serviceUrl);
 
         this.api = api;
@@ -10,9 +16,9 @@ var TapServiceConnector = (function() {
         this.connector = {status: false, service: {"shortName":_shortname,"tapService":_serviceUrl}};
 
         this.attributsHandler = AttributeHolder(this);
-    }
+    };
 
-    TapServiceConnector.prototype.testService = async function (){
+    jw.core.ServiceConnector.prototype.testService = async function (){
         let result = await this.query("SELECT tap_schema.schemas.schema_name, tap_schema.schemas.description from tap_schema.schemas");
         if(result){
             this.connector.service.schemas = {};
@@ -30,7 +36,7 @@ var TapServiceConnector = (function() {
         }
     };
 
-    TapServiceConnector.prototype.selectSchema = async function(schema,cache=true){
+    jw.core.ServiceConnector.prototype.selectSchema = async function(schema,cache=true){
         this.connector.service.schema = schema;
         this.joins = undefined;
         if(this.connector.service.schemas[schema].tables !== undefined){
@@ -64,11 +70,11 @@ var TapServiceConnector = (function() {
         }
     };
 
-    TapServiceConnector.prototype.getTables = function(){
+    jw.core.ServiceConnector.prototype.getTables = function(){
         return this.tables;
     };
 
-    TapServiceConnector.prototype.selectRootTable = async function(table){
+    jw.core.ServiceConnector.prototype.selectRootTable = async function(table){
         this.connector.service.table = table;
         let map = await this.buildObjectMap();
         if(map.status){
@@ -81,14 +87,14 @@ var TapServiceConnector = (function() {
         }
     };
 
-    TapServiceConnector.prototype.getConnector = function (){
+    jw.core.ServiceConnector.prototype.getConnector = function (){
         return this.connector;
     };
 
     /**
      * Get all the table's name and description returned as a double array
      */
-    TapServiceConnector.prototype.getAllTables = async function () {
+    jw.core.ServiceConnector.prototype.getAllTables = async function () {
         try {
             let schema  = this.connector.service.schema;
             let request = 'SELECT DISTINCT tap_schema.tables.table_name as'+
@@ -111,7 +117,7 @@ var TapServiceConnector = (function() {
         }
     };
 
-    TapServiceConnector.prototype.getAllJoins = async function(){
+    jw.core.ServiceConnector.prototype.getAllJoins = async function(){
         try {
             let schema  = this.connector.service.schema;
             let request = 'SELECT tap_schema.keys.from_table, tap_schema.keys.target_table,tap_schema.keys.key_id' +
@@ -151,7 +157,7 @@ var TapServiceConnector = (function() {
         }
     };
 
-    TapServiceConnector.prototype.buildRawJoinMap = function(allJoins){
+    jw.core.ServiceConnector.prototype.buildRawJoinMap = function(allJoins){
         
         /** map = {
          *      "T1":{
@@ -215,7 +221,7 @@ var TapServiceConnector = (function() {
 
     };
 
-    TapServiceConnector.prototype.buildJoinTreeMap = function (rawJoinMap,root,listExist){
+    jw.core.ServiceConnector.prototype.buildJoinTreeMap = function (rawJoinMap,root,listExist){
         if(root === undefined){
             root = this.connector.service.table;
         }
@@ -239,7 +245,7 @@ var TapServiceConnector = (function() {
         return treeMap;
     };
 
-    TapServiceConnector.prototype.buildObjectMap = async function() {
+    jw.core.ServiceConnector.prototype.buildObjectMap = async function() {
         let allJoins;
         if( this.joins === undefined){
             allJoins = await this.getAllJoins();
@@ -265,7 +271,7 @@ var TapServiceConnector = (function() {
         return {status:true,object_map:map};
     };
 
-    TapServiceConnector.prototype.getObjectMap = function(){
+    jw.core.ServiceConnector.prototype.getObjectMap = function(){
         if(this.objectMap === undefined){
             return {status:false,error:{logs:"Object map isn't build run buildObjectMap before trying to use this method"}};
         }else{
@@ -277,13 +283,11 @@ var TapServiceConnector = (function() {
      * this method is meant to hold quick fixes ensuring the api still work while waiting for the orignal issue to be fixed
      * meaning no permanent code should be written here
      */
-    TapServiceConnector.prototype.postProcessObjectMap = function(){
+    jw.core.ServiceConnector.prototype.postProcessObjectMap = function(){
         // no post process required right now.
     };
 
-    TapServiceConnector.prototype.query = async function(adql){
+    jw.core.ServiceConnector.prototype.query = async function(adql){
         return await this.tapService.query(adql);
     };
-
-    return TapServiceConnector;
 }());

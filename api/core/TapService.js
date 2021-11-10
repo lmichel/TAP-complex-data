@@ -1,16 +1,21 @@
 "use strict;";
 
-var TapService = /** @class */ (function () {
-    function TapService(url) {
+if (typeof jw === "undefined") {
+    //Jeff White Core
+    var jw = {core:{}};
+}
+
+(function () {
+    jw.core.ServiceRequest = function (url) {
         this.url = url;
-    }
+    };
 
     /***
      * Receive adql, return votable objects
      * @params String :receive adql statements and perform queries
      * @returns :votable object, result of adql query
      */
-    TapService.prototype.query = async function (adql) {
+    jw.core.ServiceRequest.prototype.query = async function (adql) {
         try {
         
             var site = this.url;
@@ -93,6 +98,4 @@ var TapService = /** @class */ (function () {
             }};
         }
     };
-
-    return TapService;
 }());

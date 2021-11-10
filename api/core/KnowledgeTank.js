@@ -1,7 +1,12 @@
 "use strict;";
 
-var KnowledgeTank = (function(){
-    function KnowledgeTank(){
+if (typeof jw === "undefined") {
+    //James Waiter
+    var jw = {};
+}
+
+(function(){
+    jw.KnowledgeTank = function(){
         /**
          * Support [*] and [[0-9]+] operator at the end of both ucd and field name
          * if applied to field to field name then it describe how many ucds are allowed at most.
@@ -141,9 +146,9 @@ var KnowledgeTank = (function(){
             "UNTIL","UPDATE","UPPER","USAGE","USER","USING","VALUE","VALUES","VARCHAR","VARYING","VAR_POP","VAR_SAMP","VIEW","WHEN","WHENEVER","WHERE","WHILE",
             "WIDTH_BUCKET","WINDOW","WITH","WITHIN","WITHOUT","WORK","WRITE","YEAR","ZONE",
         ];
-    }
+    };
 
-    KnowledgeTank.prototype.setPresetValue = function(AHList){
+    jw.KnowledgeTank.prototype.setPresetValue = function(AHList){
         let preset;
         for (let i =0;i<AHList.length;i++){
             preset = this.presetValues[AHList[i].db_name + "." + AHList[i].column_name];
@@ -155,7 +160,7 @@ var KnowledgeTank = (function(){
         return {"status":true,"AHList":AHList};
     };
 
-    KnowledgeTank.prototype.getDescriptors = function(){
+    jw.KnowledgeTank.prototype.getDescriptors = function(){
         return {"status":true,"descriptors": this.serviceDescriptors};
     };
 
@@ -163,7 +168,7 @@ var KnowledgeTank = (function(){
      * will select AH based on criteria described in the ucdStorage object.
      * @param {Array} AHList list of Attributes handlers to select from
      */
-    KnowledgeTank.prototype.selectAH = function(AHList){
+    jw.KnowledgeTank.prototype.selectAH = function(AHList){
         let selected = {};
         let j,i,maxSelect,curr = 0,ucd,maxField,counter,ucds;
 
@@ -223,7 +228,7 @@ var KnowledgeTank = (function(){
      * will select AH based on keywords described in the utypeKeyword object.
      * @param {Array} AHList list of Attributes handlers to select from
      */
-    KnowledgeTank.prototype.selectAHByUtypes = function(AHList){
+    jw.KnowledgeTank.prototype.selectAHByUtypes = function(AHList){
         let selected = [],i,j;
         for (i=0;i<AHList.length;i++){
             for(j=0;j<this.utypeKeyword.length;j++){
@@ -235,5 +240,4 @@ var KnowledgeTank = (function(){
         return {"status" : true,"selected":Array.from(new Set(selected))};
     };
     
-    return new KnowledgeTank();
 })();

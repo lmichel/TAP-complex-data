@@ -1,8 +1,13 @@
 "use strict;";
 
-var JsonAdqlBuilder = (function(){
+if (typeof jw === "undefined") {
+    //John Walker Core
+    var jw = {core:{}};
+}
 
-    function JsonAdqlBuilder(objectMap,rootTable,schema){
+(function(){
+
+    jw.core.JsonAdqlBuilder = function(objectMap,rootTable,schema){
         this.adqlJsonMap = {
             "rootTable" :rootTable,
             "scheme" : schema, 
@@ -67,13 +72,13 @@ var JsonAdqlBuilder = (function(){
         }
         
 
-    }
+    };
 
     /**
      * @param {String} table unqualified name of the constraint table
      * @param {String} constraint valid adql constraint constraining only the table `table`, without any starting or leading adql keyword (WHERE,OR,AND, ...)
      */
-    JsonAdqlBuilder.prototype.setTableConstraint = function(table,constraint){
+    jw.core.JsonAdqlBuilder.prototype.setTableConstraint = function(table,constraint){
 
         if(this.adqlJsonMap.joints[table] === undefined && table !== this.adqlJsonMap.rootTable){
             return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table,"constraint":constraint}}};
@@ -114,7 +119,7 @@ var JsonAdqlBuilder = (function(){
      * @param {Boolean} strict  Optional define if logic should exactly have the correct size according to logic's size
      * @returns 
      */
-    JsonAdqlBuilder.prototype.setTableConstraints = function(table,constraints,logic,strict){
+    jw.core.JsonAdqlBuilder.prototype.setTableConstraints = function(table,constraints,logic,strict){
         if (strict){
             if (logic.length !== constraints.length -1){
                 return {"status" : false, "error":{"logs":"logic length doesn't match with constraints length","params" : {"table":table,"constraints":constraints,"logic":logic,"strict":strict}}};
@@ -148,7 +153,7 @@ var JsonAdqlBuilder = (function(){
      * Remove any constraints put on the table
      * @param {String} table unqualified name of the table
      */
-    JsonAdqlBuilder.prototype.removeTableConstraints = function(table){
+    jw.core.JsonAdqlBuilder.prototype.removeTableConstraints = function(table){
         if(this.adqlJsonMap.joints[table] === undefined && table !== this.adqlJsonMap.rootTable){
             return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
         }
@@ -181,7 +186,7 @@ var JsonAdqlBuilder = (function(){
     /**
      * Remove any constraints put on any table
      */
-     JsonAdqlBuilder.prototype.removeAllTableConstraints = function(){
+    jw.core.JsonAdqlBuilder.prototype.removeAllTableConstraints = function(){
 
         this.adqlJsonMap.conditions = {};
         this.adqlJsonMap.activeJoints = [];
@@ -193,7 +198,7 @@ var JsonAdqlBuilder = (function(){
      * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
      * @param {int} degree Optional, degree of deepness allowed. `Number.MAX_VALUE` if unspecified.
      */
-    JsonAdqlBuilder.prototype.getSubTables = function(table,degree){
+    jw.core.JsonAdqlBuilder.prototype.getSubTables = function(table,degree){
         if (table == undefined){
             table = this.adqlJsonMap.rootTable;
         }
@@ -237,7 +242,7 @@ var JsonAdqlBuilder = (function(){
      * @param {String} table Table from which joined table are searched 
      */
 
-    JsonAdqlBuilder.prototype.getLowerJoints =function(table){
+    jw.core.JsonAdqlBuilder.prototype.getLowerJoints =function(table){
         if (table == undefined){
             table = this.adqlJsonMap.rootTable;
         }
@@ -254,7 +259,7 @@ var JsonAdqlBuilder = (function(){
      * Create a string containing all active ADQL joints from the starting node ignoring any joints on same or higher level other nodes
      * @param {String} table Optional, unqualified name of the node table or the root table if unspecified
      */
-    JsonAdqlBuilder.prototype.getAdqlJoints = function(table){
+    jw.core.JsonAdqlBuilder.prototype.getAdqlJoints = function(table){
         let joints = this.getActiveJoints(table);
 
         if(joints.status){
@@ -280,7 +285,7 @@ var JsonAdqlBuilder = (function(){
 
     };
 
-    JsonAdqlBuilder.prototype.getActiveJoints = function(table){
+    jw.coreJsonAdqlBuilder.prototype.getActiveJoints = function(table){
         let whitelist = this.getSubTables(table);
         
         if(whitelist.status){
@@ -301,7 +306,7 @@ var JsonAdqlBuilder = (function(){
      * Theise values are used to create an additional constraint and ignore if `table` is either undefined or the rootTable .
      * This must take the form of a map where each keys represent a key from the table `table` (target field in the join object)
      */
-    JsonAdqlBuilder.prototype.getAdqlConstraints = function(table,joinKeyVal){
+    jw.core.JsonAdqlBuilder.prototype.getAdqlConstraints = function(table,joinKeyVal){
         let whitelist = this.getSubTables(table);
         
         if(whitelist.status){
@@ -350,7 +355,7 @@ var JsonAdqlBuilder = (function(){
      * return a set containing all fields which are use as join keys on/by the selected table 
      * @param {String} table unqualified name of the node table or the root table if unspecified
      */
-    JsonAdqlBuilder.prototype.getJoinKeys = function(table){
+    jw.core.JsonAdqlBuilder.prototype.getJoinKeys = function(table){
         if(table === undefined){
             table = this.adqlJsonMap.rootTable;
         }
@@ -379,7 +384,7 @@ var JsonAdqlBuilder = (function(){
      * check if the selected table is actively joint
      * @param {String} table unqualified name of the node table
      */
-    JsonAdqlBuilder.prototype.isTableJoined = function(table){
+    jw.core.JsonAdqlBuilder.prototype.isTableJoined = function(table){
         return {"status":true,"joined": this.adqlJsonMap.activeJoints.includes(table)};
     };
 
@@ -387,7 +392,7 @@ var JsonAdqlBuilder = (function(){
      * return the constraint put on the selected table or an empty string if no constraint is set
      * @param {String} table unqualified name of the node table
      */
-    JsonAdqlBuilder.prototype.getTableConstraint = function(table){
+    jw.core.JsonAdqlBuilder.prototype.getTableConstraint = function(table){
         let constraint = this.adqlJsonMap.conditions[table];
         if (constraint === undefined){
             constraint = "";
@@ -395,7 +400,7 @@ var JsonAdqlBuilder = (function(){
         return {"status": true, "constraint":`${constraint}`};
     };
 
-    JsonAdqlBuilder.prototype.getAllTablesConstraints = function(){
+    jw.core.JsonAdqlBuilder.prototype.getAllTablesConstraints = function(){
         let constraints = {};
         for(let table in this.adqlJsonMap.conditions){
             constraints[table] = `${this.adqlJsonMap.conditions[table]}`;

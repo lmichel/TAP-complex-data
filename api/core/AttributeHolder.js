@@ -1,6 +1,11 @@
 "use strict;";
 
-AttributeHolder = function(queryAble){
+if (typeof jw === "undefined") {
+    //Join Walker Core
+    var jw = {core:{}};
+}
+
+jw.core.AttributeHolder = function(queryAble){
 
     let AHTemplate = {
         "table_name":"",
