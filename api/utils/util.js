@@ -1,3 +1,47 @@
+/*/ Classes /*/
+
+class Timeout {
+    constructor(fn, delay) {
+        this.ended = false;
+        this.timedOut = false;
+        let that = this;
+        this.id = setTimeout(() => {
+            that.timedOut = true;
+            let result = fn();
+            if (result !== undefined && result.then) {
+                result.then(that.ended = true);
+            } else {
+                that.ended = true;
+            }
+        }, delay);
+    }
+    clear() {
+        this.ended = true;
+        this.timedOut = true;
+        clearTimeout(this.id);
+    }
+}
+
+class Logger {
+    constructor() {}
+    log(...log) {console.log(log);}
+    info(...info) {console.info(info);}
+    error(...error) {console.error(error);}
+    warn(...warn) {console.info(warn);}
+}
+
+class DisabledLogger extends Logger{
+    constructor() {super();}
+    log(...log){}
+    info(...info){}
+    error(...error){}
+    warn(...warn){}
+}
+
+/*/ End Of Classes /*/
+
+/*/ Extending Classes /*/
+
 /* return the last node of file pathname
 */
 if(!String.prototype.xtractFilename){
@@ -199,13 +243,6 @@ if (!String.prototype.getTreepath) {
 
 }
 
-function unqualifyName(table,schema){
-    if(table.indexOf(schema)!=-1){
-        return table.substring(table.indexOf(".",table.indexOf(schema))+1,table.length);
-    }
-    return table;
-}
-
 if(!Array.prototype.remove){
     Array.prototype.remove = function(elem){
         const index = this.indexOf(elem);
@@ -215,6 +252,18 @@ if(!Array.prototype.remove){
         return this;
     };
 }
+
+/*/ End Of Extending Classes /*/
+
+/*/ Functions /*/
+
+function unqualifyName(table,schema){
+    if(table.indexOf(schema)!=-1){
+        return table.substring(table.indexOf(".",table.indexOf(schema))+1,table.length);
+    }
+    return table;
+}
+
 
 /**
  * @param{*} str : String the root query
