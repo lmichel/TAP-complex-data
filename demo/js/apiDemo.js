@@ -336,10 +336,11 @@ function schemasHandlerFactory(schema,api){
             if(tables.status){
                 tables = tables.tables;
                 for(let table in tables){
+                    let safe = vizierToID(table);
                     tableHolder.append("<button  type='button' class=\"btn btn-primary\" id='table_" + 
-                    table + "' style=\"margin-top: 7px;width: 100%;\">" + 
+                    safe + "' style=\"margin-top: 7px;width: 100%;\">" + 
                     table + "</button> ");
-                    bindClickAsyncEvent("table_" + table,tableHandlerFactory(table,api));
+                    bindClickAsyncEvent("table_" + safe,tableHandlerFactory(table,api));
                 }
                 return true;
             }

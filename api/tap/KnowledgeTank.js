@@ -72,6 +72,45 @@ var KnowledgeTank = (function(){
 
         };
 
+        this.tapSchemaTables = {
+            "key_columns": {
+                "description": "List all foreign keys but provides just the columns linked by the foreign key. To know the table of these columns, see in TAP_SCHEMA.keys using the key_id.",
+                "columns": [],
+                "type": "table"
+            },
+            "schemas": {
+                "description": "List of schemas published in this TAP service.",
+                "columns": [],
+                "type": "table"
+            },
+            "keys": {
+                "description": "List all foreign keys but provides just the tables linked by the foreign key. To know which columns of these tables are linked, see in TAP_SCHEMA.key_columns using the key_id.",
+                "columns": [],
+                "type": "table"
+            },
+            "tables": {
+                "description": "List of tables published in this TAP service.",
+                "columns": [],
+                "type": "table"
+            },
+            "columns": {
+                "description": "List of columns of all tables listed in TAP_SCHEMA.TABLES and published in this TAP service.",
+                "columns": [],
+                "type": "table"
+            }
+        };
+
+        this.tapSchemaJoins = [
+            {
+                from: { table: "schemas", column: "schema_name" },
+                target: { table: "tables", column: "schema_name" }
+            },
+            {
+                from: { table: "keys", column: "key_id" },
+                target: { table: "key_column", column: "key_id" }
+            },
+        ];
+
         // list of hopefully all SQL keywords in upper case
         this.sqlKeyWord = [
             "ABS",

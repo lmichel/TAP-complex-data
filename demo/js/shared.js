@@ -48,6 +48,14 @@ function removeClass(elemId,className){
  * Errored : btn-danger
 /*/
 
+function vizierToID(schema){
+    let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`","."];
+    for (let i=0;i<chars.length;i++){
+        schema = replaceAll(schema,chars[i],"");
+    }
+    return schema;
+}
+
 function disableButton(btnId){
     removeClass(btnId,"btn-primary");
     removeClass(btnId,"btn-success");

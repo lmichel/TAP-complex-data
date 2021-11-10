@@ -47,14 +47,6 @@ var ExtraDrawer ={
     }
 };
 
-function vizierToID(schema){
-    let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`","."];
-    for (let i=0;i<chars.length;i++){
-        schema = replaceAll(schema,chars[i],"");
-    }
-    return schema;
-}
-
 var TapTree = function(){
 
     /**

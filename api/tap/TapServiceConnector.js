@@ -5,6 +5,7 @@ var TapServiceConnector = (function() {
 
         this.api = api;
         this.tables = {};
+        this.joins = undefined;
 
         this.connector = {status: false, service: {"shortName":_shortname,"tapService":_serviceUrl}};
 
@@ -31,6 +32,7 @@ var TapServiceConnector = (function() {
 
     TapServiceConnector.prototype.selectSchema = async function(schema,cache=true){
         this.connector.service.schema = schema;
+        this.joins = undefined;
         if(this.connector.service.schemas[schema].tables !== undefined){
             this.tables = this.connector.service.schemas[schema].tables;
             for (let table in this.tables){
@@ -112,9 +114,12 @@ var TapServiceConnector = (function() {
     TapServiceConnector.prototype.getAllJoins = async function(){
         try {
             let schema  = this.connector.service.schema;
-            let request = 'SELECT tap_schema.keys.from_table, tap_schema.keys.target_table,tap_schema.keys.key_id'+
-                ' , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column FROM tap_schema.keys'+
-                ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id';
+            let request = 'SELECT tap_schema.keys.from_table, tap_schema.keys.target_table,tap_schema.keys.key_id' +
+                ' , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column \nFROM tap_schema.keys\n' +
+                ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id\n' +
+                'JOIN tap_schema.tables ON  tap_schema.keys.from_table = tap_schema.tables.table_name\n' +
+                'WHERE  tap_schema.tables.schema_name = \'' + schema + '\' OR  tap_schema.tables.schema_name = \'' + 
+                replaceAll(schema,'"',"") + '\'';
                 
             let query =await this.query(request);
             
@@ -127,6 +132,11 @@ var TapServiceConnector = (function() {
                     join.target = {table:unqualifyName(query.field_values[i][1],schema),column:query.field_values[i][4]};
                     joins.push(join);
                 }
+                // very few tap schema describes themself so we need to import extra data about it to browse it correctly
+                if(schema.toLowerCase() == "tap_schema"){
+                    joins = joins.concat(KnowledgeTank.tapSchemaJoins);
+                }
+                this.joins = joins;
                 return {"status":true,"all_joins":joins};
             }else{
                 return {"status":false,"error":{
@@ -230,24 +240,29 @@ var TapServiceConnector = (function() {
     };
 
     TapServiceConnector.prototype.buildObjectMap = async function() {
-        let allJoins = await this.getAllJoins();
-        if(allJoins.status){
-            allJoins = allJoins.all_joins;
-            let raw = this.buildRawJoinMap(allJoins);
-            let treeMap = this.buildJoinTreeMap(raw);
-
-            let map = {
-                "tables": this.tables, // setup in selectSchema
-                "map": treeMap
-            };
-            this.objectMap = map;
-            return {status:true,object_map:map};
-
-        } else{
-            return {"status":false,"error":{
-                "logs":allJoins.error.logs
-            }};
+        let allJoins;
+        if( this.joins === undefined){
+            allJoins = await this.getAllJoins();
+            if(allJoins.status){
+                allJoins = allJoins.all_joins;
+            }else{
+                return {"status":false,"error":{
+                    "logs":allJoins.error.logs
+                }};
+            }
+        }else {
+            allJoins = this.joins;
         }
+        
+        let raw = this.buildRawJoinMap(allJoins);
+        let treeMap = this.buildJoinTreeMap(raw);
+
+        let map = {
+            "tables": this.tables, // setup in selectSchema
+            "map": treeMap
+        };
+        this.objectMap = map;
+        return {status:true,object_map:map};
     };
 
     TapServiceConnector.prototype.getObjectMap = function(){
