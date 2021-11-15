@@ -748,6 +748,10 @@ function setupEventHandlers(){
             enableButton(btn.id);
         });
 
+        $("#resultpane").html("");
+        $("#controlPane").html("");
+        $("#rButtonPane").html("");
+
         return false;
 
     });

@@ -62,7 +62,7 @@ var TapTree = function(){
         this.short_name = api.getConnector().connector.service.shortName;
         this.treeID = tree.create_node("#",{
             "text":this.short_name,
-            "icon": "../images/database.png",
+            "icon": "./images/database.png",
             "a_attr":{
                 "title":"Double click to filter the visible tables"
             },
@@ -76,14 +76,14 @@ var TapTree = function(){
             schemas = schemas.schemas;
             let pos,icon,tap = false;
             for (let schema in schemas){
-                icon = "../images/baseCube.png";
+                icon = "./images/baseCube.png";
                 pos = "last";
                 if(schema.match(/TAP_SCHEMA/i) ) {
-                    icon = "../images/redCube.png";
+                    icon = "./images/redCube.png";
                     pos= "first";
                     tap = true;
                 } else if(schema.match(/ivoa/i) ) {
-                    icon =  "../images/greenCube.png";
+                    icon =  "./images/greenCube.png";
                     pos= tap ?1:"first";
                 }
 
@@ -108,7 +108,7 @@ var TapTree = function(){
             console.error(schemas);
         }
         ExtraDrawer.drawExtra(rootHolder,this.treeID,(id)=>{
-            $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='../images/info.png' title='Show metadata (Does not work with Vizier)'/>");
+            $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='./images/info.png' title='Show metadata (Does not work with Vizier)'/>");
             $("#" + id + "_meta").click(this.serviceMetaDataShowerFactory());
 
 
@@ -168,10 +168,10 @@ var TapTree = function(){
                 tableSafe = vizierToID(table);
                 if($("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_meta").length == 0){
                     $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
-                        "_meta' class='metadata' src='../images/info.png' title='Show metadata (Does not work with Vizier)'/>");
+                        "_meta' class='metadata' src='./images/info.png' title='Show metadata (Does not work with Vizier)'/>");
                     if(tables[table].type === "view"){
                         $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
-                            "_view' src='../images/viewer_23.png' title='this table is defined as a view query may be slower than usual ...'/>");
+                            "_view' src='./images/viewer_23.png' title='this table is defined as a view, query may be slower than usual ...'/>");
                         $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe +"_view" ).click(that.tableMetaDataShowerFactory(table));
                     }
                 }
