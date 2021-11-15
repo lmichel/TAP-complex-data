@@ -1,13 +1,20 @@
-"use strict";
-var VOTableTools = /** @class */ (function () {
-    function VOTableTools() {
-    }
+"use strict;";
+
+if (typeof jw === "undefined") {
+    //Jason's Wrench Core
+    var jw = {core:{}};
+}
+
+(function () {
+    jw.core.VOTableTools = function() {
+    };
+
     /**
      *
      * @param vObject : votable object
      * @returns : return data table 
      */
-    VOTableTools.votable2Rows = function (vObject) {
+    jw.core.VOTableTools.votable2Rows = function (vObject) {
         var contentText = "";
         contentText = vObject.responseText;
         var reData = [];
@@ -52,7 +59,6 @@ var VOTableTools = /** @class */ (function () {
         //console.log(reData);
         return reData;
     };
-
   
     /**
      *
@@ -62,7 +68,7 @@ var VOTableTools = /** @class */ (function () {
      * @param str The string to be changed / 要改变的字
      * @param changeStr Changed string / 改变后的字
      */
-    VOTableTools.changeString = function (allstr, start, end, str, changeStr) {
+    jw.core.VOTableTools.changeString = function (allstr, start, end, str, changeStr) {
         if (allstr.substring(start, end) == str) {
             return allstr.substring(0, start) + changeStr + allstr.substring(end + 1, allstr.length + 2);
         }
@@ -70,21 +76,23 @@ var VOTableTools = /** @class */ (function () {
             allstr;
         }
     };
+
     /***
      * Get the table with the data
      * @param content: the content of votable object.
      */
-    VOTableTools.content2Rows = function (content) {
+    jw.core.VOTableTools.content2Rows = function (content) {
         var p = new VOTableParser();
         var data = p.loadFile(content); //store the data(2-dimensional array) after query by url
         p.cleanMemory();
         return data; //name of field and data
     };
+
     /***
      * Get the name of field (get data)
      * @param vObject: votable object.
      */
-    VOTableTools.getField = function (vObject) {
+    jw.core.VOTableTools.getField = function (vObject) {
         var contentText = "";
         contentText = vObject.responseText;
         var p = new VOTableParser();
@@ -98,12 +106,13 @@ var VOTableTools = /** @class */ (function () {
         p.cleanMemory();
         return nameFields; //name of field and data
     };
+
     /***
        * Get the name of field
        * @param vObject: votable object.
        * @param content: the content of votable object.
        */
-    VOTableTools.genererField = function (QObject, contentText) {
+    jw.core.VOTableTools.genererField = function (QObject, contentText) {
         var method = contentText.indexOf("base64");
         var Field = [];
         if (method != -1) {
@@ -118,5 +127,4 @@ var VOTableTools = /** @class */ (function () {
         }
         return Field;
     };
-    return VOTableTools;
 }());
