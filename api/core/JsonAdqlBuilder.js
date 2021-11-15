@@ -407,6 +407,4 @@ if (typeof jw === "undefined") {
         }
         return {"status": true, "constraints":constraints};
     };
-
-    return JsonAdqlBuilder;
 })();
