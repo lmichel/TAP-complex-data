@@ -7,5 +7,6 @@ var jw = {
         ServiceConnector : undefined,
         ServiceRequest : undefined,
         VOTableTools : undefined,
-    }
+    },
+    widget:{}
 };
