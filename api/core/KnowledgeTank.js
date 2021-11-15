@@ -5,8 +5,8 @@ if (typeof jw === "undefined") {
     var jw = {};
 }
 
-(function(){
-    jw.KnowledgeTank = function(){
+jw.KnowledgeTank = (function(){
+    KnowledgeTank = function(){
         /**
          * Support [*] and [[0-9]+] operator at the end of both ucd and field name
          * if applied to field to field name then it describe how many ucds are allowed at most.
@@ -114,6 +114,14 @@ if (typeof jw === "undefined") {
                 from: { table: "keys", column: "key_id" },
                 target: { table: "key_column", column: "key_id" }
             },
+            {
+                from: { table: "tables", column: "table_name" },
+                target: { table: "keys", column: "from_table" }
+            },
+            /*{ // this type of double joins aren't supported yet
+                from: { table: "tables", column: "table_name" },
+                target: { table: "keys", column: "target_table" }
+            },*/
         ];
 
         // list of hopefully all SQL keywords in upper case
@@ -148,7 +156,7 @@ if (typeof jw === "undefined") {
         ];
     };
 
-    jw.KnowledgeTank.prototype.setPresetValue = function(AHList){
+    KnowledgeTank.prototype.setPresetValue = function(AHList){
         let preset;
         for (let i =0;i<AHList.length;i++){
             preset = this.presetValues[AHList[i].db_name + "." + AHList[i].column_name];
@@ -160,7 +168,7 @@ if (typeof jw === "undefined") {
         return {"status":true,"AHList":AHList};
     };
 
-    jw.KnowledgeTank.prototype.getDescriptors = function(){
+    KnowledgeTank.prototype.getDescriptors = function(){
         return {"status":true,"descriptors": this.serviceDescriptors};
     };
 
@@ -168,7 +176,7 @@ if (typeof jw === "undefined") {
      * will select AH based on criteria described in the ucdStorage object.
      * @param {Array} AHList list of Attributes handlers to select from
      */
-    jw.KnowledgeTank.prototype.selectAH = function(AHList){
+    KnowledgeTank.prototype.selectAH = function(AHList){
         let selected = {};
         let j,i,maxSelect,curr = 0,ucd,maxField,counter,ucds;
 
@@ -228,7 +236,7 @@ if (typeof jw === "undefined") {
      * will select AH based on keywords described in the utypeKeyword object.
      * @param {Array} AHList list of Attributes handlers to select from
      */
-    jw.KnowledgeTank.prototype.selectAHByUtypes = function(AHList){
+    KnowledgeTank.prototype.selectAHByUtypes = function(AHList){
         let selected = [],i,j;
         for (i=0;i<AHList.length;i++){
             for(j=0;j<this.utypeKeyword.length;j++){
@@ -239,5 +247,7 @@ if (typeof jw === "undefined") {
         }
         return {"status" : true,"selected":Array.from(new Set(selected))};
     };
+
+    return new KnowledgeTank();
     
 })();

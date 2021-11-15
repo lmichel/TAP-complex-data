@@ -45,7 +45,7 @@ class MyLogger extends Logger {
 }
 
 async function setupEventHandlers(){
-    let api = new TapApi();
+    let api = new jw.Api();
     
     await api.connectService("//dc.zah.uni-heidelberg.de/tap/sync","Gavo");
 

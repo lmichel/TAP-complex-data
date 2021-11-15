@@ -1,13 +1,8 @@
 "use strict;";
 
-if (typeof jw === "undefined") {
-    //Jill Will Core
-    var jw = {core:{}};
-}
-
 (function() {
     jw.core.ServiceConnector = function(_serviceUrl, _shortname,api){
-        this.tapService = new TapService(_serviceUrl);
+        this.tapService = new jw.core.ServiceRequest(_serviceUrl);
 
         this.api = api;
         this.tables = {};
@@ -15,7 +10,7 @@ if (typeof jw === "undefined") {
 
         this.connector = {status: false, service: {"shortName":_shortname,"tapService":_serviceUrl}};
 
-        this.attributsHandler = AttributeHolder(this);
+        this.attributsHandler =jw.core.AttributeHolder(this);
     };
 
     jw.core.ServiceConnector.prototype.testService = async function (){
@@ -140,7 +135,7 @@ if (typeof jw === "undefined") {
                 }
                 // very few tap schema describes themself so we need to import extra data about it to browse it correctly
                 if(schema.toLowerCase() == "tap_schema"){
-                    joins = joins.concat(KnowledgeTank.tapSchemaJoins);
+                    joins = joins.concat(jw.KnowledgeTank.tapSchemaJoins);
                 }
                 this.joins = joins;
                 return {"status":true,"all_joins":joins};

@@ -1,10 +1,5 @@
 "use strict;";
 
-if (typeof jw === "undefined") {
-    //Jeff White Core
-    var jw = {core:{}};
-}
-
 (function () {
     jw.core.ServiceRequest = function (url) {
         this.url = url;
@@ -63,8 +58,8 @@ if (typeof jw === "undefined") {
             }
 
             if (output.status === 200){
-                dataTable = VOTableTools.votable2Rows(output);
-                let fields = VOTableTools.genererField(output,output.responseText);
+                dataTable = jw.core.VOTableTools.votable2Rows(output);
+                let fields = jw.core.VOTableTools.genererField(output,output.responseText);
                 let nbCols = fields.length;
                 let singleArrayValue = [];
                 let doubleArrayValue = [];

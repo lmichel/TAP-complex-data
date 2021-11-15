@@ -1,10 +1,5 @@
 "use strict;";
 
-if (typeof jw === "undefined") {
-    //John Walker Core
-    var jw = {core:{}};
-}
-
 (function(){
 
     jw.core.JsonAdqlBuilder = function(objectMap,rootTable,schema){
@@ -272,10 +267,10 @@ if (typeof jw === "undefined") {
 
         for (let i=0;i<joints.length;i++){
             let joint = this.adqlJsonMap.joints[joints[i]];
-            adqlJoints += " JOIN " + this.adqlJsonMap.scheme + "." + joints[i] + " ON ( ";
+            adqlJoints += " JOIN " + jw.core.JsonAdqlBuilder.safeQualifier([this.adqlJsonMap.scheme, joints[i]]).qualified + " ON ( ";
             for(j=0;j<joint.keys.length;j++){
-                adqlJoints += this.adqlJsonMap.scheme + "." + joint.parentNode + "." + joint.keys[j].from + "=" +
-                this.adqlJsonMap.scheme + "." + joints[i] + "." + joint.keys[j].target + " AND ";
+                adqlJoints += jw.core.JsonAdqlBuilder.safeQualifier([this.adqlJsonMap.scheme , joint.parentNode ,joint.keys[j].from]).qualified + "=" +
+                jw.core.JsonAdqlBuilder.safeQualifier([this.adqlJsonMap.scheme,joints[i],joint.keys[j].target]).qualified + " AND ";
             }
             adqlJoints = adqlJoints.substring(0,adqlJoints.length-5);
             adqlJoints += " ) \n";
@@ -285,7 +280,7 @@ if (typeof jw === "undefined") {
 
     };
 
-    jw.coreJsonAdqlBuilder.prototype.getActiveJoints = function(table){
+    jw.core.JsonAdqlBuilder.prototype.getActiveJoints = function(table){
         let whitelist = this.getSubTables(table);
         
         if(whitelist.status){
@@ -330,7 +325,8 @@ if (typeof jw === "undefined") {
                 if(this.adqlJsonMap.joints[table].keys.every((val)=>keys.includes(val.target))){
                     adqlConstraints += "( ";
                     for (let key in joinKeyVal){
-                        adqlConstraints +=this.adqlJsonMap.scheme + "." + table + "." + key + "=" + joinKeyVal[key] + " AND ";
+                        adqlConstraints += jw.core.JsonAdqlBuilder.safeQualifier([this.adqlJsonMap.scheme , table ,key]).qualified + 
+                        "=" + joinKeyVal[key] + " AND ";
                     }
                     adqlConstraints = adqlConstraints.substring(0,adqlConstraints.length-5) + " )";
                 } else {
@@ -400,6 +396,9 @@ if (typeof jw === "undefined") {
         return {"status": true, "constraint":`${constraint}`};
     };
 
+    /**
+     * return a map of all constraint where the keys are the unqualified name of the table
+     */
     jw.core.JsonAdqlBuilder.prototype.getAllTablesConstraints = function(){
         let constraints = {};
         for(let table in this.adqlJsonMap.conditions){
@@ -407,4 +406,30 @@ if (typeof jw === "undefined") {
         }
         return {"status": true, "constraints":constraints};
     };
+
+    /**This function take a list of string and then join them with `.` ensuring each componnent is quoted if necessery
+     * this method is designed to ease qualifying table names and column names
+     * 
+     * @param {[String]} list 
+     * @returns
+     */
+    jw.core.JsonAdqlBuilder.safeQualifier=function(list){
+        let merged = "";
+        for (let j=0;j<list.length;j++){
+            if (// is list[j] a regular name or does it contains special characters or is it a keyword
+                (!list[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || jw.KnowledgeTank.sqlKeyWord.includes(list[j].toUpperCase()) ) &&
+                // not quoting *
+                list[j] !== "*" &&
+                // checking if it is already quoted
+                !(list[j][0] == '"' && list[j].endsWith('"'))
+            ) {
+                merged += '."' + list[j] + '"';
+            }else  {
+                merged += "." + list[j];
+            }
+        }
+       
+        return {status:true,qualified: merged.substring(1)};
+    };
+
 })();

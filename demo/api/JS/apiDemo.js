@@ -99,14 +99,15 @@ async function createButton(api) {
     let buttons = "";
     let tapButton = [];
     let map = (await api.getObjectMap()).object_map;
+    let safe;
 
     for (let key in map.tables) {
-
+        safe = vizierToID(key);
         buttons = "<span>" + "<button type='button' class=\"btn btn-primary\" " +
-            "id='bbb" + key + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">" +
+            "id='bbb" + safe + "' value='" + key + "' name='Cbuttons' style=\"margin-top: 7px\">" +
             "Click to select " + key + " constraints</button>" +
-            "<button  type='button' class=\"btn btn-primary\" id='" + key + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
-            " <input type='text' class='form form-control' id='txt" + key + "' value='' placeholder='Enter condition' name='Cinputs'> </span> <hr>"
+            "<button  type='button' class=\"btn btn-primary\" id='" + safe + "' value='" + key + "' style=\"margin-top: 7px\">Click to Join " + key + " constraint</button> " +
+            " <input type='text' class='form form-control' id='txt" + safe + "' value='' placeholder='Enter condition' name='Cinputs'> </span> <hr>";
         
         tapButton.push(buttons);
         
@@ -115,14 +116,14 @@ async function createButton(api) {
     $("#loadButton").append(tapButton);
 
     for (let key in map.tables) {
-        bindClickAsyncEvent("bbb" + key,async () => {
+        bindClickAsyncEvent("bbb" + safe,async () => {
             await selectConstraints(key, "txt" + key, api);
             $('#myModal').modal({"backdrop" : "static"});
             return true;
         });
 
-        bindClickAsyncEvent(key, async () => {
-            if($("#txt" + key).val().length > 1){
+        bindClickAsyncEvent(safe, async () => {
+            if($("#txt" + safe).val().length > 1){
                 let constraint = $("#txt" + key).val().trim();
 
                 /*/ constraint cleanup /*/
@@ -201,15 +202,16 @@ async function createHandlersButton(api){
 async function createTableIDsButton(api){
     let buttons = "";
     let tapButton = [];
+    let safe;
 
     for (let key in api.getObjectMap().object_map.tables) {
-
+        safe = vizierToID(key);
         buttons ="<button type='button' class=\"btn btn-primary\" " +
-            "id='btnSeeQueryID" + key + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
+            "id='btnSeeQueryID" + safe + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
             "See Table Query for " + key + "</button>" +
-            "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryID" + key + "' value='" + key + 
+            "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryID" + safe + "' value='" + key + 
             "' style=\"margin-top: 7px;width: 100%;\">Run Table Query for " + key + "</button> " +
-            " <input type='text' class='form form-control' id='txtJointValID" + key + "' value='' placeholder='value for joint key'> <hr>";
+            " <input type='text' class='form form-control' id='txtJointValID" + safe + "' value='' placeholder='value for joint key'> <hr>";
         
         tapButton.push(buttons);
         
@@ -217,16 +219,17 @@ async function createTableIDsButton(api){
     $("#loadTableQueryIds").append(tapButton);
 
     for (let key in  api.getObjectMap().object_map.tables) {
-        bindClickAsyncEvent("btnSeeQueryID" + key, async () =>{
-            let val = $("#txtJointValID" + key).val().trim();
+        safe = vizierToID(key);
+        bindClickAsyncEvent("btnSeeQueryID" + safe, async () =>{
+            let val = $("#txtJointValID" + safe).val().trim();
             let query = await api.getTableQuery(key, val ==="" ? undefined : val);
             display(query.status,"getStatus");
             display(query.query,"getJsonAll");
             return query.status;
         });
         
-        bindClickAsyncEvent("btnRunQueryID" + key, async () =>{
-            let val = $("#txtJointValID" + key).val().trim();
+        bindClickAsyncEvent("btnRunQueryID" + safe, async () =>{
+            let val = $("#txtJointValID" + safe).val().trim();
             let query = await api.getTableSelectedField(key, val ==="" ? undefined : val);
             display(query.status,"getStatus");
             display(JSON.stringify(query.field_values,undefined,4),"getJsonAll");
@@ -239,15 +242,16 @@ async function createTableIDsButton(api){
 async function createTableFieldsButton(api){
     let buttons = "";
     let tapButton = [];
+    let safe;
 
     for (let key in api.getObjectMap().object_map.tables) {
-
+        safe = vizierToID(key);
         buttons ="<button type='button' class=\"btn btn-primary\" " +
-            "id='btnSeeQueryField" + key + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
+            "id='btnSeeQueryField" + safe + "' value='" + key + "' style=\"margin-top: 7px;width: 100%;\">" +
             "See Table Query for " + key + "</button>" +
-            "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryField" + key + "' value='" + key + 
+            "<button  type='button' class=\"btn btn-primary\" id='btnRunQueryField" + safe + "' value='" + key + 
             "' style=\"margin-top: 7px;width: 100%;\">Run Table Query for " + key + "</button> " +
-            " <input type='text' class='form form-control' id='txtJointValField" + key + "' value='' placeholder='value for joint key'> <hr>"
+            " <input type='text' class='form form-control' id='txtJointValField" + safe + "' value='' placeholder='value for joint key'> <hr>";
         
         tapButton.push(buttons);
         
@@ -255,17 +259,18 @@ async function createTableFieldsButton(api){
     $("#loadTableFields").append(tapButton);
 
     for (let key in api.getObjectMap().object_map.tables) {
+        safe = vizierToID(key);
         
-        bindClickAsyncEvent("btnSeeQueryField" + key, async () =>{
-            let val = $("#txtJointValField" + key).val().trim();
+        bindClickAsyncEvent("btnSeeQueryField" + safe, async () =>{
+            let val = $("#txtJointValField" + safe).val().trim();
             let query = await api.getTableFieldsQuery(key, val ==="" ? undefined : val);
             display(query.status,"getStatus");
             display(query.query,"getJsonAll");
             return query.status;
         });
         
-        bindClickAsyncEvent("btnRunQueryField" + key, async () =>{
-            let val = $("#txtJointValField" + key).val().trim();
+        bindClickAsyncEvent("btnRunQueryField" + safe, async () =>{
+            let val = $("#txtJointValField" + safe).val().trim();
             let query = await api.getTableFields(key, val ==="" ? undefined : val);
             display(query.status,"getStatus");
             display(JSON.stringify(query.field_values,undefined,4),"getJsonAll");
@@ -279,6 +284,10 @@ function tableHandlerFactory(table,api){
     return async () =>{
         let tableCo = await api.setRootTable(table);
         display(tableCo, "getJsonAll");
+        $("#loadButton").html("");
+        $("#loadButtonsHandler").html("");
+        $("#loadTableQueryIds").html("");
+
         if (tableCo.status){
 
             enableButton("btnGetObjectMap");
@@ -311,6 +320,10 @@ function schemasHandlerFactory(schema,api){
     return async () => {
         let tableHolder = $("#tableList");
         tableHolder.html("");
+
+        $("#loadButton").html("");
+        $("#loadButtonsHandler").html("");
+        $("#loadTableQueryIds").html("");
 
         disableButton("btnGetObjectMap");
         disableButton("btnGetJoinTable");
@@ -350,7 +363,7 @@ function schemasHandlerFactory(schema,api){
 }
 
 
-let api = new TapApi();
+let api = new jw.Api();
 
 /*/ Trigers function for radio button /*/
 
@@ -358,6 +371,11 @@ function OnRadioChange(radio) {
     syncIt(async ()=>{
         $("#tableList").html("");
         $("#schemas").html("");
+
+        $("#loadButton").html("");
+        $("#loadButtonsHandler").html("");
+        $("#loadTableQueryIds").html("");
+
         disableButton("btnApiDisconnect");
         disableButton("btnGetObjectMap");
         disableButton("btnGetJoinTable");
@@ -380,7 +398,7 @@ function OnRadioChange(radio) {
             enableButton(lastLab.id);
         }
 
-        let params = KnowledgeTank.getDescriptors().descriptors[radio.value];
+        let params = jw.KnowledgeTank.getDescriptors().descriptors[radio.value];
         let connect = await api.connectService(params.tapService,params.shortName);
         display(connect,"getJsonAll");
         if(connect.status){
@@ -445,8 +463,9 @@ function setupEventHandlers(){
 
         enableButton("btnApiConnect");
 
-        $("loadButton").html("");
-        $("loadButtonsHandler").html("");
+        $("#loadButton").html("");
+        $("#loadButtonsHandler").html("");
+        $("#loadTableQueryIds").html("");
 
         return false;
     });
@@ -570,7 +589,7 @@ function setupEventHandlers(){
         let AHS = await api.getTableAttributeHandlers(api.getConnector().connector.service.table);
         if(AHS.status){
             display(AHS.attribute_handlers,"getJsonAll");
-            AHS = KnowledgeTank.selectAH(AHS.attribute_handlers);
+            AHS = jw.KnowledgeTank.selectAH(AHS.attribute_handlers);
             display(AHS.selected,"getJsonAll");
             display("true","getStatus");
             return true;

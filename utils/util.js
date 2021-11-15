@@ -152,7 +152,7 @@ if (!String.prototype.quotedTableName) {
            }
        }
        for (var j = 0; j < tbl.length; j++) {
-           if ((!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || KnowledgeTank.sqlKeyWord.includes(tbl[j].toUpperCase()) ) && tbl[j] !== "*") {
+           if ((!tbl[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || jw.KnowledgeTank.sqlKeyWord.includes(tbl[j].toUpperCase()) ) && tbl[j] !== "*") {
                tbl[j] = '"' + tbl[j] + '"';
            }
        }

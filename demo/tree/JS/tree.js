@@ -51,7 +51,7 @@ var TapTree = function(){
 
     /**
      * 
-     * @param {TapApi} api 
+     * @param {jw.Api} api 
      */
     function TapTree(api,tree,rootHolder,meta={}){
         this.api = api;
@@ -225,7 +225,7 @@ var TapTreeList = function(){
     };
 
     /**
-     * @param {TapApi} tap 
+     * @param {jw.Api} tap 
      */
     TapTreeList.prototype.contains = function(tap){
         if(!tap.getConnector().status){
@@ -235,7 +235,7 @@ var TapTreeList = function(){
     };
 
     /**
-     * @param {TapApi} tap 
+     * @param {jw.Api} tap 
      */
     TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
@@ -256,8 +256,8 @@ function OnRadioChange(radio) {
     syncIt(async ()=>{
         if(isEnable("label_" + radio.value)){
             disableButton("label_" + radio.value);
-            let api = new TapApi();
-            let params = KnowledgeTank.getDescriptors().descriptors[radio.value];
+            let api = new jw.Api();
+            let params = jw.KnowledgeTank.getDescriptors().descriptors[radio.value];
             let connect = await api.connectService(params.tapService,radio.value);
             if(connect.status){
                 tree.append(api,params);

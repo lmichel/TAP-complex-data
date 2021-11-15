@@ -1,10 +1,5 @@
 "use strict;";
 
-if (typeof jw === "undefined") {
-    //Join Walker Core
-    var jw = {core:{}};
-}
-
 jw.core.AttributeHolder = function(queryAble){
 
     let AHTemplate = {
@@ -35,8 +30,7 @@ jw.core.AttributeHolder = function(queryAble){
             let adql = Holder.getAHAdql(table,schema);
             let queryResult = await queryAble.query(adql);
             if(queryResult.status){
-                let data = queryResultToDoubleArray(queryResult.answer);
-                cache[fullName] = doubleArrayToAHList(data);
+                cache[fullName] = doubleArrayToAHList(queryResult.field_values);
             } else {
                 return {"status":false,"error":{
                     "logs":"Query failed:\n " + queryResult.error.logs,
@@ -77,8 +71,7 @@ jw.core.AttributeHolder = function(queryAble){
         fullNames = fuzzyNames;
 
         if(queryResult.status){
-            let data = queryResultToDoubleArray(queryResult.answer);
-            let AHList = doubleArrayToAHList(data);
+            let AHList = doubleArrayToAHList(queryResult.field_values);
             for (let i=0;i<AHList.length;i++){
                 if(ahMap[AHList[i].table_name.toLowerCase()]!==undefined){
                     ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);
@@ -141,25 +134,6 @@ jw.core.AttributeHolder = function(queryAble){
         " WHERE TAP_SCHEMA.columns.table_name IN ( " + full.join(" , ") + " ) ";
     };
 
-    function queryResultToDoubleArray(queryResult){
-        let dataTable = VOTableTools.votable2Rows(queryResult);
-        let nbCols = VOTableTools.genererField(queryResult, queryResult.responseText).length;
-
-        let singleArrayValue =[], doubleArrayValue=[];
-
-        let k;
-        for (let rowN = 0; rowN < dataTable.length; rowN += nbCols) {
-            for (k = rowN; k < dataTable.length; k++) {
-                singleArrayValue.push(dataTable[k]);
-            }
-            doubleArrayValue.push(singleArrayValue);
-
-            singleArrayValue = [];
-        }
-
-        return doubleArrayValue;
-    }
-
     function doubleArrayToAHList(data){
         let AHList = [];
         let AH;
@@ -183,7 +157,6 @@ jw.core.AttributeHolder = function(queryAble){
     Holder.protected = {
         "cache":cache,
         "AHTemplate":AHTemplate,
-        "queryResultToDoubleArray":queryResultToDoubleArray,
         "doubleArrayToAHList":doubleArrayToAHList
     };
 

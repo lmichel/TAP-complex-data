@@ -160,7 +160,7 @@ function bindTableEvent(api, tableID,data){
     }
 }
 
-let api = new TapApi();
+let api = new jw.Api();
 
 /*/ Steup of Event handlers functions /*/
 
@@ -169,7 +169,7 @@ function setupEventHandlers(){
     bindClickAsyncEvent("btnApiConnect",async () => {
         
         if (isEnable("btnApiConnect")) {
-            let params = KnowledgeTank.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
+            let params = jw.KnowledgeTank.getDescriptors().descriptors[$("input:radio[name=radio]:checked")[0].value];
             params.shortName = $("input:radio[name=radio]:checked")[0].value;
             console.log("yeeee");
             let connect = await api.connectService(params.tapService,params.shortName);

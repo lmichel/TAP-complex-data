@@ -1,12 +1,7 @@
 "use strict;";
 
-if (typeof jw === "undefined") {
-    //Jet Washer
-    var jw = {};
-}
-
 (()=>{
-    jw.api = function() {
+    jw.Api = function() {
         this.tapServiceConnector = undefined;
         this.jsonAdqlBuilder = undefined;
         this.connectLevel = 0;
@@ -20,7 +15,7 @@ if (typeof jw === "undefined") {
      * @param shortName (String) The Shortname of database
      * 
      */
-    jw.api.prototype.initConnetor =function (tapService, schema, table, shortName,initJson){
+    jw.Api.prototype.initConnetor =function (tapService, schema, table, shortName,initJson){
         initJson.status = 'OK';
         initJson.service.tapService = tapService;
         initJson.service.schema = schema;
@@ -29,7 +24,7 @@ if (typeof jw === "undefined") {
         initJson.message = "Active TAP : " + shortName;
     };
 
-    jw.api.prototype.connectService = async function(tapService, shortName){
+    jw.Api.prototype.connectService = async function(tapService, shortName){
         if (shortName === undefined){
             shortName = "Unknown Tap";
         }
@@ -46,7 +41,7 @@ if (typeof jw === "undefined") {
                 tapService += "/sync/";
             }
         }
-        this.tapServiceConnector = new TapServiceConnector(tapService, shortName,this);
+        this.tapServiceConnector = new jw.core.ServiceConnector(tapService, shortName,this);
         let test = await this.tapServiceConnector.testService();
         if(test.status){
             this.connectLevel = 1;
@@ -57,7 +52,7 @@ if (typeof jw === "undefined") {
         return test;
     };
 
-    jw.api.prototype.selectSchema = async function(schema){
+    jw.Api.prototype.selectSchema = async function(schema){
         if(this.connectLevel>0){
             schema = schema.quotedTableName().qualifiedName.toString();
             if(Object.keys(this.tapServiceConnector.getConnector().service.schemas).includes(schema)){
@@ -82,14 +77,14 @@ if (typeof jw === "undefined") {
         }
     };
 
-    jw.api.prototype.setRootTable = async function(table){
+    jw.Api.prototype.setRootTable = async function(table){
         if(this.connectLevel>1){
 
             if(Object.keys(this.tapServiceConnector.getTables()).includes(table)){
                 let test = await this.tapServiceConnector.selectRootTable(table);
                 if(test.status){
                     this.connectLevel = 3;
-                    this.jsonAdqlBuilder = new JsonAdqlBuilder(this.tapServiceConnector.getObjectMap().object_map,table,this.getConnector().connector.service.schema);
+                    this.jsonAdqlBuilder = new jw.core.JsonAdqlBuilder(this.tapServiceConnector.getObjectMap().object_map,table,this.getConnector().connector.service.schema);
                 } else {
                     this.connectLevel = 2;
                 }
@@ -110,14 +105,14 @@ if (typeof jw === "undefined") {
         }
     };
 
-    jw.api.prototype.disconnect = function () {
+    jw.Api.prototype.disconnect = function () {
         this.connectLevel = 0;
         delete this.tapServiceConnector;
         delete this.jsonAdqlBuilder;
         return {"status":true};
     };
 
-    jw.api.prototype.getConnector = function () {
+    jw.Api.prototype.getConnector = function () {
         if(this.tapServiceConnector === undefined || this.tapServiceConnector.getConnector()===undefined){
             return {"status" : false , "error":{"logs" :"No active TAP connection" } };
         }else {
@@ -126,7 +121,7 @@ if (typeof jw === "undefined") {
 
     };
 
-    jw.api.prototype.getObjectMap = function () {
+    jw.Api.prototype.getObjectMap = function () {
         let objectMap = {};
         if (this.connectLevel==3) {
             let map = this.tapServiceConnector.getObjectMap();
@@ -152,7 +147,7 @@ if (typeof jw === "undefined") {
      * 
      * @param {String} baseTable Table from which joined table are searched 
      */
-    jw.api.prototype.getJoinedTables = function (baseTable) {
+    jw.Api.prototype.getJoinedTables = function (baseTable) {
         let jsonContaintJoinTable = {};
         if (this.connectLevel==3) {
             
@@ -167,7 +162,7 @@ if (typeof jw === "undefined") {
         return jsonContaintJoinTable;
     };
 
-    jw.api.prototype.getActiveJoints = function(table){
+    jw.Api.prototype.getActiveJoints = function(table){
         if (this.connectLevel==3) {
             return this.jsonAdqlBuilder.getActiveJoints(table);
         } else {
@@ -178,32 +173,32 @@ if (typeof jw === "undefined") {
     /**
      * DEPRACTED use `getTableFields`
      */
-    jw.api.prototype.getRootFields = async function () {
+    jw.Api.prototype.getRootFields = async function () {
         return this.getTableFields();
     };
 
     /**
      * DEPRACTED use `getTableFieldsQuery`
      */
-    jw.api.prototype.getRootFieldsQuery = async function(){
+    jw.Api.prototype.getRootFieldsQuery = async function(){
         return this.getTableFieldsQuery();
     };
 
     /**
      * DEPRACTED use `getTableSelectedField`
      */
-    jw.api.prototype.getRootQueryIds = async function () {
+    jw.Api.prototype.getRootQueryIds = async function () {
         return this.getTableSelectedField();
     };
 
     /**
      * DEPRACTED use `getTableQuery`
      */
-    jw.api.prototype.getRootQuery = async function () {
+    jw.Api.prototype.getRootQuery = async function () {
         return await this.getTableQuery();
     };
 
-    jw.api.prototype.query = async function(query){
+    jw.Api.prototype.query = async function(query){
         if(this.connectLevel==3){
             return this.tapServiceConnector.query(query);
         } else {
@@ -216,7 +211,7 @@ if (typeof jw === "undefined") {
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.api.prototype.getTableQuery = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableQuery = async function(table,joinKeyVal){
         if(this.connectLevel==3){
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -230,11 +225,10 @@ if (typeof jw === "undefined") {
             let schema = this.tapServiceConnector.connector.service.schema;
             schema = schema.quotedTableName().qualifiedName;
 
-            let formatTableName = schema + "." + table;
-            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+            let formatTableName = this.safeQualifier([schema ,table]).qualified;
 
             adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit + " ":"") + allField;
-            adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
+            adql += '\n' + " FROM  " + formatTableName + "\n";
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
 
@@ -249,7 +243,7 @@ if (typeof jw === "undefined") {
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.api.prototype.getTableSelectedField = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableSelectedField = async function(table,joinKeyVal){
         if (this.connectLevel==3) {
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -277,7 +271,7 @@ if (typeof jw === "undefined") {
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.api.prototype.getTableFieldsQuery = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableFieldsQuery = async function(table,joinKeyVal){
         if(this.connectLevel==3){
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -292,11 +286,10 @@ if (typeof jw === "undefined") {
             let schema = this.tapServiceConnector.connector.service.schema;
             schema = schema.quotedTableName().qualifiedName;
 
-            let formatTableName = schema + "." + table;
-            let correctTableNameFormat = formatTableName.quotedTableName().qualifiedName;
+            let formatTableName = this.safeQualifier([schema ,table]).qualified;
 
             adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit + " ":"") + allField;
-            adql += '\n' + " FROM  " + correctTableNameFormat + "\n";
+            adql += '\n' + " FROM  " + formatTableName + "\n";
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
 
@@ -311,7 +304,7 @@ if (typeof jw === "undefined") {
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.api.prototype.getTableFields = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableFields = async function(table,joinKeyVal){
         if (this.connectLevel==3) {
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -337,7 +330,7 @@ if (typeof jw === "undefined") {
      *@param {string} table :  the name of table you want to remove the contraint associeted with
     * @return {*} {status: true|false, "error?": {}}
     **/
-    jw.api.prototype.resetTableConstraint = function (table) {
+    jw.Api.prototype.resetTableConstraint = function (table) {
         if(this.connectLevel==3){
             return this.jsonAdqlBuilder.removeTableConstraints(table);
         }else {
@@ -348,7 +341,7 @@ if (typeof jw === "undefined") {
     /**
     * @return {*} {status: true|false, "error?": {}}
     **/
-    jw.api.prototype.resetAllTableConstraint = function () {
+    jw.Api.prototype.resetAllTableConstraint = function () {
         if(this.connectLevel==3){
             return this.jsonAdqlBuilder.removeAllTableConstraints();
         }else {
@@ -360,7 +353,7 @@ if (typeof jw === "undefined") {
      * @param {*} table : String the name of table you want get handlerAttribut associeted with
      * @return {*} : Json the json containing all handler Attribut of the table as an array stored in the `attribute_handlers` field
      * */
-    jw.api.prototype.getTableAttributeHandlers = function (table) {
+    jw.Api.prototype.getTableAttributeHandlers = function (table) {
         
         if(this.connectLevel>1){
             let connector = this.getConnector();
@@ -375,7 +368,7 @@ if (typeof jw === "undefined") {
      * @return {*} : Json the json containing all handler Attribut of the table as a map stored in the `attribute_handlers` field 
      * the map uses the full names as keys the field `name_map` constains a map fromp short names to full names.
      * */
-    jw.api.prototype.getTablesAttributeHandlers = function (tables) {
+    jw.Api.prototype.getTablesAttributeHandlers = function (tables) {
         if(this.connectLevel>1){
             let connector = this.getConnector();
             return this.tapServiceConnector.attributsHandler.getTablesAttributeHandlers(tables, connector.connector.service.schema);
@@ -390,7 +383,7 @@ if (typeof jw === "undefined") {
      * unless checkNames is set to false in this case the method is synchronous and no check is done on fieldName, no error are returned if table is unknown
      * note that other types of errors can still be returned
      */
-    jw.api.prototype.selectField = async function(fieldName,table,checkNames){
+    jw.Api.prototype.selectField = async function(fieldName,table,checkNames){
         if(checkNames === undefined){
             checkNames = true;
         }
@@ -472,7 +465,7 @@ if (typeof jw === "undefined") {
     /**add the wanted fields to the selection of fields to query data from
      * handle non existing fields and table
      */
-    jw.api.prototype.unselectField = function(fieldName,table){
+    jw.Api.prototype.unselectField = function(fieldName,table){
         if(table === undefined){
             return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
         }
@@ -492,7 +485,7 @@ if (typeof jw === "undefined") {
         return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
     };
 
-    jw.api.prototype.unselectAllFields = function(table){
+    jw.Api.prototype.unselectAllFields = function(table){
         let obj = this.getObjectMap();
         if(obj.status){
             obj = obj.object_map;
@@ -511,7 +504,7 @@ if (typeof jw === "undefined") {
      * @param {*} table the name of table you want get all selected columns of it
      * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
      */
-    jw.api.prototype.getSelectedFields = async function (table){
+    jw.Api.prototype.getSelectedFields = async function (table){
         if(this.connectLevel <3){
             return {"status":false,"error":{"logs":"No Tap service conneted","params":{"table":table}}};
         }
@@ -528,9 +521,9 @@ if (typeof jw === "undefined") {
         fields = fields.concat(this.jsonAdqlBuilder.getJoinKeys(table).keys);
         let handler = await this.getTableAttributeHandlers(table);
         if(handler.status){
-            let AH = KnowledgeTank.selectAH(handler.attribute_handlers).selected;
+            let AH = jw.KnowledgeTank.selectAH(handler.attribute_handlers).selected;
             if(AH.length<1){ //there is no ucd set or no good field has been found 
-                AH = KnowledgeTank.selectAHByUtypes(handler.attribute_handlers).selected;   
+                AH = jw.KnowledgeTank.selectAHByUtypes(handler.attribute_handlers).selected;   
             }
             if(AH.length<1){//there is no Utypes set or no good field has been found 
                 let m = Math.min(3,handler.attribute_handlers.length);
@@ -556,7 +549,7 @@ if (typeof jw === "undefined") {
      * @param {*} table the table name of the table which you want all fields that are use in joins
      * @returns {*} {"status": true|false,"error?":{},"keys?":[]}
      */
-    jw.api.prototype.getJoinKeys = function(table){
+    jw.Api.prototype.getJoinKeys = function(table){
         if(this.connectLevel==3){
             return this.jsonAdqlBuilder.getJoinKeys(table);
         } else {
@@ -570,7 +563,7 @@ if (typeof jw === "undefined") {
      * @param {String} table  the name of table you want get all columns in it
      * @returns {*} {"status": true|false,"error?":{},"fields?":[]}
      */
-    jw.api.prototype.getAllTableFields = async function (table){
+    jw.Api.prototype.getAllTableFields = async function (table){
         if(this.connectLevel>1){
             let columns = [];
             let jsonField = (await this.getTableAttributeHandlers(table)).attribute_handlers;
@@ -591,13 +584,13 @@ if (typeof jw === "undefined") {
      * @param {*} columns columns of the table `table`
      * @returns {string}
      */
-    jw.api.prototype.formatColNames = function(table,columns){
+    jw.Api.prototype.formatColNames = function(table,columns){
         let allField ="";
         let schema;
         schema = this.getConnector().connector.service.schema;
         
         for(let i=0;i<columns.length; i++){
-            allField +=(schema+'.'+table+'.'+columns[i]).quotedTableName().qualifiedName+" , ";
+            allField += this.safeQualifier([schema,table,columns[i]]).qualified +" , ";
 
             if(schema==="dbo"){
                 // just for CaomMembers tables because request lenth is limited
@@ -629,7 +622,7 @@ if (typeof jw === "undefined") {
      * @param {string} constraint an ADQL constraint (to be put after a WHERE: no aggregation)
      * @returns {*} {"status": true|false,"error?":{}}
      */
-    jw.api.prototype.setTableConstraint = function(table, constraint){
+    jw.Api.prototype.setTableConstraint = function(table, constraint){
         if (this.connectLevel==3) {
 
             constraint = constraint.trim();
@@ -646,7 +639,7 @@ if (typeof jw === "undefined") {
      * @param {*} table the table name of which you want to get the constraint
      * @returns {*} {"status": true|false,"error?":{},"constraint?":string}
      */
-    jw.api.prototype.getTableConstraint = function(table){
+    jw.Api.prototype.getTableConstraint = function(table){
         if (this.connectLevel==3) {
 
             return this.jsonAdqlBuilder.getTableConstraint(table);
@@ -659,7 +652,7 @@ if (typeof jw === "undefined") {
      * 
      * @returns {*} {"status": true|false,"error?":{},"constraints?":{table:constraint}}
      */
-    jw.api.prototype.getAllTablesConstraints = function(){
+    jw.Api.prototype.getAllTablesConstraints = function(){
         if (this.connectLevel==3) {
 
             return this.jsonAdqlBuilder.getAllTablesConstraints();
@@ -674,7 +667,7 @@ if (typeof jw === "undefined") {
      * @param {number} limit number of line to request set to 0 or undefined to disable the limit
      * @returns {*} {"status": true}
      */
-    jw.api.prototype.setLimit = function(limit){
+    jw.Api.prototype.setLimit = function(limit){
         if(limit !== undefined && !isNaN(parseInt(limit)) && limit>0){
             this.limit = parseInt(limit);
         }else {
@@ -683,7 +676,7 @@ if (typeof jw === "undefined") {
         return {"status":true};
     };
 
-    jw.api.prototype.getSchemas = function(){
+    jw.Api.prototype.getSchemas = function(){
         if(this.connectLevel>0){
             let co = this.tapServiceConnector.getConnector();
             if(co.status){
@@ -695,10 +688,20 @@ if (typeof jw === "undefined") {
         return {"status":false,"error": {"logs":"No active TAP connection"}};
     };
 
-    jw.api.prototype.getTables = function(){
+    jw.Api.prototype.getTables = function(){
         if(this.connectLevel>1){
             return { "status":true,"tables":this.tapServiceConnector.getTables()};
         }
         return {"status":false,"error": {"logs":"No active TAP connection"}};
+    };
+
+    /**This function take a list of string and then join them with `.` ensuring each componnent is quoted if necessery
+     * this method is designed to ease qualifying table names and column names
+     * 
+     * @param {[String]} list 
+     * @returns 
+     */
+    jw.Api.prototype.safeQualifier = function(list){
+        return jw.core.JsonAdqlBuilder.safeQualifier(list);
     };
 })();

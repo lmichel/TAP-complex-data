@@ -1,10 +1,5 @@
 "use strict;";
 
-if (typeof jw === "undefined") {
-    //Jason's Wrench Core
-    var jw = {core:{}};
-}
-
 (function () {
     jw.core.VOTableTools = function() {
     };
@@ -20,7 +15,7 @@ if (typeof jw === "undefined") {
         var reData = [];
         var method = contentText.indexOf("base64");
         if (method != -1) {
-            var data = VOTableTools.content2Rows(contentText);
+            var data = jw.core.VOTableTools.content2Rows(contentText);
             var k = 0;
             for (var i = 0; i < data.length; i = i + 1) {
                 for (var j = 0; j < data[i].length; j = j + 1) {
@@ -116,7 +111,7 @@ if (typeof jw === "undefined") {
         var method = contentText.indexOf("base64");
         var Field = [];
         if (method != -1) {
-            Field = VOTableTools.getField(QObject);
+            Field = jw.core.VOTableTools.getField(QObject);
         }
         else {
             $(contentText).find('RESOURCE[type="results"]').each(function () {

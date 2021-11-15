@@ -41,13 +41,6 @@ function removeClass(elemId,className){
     }
 }
 
-/*/
- * Disable : btn-dark
- * Success : btn-success
- * Enable  : btn-primary
- * Errored : btn-danger
-/*/
-
 function vizierToID(schema){
     let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`","."];
     for (let i=0;i<chars.length;i++){
@@ -55,6 +48,13 @@ function vizierToID(schema){
     }
     return schema;
 }
+
+/*/
+ * Disable : btn-dark
+ * Success : btn-success
+ * Enable  : btn-primary
+ * Errored : btn-danger
+/*/
 
 function disableButton(btnId){
     removeClass(btnId,"btn-primary");
@@ -150,7 +150,7 @@ function bindClickAsyncEvent(elemId,handler,disableText){
 
 /*/ Builds buttons to select between all known TAP services /*/
 function buildButtonSelector(holderID){
-    let desc = KnowledgeTank.getDescriptors().descriptors;
+    let desc = jw.KnowledgeTank.getDescriptors().descriptors;
     for (let shortName in desc){
         $(holderID).append("<input style=\"display: none;\" type=\"radio\" name=\"radio\" id=\"radio_"+ shortName +
             "\" value=\"" + shortName + 
