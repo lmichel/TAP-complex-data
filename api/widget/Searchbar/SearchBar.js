@@ -25,26 +25,21 @@ if (!String.lcs) {
 /**
  * 
  * @param {*} input jQuery object from where the research string will be collected.
- * @param {*} output jQuery object where the list will be outputed.
+ * @param {*} output object with a `push` method where the output of the querier will be pushed.
  * @param {*} parser string parser used to parse the string from the input must have a `parseString` method taking
- * a string as argument return type depend on the querier. The method can also handle an extra arg which is an instance of Logger.
+ * a string as argument return type depend on the querier.
+ * @param {*} processor this object transform the output of the parser into a object accepted by the querier. 
+ * This object must have a `processConditions` method taking as input the object produced by the parser
  * @param {*} querier querier use to get the data to build the result list must have a `queryData` (can be async) method taking as argument the object
- * returned by the parser, the querier return type is an array of object where each object will be passed to the elemBuilder to build each
- * element of the list. The method can also handle an extra arg which is an instance of Logger.
- * @param {*} elemBuilder builder use to create each element of the html output list taking as input a element of the array returned by the querier.
- * The method can also handle an extra arg which is an instance of Logger.
- * @param {*} handler handler which may take as argument the same object sent to the elemBuilder, and a jQuery object representing
- * the object which has been clicked and a jQuery EventObject.
+ * returned by the processor, the querier return object will be pased to the output.
  * @param {number} timeout the minimal amout of time between two requests.
  * @param {Logger} logger an instance of Logger used to log everything that append inside of the search bar. 
  */
- jw.widget.SearchBar = function (input, output, parser, querier, elemBuilder, handler = () => { }, timeout = 2000, logger = new DisabledLogger()) {
+ jw.widget.SearchBar = function (input, output, parser,processor ,querier, timeout = 2000, logger = new DisabledLogger()) {
 
     if (!(logger instanceof Logger)) {
         logger = new DisabledLogger();
     }
-
-    let list = $("ul", output);
 
     let promList = [];
     let time;
@@ -54,43 +49,29 @@ if (!String.lcs) {
     let processEvent = () => {
         logger.info("Parsing search string");
         let parsed = parser.parseString(input.val(), logger);
-        display(parsed, "codeOutput");
-        let data;
+        logger.log(parsed);
 
+        logger.info("processing constrains");
+        let processed = processor.processConditions(parsed);
+
+        let data;
         logger.info("Gathering data");
         if (promList.length > 0) {
             data = promList[promList.length - 1].then(() => {
-                return querier.queryData(parsed, logger);
+                return querier.queryData(processed, logger);
             });
         } else {
-            data = querier.queryData(parsed, logger);
+            data = querier.queryData(processed, logger);
         }
 
-        let endProcess = (data) => {
-            logger.info("Building html");
-            list = "";
-            for (let i = 0; i < data.length; i++) {
-                list += elemBuilder(data[i], logger);
-            }
-
-            output.html("<ul class = '' role='listbox' style='text-align: center; border-radius: 4px;" +
-                "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'> </ul>");
-            $("ul", output).html(list);
-            $("ul", output).children().each((i, e) => {
-                $(e).click((event) => {
-                    handler(data[i], last, event);
-                });
-            });
-            time = Date.now();
-        };
         if (data.then !== undefined) {
             promList.push(data);
             data.then((val) => {
-                endProcess(val);
+                output.push(val);
                 promList.remove(data);
             });
         } else {
-            endProcess(data);
+            output.push(data);
         }
     };
 
@@ -276,8 +257,9 @@ jw.widget.SearchBar.ConstraintsHolder = class {
  * 
  * The `_default` keyword is used to store default values for all fields except `aliases` allowing to not provide any of the said fields if defined here.
  * This keyword also have a `schema` field to register the working schema.
+ * @param {Logger} logger 
  */
-jw.widget.SearchBar.ConstraintProcessor = function(constraintMap){
+jw.widget.SearchBar.ConstraintProcessor = function(constraintMap,logger= new DisabledLogger()){
     
     /** This function process conditions as explained in the constructor's documentation.
      *  
@@ -290,6 +272,10 @@ jw.widget.SearchBar.ConstraintProcessor = function(constraintMap){
         // first loop : formating
         for (let kw in conditions){
             conditions[kw] = Array.from(new Set(conditions[kw]));
+
+            if(conditions[kw].length<1)
+                continue;
+
             // alias process
             if(constraintMap[kw].aliases !== undefined && constraintMap[kw].aliases.length>0){
                 aliased[kw] = {};
@@ -304,6 +290,9 @@ jw.widget.SearchBar.ConstraintProcessor = function(constraintMap){
                         conditions[kw].forEach((val)=>{
                             form = constraintMap[kw].formator.format(val);
                             constraintMap[kw].aliases.forEach((alias)=>{
+                                if(!formated[alias]){
+                                    formated[alias] = [];
+                                }
                                 formated[alias].push(form);
                             });
                         });
@@ -410,7 +399,8 @@ jw.widget.SearchBar.mergers = {
      */
     likeMerger : {
         merge : function(conditions,schema,table,column,merge){
-            let base =jw.Api.safeQualifier([schema,table,column]),fullCondition="";
+            
+            let base =jw.Api.safeQualifier([schema,table,column]).qualified,fullCondition="";
             conditions.forEach((condition)=>{
                 if(condition.indexOf("%") == -1){
                     fullCondition +=  base + " = " + condition + " OR ";
@@ -418,7 +408,7 @@ jw.widget.SearchBar.mergers = {
                     fullCondition += "UPPER(" + base + ") LIKE " + condition.toUpperCase() + " OR ";
                 }
             });
-            if(merger === undefined){
+            if(merge === undefined){
                 return new jw.widget.SearchBar.ConstraintsHolder(Array.from(conditions),fullCondition.substr(0,fullCondition.length-4));
             } else {
                 return new jw.widget.SearchBar.ConstraintsHolder(conditions.concat(merge.values),fullCondition + merge.getConstraint());
@@ -453,12 +443,12 @@ jw.widget.SearchBar.formators = {
             if (!str.endsWith("%")) {
                 str += "%";
             }
-            return jw.widget.SearchBar.formators.simpleStringFormator(str);
+            return jw.widget.SearchBar.formators.simpleStringFormator.format(str);
         }
     },
 };
 
-/**
+/**This class is designed to be used with the search bar
  * 
  * @param {*} api an instance of jw.Api allready connected to the wanted root table.
  * @param {*} defaults a map registering default conditions and fields in the form of
@@ -474,7 +464,7 @@ jw.widget.SearchBar.formators = {
  * @param {Logger} logger a logger used to produce logs
  */
 jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.values(d).join(''),logger = new DisabledLogger()){
-    this.protected = {cache:{conditions:{}},schema: api.getConnector().service.schema};
+    this.protected = {cache:{conditions:{}},schema: api.getConnector().connector.service.schema};
 
     // return true if `a` contains every elements of `b`
     this.protected.arrayIncludes = function (a, b) {
@@ -487,11 +477,11 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
     this.protected.getSelect= function(conditionMap){
         let select = "SELECT ";
         for(let kw in conditionMap){
-            select += jw.Api.safeQualifier([this.protected.schema, conditionMap[kw].table, conditionMap[kw].column]) + " AS " + kw + ", ";
+            select += jw.Api.safeQualifier([this.schema, conditionMap[kw].table, conditionMap[kw].column]).qualified + " AS " + kw + ", ";
         }
         for (let kw in defaults){
             if(conditionMap[kw] === undefined){
-                select += jw.Api.safeQualifier([this.protected.schema, defaults[kw].table, defaults[kw].column]) + " AS " + kw + ", ";
+                select += jw.Api.safeQualifier([this.schema, defaults[kw].table, defaults[kw].column]).qualified + " AS " + kw + ", ";
             }
         }
         return select.substr(0, select.length - 2) + " ";
@@ -530,13 +520,13 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
         logger.info("Checking cache");
         // if a keyword from conditions is not in the cache or in the defaults the cache can't be used as it won't contains data related to this keyword
         if(this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
-            this.protected.arrayIncludes(Object.keys(conditions),Object.keys(this.protected.cache.conditions))
+            this.protected.arrayIncludes(Object.keys(conditions),Object.keys(this.protected.cache.conditions) && this.protected.cache.values !== undefined)
         ){
             // checking that all cached conditions are less restrictive than the conditions we are evaluating
             let includeTest = Object.keys(conditions).every((kw)=>{
                 return  (this.protected.cache.conditions[kw] === undefined ? true : 
                         this.protected.cache.conditions[kw].condition.includes(conditions[kw].condition)) &&
-                    (defaults[kw] === undefined ? true : defaults[kw].condition.includes(conditions[kw].condition));
+                    (defaults[kw] !== undefined && defaults[kw].condition !== undefined ? defaults[kw].condition.includes(conditions[kw].condition) : true);
             });
             if(includeTest){
                 // checking how much the conditions changed
@@ -580,10 +570,10 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
             if(map[kw] === undefined || defaults[kw].condition !== undefined ){
                 if(defaults[kw].condition === undefined){
                     map[kw] = "";
-                } else if(map !== undefined){
-                    map[kw] = "( " + map[kw] + " ) AND ( " + defaults[kw].condition + " )";
+                } else if(map[kw] !== undefined){
+                    map[kw] = "( " + map[kw] + " ) AND ( " + defaults[kw].condition.getConstraint() + " )";
                 } else {
-                    map[kw] = defaults[kw].condition;
+                    map[kw] = defaults[kw].condition.getConstraint();
                 }
             }
         }
@@ -597,14 +587,18 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                 table = defaults[kw].table;
             }
             if(tableMap[table] === undefined){
-                tableMap[table] = "( " + map[kw] + " ) AND ";
-            } else {
-                tableMap[table] = "( " +  map[kw] + " ) AND ";
+                if(map[kw] == ""){
+                    tableMap[table] = map[kw];
+                }else {
+                    tableMap[table] = "( " + map[kw] + " ) AND ";
+                }
+            } else if(map[kw] !== "") {
+                tableMap[table] += "( " +  map[kw] + " ) AND ";
             }
         }
 
         for (let tab in tableMap){
-            api.setTableConstraint(tab,tableMap[tab]);
+            api.setTableConstraint(tab,tableMap[tab].substr(0,tableMap[tab].length - 5));
         }
 
         let that = this;
