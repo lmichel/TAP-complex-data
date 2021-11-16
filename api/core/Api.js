@@ -225,7 +225,7 @@
             let schema = this.tapServiceConnector.connector.service.schema;
             schema = schema.quotedTableName().qualifiedName;
 
-            let formatTableName = this.safeQualifier([schema ,table]).qualified;
+            let formatTableName = jw.Api.safeQualifier([schema ,table]).qualified;
 
             adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit + " ":"") + allField;
             adql += '\n' + " FROM  " + formatTableName + "\n";
@@ -286,7 +286,7 @@
             let schema = this.tapServiceConnector.connector.service.schema;
             schema = schema.quotedTableName().qualifiedName;
 
-            let formatTableName = this.safeQualifier([schema ,table]).qualified;
+            let formatTableName = jw.Api.safeQualifier([schema ,table]).qualified;
 
             adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit + " ":"") + allField;
             adql += '\n' + " FROM  " + formatTableName + "\n";
@@ -590,7 +590,7 @@
         schema = this.getConnector().connector.service.schema;
         
         for(let i=0;i<columns.length; i++){
-            allField += this.safeQualifier([schema,table,columns[i]]).qualified +" , ";
+            allField += jw.Api.safeQualifier([schema,table,columns[i]]).qualified +" , ";
 
             if(schema==="dbo"){
                 // just for CaomMembers tables because request lenth is limited
@@ -701,7 +701,7 @@
      * @param {[String]} list 
      * @returns 
      */
-    jw.Api.prototype.safeQualifier = function(list){
+    jw.Api.safeQualifier = function(list){
         return jw.core.JsonAdqlBuilder.safeQualifier(list);
     };
 })();

@@ -316,7 +316,7 @@
         let adqlConstraints = "";
 
         for (let i=0;i<tables.length;i++){
-            adqlConstraints += "( " + this.adqlJsonMap.conditions[tables[i]] + " ) AND \n ";
+            adqlConstraints += this.adqlJsonMap.conditions[tables[i]].length>0 ? "( " + this.adqlJsonMap.conditions[tables[i]] + " ) AND \n ": "";
         }
 
         if (table !== undefined && table !== this.adqlJsonMap.rootTable && joinKeyVal !== undefined){

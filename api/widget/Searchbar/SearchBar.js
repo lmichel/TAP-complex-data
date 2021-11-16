@@ -27,18 +27,18 @@ if (!String.lcs) {
  * @param {*} input jQuery object from where the research string will be collected.
  * @param {*} output jQuery object where the list will be outputed.
  * @param {*} parser string parser used to parse the string from the input must have a `parseString` method taking
- * a string as argument return type depend on the queryier. The method can also handle an extra arg which is an instance of Logger.
- * @param {*} queryier queryier use to get the data to build the result list must have a `queryData` (can be async) method taking as argument the object
- * returned by the parser, the queryier return type is an array of object where each object will be passed to the elemBuilder to build each
+ * a string as argument return type depend on the querier. The method can also handle an extra arg which is an instance of Logger.
+ * @param {*} querier querier use to get the data to build the result list must have a `queryData` (can be async) method taking as argument the object
+ * returned by the parser, the querier return type is an array of object where each object will be passed to the elemBuilder to build each
  * element of the list. The method can also handle an extra arg which is an instance of Logger.
- * @param {*} elemBuilder builder use to create each element of the html output list taking as input a element of the array returned by the queryier.
+ * @param {*} elemBuilder builder use to create each element of the html output list taking as input a element of the array returned by the querier.
  * The method can also handle an extra arg which is an instance of Logger.
  * @param {*} handler handler which may take as argument the same object sent to the elemBuilder, and a jQuery object representing
  * the object which has been clicked and a jQuery EventObject.
  * @param {number} timeout the minimal amout of time between two requests.
  * @param {Logger} logger an instance of Logger used to log everything that append inside of the search bar. 
  */
- jw.widget.SearchBar = function (input, output, parser, queryier, elemBuilder, handler = () => { }, timeout = 2000, logger = new DisabledLogger()) {
+ jw.widget.SearchBar = function (input, output, parser, querier, elemBuilder, handler = () => { }, timeout = 2000, logger = new DisabledLogger()) {
 
     if (!(logger instanceof Logger)) {
         logger = new DisabledLogger();
@@ -60,10 +60,10 @@ if (!String.lcs) {
         logger.info("Gathering data");
         if (promList.length > 0) {
             data = promList[promList.length - 1].then(() => {
-                return queryier.queryData(parsed, logger);
+                return querier.queryData(parsed, logger);
             });
         } else {
-            data = queryier.queryData(parsed, logger);
+            data = querier.queryData(parsed, logger);
         }
 
         let endProcess = (data) => {
@@ -125,12 +125,10 @@ jw.widget.SearchBar.StringParser = function (keyWords, separator) {
         separator = ":";
     }
 
-    var parser = {};
+    this.keyWords = keyWords;
+    this.separator = separator;
 
-    parser.keyWords = keyWords;
-    parser.separator = separator;
-
-    parser.parseString = function (str, logger) {
+    this.parseString = function (str, logger) {
         let splitted = [str];
         let newSplit, partialSplit;
         let data = { "default": [] };
@@ -138,14 +136,14 @@ jw.widget.SearchBar.StringParser = function (keyWords, separator) {
 
         //splitting the string on all separator to get nice strings to work with
         // can be optimized but would this worth the time spent ? 
-        for (let i = 0; i < parser.keyWords.length; i++) {
-            data[parser.keyWords[i]] = [];
+        for (let i = 0; i < this.keyWords.length; i++) {
+            data[this.keyWords[i]] = [];
             newSplit = [];
             for (j = 0; j < splitted.length; j++) {
-                partialSplit = splitted[j].split(parser.keyWords[i] + parser.separator);
+                partialSplit = splitted[j].split(this.keyWords[i] + this.separator);
 
                 for (k = 1; k < partialSplit.length; k++) {
-                    partialSplit[k] = parser.keyWords[i] + parser.separator + partialSplit[k].trim();
+                    partialSplit[k] = this.keyWords[i] + this.separator + partialSplit[k].trim();
                 }
                 partialSplit[0] = partialSplit[0].trim();
                 if (partialSplit[0].length < 1) {
@@ -158,11 +156,11 @@ jw.widget.SearchBar.StringParser = function (keyWords, separator) {
         let defaultVal = Array.from(splitted);
 
         // sorting all data in a convenient way
-        for (let i = 0; i < parser.keyWords.length; i++) {
+        for (let i = 0; i < this.keyWords.length; i++) {
             for (j = 0; j < splitted.length; j++) {
-                if (splitted[j].startsWith(parser.keyWords[i] + parser.separator)) {
+                if (splitted[j].startsWith(this.keyWords[i] + this.separator)) {
                     defaultVal.remove(splitted[j]);
-                    data[parser.keyWords[i]].push(splitted[j].substr(parser.keyWords[i].length + parser.separator.length));
+                    data[this.keyWords[i]].push(splitted[j].substr(this.keyWords[i].length + this.separator.length));
                 }
             }
         }
@@ -172,9 +170,6 @@ jw.widget.SearchBar.StringParser = function (keyWords, separator) {
 
         return data;
     };
-
-    return parser;
-
 };
 
 /**
@@ -197,7 +192,8 @@ jw.widget.SearchBar.ConstraintsHolder = class {
         return this.constraint;
     }
 
-    /** compare the current object to `other` and return true the current object is restrictive enought to includes the other constraints in it
+    /** compare the current object to `other` and return true when 
+     * if a result R can pass `other`'s condtion imply that R can pass the curent object's conditions
      * @param {ConstraintHolder} other 
      */
     includes(other) {
@@ -206,7 +202,7 @@ jw.widget.SearchBar.ConstraintsHolder = class {
         while (include && i<other.values.length){
             j=0;
             // there is at least one constrains from this which includes it
-            while(j<this.values.length && !this.values[j].startsWith(other.values[i])){
+            while(j<this.values.length && !other.values[j].startsWith(this.values[i])){
                 j++;
             }
             include = include && j<this.values.length;
@@ -243,24 +239,57 @@ jw.widget.SearchBar.ConstraintsHolder = class {
 
         return sum;
     }
+
+    /**evaluate the passed and return true it fullfill the contrains this object hold 
+     * 
+     * @param {String} val string to evaluate 
+     */
+    match(val){
+        return this.values.some(v=> v==val);
+    }
 };
 
 /**
+ * This class provide a post processing for conditions taking the output object of the parser and transforming it to be usable by the querier
+ * @param {*} constraintMap a map in the form of {kw:{aliases:[],table,column,formator,merger}...} with two behavior depending on if `aliases` is set or not
+ * and a special keyword `_default`. the map's element are defined as :
  * 
- * @param {*} constraintMap {kw:{alias:[],table,column,merger,formator}}
+ * for each element of the map if aliases is not set :
+ *  - `kw` can be a keyword of the parser, this keyword will be passed to querier as defined in the return object of the `processConditions` method
+ *  - `table` is the unqualifyed name of the table this keyword will constraint
+ *  - `column` is  the unqualifyed name of the column of `table` this keyword will constraint
+ *  - `formator` is an object with a `format` method. This method will be given a string assigned by the parser to this keyword
+ *  - `merger` is an object with a `merge` method. This method will be given a list of formated conditions produced by the `formator` 
+ *  as well as the schema, the table and the column. this method is expected to output a {@link jw.widget.SearchBar.ConstraintsHolder ConstraintsHolder}
+ * 
+ * if aliases is set :
+ *  - `aliases` is an array of keyword which exist in the map and don't have the aliases field set
+ *  - `kw` is a keyword from the parser, this keyword will not be passed to querier as related data will be merged into the aliases data.
+ *  - `table` is ignored.
+ *  - `column` is ignored.
+ *  - `formator` is an object with a `format` method. This method will be given a string assigned by the parser to the main keyword.
+ *  If no formator is defined the formators of each keywords will be used 
+ *  - `merger` is an object with a `merge` method. If this object is missing data will be put with the aliases data before being merged.
+ *  The `merge` method will be given a list of formated conditions produced by the `formator`
+ *  as well as the schema, the table and the column and a {@link jw.widget.SearchBar.ConstraintsHolder ConstraintsHolder}
+ *  as outputed by the aliases merge functions. this method is expected to output a {@link jw.widget.SearchBar.ConstraintsHolder ConstraintsHolder}
+ * 
+ * The `_default` keyword is used to store default values for all fields except `aliases` allowing to not provide any of the said fields if defined here.
+ * This keyword also have a `schema` field to register the working schema.
  */
 jw.widget.SearchBar.ConstraintProcessor = function(constraintMap){
-    let public = {};
-
-    /**
-     * 
-     * @param {*} conditions {kw:[val1,val2],...} 
+    
+    /** This function process conditions as explained in the constructor's documentation.
+     *  
+     * @param {*} conditions {kw:[val1,val2],...} the outputed object of the parser
+     * @returns {*} {kw:{condition:{@link jw.widget.SearchBar.ConstraintsHolder ConstraintsHolder}, table:String,column:String}}
      */
-    public.processConditions = function(conditions){
+    this.processConditions = function(conditions){
         // TODO :split in sub functions foctorise redundent code
         let formated = {},aliased = {};
         // first loop : formating
         for (let kw in conditions){
+            conditions[kw] = Array.from(new Set(conditions[kw]));
             // alias process
             if(constraintMap[kw].aliases !== undefined && constraintMap[kw].aliases.length>0){
                 aliased[kw] = {};
@@ -328,22 +357,40 @@ jw.widget.SearchBar.ConstraintProcessor = function(constraintMap){
         }
         // second loop : merge the non-aliased constraints
         let merged = {};
+        let table,column;
         for(let kw in formated){
+            table = constraintMap[kw].table !== undefined ? constraintMap[kw].table : constraintMap._default.table;
+            column = constraintMap[kw].column !== undefined ? constraintMap[kw].column : constraintMap._default.column;
+
             merged[kw] = {
-                table : constraintMap[kw].table !== undefined ? constraintMap[kw].table : constraintMap._default.table,
-                column : constraintMap[kw].column !== undefined ? constraintMap[kw].column : constraintMap._default.column,
-                condition : constraintMap[kw].merger !== undefined ? constraintMap[kw].merger(formated[kw]) : constraintMap._default.merger(formated[kw]),
+                table : table,
+                column : column,
+                condition : constraintMap[kw].merger !== undefined ? 
+                    constraintMap[kw].merger.merge(formated[kw],constraintMap._default.schema,table,column) : 
+                    constraintMap._default.merger.merge(formated[kw],constraintMap._default.schema,table,column),
             };
         }
         // third loop : merging the aliased constraints
         for(let kw in aliased){
             if(aliased[kw].__){
                 constraintMap[kw].aliases.forEach((alias)=>{
-                    merged[alias].condition = constraintMap[kw].merger(aliased[kw].__,merged[alias].condition);
+                    merged[alias].condition = constraintMap[kw].merger.merge(
+                        aliased[kw].__, 
+                        constraintMap._default.schema,
+                        merged[alias].table,
+                        merged[alias].column,
+                        merged[alias].condition
+                    );
                 });
             }else{
                 for (let alias in aliased[kw]){
-                    merged[alias].condition = constraintMap[kw].merger(aliased[kw][alias],merged[alias].condition);
+                    merged[alias].condition = constraintMap[kw].merger.merge(
+                        aliased[kw][alias], 
+                        constraintMap._default.schema,
+                        merged[alias].table, 
+                        merged[alias].column,
+                        merged[alias].condition
+                    );
                 }
             }
         }
@@ -353,6 +400,241 @@ jw.widget.SearchBar.ConstraintProcessor = function(constraintMap){
     };
 };
 
+/**
+ * This object store defaults merger which may be helpfull
+ */
+jw.widget.SearchBar.mergers = {
+    /**
+     * this merger is using `like` or `=` to form conditions based on the detection of `%`
+     * this merger can be used with aliases
+     */
+    likeMerger : {
+        merge : function(conditions,schema,table,column,merge){
+            let base =jw.Api.safeQualifier([schema,table,column]),fullCondition="";
+            conditions.forEach((condition)=>{
+                if(condition.indexOf("%") == -1){
+                    fullCondition +=  base + " = " + condition + " OR ";
+                }else {
+                    fullCondition += "UPPER(" + base + ") LIKE " + condition.toUpperCase() + " OR ";
+                }
+            });
+            if(merger === undefined){
+                return new jw.widget.SearchBar.ConstraintsHolder(Array.from(conditions),fullCondition.substr(0,fullCondition.length-4));
+            } else {
+                return new jw.widget.SearchBar.ConstraintsHolder(conditions.concat(merge.values),fullCondition + merge.getConstraint());
+            }
+        }
+    }
+};
+
+/**
+ * This object store defaults formators which may be helpfull
+ */
+jw.widget.SearchBar.formators = {
+    /**
+     * This formator apply simple quoting and escape possibly problematic characters like quotes
+     */
+    simpleStringFormator: {
+        format: function (str) {
+            str = str.replace(/([\"\\\'])/g, "\\$1");
+            return "'" + str + "'";
+        }
+    },
+
+    /**
+     * This formator put `%` at the start and the end or the condition if not already present then use the simpleStringFormator to finish the formating
+     * This formator the impact of this addition depend on the merger's behavior
+     */
+    lazyStringFormator: {
+        format:function (str) {
+            if (!str.startsWith("%")) {
+                str = "%" + str;
+            }
+            if (!str.endsWith("%")) {
+                str += "%";
+            }
+            return jw.widget.SearchBar.formators.simpleStringFormator(str);
+        }
+    },
+};
+
+/**
+ * 
+ * @param {*} api an instance of jw.Api allready connected to the wanted root table.
+ * @param {*} defaults a map registering default conditions and fields in the form of
+ * {kw:{condition,table,column,operator}}
+ * where :
+ *  - `kw` is a keyword used to map the output values, kw can be a parser's keyword
+ *  - `condition` is a {@link jw.widget.SearchBar.ConstraintsHolder ConstraintsHolder} containing the condition to be applyed.
+ *  Leave empty set the keyword as only a default field.
+ *  - `table` is the unqualifyed name of the table this keyword will constraint or select
+ *  - `column` is  the unqualifyed name of the column of `table` this keyword will constraint or select
+ * @param {*} keyBuilder a function taking as argument a dictionary where each key is the name of a field queried and each value is the related string value.
+ * this function should return a string, this string is used to detect if two entries are duplicated due to 1-N joins. Leave empty for no nomalisation
+ * @param {Logger} logger a logger used to produce logs
+ */
+jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.values(d).join(''),logger = new DisabledLogger()){
+    this.protected = {cache:{conditions:{}},schema: api.getConnector().service.schema};
+
+    // return true if `a` contains every elements of `b`
+    this.protected.arrayIncludes = function (a, b) {
+        return Array.isArray(a) &&
+            Array.isArray(b) &&
+            a.length >= b.length &&
+            b.every((val) => a.includes(val));
+    };
+
+    this.protected.getSelect= function(conditionMap){
+        let select = "SELECT ";
+        for(let kw in conditionMap){
+            select += jw.Api.safeQualifier([this.protected.schema, conditionMap[kw].table, conditionMap[kw].column]) + " AS " + kw + ", ";
+        }
+        for (let kw in defaults){
+            if(conditionMap[kw] === undefined){
+                select += jw.Api.safeQualifier([this.protected.schema, defaults[kw].table, defaults[kw].column]) + " AS " + kw + ", ";
+            }
+        }
+        return select.substr(0, select.length - 2) + " ";
+    };
+
+    this.protected.arraysToMaps = function (arrays) {
+        let maps = [];
+        let map;
+        for (let i = 0; i < arrays.field_values.length; i++) {
+            map = {};
+            for (let j = 0; j < arrays.field_names.length; j++) {
+                map[arrays.field_names[j]] = arrays.field_values[i][j];
+            }
+            maps.push(map);
+        }
+        return maps;
+    };
+
+    this.protected.normalize = function (data) {
+        let nDat = [], known = [];
+        for (let i = 0; i < data.length; i++) {
+            if (!known.includes(keyBuilder(data[i]))) {
+                nDat.push(data[i]);
+                known.push(keyBuilder(data[i]));
+            }
+        }
+        return nDat;
+    };
+
+    /**This method rely on being only called once at a time
+     * TODO : split in sub functions
+     * @param {*} conditions 
+     * @returns 
+     */
+    this.queryData = function(conditions){
+        logger.info("Checking cache");
+        // if a keyword from conditions is not in the cache or in the defaults the cache can't be used as it won't contains data related to this keyword
+        if(this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
+            this.protected.arrayIncludes(Object.keys(conditions),Object.keys(this.protected.cache.conditions))
+        ){
+            // checking that all cached conditions are less restrictive than the conditions we are evaluating
+            let includeTest = Object.keys(conditions).every((kw)=>{
+                return  (this.protected.cache.conditions[kw] === undefined ? true : 
+                        this.protected.cache.conditions[kw].condition.includes(conditions[kw].condition)) &&
+                    (defaults[kw] === undefined ? true : defaults[kw].condition.includes(conditions[kw].condition));
+            });
+            if(includeTest){
+                // checking how much the conditions changed
+                let delta = 0,d;
+                Object.keys(conditions).forEach((kw)=>{
+                    d = [];
+                    if(defaults[kw] !== undefined){
+                        d.push(defaults[kw].condition.getDistance(conditions[kw].condition));
+                    }
+                    if(this.protected.cache.conditions[kw] !== undefined){
+                        d.push(this.protected.cache.conditions[kw].condition.getDistance(conditions[kw].condition));
+                    }
+                    delta += Math.min(...d);
+                });
+
+                if(delta<5){
+                    let nval = [];
+                    this.protected.cache.values.forEach((data)=>{
+                        if(Object.keys(data).every((kw)=>{
+                            if(conditions[kw]!== undefined){
+                                return conditions[kw].condition.match(data[kw]);
+                            }
+                            return true;
+                        })){
+                            nval.push(data);
+                        }
+                    });
+                    return this.protected.normalize(nval);
+                }
+            }
+        }
+
+        let map = {};
+        api.resetAllTableConstraint();
+        for (let kw in conditions){
+            map[kw] = conditions[kw].condition.getConstraint();
+        }
+
+        // merging by keyword
+        for (let kw in defaults){
+            if(map[kw] === undefined || defaults[kw].condition !== undefined ){
+                if(defaults[kw].condition === undefined){
+                    map[kw] = "";
+                } else if(map !== undefined){
+                    map[kw] = "( " + map[kw] + " ) AND ( " + defaults[kw].condition + " )";
+                } else {
+                    map[kw] = defaults[kw].condition;
+                }
+            }
+        }
+
+        let tableMap = {},table;
+
+        for (let kw in map){
+            if(conditions[kw] !== undefined){
+                table = conditions[kw].table;
+            }else {
+                table = defaults[kw].table;
+            }
+            if(tableMap[table] === undefined){
+                tableMap[table] = "( " + map[kw] + " ) AND ";
+            } else {
+                tableMap[table] = "( " +  map[kw] + " ) AND ";
+            }
+        }
+
+        for (let tab in tableMap){
+            api.setTableConstraint(tab,tableMap[tab]);
+        }
+
+        let that = this;
+        logger.info("Creating request");
+
+        return api.getTableQuery().then((val) => {
+            let query = val.query;
+            query = that.protected.getSelect(conditions) + query.substr(query.toLowerCase().indexOf(" from "));
+
+            while (query.indexOf("  ") !== -1) {
+                query = query.replace("  ", " ");
+            }
+
+            logger.log(query);
+            logger.info("Waiting for server responce");
+
+            return api.query(query).then((val) => {
+
+                logger.log(val);
+                if (val.status) {
+                    this.protected.cache.conditions = conditions;
+                    this.protected.cache.values = that.protected.arraysToMaps(val);
+                    return that.protected.normalize(this.protected.cache.values);
+                }
+                return [];
+            });
+        });
+
+    };
+};
 
 //TODO : make this hell easier to understand.
 /**
@@ -633,48 +915,6 @@ var dataQueryier = function (api, fieldMap, defaultConditions, exceptionMap, def
 
     return publicObject;
 
-};
-
-var mergerRegistry = {
-    simpleStringMerger: function (conditions, base) {
-        let condition = "";
-        for (let i = 0; i < conditions.length; i++) {
-            if (condition.length > 0) {
-                condition += " OR ";
-            }
-            if (conditions[i].indexOf("%") == -1) {
-                condition += base + "= " + conditions[i];
-            } else {
-                condition += "UPPER(" + base + ") LIKE " + conditions[i].toUpperCase();
-            }
-        }
-        return condition;
-    },
-    multiTableStringMerger: function (conditions, base) {
-        let bases = base.split("::");
-        let mergedConditions = [];
-        for (let i = 0; i < bases.length; i++) {
-            mergedConditions.push("(" + mergerRegistry.simpleStringMerger(conditions, bases[i]) + ")");
-        }
-        return mergedConditions.join(" OR ");
-    },
-};
-
-var formatorRegistry = {
-
-    simpleStringFormator: function (str) {
-        str = str.replace(/([\"\\])/g, "\\$1");
-        return "'" + str + "'";
-    },
-    lazyStringFormator: function (str) {
-        if (!str.startsWith("%")) {
-            str = "%" + str;
-        }
-        if (!str.endsWith("%")) {
-            str += "%";
-        }
-        return formatorRegistry.simpleStringFormator(str);
-    },
 };
 
 /*
