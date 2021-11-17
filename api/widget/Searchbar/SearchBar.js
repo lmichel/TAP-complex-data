@@ -159,14 +159,17 @@ jw.widget.SearchBar.StringParser = function (keyWords, separator) {
 jw.widget.SearchBar.ConstraintsHolder = class {
 
     /**
-     * 
-     * @param {String} table the table the constraints apply to  
-     * @param {String} col the column of the table `table` the constraints apply to  
      * @param {[String]} values the values to compare
+     * @param {String} constraint the main constraint
+     * @param {number} degree the degree of the constraint ie with how many other constrains this one is the merge result, 0 by default
+     * this value is usefull for merger to provide distance correction function
+     * @param {*} rectifier a function use correct errors in distance calculation like distance is always three times too large than expected
      */
-    constructor(values, constraint) {
+    constructor(values, constraint,degree=0,rectifier=v=>v) {
         this.values = values;
         this.constraint = constraint;
+        this.degree = degree;
+        this.rectifier = rectifier;
     }
 
     getConstraint() {
@@ -196,6 +199,7 @@ jw.widget.SearchBar.ConstraintsHolder = class {
      * @param {ConstraintHolder} other Other has to either includes or being included by the current object for this computation to work
      */
     getDistance(other) {
+        console.log("evaluating distance");
         let dist,sum=0,i,valsL,valsS;
         
         // always determine which is the longest and shortest is needed to ensure that other.getDistance(this) == this.getDistance(other)
@@ -214,11 +218,12 @@ jw.widget.SearchBar.ConstraintsHolder = class {
             i=0;
             while (dist !== 0 && i < valsS.length){
                 dist = Math.min(dist, Math.abs(Math.max(val.length, valsS[i].length) - valsS[i].lcs(val).length));
+                i++;
             }
             sum += dist;
         });
 
-        return sum;
+        return this.rectifier(sum);
     }
 
     /**evaluate the passed and return true it fullfill the contrains this object hold 
@@ -227,6 +232,43 @@ jw.widget.SearchBar.ConstraintsHolder = class {
      */
     match(val){
         return this.values.some(v=> v==val);
+    }
+};
+
+jw.widget.SearchBar.FuzzyConstraintsHolder = class extends jw.widget.SearchBar.ConstraintsHolder {
+
+    /** compare the current object to `other` and return true when 
+     * if a result R can pass `other`'s condtion imply that R can pass the curent object's conditions
+     * @param {ConstraintHolder} other 
+     */
+     includes(other) {
+        let include = true,i=0,j,test;
+        // for each constrains of other
+        while (include && i<other.values.length){
+            j=0;
+            test = false;
+            // there is at least one constrains from this which includes it
+            while(j<this.values.length && !test){
+                if(this.values[j].indexOf("%") !== -1){
+                    test = test || other.values[i].replace(/%\'/g,"").toUpperCase().includes(this.values[j].replace(/%\'/g,"").toUpperCase());
+                }else{
+                    test = test || other.values[i].startsWith(this.values[j]);
+                }
+                console.log(test);
+                j++;
+            }
+            include = include && test;
+            i++;
+        }
+        return include;
+    }
+
+    /**evaluate the passed and return true it fullfill the contrains this object hold 
+     * 
+     * @param {String} val string to evaluate 
+     */
+    match(val){
+        return this.values.some(v=> v.indexOf("%") == -1 ? v==val : val.toUpperCase().includes(v.replace(/%/g, "").toUpperCase()));
     }
 };
 
@@ -246,8 +288,8 @@ jw.widget.SearchBar.ConstraintsHolder = class {
  * if aliases is set :
  *  - `aliases` is an array of keyword which exist in the map and don't have the aliases field set
  *  - `kw` is a keyword from the parser, this keyword will not be passed to querier as related data will be merged into the aliases data.
- *  - `table` is ignored.
- *  - `column` is ignored.
+ *  - `table` will be send to the querier.
+ *  - `column`  will be send to the querier.
  *  - `formator` is an object with a `format` method. This method will be given a string assigned by the parser to the main keyword.
  *  If no formator is defined the formators of each keywords will be used 
  *  - `merger` is an object with a `merge` method. If this object is missing data will be put with the aliases data before being merged.
@@ -363,12 +405,18 @@ jw.widget.SearchBar.ConstraintProcessor = function(constraintMap,logger= new Dis
         for(let kw in aliased){
             if(aliased[kw].__){
                 constraintMap[kw].aliases.forEach((alias)=>{
-                    merged[alias].condition = constraintMap[kw].merger.merge(
+                    if(merged[kw] == undefined){
+                        merged[kw] = {
+                            table:constraintMap[alias].table !== undefined ? constraintMap[alias].table : constraintMap._default.table,
+                            column:constraintMap[alias].column !== undefined ? constraintMap[alias].column : constraintMap._default.column
+                        };
+                    }
+                    merged[kw].condition = constraintMap[kw].merger.merge(
                         aliased[kw].__, 
                         constraintMap._default.schema,
-                        merged[alias].table,
-                        merged[alias].column,
-                        merged[alias].condition
+                        constraintMap[alias].table !== undefined ? constraintMap[alias].table : constraintMap._default.table,
+                        constraintMap[alias].column !== undefined ? constraintMap[alias].column : constraintMap._default.column,
+                        merged[kw].condition
                     );
                 });
             }else{
@@ -399,7 +447,7 @@ jw.widget.SearchBar.mergers = {
      */
     likeMerger : {
         merge : function(conditions,schema,table,column,merge){
-            
+
             let base =jw.Api.safeQualifier([schema,table,column]).qualified,fullCondition="";
             conditions.forEach((condition)=>{
                 if(condition.indexOf("%") == -1){
@@ -409,9 +457,14 @@ jw.widget.SearchBar.mergers = {
                 }
             });
             if(merge === undefined){
-                return new jw.widget.SearchBar.ConstraintsHolder(Array.from(conditions),fullCondition.substr(0,fullCondition.length-4));
+                return new jw.widget.SearchBar.FuzzyConstraintsHolder(Array.from(conditions),fullCondition.substr(0,fullCondition.length-4));
             } else {
-                return new jw.widget.SearchBar.ConstraintsHolder(conditions.concat(merge.values),fullCondition + merge.getConstraint());
+                return new jw.widget.SearchBar.FuzzyConstraintsHolder(conditions.concat(merge.values),fullCondition + merge.getConstraint(),
+                    merge.degree+1 ,
+                    (v)=>{
+                        return v/(merge.degree+2) - conditions.concat(merge.values).filter(e=>e.endsWith("%")).length +1;
+                    }
+                );
             }
         }
     }
@@ -435,7 +488,7 @@ jw.widget.SearchBar.formators = {
      * This formator put `%` at the start and the end or the condition if not already present then use the simpleStringFormator to finish the formating
      * This formator the impact of this addition depend on the merger's behavior
      */
-    lazyStringFormator: {
+    fuzzyStringFormator: {
         format:function (str) {
             if (!str.startsWith("%")) {
                 str = "%" + str;
@@ -477,11 +530,11 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
     this.protected.getSelect= function(conditionMap){
         let select = "SELECT ";
         for(let kw in conditionMap){
-            select += jw.Api.safeQualifier([this.schema, conditionMap[kw].table, conditionMap[kw].column]).qualified + " AS " + kw + ", ";
+            select += jw.Api.safeQualifier([this.schema, conditionMap[kw].table, conditionMap[kw].column]).qualified + " AS \"" + kw + "\", ";
         }
         for (let kw in defaults){
             if(conditionMap[kw] === undefined){
-                select += jw.Api.safeQualifier([this.schema, defaults[kw].table, defaults[kw].column]).qualified + " AS " + kw + ", ";
+                select += jw.Api.safeQualifier([this.schema, defaults[kw].table, defaults[kw].column]).qualified + " AS \"" + kw + "\", ";
             }
         }
         return select.substr(0, select.length - 2) + " ";
@@ -517,10 +570,10 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
      * @returns 
      */
     this.queryData = function(conditions){
-        logger.info("Checking cache");
         // if a keyword from conditions is not in the cache or in the defaults the cache can't be used as it won't contains data related to this keyword
-        if(this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
-            this.protected.arrayIncludes(Object.keys(conditions),Object.keys(this.protected.cache.conditions) && this.protected.cache.values !== undefined)
+        //FIX ME cache not working
+        if(false && this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
+            this.protected.arrayIncludes(Object.keys(conditions),Object.keys(this.protected.cache.conditions)) && this.protected.cache.values !== undefined
         ){
             // checking that all cached conditions are less restrictive than the conditions we are evaluating
             let includeTest = Object.keys(conditions).every((kw)=>{
@@ -529,6 +582,7 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                     (defaults[kw] !== undefined && defaults[kw].condition !== undefined ? defaults[kw].condition.includes(conditions[kw].condition) : true);
             });
             if(includeTest){
+                console.log("Include test OK");
                 // checking how much the conditions changed
                 let delta = 0,d;
                 Object.keys(conditions).forEach((kw)=>{
@@ -541,8 +595,9 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                     }
                     delta += Math.min(...d);
                 });
-
+                console.log(delta);
                 if(delta<5){
+                    console.log("Delta OK");
                     let nval = [];
                     this.protected.cache.values.forEach((data)=>{
                         if(Object.keys(data).every((kw)=>{
@@ -552,6 +607,8 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                             return true;
                         })){
                             nval.push(data);
+                        }else{
+                            console.log("refusing", data);
                         }
                     });
                     return this.protected.normalize(nval);
@@ -601,12 +658,11 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
             api.setTableConstraint(tab,tableMap[tab].substr(0,tableMap[tab].length - 5));
         }
 
-        let that = this;
         logger.info("Creating request");
 
         return api.getTableQuery().then((val) => {
             let query = val.query;
-            query = that.protected.getSelect(conditions) + query.substr(query.toLowerCase().indexOf(" from "));
+            query = this.protected.getSelect(conditions) + query.substr(query.toLowerCase().indexOf(" from "));
 
             while (query.indexOf("  ") !== -1) {
                 query = query.replace("  ", " ");
@@ -620,8 +676,8 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                 logger.log(val);
                 if (val.status) {
                     this.protected.cache.conditions = conditions;
-                    this.protected.cache.values = that.protected.arraysToMaps(val);
-                    return that.protected.normalize(this.protected.cache.values);
+                    this.protected.cache.values = this.protected.arraysToMaps(val);
+                    return this.protected.normalize(this.protected.cache.values);
                 }
                 return [];
             });

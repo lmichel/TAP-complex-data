@@ -103,15 +103,17 @@ async function setupEventHandlers(){
         "ivoid":{column:"ivoid"},
         "desc":{column:"res_description"},
         "title":{column:"res_title"},
-        "subject":{tableName:"res_subject",column:"res_subject"},
-        "subjectUat":{tableName:"subject_uat",column:"uat_concept"},
-        "tableName":{tableName:"res_table",column:"table_name"},
-        "tableDesc":{tableName:"res_table",column:"table_description"},
-        "utype":{tableName:"res_table",column:"table_utype"},
-        "url":{tableName:"interface",column:"access_url"},
+        "subject":{table:"res_subject",column:"res_subject"},
+        "subjectUat":{table:"subject_uat",column:"uat_concept"},
+        "tableName":{table:"res_table",column:"table_name"},
+        "tableDesc":{table:"res_table",column:"table_description"},
+        "utype":{table:"res_table",column:"table_utype"},
+        "url":{table:"interface",column:"access_url"},
         "default":{
             aliases : ["name","ivoid","title"],
-            formator:jw.widget.SearchBar.formators.lazyStringFormator,
+            column : "short_name",
+            formator:jw.widget.SearchBar.formators.fuzzyStringFormator,
+            merger : jw.widget.SearchBar.mergers.likeMerger,
         },
     };
 
@@ -125,7 +127,6 @@ async function setupEventHandlers(){
             let li;
             let list = "<ul class = '' role='listbox' style='text-align: center; border-radius: 4px;" +
             "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'>";
-            console.log(dataList);
             for(let i=0;i<dataList.length;i++){
                 dat = $.extend({},dataList[i]);
                 li= "<li style='border-radius: 4px; margin: 0.5em;" +
@@ -137,6 +138,8 @@ async function setupEventHandlers(){
                 delete dat.ivoid;
                 for (let field in dat){
                     if(field[0] == "_")
+                        continue;
+                    if(field == "default")
                         continue;
                     li += "<br>" + field + " : " + dat[field]; 
                 }
