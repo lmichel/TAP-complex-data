@@ -74,6 +74,8 @@ var TapTree = function(){
         if(schemas.status){
             let safeSchem;
             schemas = schemas.schemas;
+            this.schemas = schemas;
+
             let pos,icon,tap = false;
             for (let schema in schemas){
                 icon = "./images/baseCube.png";
@@ -122,6 +124,10 @@ var TapTree = function(){
             infoSpan.append(span + 'grey; color:white" title="The application does not support table upload">U</span>');
         });
     }
+
+    TapTree.prototype.getSchemas = function(){
+        return this.schemas;
+    };
 
     TapTree.prototype.schemaHandlerFactory = function(schema,safeSchem){
         let fun = async (event,node) => {
@@ -180,7 +186,7 @@ var TapTree = function(){
     };
 
     TapTree.prototype.getID = function(){
-        return this.api.getConnector().connector.service.tapService;
+        return this.treeID;
     };
 
     // factory patern needed because of `this` which doesn't represent a TapTree anymore when the method is used as an external handler ...
@@ -195,6 +201,12 @@ var TapTree = function(){
         return () => {};
     };
 
+
+    TapTree.prototype.filter = function(filter){
+        console.log(this);
+        console.log(filter);
+    };
+
     return TapTree;
 }();
 
@@ -202,14 +214,41 @@ var TapTreeList = function(){
 
     function TapTreeList(holder){
         this.holder = holder;
+        
+        this.holder.html('<div style="display:flex;flex-flow: column;flex-grow: 1;"><input id="searchBar" type="text" autocomplete="off" style="width: 100%;margin: .5em;" ><div id="tree"></div></div>');
+        $("input",this.holder).prop( "disabled", true );
+        this.treeHolder = $("#tree",holder);
         this.treeMap={};
-        this.protected = {};
-        this.holder.jstree({
+
+        this.protected = {
+            constraintMap:{
+                _default : {
+                    schema : "",
+                },
+                default : {
+                    table : "tables",
+                    column : "table_name",
+                    merger : jw.widget.SearchBar.mergers.likeMerger,
+                    formator : jw.widget.SearchBar.formators.fuzzyStringFormator
+                }
+            },
+            barApi : new jw.Api(),
+            sBarOut : {push:()=>{}}
+        };
+
+        this.treeHolder.jstree({
             'core' : {
                 'check_callback' : ()=>true
             }
         });
-        this.tree = this.holder.jstree(true);
+        this.tree = this.treeHolder.jstree(true);
+        this.treeHolder.on("activate_node.jstree",(event,node)=>{
+            console.log(node);
+            node = node.node;
+            let ID = node.parents.length == 1 ? node.id : node.parents[node.parents.length-2];
+            let tree = this.treeMap[Object.keys(this.treeMap).filter(id=>this.treeMap[id].tree.getID()==ID)];
+            this.protected.connectSearchBar(tree);
+        });
         registerProtected(this);
     }
 
@@ -218,11 +257,42 @@ var TapTreeList = function(){
      * @param {TapTreeList} tree 
      */
     function registerProtected(tree){
+        tree.protected.connectSearchBar = function(map){
+            $("input",tree.holder).prop( "disabled", true );
+            let connector = map.api.getConnector().connector.service;
+            
+            tree.protected.barApi.connectService(connector.tapService).then(()=>{
+                let schema = Object.keys(map.tree.getSchemas()).filter(v=>v.match(/TAP_SCHEMA/i))[0];
+                tree.protected.constraintMap._default.schema = schema;
+                tree.protected.barApi.selectSchema(schema).then(()=>{
+                    tree.protected.barApi.setRootTable("tables").then((val)=>{
+                        if( val.status){
+                            tree.protected.sBarOut.push = map.tree.filter.bind(map.tree);
+                            if(tree.protected.searchBar === undefined){
+                                tree.protected.barApi.selectSchema("tap_schema");
+                                let querier = new jw.widget.SearchBar.Querier(tree.protected.barApi,{
+                                    "schema":{
+                                        table:"tables",
+                                        column:"schema_name",
+                                    }
+                                });
+                                let processor = new jw.widget.SearchBar.ConstraintProcessor(tree.protected.constraintMap);
+                                let parser = new jw.widget.SearchBar.StringParser(Object.keys(tree.protected.constraintMap),":");
+                                tree.protected.searchBar = jw.widget.SearchBar(
+                                    $("input",tree.holder),
+                                    tree.protected.sBarOut,
+                                    parser,
+                                    processor,
+                                    querier,
+                                );
+                            }
+                            $("input",tree.holder).prop( "disabled", false );
+                        }
+                    });
+                });
+            });
+        };
     }
-
-    TapTreeList.prototype.filter = function(filter){
-
-    };
 
     /**
      * @param {jw.Api} tap 
@@ -240,7 +310,7 @@ var TapTreeList = function(){
     TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
         if(connector.status && !this.contains(tap)){
-            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.holder,meta)};
+            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,meta),"api":tap};
         }
         return connector.status;
     };

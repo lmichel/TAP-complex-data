@@ -453,7 +453,7 @@ jw.widget.SearchBar.mergers = {
                 if(condition.indexOf("%") == -1){
                     fullCondition +=  base + " = " + condition + " OR ";
                 }else {
-                    fullCondition += "UPPER(" + base + ") LIKE " + condition.toUpperCase() + " OR ";
+                    fullCondition += "uppercase(" + base + ") LIKE " + condition.toUpperCase() + " OR ";
                 }
             });
             if(merge === undefined){

@@ -1,49 +1,5 @@
 "use strict;";
 
-class MyLogger extends Logger {
-    constructor(div) {
-        super();
-        this.div = div;
-    }
-    split(...args){
-        let objects = [],text = "";
-        for( let i=0;i<args.length;i++){
-            if(typeof args[i] === "object"){
-                objects.push(args[i]);
-            } else if(typeof args[i] === "string"){
-                text += args[i];
-            } else {
-                text += String(args[i]);
-            }
-        }
-        return {objects:objects,text:text};
-    }
-    log(...log) {
-        let out = this.split(...log);
-        if(out.text.length>0){
-            display(out.text,"querrySend");
-        }
-        if(out.objects.length>0){
-            display(out.objects,"codeOutput");
-        }
-    }
-    info(...log){
-        let out = this.split(...log);
-        if(out.text.length>0){
-            let writing = $("p#logger_text", this.div);
-            if (writing.length < 1) {
-                this.div.html("<div class='cv-spinner'><span class='spinner'></span> <p id='logger_text'></p></div>");
-                writing = $("p#logger_text", this.div);
-            }
-            writing.html(out.text);
-        }
-        if(out.objects.length>0){
-            display(out.objects,"codeOutput");
-        }
-
-    }
-}
-
 async function setupEventHandlers(){
     let api = new jw.Api();
     
