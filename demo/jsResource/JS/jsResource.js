@@ -271,7 +271,7 @@ function makeCollapsableDiv(holder,name,collapsed,firstClickHandler,elems,expend
 
 function showTapResult(dataTreePath, data,tid,handler) {
     var job = ( !dataTreePath.jobid || dataTreePath.jobid == "")? "": dataTreePath.jobid;
-    let tableID = "datatable_" + replaceAll(`${job}`/* create a new instance of the string to avoid possible troubles */," ","_");
+    let tableID = "datatable_" + utils.replaceAll(`${job}`/* create a new instance of the string to avoid possible troubles */," ","_");
     var table = "<table cellpadding=\"0\" cellspacing=\"0\" border=\"1\" width= 100% id=\"" + tableID + "\" class=\"display\"></table>";
     let jsdata = data.data;
     
@@ -749,7 +749,10 @@ function setupEventHandlers(){
         });
 
         $("#resultpane").html("");
-        $("#controlPane").html("");
+        $("#tapColSelector").html("");
+        $("#tableNameTable").html("");
+        $("#tapColEditor").html("");
+        $("#multiTabDiv").hide();
         $("#rButtonPane").html("");
 
         return false;

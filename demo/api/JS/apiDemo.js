@@ -413,7 +413,7 @@ function OnRadioChange(radio) {
                 holder.html("");
                 let unqSchem;
                 for (let schema in schemas.schemas){
-                    unqSchem = replaceAll(schema,'"',"");
+                    unqSchem = utils.replaceAll(schema,'"',"");
                     holder.append("<button  type='button' class=\"btn btn-primary\" id='schema_" + 
                         unqSchem + "' style=\"margin-top: 7px;width: 100%;\">" + 
                         schema + "</button> ");

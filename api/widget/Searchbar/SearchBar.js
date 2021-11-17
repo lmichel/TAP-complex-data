@@ -33,13 +33,9 @@ if (!String.lcs) {
  * @param {*} querier querier use to get the data to build the result list must have a `queryData` (can be async) method taking as argument the object
  * returned by the processor, the querier return object will be pased to the output.
  * @param {number} timeout the minimal amout of time between two requests.
- * @param {Logger} logger an instance of Logger used to log everything that append inside of the search bar. 
+ * @param {utils.Logger} logger an instance of Logger used to log everything that append inside of the search bar. 
  */
- jw.widget.SearchBar = function (input, output, parser,processor ,querier, timeout = 2000, logger = new DisabledLogger()) {
-
-    if (!(logger instanceof Logger)) {
-        logger = new DisabledLogger();
-    }
+ jw.widget.SearchBar = function (input, output, parser,processor ,querier, timeout = 2000, logger = new utils.DisabledLogger()) {
 
     let promList = [];
     let time;
@@ -79,16 +75,16 @@ if (!String.lcs) {
         lastEvent = lastEvent.then(() => {
             if (time === undefined) {
                 time = Date.now();
-                lastTimeout = new Timeout(processEvent, 0);
+                lastTimeout = new utils.Timeout(processEvent, 0);
             } else {
                 if (lastTimeout !== undefined && !lastTimeout.timedOut) {
                     lastTimeout.clear();
                 }
                 logger.info("Waiting for timeout");
                 if (lastTimeout.ended) {
-                    lastTimeout = new Timeout(processEvent, Math.max(timeout - Date.now() + time, 0));
+                    lastTimeout = new utils.Timeout(processEvent, Math.max(timeout - Date.now() + time, 0));
                 } else {
-                    lastTimeout = new Timeout(processEvent, timeout);
+                    lastTimeout = new utils.Timeout(processEvent, timeout);
                 }
             }
         });
@@ -299,9 +295,9 @@ jw.widget.SearchBar.FuzzyConstraintsHolder = class extends jw.widget.SearchBar.C
  * 
  * The `_default` keyword is used to store default values for all fields except `aliases` allowing to not provide any of the said fields if defined here.
  * This keyword also have a `schema` field to register the working schema.
- * @param {Logger} logger 
+ * @param {utils.Logger} logger 
  */
-jw.widget.SearchBar.ConstraintProcessor = function(constraintMap,logger= new DisabledLogger()){
+jw.widget.SearchBar.ConstraintProcessor = function(constraintMap,logger= new utils.DisabledLogger()){
     
     /** This function process conditions as explained in the constructor's documentation.
      *  
@@ -514,9 +510,9 @@ jw.widget.SearchBar.formators = {
  *  - `column` is  the unqualifyed name of the column of `table` this keyword will constraint or select
  * @param {*} keyBuilder a function taking as argument a dictionary where each key is the name of a field queried and each value is the related string value.
  * this function should return a string, this string is used to detect if two entries are duplicated due to 1-N joins. Leave empty for no nomalisation
- * @param {Logger} logger a logger used to produce logs
+ * @param {utils.Logger} logger a logger used to produce logs
  */
-jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.values(d).join(''),logger = new DisabledLogger()){
+jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.values(d).join(''),logger = new utils.DisabledLogger()){
     this.protected = {cache:{conditions:{}},schema: api.getConnector().connector.service.schema};
 
     // return true if `a` contains every elements of `b`

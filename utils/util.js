@@ -1,44 +1,60 @@
-/*/ Classes /*/
 
-class Timeout {
-    constructor(fn, delay) {
-        this.ended = false;
-        this.timedOut = false;
-        let that = this;
-        this.id = setTimeout(() => {
-            that.timedOut = true;
-            let result = fn();
-            if (result !== undefined && result.then) {
-                result.then(that.ended = true);
-            } else {
-                that.ended = true;
-            }
-        }, delay);
-    }
-    clear() {
-        this.ended = true;
-        this.timedOut = true;
-        clearTimeout(this.id);
-    }
-}
+var utils = {
+    Timeout : class {
+        constructor(fn, delay) {
+            this.ended = false;
+            this.timedOut = false;
+            let that = this;
+            this.id = setTimeout(() => {
+                that.timedOut = true;
+                let result = fn();
+                if (result !== undefined && result.then) {
+                    result.then(that.ended = true);
+                } else {
+                    that.ended = true;
+                }
+            }, delay);
+        }
+        clear() {
+            this.ended = true;
+            this.timedOut = true;
+            clearTimeout(this.id);
+        }
+    },
 
-class Logger {
-    constructor() {}
-    log(...log) {console.log(log);}
-    info(...info) {console.info(info);}
-    error(...error) {console.error(error);}
-    warn(...warn) {console.info(warn);}
-}
+    Logger : class {
+        constructor() {}
+        log(...log) {console.log(log);}
+        info(...info) {console.info(info);}
+        error(...error) {console.error(error);}
+        warn(...warn) {console.info(warn);}
+    },
 
-class DisabledLogger extends Logger{
+    unqualifyName : function (table,schema){
+        if(table.indexOf(schema)!=-1){
+            return table.substring(table.indexOf(".",table.indexOf(schema))+1,table.length);
+        }
+        return table;
+    },
+    
+    /**
+     * @param{*} str : String the root query
+     * @param{*} find : String the short string you search in the root query
+     * @param{*} replace : String the replace value of the search element
+     **/
+    replaceAll : function (str, find, replace) {
+        let escapedFind = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+        return str.replace(new RegExp(escapedFind, 'g'), replace);
+    },
+};
+
+utils.DisabledLogger = class extends utils.Logger{
     constructor() {super();}
     log(...log){}
     info(...info){}
     error(...error){}
     warn(...warn){}
-}
-
-/*/ End Of Classes /*/
+};
 
 /*/ Extending Classes /*/
 
@@ -254,23 +270,3 @@ if(!Array.prototype.remove){
 }
 
 /*/ End Of Extending Classes /*/
-
-/*/ Functions /*/
-
-function unqualifyName(table,schema){
-    if(table.indexOf(schema)!=-1){
-        return table.substring(table.indexOf(".",table.indexOf(schema))+1,table.length);
-    }
-    return table;
-}
-
-
-/**
- * @param{*} str : String the root query
- * @param{*} find : String the short string you search in the root query
- * @param{*} replace : String the replace value of the search element
- **/
- function replaceAll(str, find, replace) {
-    let escapedFind = find.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-    return str.replace(new RegExp(escapedFind, 'g'), replace);
-}

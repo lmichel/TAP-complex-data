@@ -1,3 +1,7 @@
+if (typeof utils === "undefined") {
+    throw "JW requires utils to be loaded";
+}
+
 var jw = {
     Api : undefined,
     KnowledgeTank : undefined,

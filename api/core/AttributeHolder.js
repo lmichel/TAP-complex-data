@@ -120,15 +120,15 @@ jw.core.AttributeHolder = function(queryAble){
 
     Holder.getAHAdql = function(table,schema){
         return Holder.getAHColAdql() +
-        " WHERE TAP_SCHEMA.columns.table_name = " + "\'" + replaceAll(table,"\"","\\\"") + "\'" + 
-        " OR TAP_SCHEMA.columns.table_name = " + "\'" + replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","\\\"") + "\'";
+        " WHERE TAP_SCHEMA.columns.table_name = " + "\'" + utils.replaceAll(table,"\"","\\\"") + "\'" + 
+        " OR TAP_SCHEMA.columns.table_name = " + "\'" + utils.replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","\\\"") + "\'";
     };
 
     Holder.getAHsAdql = function(names){
         let full = [];
         for (let name in names){
-            full.push("\'" + replaceAll(names[name],"\"","\\\"") + "\'");
-            full.push("\'" + replaceAll(name,"\"","\\\"") + "\'");
+            full.push("\'" + utils.replaceAll(names[name],"\"","\\\"") + "\'");
+            full.push("\'" + utils.replaceAll(name,"\"","\\\"") + "\'");
         }
         return Holder.getAHColAdql() +
         " WHERE TAP_SCHEMA.columns.table_name IN ( " + full.join(" , ") + " ) ";

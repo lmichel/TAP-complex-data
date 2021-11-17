@@ -94,12 +94,12 @@
             let schema  = this.connector.service.schema;
             let request = 'SELECT DISTINCT tap_schema.tables.table_name as'+
                 ' table_name, tap_schema.tables.description, tap_schema.tables.table_type  FROM tap_schema.tables WHERE tap_schema.tables.schema_name = \'' + 
-                schema + '\' OR  tap_schema.tables.schema_name = \'' +  replaceAll(schema,'"',"") + '\'';
+                schema + '\' OR  tap_schema.tables.schema_name = \'' +  utils.replaceAll(schema,'"',"") + '\'';
 
             let query =await this.query(request);
 
             for(let i=0;i<query.field_values.length;i++){
-                query.field_values[i][0] = unqualifyName(query.field_values[i][0],schema);
+                query.field_values[i][0] = utils.unqualifyName(query.field_values[i][0],schema);
             }
 
             return {"status":true,"all_tables":query.field_values};
@@ -120,7 +120,7 @@
                 ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id\n' +
                 'JOIN tap_schema.tables ON  tap_schema.keys.from_table = tap_schema.tables.table_name\n' +
                 'WHERE  tap_schema.tables.schema_name = \'' + schema + '\' OR  tap_schema.tables.schema_name = \'' + 
-                replaceAll(schema,'"',"") + '\'';
+                utils.replaceAll(schema,'"',"") + '\'';
                 
             let query =await this.query(request);
             
@@ -129,8 +129,8 @@
                 let join;
                 for (let i=0;i<query.field_values.length;i++){
                     join={};
-                    join.from = {table:unqualifyName(query.field_values[i][0],schema),column:query.field_values[i][3]};
-                    join.target = {table:unqualifyName(query.field_values[i][1],schema),column:query.field_values[i][4]};
+                    join.from = {table:utils.unqualifyName(query.field_values[i][0],schema),column:query.field_values[i][3]};
+                    join.target = {table:utils.unqualifyName(query.field_values[i][1],schema),column:query.field_values[i][4]};
                     joins.push(join);
                 }
                 // very few tap schema describes themself so we need to import extra data about it to browse it correctly

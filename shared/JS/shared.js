@@ -2,7 +2,7 @@
 
 /*/ Utility function used by all demo pages /*/
 
-class MyLogger extends Logger {
+class MyLogger extends utils.Logger {
     constructor(div) {
         super();
         this.div = div;
@@ -88,7 +88,7 @@ function removeClass(elemId,className){
 function vizierToID(schema){
     let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`","."];
     for (let i=0;i<chars.length;i++){
-        schema = replaceAll(schema,chars[i],"");
+        schema = utils.replaceAll(schema,chars[i],"");
     }
     return schema;
 }

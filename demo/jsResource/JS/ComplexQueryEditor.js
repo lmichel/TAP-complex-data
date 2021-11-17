@@ -49,9 +49,9 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
         return this.api.getTableQuery().then((val)=>{ //TODO proper selection of the wanted table
             if(val.status){
                 let query = val.query;
-                query = replaceAll(query,"\n (","(");
-                query = replaceAll(query,"AND","AND\n    ");
-                query = replaceAll(query,"  (","(");
+                query = utils.replaceAll(query,"\n (","(");
+                query = utils.replaceAll(query,"AND","AND\n    ");
+                query = utils.replaceAll(query,"  (","(");
                 that.editor.html(hljs.highlight(query ,{"language":"SQL", "ignoreIllegals":true}).value);
             }
         });
