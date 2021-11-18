@@ -9,14 +9,14 @@ var ExtraDrawer ={
                 if(ExtraDrawer.data[holder[i]] === undefined){
                     ExtraDrawer.data[holder[i]] = {};
                 }
-                if(ExtraDrawer.data[holder[i]][events[i]] === undefined){
-                    ExtraDrawer.data[holder[i]][events[i]] = {};
-                    $(holder[i]).on(events[i],ExtraDrawer.reDrawer(holder[i],events[i]));
+                if(ExtraDrawer.data[holder[i]][events[j]] === undefined){
+                    ExtraDrawer.data[holder[i]][events[j]] = {};
+                    $(holder[i]).on(events[j],ExtraDrawer.reDrawer(holder[i],events[j]));
                 }
-                if(ExtraDrawer.data[holder[i]][events[i]][nodeID] === undefined){
-                    ExtraDrawer.data[holder[i]][events[i]][nodeID] = [];
+                if(ExtraDrawer.data[holder[i]][events[j]][nodeID] === undefined){
+                    ExtraDrawer.data[holder[i]][events[j]][nodeID] = [];
                 }
-                ExtraDrawer.data[holder[i]][events[i]][nodeID].push(drawer);
+                ExtraDrawer.data[holder[i]][events[j]][nodeID].push(drawer);
             }
         }
         drawer(nodeID);
@@ -67,6 +67,8 @@ var TapTree = function(){
                 "title":"Double click to filter the visible tables"
             },
         });
+
+        this.filterMap = {};
 
         this.root = tree.get_node("#" + this.treeID);
 
@@ -151,9 +153,9 @@ var TapTree = function(){
                                 "icon": false,
                             });
                         }
+                        this.applyFilter();
                         this.tree.delete_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem + "_dummy"));
-
-                        ExtraDrawer.drawExtra(this.rootHolder,this.treeID + "_" + safeSchem,this.reDrawerFactory(safeSchem,tables),["before_open.jstree"]);
+                        ExtraDrawer.drawExtra(this.rootHolder,this.treeID + "_" + safeSchem,this.reDrawerFactory(safeSchem,tables),["before_open.jstree","after_open.jstree"]);
                     }else {
                         alert(tables.error.logs);
                     }
@@ -201,10 +203,78 @@ var TapTree = function(){
         return () => {};
     };
 
+    TapTree.prototype.resetFilter = function(){
+        this.filterMap = {};
+        this.tree.show_all();
+        let safeSchem;
+        let schemNode;
+        for (let schem in this.schemas){
+            safeSchem = vizierToID(schem);
+            schemNode = this.tree.get_node("#" + this.treeID + "_" + safeSchem);
+            if(this.tree.is_open(schemNode)){
+                this.tree.close_node(schemNode,false);
+                this.tree.open_node(schemNode);
+            }
+        }
+    };
+
+    TapTree.prototype.applyFilter = function(){
+        this.tree.show_all();
+
+        // tables of each schema are cached there if a table isn't cached we can't have a node for it
+        let schemas = this.api.getSchemas();
+        if(schemas.status){
+            this.schemas = schemas.schemas;
+        } 
+        let safeSchem;
+        let schemNode;
+        for (let schem in this.schemas){
+            safeSchem = vizierToID(schem);
+            schemNode = this.tree.get_node("#" + this.treeID + "_" + safeSchem);
+            if(this.filterMap[schem]=== undefined){
+                this.tree.hide_node(schemNode);
+            } else {
+                if(this.schemas[schem].tables !== undefined){
+                    let safeTable;
+                    for (let table in this.schemas[schem].tables ){
+                        if(!this.filterMap[schem].includes(table)){
+                            safeTable = vizierToID(table);
+                            this.tree.hide_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem + "_" + safeTable));
+                        }
+                    }
+                    if(this.tree.is_open(schemNode)){
+                        this.tree.close_node(schemNode,false);
+                        this.tree.open_node(schemNode);
+                    }
+                }
+            }
+        }
+    };
 
     TapTree.prototype.filter = function(filter){
-        console.log(this);
-        console.log(filter);
+        if (filter.length == 0){
+            this.resetFilter();
+            return;
+        }
+        let schemas = Array.from(new Set(filter.map(x=>x.schema)));
+        this.filterMap = schemas.map(s=>{
+            let v ={};
+            v[jw.Api.safeQualifier([s]).qualified]=filter.reduce((p,c)=>{
+                if(c.schema == s){
+                    p.push(utils.unqualifyName(c.default,s));
+                }
+                return p;
+            },[]);
+            return v;
+        }).reduce((o,n)=>{
+            for(let k in n){
+                o[k] = n[k];
+            }
+            return o;
+        },{});
+
+        this.applyFilter();
+
     };
 
     return TapTree;
@@ -228,12 +298,22 @@ var TapTreeList = function(){
                 default : {
                     table : "tables",
                     column : "table_name",
-                    merger : jw.widget.SearchBar.mergers.likeMerger,
+                    merger : jw.widget.SearchBar.mergers.likeMerger(),
                     formator : jw.widget.SearchBar.formators.fuzzyStringFormator
                 }
             },
             barApi : new jw.Api(),
-            sBarOut : {push:()=>{}}
+            sBarOut : {
+                push:(data)=>{
+                    if(data.length>0 && data[0].default !== undefined){
+                        this.protected.sBarOut.pusher(data);
+                    }else{
+                        this.protected.sBarOut.reset();
+                    }
+                },
+                pusher:()=>{},
+                reset : ()=>{}
+            }
         };
 
         this.treeHolder.jstree({
@@ -243,7 +323,6 @@ var TapTreeList = function(){
         });
         this.tree = this.treeHolder.jstree(true);
         this.treeHolder.on("activate_node.jstree",(event,node)=>{
-            console.log(node);
             node = node.node;
             let ID = node.parents.length == 1 ? node.id : node.parents[node.parents.length-2];
             let tree = this.treeMap[Object.keys(this.treeMap).filter(id=>this.treeMap[id].tree.getID()==ID)];
@@ -265,30 +344,46 @@ var TapTreeList = function(){
                 let schema = Object.keys(map.tree.getSchemas()).filter(v=>v.match(/TAP_SCHEMA/i))[0];
                 tree.protected.constraintMap._default.schema = schema;
                 tree.protected.barApi.selectSchema(schema).then(()=>{
-                    tree.protected.barApi.setRootTable("tables").then((val)=>{
-                        if( val.status){
-                            tree.protected.sBarOut.push = map.tree.filter.bind(map.tree);
-                            if(tree.protected.searchBar === undefined){
-                                tree.protected.barApi.selectSchema("tap_schema");
-                                let querier = new jw.widget.SearchBar.Querier(tree.protected.barApi,{
-                                    "schema":{
-                                        table:"tables",
-                                        column:"schema_name",
-                                    }
-                                });
-                                let processor = new jw.widget.SearchBar.ConstraintProcessor(tree.protected.constraintMap);
-                                let parser = new jw.widget.SearchBar.StringParser(Object.keys(tree.protected.constraintMap),":");
-                                tree.protected.searchBar = jw.widget.SearchBar(
-                                    $("input",tree.holder),
-                                    tree.protected.sBarOut,
-                                    parser,
-                                    processor,
-                                    querier,
-                                );
-                            }
-                            $("input",tree.holder).prop( "disabled", false );
+                    tree.protected.barApi.query('SELECT UPPER(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables').then( (val)=>{
+                        if(val.status){
+                            tree.protected.constraintMap.default.merger = jw.widget.SearchBar.mergers.likeMerger("UPPER");
+                        }else {
+                            return tree.protected.barApi.query('SELECT uppercase(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables').then((val)=>{
+                                if(val.status){
+                                    tree.protected.constraintMap.default.merger = jw.widget.SearchBar.mergers.likeMerger("uppercase");
+                                }else {
+                                    tree.protected.constraintMap.default.merger = jw.widget.SearchBar.mergers.likeMerger("");
+                                }
+                            });
                         }
+                    }).then(()=>{
+                        tree.protected.barApi.setRootTable("tables").then((val)=>{
+                            if( val.status){
+                                tree.protected.sBarOut.pusher = map.tree.filter.bind(map.tree);
+                                tree.protected.sBarOut.reset = map.tree.resetFilter.bind(map.tree);
+                                if(tree.protected.searchBar === undefined){
+                                    tree.protected.barApi.selectSchema("tap_schema");
+                                    let querier = new jw.widget.SearchBar.Querier(tree.protected.barApi,{
+                                        "schema":{
+                                            table:"tables",
+                                            column:"schema_name",
+                                        }
+                                    });
+                                    let processor = new jw.widget.SearchBar.ConstraintProcessor(tree.protected.constraintMap);
+                                    let parser = new jw.widget.SearchBar.StringParser(Object.keys(tree.protected.constraintMap),":");
+                                    tree.protected.searchBar = jw.widget.SearchBar(
+                                        $("input",tree.holder),
+                                        tree.protected.sBarOut,
+                                        parser,
+                                        processor,
+                                        querier,
+                                    );
+                                }
+                                $("input",tree.holder).prop( "disabled", false );
+                            }
+                        });
                     });
+                    
                 });
             });
         };

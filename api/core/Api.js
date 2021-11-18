@@ -199,7 +199,7 @@
     };
 
     jw.Api.prototype.query = async function(query){
-        if(this.connectLevel==3){
+        if(this.connectLevel>0){
             return this.tapServiceConnector.query(query);
         } else {
             return {"status":false,"error" :{ "logs": "No active TAP connection","params":{"query":query}}};

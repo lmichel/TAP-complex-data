@@ -69,7 +69,7 @@ async function setupEventHandlers(){
             aliases : ["name","ivoid","title"],
             column : "short_name",
             formator:jw.widget.SearchBar.formators.fuzzyStringFormator,
-            merger : jw.widget.SearchBar.mergers.likeMerger,
+            merger : jw.widget.SearchBar.mergers.likeMerger("UPPER"),
         },
     };
 

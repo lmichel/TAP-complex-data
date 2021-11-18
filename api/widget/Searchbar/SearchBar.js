@@ -441,28 +441,31 @@ jw.widget.SearchBar.mergers = {
      * this merger is using `like` or `=` to form conditions based on the detection of `%`
      * this merger can be used with aliases
      */
-    likeMerger : {
-        merge : function(conditions,schema,table,column,merge){
+    likeMerger :function (upper=""){
+        return {
+            merge : function(conditions,schema,table,column,merge){
 
-            let base =jw.Api.safeQualifier([schema,table,column]).qualified,fullCondition="";
-            conditions.forEach((condition)=>{
-                if(condition.indexOf("%") == -1){
-                    fullCondition +=  base + " = " + condition + " OR ";
-                }else {
-                    fullCondition += "uppercase(" + base + ") LIKE " + condition.toUpperCase() + " OR ";
-                }
-            });
-            if(merge === undefined){
-                return new jw.widget.SearchBar.FuzzyConstraintsHolder(Array.from(conditions),fullCondition.substr(0,fullCondition.length-4));
-            } else {
-                return new jw.widget.SearchBar.FuzzyConstraintsHolder(conditions.concat(merge.values),fullCondition + merge.getConstraint(),
-                    merge.degree+1 ,
-                    (v)=>{
-                        return v/(merge.degree+2) - conditions.concat(merge.values).filter(e=>e.endsWith("%")).length +1;
+                let base =jw.Api.safeQualifier([schema,table,column]).qualified,fullCondition="";
+                conditions.forEach((condition)=>{
+                    if(condition.indexOf("%") == -1){
+                        fullCondition +=  base + " = " + condition + " OR ";
+                    }else {
+                        fullCondition += (upper.length>0 ? upper + "(":"") + base + (upper.length>0 ? ")": "") + " LIKE " +
+                            (upper.length>0 ? condition.toUpperCase() : condition) + " OR ";
                     }
-                );
+                });
+                if(merge === undefined){
+                    return new jw.widget.SearchBar.FuzzyConstraintsHolder(Array.from(conditions),fullCondition.substr(0,fullCondition.length-4));
+                } else {
+                    return new jw.widget.SearchBar.FuzzyConstraintsHolder(conditions.concat(merge.values),fullCondition + merge.getConstraint(),
+                        merge.degree+1 ,
+                        (v)=>{
+                            return v/(merge.degree+2) - conditions.concat(merge.values).filter(e=>e.endsWith("%")).length +1;
+                        }
+                    );
+                }
             }
-        }
+        };
     }
 };
 
