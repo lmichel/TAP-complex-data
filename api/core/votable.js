@@ -1117,7 +1117,7 @@ function VOTableParser() {
       // and take in account the rest we obtained at previous value's streaming
       needBit = Math.ceil((dataSize - bufferLenght) / 6);
 
-      byteDelta = dataB64.substring(ptrStream).length - needBit
+      byteDelta = dataB64.length - needBit - ptrStream;
       // byteDelta <0 represent a lack of available data compared to the data size
       // it's checking if don't need more bits than we have available
       // this avoid sending additional errored data.

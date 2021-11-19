@@ -55,7 +55,7 @@ async function setupEventHandlers(){
             formator : jw.widget.SearchBar.formators.simpleStringFormator
         },
         "name":{column:"short_name"},
-        "roleIvoid":{column:"role_ivoid"},
+        "roleIvoid":{table:"res_role",column:"role_ivoid"},
         "ivoid":{column:"ivoid"},
         "desc":{column:"res_description"},
         "title":{column:"res_title"},

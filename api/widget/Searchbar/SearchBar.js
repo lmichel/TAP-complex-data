@@ -553,11 +553,12 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
     };
 
     this.protected.normalize = function (data) {
-        let nDat = [], known = [];
+        let nDat = [], known = new Set(),k;
         for (let i = 0; i < data.length; i++) {
-            if (!known.includes(keyBuilder(data[i]))) {
+            k=keyBuilder(data[i]);
+            if (!known.has(k)) {
                 nDat.push(data[i]);
-                known.push(keyBuilder(data[i]));
+                known.add(k);
             }
         }
         return nDat;

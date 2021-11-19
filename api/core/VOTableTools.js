@@ -102,6 +102,55 @@
         return nameFields; //name of field and data
     };
 
+    jw.core.VOTableTools.getRowAndField = function(content){
+        let p = new VOTableParser();
+        let data;
+        let field = [];
+
+        if (content.includes("base64")) {
+            data = p.loadFile(content); //store the data(2-dimensional array) after query by url
+            let nameFields = p.getCurrentTableFields(); //store all the information of field
+            let nbFields = nameFields.length;
+
+            for (var i = 0; i < nbFields; i++) {
+                field.push(nameFields[i].name); //store the name of filed
+            }
+        } else {
+            data = [];
+            let i=0;
+            let nodeData,cDataContent;
+            $(content).find('RESOURCE[type="results"]').each(function () {
+                $(this).find("FIELD").each(function () {
+                    field.push(this.attributes.name.nodeValue);
+                });
+                const cdata="[CDATA";
+                $(this).find("TR").each(function () {
+                    data.push([]);
+                    $(this).find("TD").each(function () {
+                        if(typeof this.childNodes[0] == typeof undefined){
+                            data[i].push("");
+                        }else{
+                            nodeData = this.childNodes[0].data;
+
+                            if(nodeData.startsWith(cdata)){
+                                    cDataContent =(nodeData.replace("[CDATA[","").replace("]]",""));
+                                    data[i].push(cDataContent);  
+                            }else{
+                                data[i].push(this.textContent);
+                            }
+                        }
+                    });
+                    i++;
+                });
+            });
+
+
+        }
+        
+        p.cleanMemory();
+        return {row:data,fields:field}; //name of field and data
+    };
+
     /***
        * Get the name of field
        * @param vObject: votable object.

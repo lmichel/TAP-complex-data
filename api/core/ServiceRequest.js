@@ -58,25 +58,14 @@
             }
 
             if (output.status === 200){
-                dataTable = jw.core.VOTableTools.votable2Rows(output);
-                let fields = jw.core.VOTableTools.genererField(output,output.responseText);
-                let nbCols = fields.length;
-                let singleArrayValue = [];
-                let doubleArrayValue = [];
-                let col;
-                if(nbCols <1 && dataTable.length > 0){
+                let data = jw.core.VOTableTools.getRowAndField(output.responseText);
+                console.log(data);
+                let nbCols = data.fields.length;
+                if(nbCols <1 && data.row.length > 0){
                     return {"status" : false , "error":{"logs" :"Error in columns parsing" } };
                 }
-                for (let rowNb = 0; rowNb < dataTable.length; rowNb += nbCols) {
-                    for (col = 0; col < nbCols; col++) {
-                        singleArrayValue.push(dataTable[rowNb+col]);
-                    }
-                    doubleArrayValue.push(singleArrayValue);
 
-                    singleArrayValue = [];
-                }
-
-                return {"status" : true , "field_values" :doubleArrayValue,"field_names":fields,"answer":output};
+                return {"status" : true , "field_values" :data.row,"field_names":data.fields,"answer":output};
 
             } else {
                 console.error(output);
