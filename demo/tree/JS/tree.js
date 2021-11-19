@@ -141,11 +141,14 @@ var TapTree = function(){
                     let tables = this.api.getTables();
                     let tableSafe;
                     if(tables.status){
-
+                        let node = this.tree.get_node("#" + this.treeID + "_" + safeSchem);
                         tables = tables.tables;
+                        if(Object.keys(tables).length>500){
+                            this.tree.close_node(node);
+                        }
                         for (let table in tables){
                             tableSafe = vizierToID(table);
-                            this.tree.create_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem),{
+                            this.tree.create_node(node,{
                                 "id":this.treeID + "_" + safeSchem + "_" + tableSafe,
                                 "text":table,
                                 "a_attr":{
@@ -155,6 +158,9 @@ var TapTree = function(){
                             });
                         }
                         this.applyFilter();
+                        if(Object.keys(tables).length>500){
+                            this.tree.open_node(node);
+                        }
                         this.tree.delete_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem + "_dummy"));
                         ExtraDrawer.drawExtra(this.rootHolder,this.treeID + "_" + safeSchem,this.reDrawerFactory(safeSchem,tables),["before_open.jstree","after_open.jstree"]);
                     }else {
@@ -233,6 +239,8 @@ var TapTree = function(){
         } 
         let safeSchem;
         let schemNode;
+        let wasOpen;
+        let toClose;
         for (let schem in this.schemas){
             safeSchem = vizierToID(schem);
             schemNode = this.tree.get_node("#" + this.treeID + "_" + safeSchem);
@@ -241,14 +249,23 @@ var TapTree = function(){
             } else {
                 if(this.schemas[schem].tables !== undefined){
                     let safeTable;
+                    wasOpen =this.tree.is_open(schemNode);
+                    toClose = true;
+                    if(Object.keys(this.schemas[schem].tables).length>500 && wasOpen){
+                        
+                        this.tree.close_node(schemNode,false);
+                        toClose = false;
+                    }
                     for (let table in this.schemas[schem].tables ){
                         if(!this.filterMap[schem].includes(table)){
                             safeTable = vizierToID(table);
                             this.tree.hide_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem + "_" + safeTable));
                         }
                     }
-                    if(this.tree.is_open(schemNode)){
-                        this.tree.close_node(schemNode,false);
+                    if(wasOpen){
+                        if(toClose){
+                            this.tree.close_node(schemNode,false);
+                        }
                         this.tree.open_node(schemNode);
                     }
                 }
