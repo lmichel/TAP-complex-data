@@ -42,7 +42,7 @@ if (!String.lcs) {
     let lastTimeout;
     let lastEvent = new Promise((resolve) => { resolve(); });
 
-    let processEvent = () => {
+    this.processEvent = () => {
         logger.info("Parsing search string");
         let parsed = parser.parseString(input.val(), logger);
         logger.log(parsed);
@@ -75,16 +75,16 @@ if (!String.lcs) {
         lastEvent = lastEvent.then(() => {
             if (time === undefined) {
                 time = Date.now();
-                lastTimeout = new utils.Timeout(processEvent, 0);
+                lastTimeout = new utils.Timeout(this.processEvent, 0);
             } else {
                 if (lastTimeout !== undefined && !lastTimeout.timedOut) {
                     lastTimeout.clear();
                 }
                 logger.info("Waiting for timeout");
                 if (lastTimeout.ended) {
-                    lastTimeout = new utils.Timeout(processEvent, Math.max(timeout - Date.now() + time, 0));
+                    lastTimeout = new utils.Timeout(this.processEvent, Math.max(timeout - Date.now() + time, 0));
                 } else {
-                    lastTimeout = new utils.Timeout(processEvent, timeout);
+                    lastTimeout = new utils.Timeout(this.processEvent, timeout);
                 }
             }
         });

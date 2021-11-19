@@ -46,7 +46,7 @@
             return {"status":true};
         }
         let allTables = await this.getAllTables();
-        this.tables = {};
+        this.tables = schema.match(/TAP_SCHEMA/i)? jw.KnowledgeTank.tapSchemaTables: {};
         if (allTables.status ){
             allTables = allTables.all_tables;
             for (let i=0;i<allTables.length;i++){

@@ -69,6 +69,7 @@ var TapTree = function(){
         });
 
         this.filterMap = {};
+        this.filtered = false;
 
         this.root = tree.get_node("#" + this.treeID);
 
@@ -204,6 +205,7 @@ var TapTree = function(){
     };
 
     TapTree.prototype.resetFilter = function(){
+        this.filtered = false;
         this.filterMap = {};
         this.tree.show_all();
         let safeSchem;
@@ -219,6 +221,9 @@ var TapTree = function(){
     };
 
     TapTree.prototype.applyFilter = function(){
+        if(!this.filtered){
+            return;
+        }
         this.tree.show_all();
 
         // tables of each schema are cached there if a table isn't cached we can't have a node for it
@@ -252,10 +257,7 @@ var TapTree = function(){
     };
 
     TapTree.prototype.filter = function(filter){
-        if (filter.length == 0){
-            this.resetFilter();
-            return;
-        }
+        this.filtered = true;
         let schemas = Array.from(new Set(filter.map(x=>x.schema)));
         this.filterMap = schemas.map(s=>{
             let v ={};
@@ -305,9 +307,10 @@ var TapTreeList = function(){
             barApi : new jw.Api(),
             sBarOut : {
                 push:(data)=>{
-                    if(data.length>0 && data[0].default !== undefined){
+                    if(data.length ==0 || data[0].default !== undefined){
+                        this.protected.sBarOut.cache = data;
                         this.protected.sBarOut.pusher(data);
-                    }else{
+                    }else {
                         this.protected.sBarOut.reset();
                     }
                 },
@@ -362,7 +365,6 @@ var TapTreeList = function(){
                                 tree.protected.sBarOut.pusher = map.tree.filter.bind(map.tree);
                                 tree.protected.sBarOut.reset = map.tree.resetFilter.bind(map.tree);
                                 if(tree.protected.searchBar === undefined){
-                                    tree.protected.barApi.selectSchema("tap_schema");
                                     let querier = new jw.widget.SearchBar.Querier(tree.protected.barApi,{
                                         "schema":{
                                             table:"tables",
@@ -371,13 +373,15 @@ var TapTreeList = function(){
                                     });
                                     let processor = new jw.widget.SearchBar.ConstraintProcessor(tree.protected.constraintMap);
                                     let parser = new jw.widget.SearchBar.StringParser(Object.keys(tree.protected.constraintMap),":");
-                                    tree.protected.searchBar = jw.widget.SearchBar(
+                                    tree.protected.searchBar = new jw.widget.SearchBar(
                                         $("input",tree.holder),
                                         tree.protected.sBarOut,
                                         parser,
                                         processor,
                                         querier,
                                     );
+                                } else {
+                                    tree.protected.searchBar.processEvent();
                                 }
                                 $("input",tree.holder).prop( "disabled", false );
                             }

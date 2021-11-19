@@ -51,7 +51,7 @@ async function setupEventHandlers(){
         "_default": {
             table : "resource",
             schema : "rr",
-            merger : jw.widget.SearchBar.mergers.likeMerger,
+            merger : jw.widget.SearchBar.mergers.likeMerger(),
             formator : jw.widget.SearchBar.formators.simpleStringFormator
         },
         "name":{column:"short_name"},
