@@ -59,7 +59,6 @@
 
             if (output.status === 200){
                 let data = jw.core.VOTableTools.getRowAndField(output.responseText);
-                console.log(data);
                 let nbCols = data.fields.length;
                 if(nbCols <1 && data.row.length > 0){
                     return {"status" : false , "error":{"logs" :"Error in columns parsing" } };

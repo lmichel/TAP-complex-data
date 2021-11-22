@@ -83,8 +83,10 @@ if (!String.lcs) {
                 logger.info("Waiting for timeout");
                 if (lastTimeout.ended) {
                     lastTimeout = new utils.Timeout(this.processEvent, Math.max(timeout - Date.now() + time, 0));
+                    time = Date.now();
                 } else {
                     lastTimeout = new utils.Timeout(this.processEvent, timeout);
+                    time = Date.now();
                 }
             }
         });
@@ -195,7 +197,6 @@ jw.widget.SearchBar.ConstraintsHolder = class {
      * @param {ConstraintHolder} other Other has to either includes or being included by the current object for this computation to work
      */
     getDistance(other) {
-        console.log("evaluating distance");
         let dist,sum=0,i,valsL,valsS;
         
         // always determine which is the longest and shortest is needed to ensure that other.getDistance(this) == this.getDistance(other)
@@ -250,7 +251,6 @@ jw.widget.SearchBar.FuzzyConstraintsHolder = class extends jw.widget.SearchBar.C
                 }else{
                     test = test || other.values[i].startsWith(this.values[j]);
                 }
-                console.log(test);
                 j++;
             }
             include = include && test;
@@ -571,8 +571,7 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
      */
     this.queryData = function(conditions){
         // if a keyword from conditions is not in the cache or in the defaults the cache can't be used as it won't contains data related to this keyword
-        //FIX ME cache not working
-        if(false && this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
+        if(this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
             this.protected.arrayIncludes(Object.keys(conditions),Object.keys(this.protected.cache.conditions)) && this.protected.cache.values !== undefined
         ){
             // checking that all cached conditions are less restrictive than the conditions we are evaluating
@@ -582,7 +581,6 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                     (defaults[kw] !== undefined && defaults[kw].condition !== undefined ? defaults[kw].condition.includes(conditions[kw].condition) : true);
             });
             if(includeTest){
-                console.log("Include test OK");
                 // checking how much the conditions changed
                 let delta = 0,d;
                 Object.keys(conditions).forEach((kw)=>{
@@ -595,8 +593,11 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                     }
                     delta += Math.min(...d);
                 });
-                console.log(delta);
-                if(delta<5){
+                if(delta == 0){
+                    return this.protected.normalize(this.protected.cache.values);
+                }
+                //FIX ME cache evaluation not working
+                if(false && delta<5){
                     console.log("Delta OK");
                     let nval = [];
                     this.protected.cache.values.forEach((data)=>{

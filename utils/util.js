@@ -9,7 +9,7 @@ var utils = {
                 that.timedOut = true;
                 let result = fn();
                 if (result !== undefined && result.then) {
-                    result.then(that.ended = true);
+                    result.then(()=>{that.ended = true;});
                 } else {
                     that.ended = true;
                 }
