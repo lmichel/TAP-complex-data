@@ -65,7 +65,7 @@ async function setupEventHandlers(){
         "tableDesc":{table:"res_table",column:"table_description"},
         "utype":{table:"res_table",column:"table_utype"},
         "url":{table:"interface",column:"access_url"},
-        "default":{
+        "noField":{
             aliases : ["name","ivoid","title"],
             column : "short_name",
             formator:jw.widget.SearchBar.formators.fuzzyStringFormator,
@@ -95,7 +95,7 @@ async function setupEventHandlers(){
                 for (let field in dat){
                     if(field[0] == "_")
                         continue;
-                    if(field == "default")
+                    if(field == "noField")
                         continue;
                     li += "<br>" + field + " : " + dat[field]; 
                 }

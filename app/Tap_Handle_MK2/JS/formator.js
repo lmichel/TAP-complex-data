@@ -5,13 +5,15 @@
  * @returns {___anonymous_ValueFormator}
  */
 ValueFormator = function() {
-	var raValue = undefined;
-	var decValue = undefined;
+	var raValue;
+	var decValue;
 	var reset = function(){
 		raValue = undefined;
 		decValue = undefined;		
 	};
 	var dataTreePath;
+	let decimaleRegexp = new RegExp("^[+-]?[0-9]*[.][0-9]*([eE][+-]?[0-9]+)?$","m");
+	let bibcodeRegexp = new RegExp(/^[12][089]\d{2}[A-Za-z][A-Za-z0-9&][A-Za-z0-9&.]{2}[A-Za-z0-9.][0-9.][0-9.BCRU][0-9.]{2}[A-Za-z0-9.][0-9.]{4}[A-Z:.]$/);
 	
 	/**
 	 * 
@@ -97,10 +99,10 @@ ValueFormator = function() {
 		if( value.match(/^((position)|(region)|(polygon)|(circle))/i) ) {
 			//addSTCRegionControl(tdNode, value);
 			if(columnMap.s_ra != -1 && columnMap.s_dec !=-1){
-						var ra=raValue;
-						var dec=decValue;
-						var dec_name = columnNames[1];
-						var ra_name = columnNames[0];
+						let ra=raValue;
+						let dec=decValue;
+						let dec_name = columnNames[1];
+						let ra_name = columnNames[0];
 						//alert(ra_name+"  "+columnMap.s_ra);
 						addSTCRegionControl(tdNode, value,ra,dec,ra_name,dec_name);	
 				}
@@ -118,31 +120,22 @@ ValueFormator = function() {
 			if(columnMap.s_ra != -1 && columnMap.s_dec !=-1){
 						var ra=raValue;
 						var dec=decValue;
-						var dec_name = columnNames[1];
-						var ra_name = columnNames[0];	
-						//alert(ra_name+"  "+dec_name)
-						//alert (getCurrentName().quotedTableName().qualifiedName); 
-						var tableBase=  dataTreePath.schema+"."+dataTreePath.table;
 						var tab=  tableBase.quotedTableName().qualifiedName;
-						//var urlPath = myNodeInfo(dataTreeView.dataTreePath.nodekey).info.url;
 						isloadAlix=true;
-						var title = dataTreePath.nodekey+">"+tab;
-						//dataTreeView.showNodeInfos( dataTreePath.nodekey );
-						var id = "dec_"+ dec.toString().replace(".", "").replace("-", "")
-						//console.log(positions+" @@@@@@@@@@@@@@@@@@@@@@@@@  "+urlPath)
+
+						var id = "dec_"+ dec.toString().replace(".", "").replace("-", "");
 						var alLink = "<a id='" + id + "'  class='dl_aladin'  title='Send source coordo to Alix'></a>";
-						tdNode.html(alLink + " " + (new Number(value)).toPrecision(8));
+						tdNode.html(alLink + " " +  Number(value).toPrecision(8));
 						 tdNode.first().click(function(){
 							var dec_name = columnNames[1];
 							var ra_name = columnNames[0];
-							var label = "TAP "+ dataTreePath.nodekey + " " + tableBase;
+							var label = "TAP "+ columnName;
 							alixapi.showPopupData({
 								master: {
 									raCenter: ra, 
 									decCenter: dec, 
 									raColumn: ra_name,
 									decColumn: dec_name,
-									//urlPath: urlPath, 
 									tablePath: tab, 
 									label: label	
 									},
@@ -161,7 +154,7 @@ ValueFormator = function() {
 		    
 			//tdNode.html("<span title='" + value + "' style =' cursor: pointer;' onclick='alixapi.drawCircle(\"" + value + "\");'>" + value.substring(0, 23) + " ... </span>");	
 		} else if( decimaleRegexp.test(value)){
-			tdNode.html((new Number(value)).toPrecision(8));
+			tdNode.html(Number(value).toPrecision(8));
 		} else if( bibcodeRegexp.test(value)){
 			tdNode.html("<a title=\"bibcode\" href='http://cdsads.u-strasbg.fr/cgi-bin/nph-bib_query?" + value + "' target=blank>" + value + "</a>");
 		} else {

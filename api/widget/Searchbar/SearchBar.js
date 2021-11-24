@@ -110,7 +110,7 @@ jw.widget.SearchBar.StringParser = function (keyWords, separator) {
     this.parseString = function (str, logger) {
         let splitted = [str];
         let newSplit, partialSplit;
-        let data = { "default": [] };
+        let data = { "noField": [] };
         let j, k;
 
         //splitting the string on all separator to get nice strings to work with
@@ -143,7 +143,7 @@ jw.widget.SearchBar.StringParser = function (keyWords, separator) {
                 }
             }
         }
-        data.default = data.default.concat(defaultVal);
+        data.noField = data.noField.concat(defaultVal);
 
         logger.log(data);
 
@@ -272,6 +272,9 @@ jw.widget.SearchBar.FuzzyConstraintsHolder = class extends jw.widget.SearchBar.C
  * This class provide a post processing for conditions taking the output object of the parser and transforming it to be usable by the querier
  * @param {*} constraintMap a map in the form of {kw:{aliases:[],table,column,formator,merger}...} with two behavior depending on if `aliases` is set or not
  * and a special keyword `_default`. the map's element are defined as :
+ * 
+ * /!\ due to some tap services not being able to understand quotes *cough* STSCI's CAOM *cough* use safe keywords and 
+ * be awaire that kewords will be matched without taking in account the case 
  * 
  * for each element of the map if aliases is not set :
  *  - `kw` can be a keyword of the parser, this keyword will be passed to querier as defined in the return object of the `processConditions` method
@@ -515,7 +518,7 @@ jw.widget.SearchBar.formators = {
  * this function should return a string, this string is used to detect if two entries are duplicated due to 1-N joins. Leave empty for no nomalisation
  * @param {utils.Logger} logger a logger used to produce logs
  */
-jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.values(d).join(''),logger = new utils.DisabledLogger()){
+jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.values(d).join(''),logger = new utils.DisabledLogger(),cache=true){
     this.protected = {cache:{conditions:{}},schema: api.getConnector().connector.service.schema};
 
     // return true if `a` contains every elements of `b`
@@ -529,19 +532,23 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
     this.protected.getSelect= function(conditionMap){
         let select = "SELECT ";
         for(let kw in conditionMap){
-            select += jw.Api.safeQualifier([this.schema, conditionMap[kw].table, conditionMap[kw].column]).qualified + " AS \"" + kw + "\", ";
+            select += jw.Api.safeQualifier([this.schema, conditionMap[kw].table, conditionMap[kw].column]).qualified + " AS " + jw.Api.safeQualifier([kw]).qualified + ", ";
         }
         for (let kw in defaults){
             if(conditionMap[kw] === undefined){
-                select += jw.Api.safeQualifier([this.schema, defaults[kw].table, defaults[kw].column]).qualified + " AS \"" + kw + "\", ";
+                select += jw.Api.safeQualifier([this.schema, defaults[kw].table, defaults[kw].column]).qualified + " AS " + jw.Api.safeQualifier([kw]).qualified + ", ";
             }
         }
         return select.substr(0, select.length - 2) + " ";
     };
 
-    this.protected.arraysToMaps = function (arrays) {
+    this.protected.arraysToMaps = function (arrays,keywords) {
         let maps = [];
         let map;
+        // Fixing STSCI
+        arrays.field_names = arrays.field_names.map((oldK)=>{
+            return keywords.filter(k=>k.toUpperCase() == oldK.toUpperCase())[0];
+        });
         for (let i = 0; i < arrays.field_values.length; i++) {
             map = {};
             for (let j = 0; j < arrays.field_names.length; j++) {
@@ -571,7 +578,7 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
      */
     this.queryData = function(conditions){
         // if a keyword from conditions is not in the cache or in the defaults the cache can't be used as it won't contains data related to this keyword
-        if(this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
+        if(cache && this.protected.arrayIncludes(Object.keys(this.protected.cache.conditions).concat(Object.keys(defaults)),Object.keys(conditions)) &&
             this.protected.arrayIncludes(Object.keys(conditions),Object.keys(this.protected.cache.conditions)) && this.protected.cache.values !== undefined
         ){
             // checking that all cached conditions are less restrictive than the conditions we are evaluating
@@ -677,7 +684,7 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                 logger.log(val);
                 if (val.status) {
                     this.protected.cache.conditions = conditions;
-                    this.protected.cache.values = this.protected.arraysToMaps(val);
+                    this.protected.cache.values = this.protected.arraysToMaps(val,Array.from(new Set(Object.keys(conditions).concat(Object.keys(defaults)))) );
                     return this.protected.normalize(this.protected.cache.values);
                 }
                 return [];
@@ -686,307 +693,3 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
 
     };
 };
-
-//TODO : make this hell easier to understand.
-/**
- * 
- * @param {TapApi} api Tap Api instance with a root table already selected. Queries will be created from the root table query ensure 
- * 
- * @param {*} fieldMap A map in the form of  {name:{tableName,conditionBase,transform,merger}...} where :
- *  - `name` is one the keywords of the StringParser or a dummy entry to be used with the `exceptionMap`
- * this field is used to name the fields of dict composing the array returned by the `queryData` method
- *  - `tableName` is the name of the table which the builded constraints will apply to
- *  - `conditionBase` is a string representing the fully qualified name of the field which will be constrained.
- * This value is also used to automaticly select fields to query see the `exceptionMap` parameter to see how to allow more complex conditionBase to work
- *  - `transform` is a function called on each value which will be used to constrain the query 
- *  - `merger` is a function which is called with as arguements a list of transformed values and conditionBase
- *  this function must return a string representing a valid constrains, 
- *  which can be placed after a `WHERE` and can be composed with other constrains with `AND` and `OR`
- * 
- * @param {*} defaultConditions A map of the form of {name:condition} where :
- *  - `name` is one the keywords of the StringParser
- *  - `condition` is a string representing a valid constrains
- * which can be placed after a `WHERE` and can be composed with other constrains with `AND` and `OR`
- * 
- * This map is used to add default constrains to the query.
- * 
- * @param {*} exceptionMap A map of the form {name:[name,name]...} where :
- *  - `name` is one the keywords of the `fieldMap`
- * 
- * This map is used to convert complex `conditionBase` of the `fieldMap` into simpler and valid names to use instead 
- * if keyword `a` should constrains two fields of the same table then the `exceptionMap` would have a field looking like `a:[b,c]`
- * this process is not done recurcievely.
- * @param {*} defaultFields A map of the form {field_name:name} where :
- *  - `field_name` is a string representing the fully qualified name of the field which will be requested 
- * where the table related to this field is constrained in the default condition.
- *  - `name` is the short name of the field which will be used as the `name` field of the `fieldMap` the `queryData` method
- * if the value of this field also exist in the `fieldMap` take care of making `field_name` and `fieldMap`'s 'conditionBase' match for the said `name`
- * failing to do so might cause you some troubles.
- * @param {*} keyBuilder A function used to create a string key from an object representing a line of the runed query.
- * This string is used to detect and remove duplicated entries. the keys of the given object are 
- * the name of the requested fields has specifyed in the `defaultFields` and `fieldMap` param
- * @returns 
- */
-var dataQueryier = function (api, fieldMap, defaultConditions, exceptionMap, defaultFields, keyBuilder) {
-
-    let cache, cachedMap;
-    let publicObject = {}, protected = {};
-
-    /*/ Public Methods and Fields /*/
-
-    publicObject.exceptionMap = exceptionMap;
-    publicObject.defaultConditions = defaultConditions;
-    publicObject.defaultFields = defaultFields;
-    publicObject.keyBuilder = keyBuilder;
-
-    if (publicObject.keyBuilder === undefined) {
-        publicObject.keyBuilder = (data) => {
-            return Object.values(data).join("");
-        };
-    }
-
-    publicObject.processConditions = function (conditionMap) {
-        let processed = {};
-        let partialProcess;
-
-        for (let consName in conditionMap) {
-            partialProcess = [];
-            if (fieldMap[consName].transform) {
-                for (let i = 0; i < conditionMap[consName].length; i++) {
-                    partialProcess.push(fieldMap[consName].transform(conditionMap[consName][i]));
-                }
-            } else {
-                partialProcess = Array.from(conditionMap[consName]);
-            }
-            if (processed[fieldMap[consName].tableName] === undefined) {
-                processed[fieldMap[consName].tableName] = [];
-            }
-            processed[fieldMap[consName].tableName].push(fieldMap[consName].merger(partialProcess, fieldMap[consName].conditionBase));
-        }
-        for (let table in processed) {
-            processed[table] = processed[table].join(" AND ");
-        }
-        return processed;
-    };
-
-    publicObject.getSelect = function (conditionMap) {
-        let fields = $.extend({}, publicObject.defaultFields);
-        for (let consName in conditionMap) {
-            if (conditionMap[consName].length > 0 && consName != "default") {
-                fields[fieldMap[consName].conditionBase] = consName;
-            }
-        }
-
-        let select = "SELECT ";
-        for (let field in fields) {
-            select += field + " AS \"" + fields[field] + "\", ";
-        }
-        return select.substr(0, select.length - 2) + " ";
-    };
-
-    publicObject.queryData = function (conditionMap, logger) {
-        conditionMap = protected.toCachedMap(conditionMap);
-
-        //checking if no new constraint fields are set
-        logger.info("Checking if cache is up to date");
-        if (cache !== undefined && protected.arrayEquals(Object.keys(conditionMap), Object.keys(cachedMap))) {
-
-            //checking if no new constraint as been added to any field
-            if (Object.keys(conditionMap).every((table) => conditionMap[table].length == cachedMap[table].length)) {
-                let delta = protected.getDelta(conditionMap);
-                if (delta.delta == 0) { // conditions are the same
-                    return protected.normalize(cache);
-
-                    // if some chars has been removed the condition is probably less restrictive, we can't assure accuraty of the result in this case
-                    // same thing if percents has appears this mean that some string are now less restrictive
-                } else if (delta.percent == 0 && delta.delta < 5 && delta.min >= 0) {
-                    logger.info("Gathering from cache");
-                    return protected.fromCache(conditionMap, delta.changed);
-                }
-            }
-
-        }
-
-        logger.info("Creating ADQL constraints");
-        let allCond = publicObject.processConditions(conditionMap);
-        cachedMap = conditionMap;
-
-        for (let table in publicObject.defaultConditions) {
-            if (allCond[table] !== undefined) {
-                allCond[table] += " AND ( " + publicObject.defaultConditions[table] + " )";
-            } else {
-                allCond[table] = publicObject.defaultConditions[table];
-            }
-        }
-
-        logger.info("applying ADQL constraints");
-        logger.log(allCond);
-        api.resetAllTableConstraint();
-
-        for (let table in allCond) {
-            api.setTableConstraint(table, allCond[table]);
-        }
-
-        logger.info("Creating request");
-        return api.getTableQuery().then((val) => {
-            let query = val.query;
-            query = publicObject.getSelect(conditionMap) + query.substr(query.toLowerCase().indexOf(" from "));
-
-            while (query.indexOf("  ") !== -1) {
-                query = query.replace("  ", " ");
-            }
-
-            logger.log(query);
-            logger.info("Waiting for server responce");
-
-            return api.query(query).then((val) => {
-
-                logger.log(val);
-                if (val.status) {
-                    cache = protected.arraysToMaps(val);
-                }
-                return protected.normalize(cache);
-            });
-        });
-
-
-    };
-
-    /*/ Protected Methods and Fields /*/
-
-    protected.arraysToMaps = function (arrays) {
-        let maps = [];
-        let map;
-        for (let i = 0; i < arrays.field_values.length; i++) {
-            map = {};
-            for (let j = 0; j < arrays.field_names.length; j++) {
-                map[arrays.field_names[j]] = arrays.field_values[i][j];
-            }
-            maps.push(map);
-        }
-        return maps;
-    };
-
-
-    protected.arrayEquals = function (a, b) {
-        return Array.isArray(a) &&
-            Array.isArray(b) &&
-            a.length === b.length &&
-            a.every((val, index) => val === b[index]);
-    };
-
-    // str1 = new str2 = old
-    protected.stringDelta = function (str1, str2) {
-        let lcs = "";
-        for (let i = 0; i < str2.length; i++) {
-            if (str1[i] == str2[i]) {
-                lcs += str1[i];
-            } else {
-                break;
-            }
-        }
-
-        if (lcs.length == str2.length) {
-            return str1.length - str2.length;
-        } else {
-            return lcs.length - str2.length;
-        }
-    };
-
-    protected.getDelta = function (conditionMap) {
-        let delta = 0, min, max, d, percent = 0;
-        let changed = [];
-        for (let table in conditionMap) {
-            for (let i = 0; i < conditionMap[table].length; i++) {
-                d = protected.stringDelta(conditionMap[table][i], cachedMap[table][i]);
-                percent += Math.abs(conditionMap[table][i].split('%').length - cachedMap[table][i].split('%').length);
-                if (min > d || min === undefined) {
-                    min = d;
-                } else if (max < d || max === undefined) {
-                    max = d;
-                }
-                delta += Math.abs(d);
-                if (d != 0) {
-                    changed.push(table);
-                }
-            }
-        }
-        return { delta: delta, min: min, max: max, changed: Array.from(new Set(changed)), percent: percent };
-    };
-
-    protected.toCachedMap = function (conditionMap) {
-        let map = {};
-        for (let table in conditionMap) {
-            // removing fields without constraints
-            if (conditionMap[table].length > 0) {
-                // ignoring empty constraints
-                map[table] = Array.from(conditionMap[table]);
-                while (map[table].indexOf("") !== -1) {
-                    map[table].remove("");
-                }
-                if (map[table].length < 1) {
-                    delete map[table];
-                }
-            }
-        }
-        return map;
-    };
-
-    protected.fromCache = function (conditionMap, changed) {
-        let test;
-        return protected.normalize(cache.filter((val) => {
-            return changed.every((table) => {
-                return conditionMap[table].every((condition) => {
-                    if (publicObject.exceptionMap[table] !== undefined) {
-                        test = false;
-                        publicObject.exceptionMap[table].forEach((table) => {
-                            test = test || val[table].toLowerCase().includes(condition.toLowerCase().replace("%", ""));
-                        });
-                        return test;
-                    } else {
-                        return val[table].toLowerCase().includes(condition.toLowerCase().replace("%", ""));
-                    }
-                });
-            });
-        }));
-    };
-
-    protected.normalize = function (data) {
-        let nDat = [], known = [];
-        for (let i = 0; i < data.length; i++) {
-            if (!known.includes(publicObject.keyBuilder(data[i]))) {
-                nDat.push(data[i]);
-                known.push(publicObject.keyBuilder(data[i]));
-            }
-        }
-        return nDat;
-    };
-
-    publicObject.protected = protected;
-
-    return publicObject;
-
-};
-
-/*
-let id=0;
-function test(){
- 	this.a =id;
-    id++;
-    this.protected = {};
-    this.buildProtected();
-}
-test.prototype.buildProtected= function(){
-  let that = this;
-  this.protected.w = function(){
-   console.log(that.a);
-   console.log(this);
-  }
-}
-
-let t = new test();
-let t2 = new test();
-
-t.protected.w();
-t2.protected.w();
- */

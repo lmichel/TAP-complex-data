@@ -86,7 +86,7 @@ function removeClass(elemId,className){
 }
 
 function vizierToID(schema){
-    let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`","."];
+    let chars = ["'",'"',"(","<","{","\\","/","}",">",")","*","$","^","`",".","+"];
     for (let i=0;i<chars.length;i++){
         schema = utils.replaceAll(schema,chars[i],"");
     }

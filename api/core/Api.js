@@ -383,7 +383,7 @@
      * unless checkNames is set to false in this case the method is synchronous and no check is done on fieldName, no error are returned if table is unknown
      * note that other types of errors can still be returned
      */
-    jw.Api.prototype.selectField = async function(fieldName,table,checkNames){
+    jw.Api.prototype.selectField = function(fieldName,table,checkNames){
         if(checkNames === undefined){
             checkNames = true;
         }
@@ -433,22 +433,6 @@
                 } else{
                     if(!obj.tables[table].columns.includes(fieldName))
                         obj.tables[table].columns.push(fieldName);
-                    return {"status":true};
-                }
-                
-            } else if(table === obj.root_table.name){
-                if(checkNames){
-                    return has_field(table,fieldName,this).then((val)=>{
-                        if(val){
-                            if(!obj.root_table.columns.includes(fieldName))
-                                obj.root_table.columns.push(fieldName);
-                            return {"status":true};
-                        }
-                        return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
-                    });
-                }else {
-                    if(!obj.root_table.columns.includes(fieldName))
-                        obj.root_table.columns.push(fieldName);
                     return {"status":true};
                 }
             }

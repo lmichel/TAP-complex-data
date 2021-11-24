@@ -1,5 +1,3 @@
-"use strict;";
-
 var ExtraDrawer ={
     "data":{},
     "eventMap":{},
@@ -47,43 +45,6 @@ var ExtraDrawer ={
     }
 };
 
-class TreeSBLogger extends MyLogger {
-    constructor(div){
-        super(div);
-        this.STATUS_OK = "ok";
-        this.STATUS_INFO = "info";
-        this.STATUS_ERROR = "error";
-        this.statusIconMap={
-            "info":"./images/info.png",
-            "ok":"./images/check.png",
-            "error":"./images/red.png",
-        };
-    }
-
-    log(...log) {
-        let out = this.split(...log);
-        if(out.text.length>0){
-            console.log(out.text);
-        }
-        if(out.objects.length>0){
-            console.log(out.objects);
-        }
-    }
-    info(...log){
-        let out = this.split(...log);
-        if(out.text.length>0){
-            this.div.html("<div class='cv-spinner'><span class='spinner' title='" + out.text +"'></span></div>");
-        }
-        if(out.objects.length>0){
-            this.log(out.objects);
-        }
-    }
-    status(statusText,statusType){
-        this.div.html("<img style='background-position: center center;background-size: auto;background-repeat:no-repeat;vertical-align: top;height:100%;width:100%' src='" +
-            this.statusIconMap[statusType]+"' title='" + statusText +"'></img>");
-    }
-}
-
 var TapTree = function(){
 
     /**
@@ -106,10 +67,23 @@ var TapTree = function(){
             },
         });
 
+        let that = this;
         rootHolder.on("select_node.jstree",(event,object)=>{
             if(object.node.parents.length>2){
                 if(object.node.parents[object.node.parents.length-2]==this.treeID){
-                    console.log(object.node.text);
+                    api.setRootTable(object.node.text).then(val=>{
+                        if(val.status){
+                            $(document).trigger("new_root_table.tree",{
+                                api:api,
+                                tree:that,
+                            });
+                        } else {
+                            $(document).trigger("error.application",{
+                                error : val.error,
+                                origin : that,
+                            });
+                        }
+                    });
                 }
             }
         });
@@ -158,6 +132,7 @@ var TapTree = function(){
         }else{
             console.error(schemas);
         }
+        /*/ Auto redraw of schemas and service info  /*/
         ExtraDrawer.drawExtra(rootHolder,this.treeID,(id)=>{
             $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='./images/info.png' title='Show metadata (Does not work with Vizier)'/>");
             $("#" + id + "_meta").click(this.serviceMetaDataShowerFactory());
@@ -270,7 +245,7 @@ var TapTree = function(){
                 this.tree.open_node(schemNode);
             }
         }
-        this.logger.status("No filter applied, results are up to date",this.logger.STATUS_OK);
+        this.logger.status("No filter applied, results are up to date",TreeSBLogger.STATUS_OK);
     };
 
     TapTree.prototype.applyFilter = function(){
@@ -320,17 +295,17 @@ var TapTree = function(){
             }
         }
 
-        this.logger.status("Results are up to date",this.logger.STATUS_OK);
+        this.logger.status("Results are up to date",TreeSBLogger.STATUS_OK);
     };
 
     TapTree.prototype.filter = function(filter){
         this.filtered = true;
-        let schemas = Array.from(new Set(filter.map(x=>x.schema)));
+        let schemas = Array.from(new Set(filter.map(x=>x.schemaName)));
         this.filterMap = schemas.map(s=>{
             let v ={};
             v[jw.Api.safeQualifier([s]).qualified]=filter.reduce((p,c)=>{
-                if(c.schema == s){
-                    p.push(utils.unqualifyName(c.default,s));
+                if(c.schemaName == s){
+                    p.push(utils.unqualifyName(c.noField,s));
                 }
                 return p;
             },[]);
@@ -354,7 +329,11 @@ var TapTreeList = function(){
     function TapTreeList(holder){
         this.holder = holder;
         
-        this.holder.html('<div style="display:flex;flex-flow: column;flex-grow: 1;"><div style="display:flex"><input id="searchBar" type="text" autocomplete="off" style="width: calc(100% - 2em);margin: .5em;" ><div id="logger" style="width:2em;height:2em;margin: .5em;"></div></div><div id="tree"></div></div>');
+        this.holder.html(
+            '<div style="display:flex;flex-flow: column;flex-grow: 1;"><div style="display:flex">'+
+            // 3.5 = 2 (logger width) + 0.5 (input left margin) + 0.5 (logger left margin) + 0.5(logger right margin)
+            '<input id="searchBar" type="text" autocomplete="off" style="width: calc(100% - 3.5em);margin: .5em;margin-right: 0;" >'+ 
+            '<div id="logger" style="width:2em;height:2em;margin: .5em;"></div></div><div id="tree"></div></div>');
         $("input",this.holder).prop( "disabled", true );
         this.logger = new TreeSBLogger($("#logger",this.holder));
         this.treeHolder = $("#tree",holder);
@@ -365,7 +344,7 @@ var TapTreeList = function(){
                 _default : {
                     schema : "", // place holder the true selected schema is updated later
                 },
-                default : {
+                noField : {
                     table : "tables",
                     column : "table_name",
                     merger : jw.widget.SearchBar.mergers.likeMerger(),
@@ -375,7 +354,7 @@ var TapTreeList = function(){
             barApi : new jw.Api(),
             sBarOut : {
                 push:(data)=>{
-                    if(data.length ==0 || data[0].default !== undefined){
+                    if(data.length ==0 || data[0].noField !== undefined){
                         this.protected.sBarOut.pusher(data);
                     }else {
                         this.protected.sBarOut.reset();
@@ -399,7 +378,7 @@ var TapTreeList = function(){
             this.protected.connectSearchBar(tree);
         });
         registerProtected(this);
-        this.logger.status("the tree is initialized, please add a service to start using the tree, select one to enable the search Bar",this.logger.STATUS_INFO);
+        this.logger.status("the tree is initialized, please add a service to start using the tree, select one to enable the search Bar",TreeSBLogger.STATUS_INFO);
     }
 
     /**
@@ -408,9 +387,13 @@ var TapTreeList = function(){
      */
     function registerProtected(tree){
         tree.protected.connectSearchBar = function(map){
-            $("input",tree.holder).prop( "disabled", true );
             let connector = map.api.getConnector().connector.service;
-            
+            if(tree.protected.barApi.getConnector().connector !== undefined && 
+                connector.tapService == tree.protected.barApi.getConnector().connector.service.tapService){
+                return;
+            }
+
+            $("input",tree.holder).prop( "disabled", true );
             tree.protected.barApi.connectService(connector.tapService).then(()=>{
                 tree.logger.info("connecting the search bar to the selected service");
                 let schema = Object.keys(map.tree.getSchemas()).filter(v=>v.match(/TAP_SCHEMA/i))[0];
@@ -420,13 +403,13 @@ var TapTreeList = function(){
                     tree.protected.barApi.query('SELECT UPPER(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables').then( (val)=>{
                         tree.logger.info("checking case insensitive function");
                         if(val.status){
-                            tree.protected.constraintMap.default.merger = jw.widget.SearchBar.mergers.likeMerger("UPPER");
+                            tree.protected.constraintMap.noField.merger = jw.widget.SearchBar.mergers.likeMerger("UPPER");
                         }else {
                             return tree.protected.barApi.query('SELECT uppercase(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables').then((val)=>{
                                 if(val.status){
-                                    tree.protected.constraintMap.default.merger = jw.widget.SearchBar.mergers.likeMerger("uppercase");
+                                    tree.protected.constraintMap.noField.merger = jw.widget.SearchBar.mergers.likeMerger("uppercase");
                                 }else {
-                                    tree.protected.constraintMap.default.merger = jw.widget.SearchBar.mergers.likeMerger("");
+                                    tree.protected.constraintMap.noField.merger = jw.widget.SearchBar.mergers.likeMerger("");
                                     upper = false;
                                 }
                             });
@@ -440,13 +423,14 @@ var TapTreeList = function(){
                                 if(tree.protected.searchBar === undefined){
                                     let querier = new jw.widget.SearchBar.Querier(tree.protected.barApi,
                                         {
-                                            "schema":{
+                                            "schemaName":{
                                                 table:"tables",
                                                 column:"schema_name",
                                             },
                                         },
                                         undefined,
-                                        tree.logger
+                                        tree.logger,
+                                        false
                                     );
                                     let processor = new jw.widget.SearchBar.ConstraintProcessor(tree.protected.constraintMap,tree.logger);
                                     let parser = new jw.widget.SearchBar.StringParser(Object.keys(tree.protected.constraintMap),":");
@@ -463,9 +447,9 @@ var TapTreeList = function(){
                                     tree.protected.searchBar.processEvent();
                                 }
                                 $("input",tree.holder).prop( "disabled", false );
-                                tree.logger.status("The search bar has been succefully initialized and connected",tree.logger.STATUS_OK);
+                                tree.logger.status("The search bar has been succefully initialized and connected",TreeSBLogger.STATUS_OK);
                             }else {
-                                tree.logger.status("Unable to connect the search bar to the select service",tree.logger.STATUS_ERROR);
+                                tree.logger.status("Unable to connect the search bar to the select service",TreeSBLogger.STATUS_ERROR);
                             }
                         });
                     });
@@ -497,41 +481,3 @@ var TapTreeList = function(){
 
     return TapTreeList;
 }();
-
-let tree;
-
-/*/ Trigers function for radio button /*/
-
-function OnRadioChange(radio) {
-    syncIt(async ()=>{
-        if(isEnable("label_" + radio.value)){
-            disableButton("label_" + radio.value);
-            let api = new jw.Api();
-            let params = jw.KnowledgeTank.getDescriptors().descriptors[radio.value];
-            let connect = await api.connectService(params.tapService,radio.value);
-            if(connect.status){
-                tree.append(api,params);
-
-                successButton("label_" + radio.value);
-                return;
-            }
-            console.error(connect);
-            errorButton("label_" + radio.value);
-        }
-        
-    });
-}
-
-function setupEventHandlers(){
-
-}
-
-$(document).ready(function() {
-    syncIt(async ()=>{
-        buildButtonSelector("#mainButtonHolder");
-        // ensure no radio button is check by default
-        $("input:radio[name=radio]:checked").prop('checked', false);
-        tree = new TapTreeList($("#tapTree"));
-        setupEventHandlers();
-    });
-});
