@@ -162,8 +162,9 @@ class CollapsableDiv{
 class TablePane{
     constructor(div,logger = new utils.DisabledLogger()){
         this.api = undefined;
-        this.holder = div;
-        this.holder.html("");
+        div.html("<div id='TP-header' style='text-align:center'></div><div id='TP-holder' style='display: flex;flex-direction: column;'>");
+        this.header = $("#TP-header",div) ;
+        this.holder = $("#TP-holder",div);
         this.logger = logger;
         if(logger.hide == undefined){
             logger.hide = ()=>{};
@@ -190,7 +191,13 @@ class TablePane{
         }
         this.holder.html("");
         this.api = api;
-        let table = api.getConnector().connector.service.table;
+        let connector = api.getConnector().connector.service;
+        this.header.html("<h3> " +
+            connector.shortName + ": " +
+            connector.schema + "." + connector.table+
+            " </h3> </h4>" + connector.schemas[connector.schema].description +
+            "</h4>");
+        let table = connector.table;
         let tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,""); // btoa use the B64 charset containing / and + not good for ids
         this.struct = {
             div:new CollapsableDiv(this.holder,tableB64,false,undefined,
