@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>API test for Tap Complex</title>
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+
+        <!-- Tap Complex API imports -->
+        <script type="text/javascript" src="../../utils/util.js"></script>
+
+        <script type="text/javascript" src="../../api/core/_namespace.js"></script>
+
+        <script type="text/javascript" src="../../api/core/Api.js"></script>
+        <script type="text/javascript" src="../../api/core/KnowledgeTank.js"></script>
+
+        <script type="text/javascript" src="../../api/core/AttributeHolder.js"></script>
+        <script type="text/javascript" src="../../api/core/JsonAdqlBuilder.js"></script>
+        <script type="text/javascript" src="../../api/core/ServiceConnector.js"></script>
+        <script type="text/javascript" src="../../api/core/ServiceRequest.js"></script>
+        <script type="text/javascript" src="../../api/core/VOTableTools.js"></script>
+
+        <script type="text/javascript" src="../../api/core/votable.js"></script>
+
+        <!-- End of Tap Complex API imports -->
+
+        <!-- Custum scripts -->
+
+        <script type="text/javascript" src="./JS/apiDemo.js"></script>
+        <script type="text/javascript" src="../../shared/JS/shared.js"></script>
+
+        <!-- End of Custum scripts -->
+
+        <!-- CSS imports -->
+
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/github.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        
+        <link rel="stylesheet" href="../../shared/css/style.css"/>
+        <link href="../../shared/css/main.css" rel="stylesheet">
+        <!-- End of CSS imports -->
+
+    </head>
+
+    <body>
+        <div id="overlay">
+            <div class="cv-spinner">
+                <span class="spinner"></span>
+            </div>
+        </div>
+        <div>
+            <br>
+            <div class = "row">
+                <div class="col-1"></div>
+                
+                <div class="text-center col-10" id="mainButtonHolder"  style="display: flex;" ></div>
+
+                <div class="col-1"></div>
+            </div>
+
+            <hr>
+
+                <div class = "row">
+
+                    <div class="col-1"></div>
+                    <!--  Button column  -->
+                    <div class="col-2">
+
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnApiDisconnect">Disconnect Api</button>
+                        <hr>
+
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetConnector">Get Connector</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetObjectMap">Get Object Map</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetJoinTable">Get Joined Tables</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQuery">Get Root Query</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootFieldsQuery">Get Root Fields Query</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootQueryIds">Get Root Query Ids</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetRootFields">Get Root Fields</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetAdqlJsonMap">Get Adql Json Map</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetSelectedAH">Get Slected AH</button>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnCustom">Custom test</button>
+
+                        <hr>
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetTableQueryIds">Get Table Query Ids</button>
+                        <div class="card" style="overflow:scroll;max-height: 16em;"  >
+                            <div class="card-body text-capitalize text-success" id="loadTableQueryIds" style="display: none;">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-dark" style="margin-top: 7px;width: 100%;" id="btnGetTableFields">Get Table Fields</button>
+                        <div class="card" style="overflow:scroll;max-height: 16em;"  >
+                            <div class="card-body text-capitalize text-success" id="loadTableFields" style="display: none;">
+                            </div>
+                        </div>
+                        <hr>
+                        <button class="btn btn-dark" id="btnConstraint" style="margin-top: 7px;width: 100%;">Add joinTable constraint</button>
+                        
+
+                        <div class="card" style="overflow:scroll;max-height: 16em;"  >
+                            <div class="card-body text-capitalize text-success" id="loadButton" style="display: none;">
+                            </div>
+                        </div>
+
+                        <button class="btn btn-dark" id="btnRemoveConstraint" style="margin-top: 7px;width: 100%;">Remove constraint</button>
+                        
+                        <div class="card"  >
+                            <input type='text' class='form form-control' id='txtConstraint' value= '' placeholder='name of table : exp,otypes'>
+                        </div>
+
+                        <button class="btn btn-dark" id="btnRemoveAllConstraint" style="margin-top: 7px;width: 100%;">Reset All constraint</button>
+                        <hr>
+
+                        <button class="btn btn-dark" id="btnLoadButtonsHandler" style="margin-top: 7px;width: 100%;">getTableHandlers</button>
+                        
+                        <div class="card" style="overflow:scroll;max-height: 12em;">
+                            <div class="card-body" id="loadButtonsHandler" style="display: none;"></div>
+                        </div>
+
+                    </div>
+
+                    <!-- Data Output -->
+
+                    <div class="col-6" style="display: flex;flex-direction: column;">
+                                        
+                        <div class="card"> <h4 class="text-capitalize text-info text-center"> status of function</h4></div>
+                        
+                        <div class="card">
+                            <div class="card-body text-capitalize text-success"> 
+                                <h4 id="getStatus"></h4>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="card"> 
+                            <h4 class="text-capitalize text-info text-center"> Json content </h4>
+                        </div>
+
+                        <div class="card" style="flex: 1 1 auto;"> 
+                            <pre style= 'overflow:scroll;margin-left:0px; line-height: 1.3; width: 100%;flex: 1 1 auto;'><code id='getJsonAll'></code></pre>
+                        </div>
+                    </div>
+
+
+                    <div class="col-2" id="rightCol">
+                        <div style="display: flex; flex-flow: column;" id="schemas">
+
+                        </div>
+                        <hr>
+                        <div style="display: flex; flex-flow: column;overflow: scroll;" id="tableList">
+
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </body>
+</html>
