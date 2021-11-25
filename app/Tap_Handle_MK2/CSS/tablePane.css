@@ -165,3 +165,24 @@ div table.dataTable {
 a.first.paginate_button, a.next.paginate_button, a.previous.paginate_button, a.last.paginate_button, a.paginate_active, a.paginate_button {
     padding: 0 1em;
 }
+
+.cv-spinner {
+    flex-flow: column;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.spinner {
+    width: 100%;
+    height: 100%;
+    border: 4px #ddd solid;
+    border-top: 4px #2e93e6 solid;
+    border-radius: 50%;
+    animation: sp-anime 0.8s infinite linear;
+}
+@keyframes sp-anime {
+    100% {
+      transform: rotate(360deg);
+    }
+}
