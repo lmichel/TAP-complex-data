@@ -186,3 +186,24 @@ a.first.paginate_button, a.next.paginate_button, a.previous.paginate_button, a.l
       transform: rotate(360deg);
     }
 }
+#overlay{
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 0, 0, 0, .85 )
+}
+
+#overlay p{
+    border-radius: .5em;
+    background-color: white;
+    font-weight: 600;
+    font-size: medium;
+    padding: 0.2em;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin: 0.5em;
+}

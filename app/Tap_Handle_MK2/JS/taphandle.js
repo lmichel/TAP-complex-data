@@ -18,11 +18,11 @@ async function OnRadioChange(radio){
     }
 }
 
-function setupApp(){
+function setupApp(logger){
 
     tree = new TapTreeList($("#tree"));
 
-    let tablePane = new TablePane($("#tablePane"));
+    let tablePane = new TablePane($("#tablePane"),logger);
 
     $(document).on("new_root_table.tree",(event, args)=>{
         tablePane.setApi(args.api);
@@ -34,8 +34,12 @@ function setupApp(){
 }
 
 $(document).ready(()=>{
+    let logger = new GlobalLogger();
+    logger.info("Setting up everything");
+
     buildButtonSelector("#mainButtonHolder");
     // ensure no radio button is check by default
     $("input:radio[name=radio]:checked").prop('checked', false);
-    setupApp();
+    setupApp(logger);
+    logger.hide();
 });

@@ -179,6 +179,7 @@ class TablePane{
         return  str ;
     }
     setApi(api){
+        this.logger.info("Setting up tables");
         let object_map = api.getObjectMap();
         if(object_map.status){
             object_map=object_map.object_map;
@@ -199,6 +200,8 @@ class TablePane{
             "</h4>");
         let table = connector.table;
         let tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,""); // btoa use the B64 charset containing / and + not good for ids
+
+        this.logger.info("building internal structure");
         this.struct = {
             div:new CollapsableDiv(this.holder,tableB64,false,undefined,
                 [
@@ -231,6 +234,8 @@ class TablePane{
     }
 
     refresh(){
+
+        this.logger.info("refrashing table content");
         this.struct.childs = [];
         this.struct.div.div.html("");
         this.makeTable(this.struct);
@@ -240,6 +245,8 @@ class TablePane{
      * @param {CollapsableDiv} colDiv 
      */
     async makeTable(struct,keyvals){
+
+        this.logger.info("Gathering meta data");
         let colDiv = struct.div;
         let tableB64 = colDiv.name;
         let tableName = atob(tableB64.replace(/_/g,"/").replace(/-/g,"+"));
@@ -269,8 +276,8 @@ class TablePane{
             return;
         }
 
+        this.logger.info("updating fields selection");
         if(object_map.tables[tableName].columns.length == 0){
-            console.log("selecting fields");
             let t = await this.api.getSelectedFields(tableName);
             
             if(t.status){ // out object map is a copy so I need to update it by hand
@@ -326,6 +333,8 @@ class TablePane{
         // and for the Hmap to work
         
         fieldsData.field_names = fieldsData.field_names.filter((v)=>selected.has(v)); 
+
+        this.logger.info("Gathering meta data");
 
         let ahs = await this.api.getTableAttributeHandlers(tableName);
         if(!ahs.status){
@@ -404,6 +413,7 @@ class TablePane{
             }
         ];
 
+        this.logger.info("Formating table");
         let tableID = "datatable_" + tableB64;
         colDiv.div.append("<table id=\"" + tableID + "\" class=\"display\"></table>");
         
@@ -427,6 +437,7 @@ class TablePane{
         }
         
         $("#"+tableID+"_wrapper").css("overflow", "hidden");
+        this.logger.hide();
     }
 
     removeChilds(struct){
@@ -469,7 +480,7 @@ class TablePane{
         return (nRow,data)=>{
             $(nRow).click(()=>{
 
-                // TODO : re-open divs
+                that.logger.info("Gathering meta data");
 
                 let h = $(".rHighlight",$(nRow).parent());
                 if(h.get(0)==nRow){
@@ -486,6 +497,8 @@ class TablePane{
 
                 let gKMap = Hmap[data.join("")];
                 let joints = that.api.getJoinedTables(tableName).joined_tables;
+
+                that.logger.info("Building tables");
                 for(let table in subtables){
                     tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
                     let nb = Object.keys(that.api.getJoinedTables(table).joined_tables).length;
@@ -535,6 +548,7 @@ class TablePane{
 
                     struct.childs.push(s);
                 }
+                that.logger.hide();
             });
             
         };
