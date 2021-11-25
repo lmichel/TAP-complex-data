@@ -14,7 +14,7 @@ class CollapsableDiv{
 
         this.buildHeader(elems);
 
-        this.holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
+        this.holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' style = 'max-width:" + this.header[0].offsetWidth + "' ></div>");
     
         this.div = $("#collapsable-div-" + name,this.holder );
         if(collapsed){
@@ -169,6 +169,14 @@ class TablePane{
             logger.hide = ()=>{};
         }
     }
+    quoteIfString(str){
+
+        if(isNaN(str) || isNaN(parseInt(str)) || isNaN(+str) ){
+            return "'" + str+ "'";
+        }
+    
+        return  str ;
+    }
     setApi(api){
         let object_map = api.getObjectMap();
         if(object_map.status){
@@ -190,7 +198,12 @@ class TablePane{
                     {txt:table,type:"title",pos:"center"},
                     {pos:"left",txt:object_map.tables[table].description,type:"desc",weight:2,monoline:true},
                     {
-                        toDom:"<div style='font-size: small;'><label for='" + tableB64 + 
+                        toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
+                            "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
+                        pos:"right"
+                    },
+                    {
+                        toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                             "_limit'>Queryied entries :</label><select id='" +
                             tableB64 + "_limit'> <option value='10'>10</option>" +
                             "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
@@ -295,7 +308,7 @@ class TablePane{
             kMap = {};
             fieldsData.field_values[l] = fieldsData.field_values[l].filter((val,index)=>{
                 if(keys.includes(fieldsData.field_names[index])){
-                    kMap[fieldsData.field_names[index]] = val;
+                    kMap[fieldsData.field_names[index]] = this.quoteIfString(val);
                 }
                 return selected.has(fieldsData.field_names[index]);
             });
@@ -399,6 +412,12 @@ class TablePane{
             top: -15, 
             left: 5 	
         });
+
+        let oldW = parseInt($("table#" + tableID)[0].style.width);
+        let newW = parseInt($("div#collapsable-div-" + tableB64)[0].style["max-width"]);
+        if(Math.abs(oldW-newW)<10){
+            $("table#" + tableID)[0].style.width = (newW -1) + "px";
+        }
         
         $("#"+tableID+"_wrapper").css("overflow", "hidden");
     }
@@ -409,6 +428,7 @@ class TablePane{
             delete struct.childs[i].div;
             this.removeChilds(struct.childs[i]);
         }
+        struct.childs = [];
     }
 
     makeSubdivsFactory(struct,Hmap){
@@ -442,8 +462,7 @@ class TablePane{
         return (nRow,data)=>{
             $(nRow).click(()=>{
 
-                // TODO : remove existing divs re-open divs
-                // TODO : bind the table making functions
+                // TODO : re-open divs
 
                 let h = $(".rHighlight",$(nRow).parent());
                 if(h.get(0)==nRow){
@@ -452,7 +471,12 @@ class TablePane{
                 h.removeClass("rHighlight");
                 $(nRow).addClass("rHighlight");
 
+                let open = struct.childs.filter(s=>s.div.div.is(":visible"));
+                open = open.map(s=> s.div.name);
+                open = new Set(open);
+
                 that.removeChilds(struct);
+
                 let gKMap = Hmap[data.join("")];
                 let joints = that.api.getJoinedTables(tableName).joined_tables;
                 for(let table in subtables){
@@ -482,7 +506,7 @@ class TablePane{
                                 pos:"right"
                             },
                             {
-                                toDom:"<div style='font-size: small;'><label for='" + tableB64 + 
+                                toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                                     "_limit'>Queryied entries :</label><select id='" +
                                     tableB64 + "_limit'> <option value='10'>10</option>" +
                                     "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
@@ -498,6 +522,9 @@ class TablePane{
                         "title",
                         !struct.div.parity,
                     );
+                    if(open.has(tableB64)){
+                        $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
+                    }
 
                     struct.childs.push(s);
                 }
