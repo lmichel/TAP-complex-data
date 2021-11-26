@@ -246,7 +246,7 @@ class TablePane{
      */
     async makeTable(struct,keyvals){
 
-        this.logger.info("Gathering meta data");
+        this.logger.info("Gathering meta data 1");
         let colDiv = struct.div;
         let tableB64 = colDiv.name;
         let tableName = atob(tableB64.replace(/_/g,"/").replace(/-/g,"+"));
@@ -334,7 +334,7 @@ class TablePane{
         
         fieldsData.field_names = fieldsData.field_names.filter((v)=>selected.has(v)); 
 
-        this.logger.info("Gathering meta data");
+        this.logger.info("Gathering meta data 2");
 
         let ahs = await this.api.getTableAttributeHandlers(tableName);
         if(!ahs.status){
@@ -480,7 +480,7 @@ class TablePane{
         return (nRow,data)=>{
             $(nRow).click(()=>{
 
-                that.logger.info("Gathering meta data");
+                that.logger.info("Gathering meta data 3");
 
                 let h = $(".rHighlight",$(nRow).parent());
                 if(h.get(0)==nRow){

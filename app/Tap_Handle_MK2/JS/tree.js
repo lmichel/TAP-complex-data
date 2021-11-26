@@ -57,6 +57,7 @@ var TapTree = function(){
         this.rootHolder = rootHolder;
         this.meta = meta;
         this.logger = logger;
+        this.partial = {}; // store state of partially loaded schemas
 
         this.short_name = api.getConnector().connector.service.shortName;
         this.treeID = tree.create_node("#",{
@@ -160,10 +161,10 @@ var TapTree = function(){
                 this.rootHolder.off({"before_open.jstree":fun});
                 let schem = await this.api.selectSchema(schema);
                 if(schem.status){
-                    let tables = this.api.getTables();
-                    let tableSafe;
-                    if(tables.status){
-                        tables = tables.tables;
+                    let schemas = this.api.getSchemas();
+                    if(schemas.status){
+                        this.schemas = schemas.schemas;
+                        let tables = this.schemas[schema].tables;
 
                         let toClose = Array.from(this.tree.get_node("#").children);
 
@@ -178,23 +179,9 @@ var TapTree = function(){
                             }
                         }
 
-                        node = this.tree.get_node("#" + nodeID);
-                        // each string concat create a new instance of string when done too many time in a small time span this cause the GC to work hard
-                        let node_ = nodeID + "_";
-                        
-                        for (let table in tables){
-                            tableSafe = vizierToID(table);
-                            this.tree.create_node(node,{
-                                "id":node_ + tableSafe,
-                                "text":table,
-                                "a_attr":{
-                                    "title":tables[table].description
-                                },
-                                "icon": false,
-                            });
-                        }
+                        let partial = this.loadNodes(schema,nodeID);
                         this.applyFilter([schema]);
-                        this.tree.delete_node(this.tree.get_node("#" + nodeID+ "_dummy"));
+                        this.tree.delete_node(this.tree.get_node(nodeID+ "_dummy"));
                         
                         for(let i=0;i<wasOpen.length;i++){
                             this.tree.open_node(wasOpen[i],undefined,false);
@@ -202,17 +189,76 @@ var TapTree = function(){
 
                         ExtraDrawer.drawExtra(this.rootHolder,nodeID,this.reDrawerFactory(safeSchem,tables),["before_open.jstree","after_open.jstree"]);
                         ExtraDrawer.drawExtra(this.rootHolder,this.treeID,this.reDrawerFactory(safeSchem,tables),["before_open.jstree"]);
+                        if(partial){
+                            this.rootHolder.on("before_open.jstree",fun);
+                        }
                     }else {
                         alert(tables.error.logs);
                     }
                 }else {
                     alert(schem);
                 }
-                
             }
         };
         return fun;
     };
+
+    TapTree.prototype.loadNodes= function(schema,nodeID){
+        let tables = this.schemas[schema].tables;
+        
+        // when data is filtered we limit how much tables we put in the tree at once
+        let partial = false, inTree = 0;
+        if(this.partial[schema] !== undefined){
+            inTree = this.partial[schema].size;
+        }
+        if(Object.keys(tables).length - inTree >200 && this.filtered){
+            tables = {};
+            for (let table in this.schemas[schema].tables){
+                // tables contains arround 200 entries or has many as required by the filtermap
+                if( !(inTree>0 && this.partial[schema].has(table)) && (this.filterMap[schema].includes(table) || Object.keys(tables).length<(200-this.filterMap[schema].length))){
+                    tables[table] = this.schemas[schema].tables[table];
+                }
+            }
+            console.log('loading only ' + Object.keys(tables).length + " nodes ");
+            partial = true;
+        }else if(inTree>0){
+            for (let table in this.schemas[schema].tables){
+                if(!this.partial[schema].has(table)){
+                    tables[table] = this.schemas[schema].tables[table];
+                }
+            }
+            partial = true;
+        }
+
+        if(partial && inTree == 0){
+            this.partial[schema] = new Set();
+        }
+
+        let node = this.tree.get_node(nodeID);
+        // each string concat create a new instance of string when done too many time in a small time span this cause the GC to work hard
+        let node_ = nodeID + "_";
+        for (let table in tables){
+            tableSafe = vizierToID(table);
+            this.tree.create_node(node,{
+                "id":node_ + tableSafe,
+                "text":table,
+                "a_attr":{
+                    "title":tables[table].description
+                },
+                "icon": false,
+            });
+            if(partial){
+                this.partial[schema].add(table);
+            }
+        }
+        //if partial is true but we have put every tables in the tree then it is not partial anymore
+        if(partial && this.partial[schema].size == Object.keys(tables).length ){
+            delete this.partial[schema];
+            return false;
+        }
+        return partial;
+    };
+
 
     TapTree.prototype.reDrawerFactory = function(safeSchem,tables){
         let that = this;
@@ -286,15 +332,26 @@ var TapTree = function(){
         for(let schem in this.schemas){ // hiding or showing individual nodes takes ages so we minimise the work
             safeSchem = vizierToID(schem);
             if(this.filterMap[schem]=== undefined){
-                toHide.push("#" + this.treeID + "_" + safeSchem);
+                toHide.push(this.treeID + "_" + safeSchem);
             }else{
                 if(this.schemas[schem].tables !== undefined){
-                    for (let table in this.schemas[schem].tables ){
-                        if(!this.filterMap[schem].includes(table)){
-                            safeTable = vizierToID(table);
-                            toHide.push("#" + this.treeID + "_" + safeSchem + "_" + safeTable);
+                    // praise boolean optimisation this block of code will be executed if and only if all tables aren't in the tree and partial[schem] still exist
+                    if(this.partial[schem] !== undefined && this.loadNodes(schem,this.treeID + "_" + safeSchem)){
+                        for (let table in this.schemas[schem].tables ){
+                            if(!this.filterMap[schem].includes(table) &&this.partial[schema].has(table)){
+                                safeTable = vizierToID(table);
+                                toHide.push(this.treeID + "_" + safeSchem + "_" + safeTable);
+                            }
+                        }
+                    }else{
+                        for (let table in this.schemas[schem].tables ){
+                            if(!this.filterMap[schem].includes(table)){
+                                safeTable = vizierToID(table);
+                                toHide.push(this.treeID + "_" + safeSchem + "_" + safeTable);
+                            }
                         }
                     }
+                    
                 }
             }
         }
@@ -316,44 +373,10 @@ var TapTree = function(){
             this.tree.hide_node(this.tree.get_node(toHide[i]));
         }
 
-
         for(let i=0;i<wasOpen.length;i++){
             this.tree.open_node(wasOpen[i],undefined,false);
         }
         
-        /*let wasOpen;
-        let toClose;
-        for (let schem in this.schemas){
-            safeSchem = vizierToID(schem);
-            schemNode = this.tree.get_node("#" + this.treeID + "_" + safeSchem);
-            console.log(schemNode);
-            if(this.filterMap[schem]=== undefined){
-                this.tree.hide_node(schemNode);
-            } else {
-                if(this.schemas[schem].tables !== undefined){
-                    let safeTable;
-                    wasOpen =this.tree.is_open(schemNode);
-                    toClose = true;
-                    if(Object.keys(this.schemas[schem].tables).length>500 && wasOpen){
-                        
-                        this.tree.close_node(schemNode,false);
-                        toClose = false;
-                    }
-                    for (let table in this.schemas[schem].tables ){
-                        if(!this.filterMap[schem].includes(table)){
-                            safeTable = vizierToID(table);
-                            this.tree.hide_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem + "_" + safeTable));
-                        }
-                    }
-                    if(wasOpen){
-                        if(toClose){
-                            this.tree.close_node(schemNode,false);
-                        }
-                        this.tree.open_node(schemNode);
-                    }
-                }
-            }
-        }*/
         this.logger.status("Results are up to date",TreeSBLogger.STATUS_OK);
     };
 
