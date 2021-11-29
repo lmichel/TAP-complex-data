@@ -62,7 +62,7 @@ jw.KnowledgeTank = (function(){
             },
             
             "Vizier" : {
-                "tapService" : "//tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
+                "tapService" : "http://tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
                 "schema" : "metaviz",
                 "table" : "METAcat"
             },
