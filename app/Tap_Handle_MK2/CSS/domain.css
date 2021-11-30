@@ -394,11 +394,6 @@ a.accept {
 	margin-left: 6px;
 }
 
-.ui-tabs .ui-tabs-panel {
-	padding: 0px;
-	min-height: 250px;
-}
-
 .dataTables_wrapper {
 	overflow-x: auto;
 }

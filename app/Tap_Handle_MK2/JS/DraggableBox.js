@@ -4,7 +4,7 @@ class DraggableBox{
             id = "drglBx_" + DraggableBox.ID++;
         }
         this.id = id;
-        $("body").append("<div id = '"+this.id+"' class='draggable-box'><div class= 'draggable-header'>HEADER</div><div class='draggable-body'></div>Just a body <br>don't worry be happy</div>");
+        $("body").append("<div id = '"+this.id+"' class='draggable-box'><div class= 'draggable-header'></div><div class='draggable-body'></div></div>");
         this.box = $("#" + this.id)[0];
         this.header = $(".draggable-header",this.box)[0];
         this.body = $(".draggable-body",this.box)[0];

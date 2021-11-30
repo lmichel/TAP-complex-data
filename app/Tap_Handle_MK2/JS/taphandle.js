@@ -22,10 +22,12 @@ function setupApp(logger){
 
     tree = new TapTreeList($("#tree"));
 
+    let control = new ControlPane();
     let tablePane = new TablePane($("#tablePane"),logger);
 
     $(document).on("new_root_table.tree",(event, args)=>{
         tablePane.setApi(args.api);
+        control.setApi(args.api);
     });
     $(document).on("error.application",(...args)=>{
         console.log("error event recieved");
@@ -42,5 +44,4 @@ $(document).ready(()=>{
     $("input:radio[name=radio]:checked").prop('checked', false);
     setupApp(logger);
     logger.hide();
-    let dragg = new DraggableBox();
 });
