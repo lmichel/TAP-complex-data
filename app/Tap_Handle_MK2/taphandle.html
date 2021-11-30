@@ -46,6 +46,7 @@
         <script type="text/javascript" src="./JS/jquery.dataTables.js"></script>
         <script type="text/javascript" src="./JS/ModalResult.js"></script>
         <script type="text/javascript" src="./JS/ModalInfo.js"></script>
+        <script type="text/javascript" src="./JS/DraggableBox.js"></script>
 
         
         <!-- End of Custum scripts -->
@@ -67,32 +68,33 @@
         <link rel="stylesheet" href="./CSS/domain.css" />
         <link rel="stylesheet" href="./CSS/basics.css" />
         <link rel="stylesheet" href="./CSS/datatable.css" />
+        <link rel="stylesheet" href="./CSS/draggableBox.css" />
 
         <!-- End of App CSS -->
 
     </head>
 
-    <body>
-        <div id = "banner" style="display: flex;width: 100%;">
-            <div id = "R_banner" class="col-2"></div>
-            <div style="flex-grow: 1; display: flex;margin-right: 1em;" id = "mainButtonHolder">
-                <!--input id="searchBar" type="text" autocomplete="off" style="width:100%;margin:.5em;"-->
+    <body style="overflow: hidden;">
+        <div style="height: 100%;display:flex;flex-flow:column">
+            <div id = "banner" style="display: flex;width: 100%;">
+                <div id = "R_banner" class="col-2"></div>
+                <div style="flex-grow: 1; display: flex;margin-right: 1em;" id = "mainButtonHolder">
+                    <!--input id="searchBar" type="text" autocomplete="off" style="width:100%;margin:.5em;"-->
+                </div>
+                <div id = "L_banner" class="col-2"></div>
             </div>
-            <div id = "L_banner" class="col-2"></div>
-        </div>
-        <div style="display: flex;">
-            <div class="col-2" style="flex-shrink: 1;" id="tree">
-
-            </div>
-            <div style="flex-grow: 1;display: flex;flex-direction: column; margin-right: 1em;">
-                <div style="overflow: auto; flex-shrink: 1;" id = "tablePane">
+            <div style="display: flex;overflow: auto;">
+                <div class="col-2" style="flex-shrink: 1;overflow: auto;display: flex;" id="tree">
 
                 </div>
-                <div style="margin-top: auto; justify-content: center;display: flex;" id="controlPane">
+                <div style="flex-grow: 1;display: flex;flex-direction: column; margin-right: 1em;">
+                    <div style="overflow: auto; flex-shrink: 1;height: 100%;" id = "tablePane">
 
+                    </div>
                 </div>
             </div>
         </div>
+        
     </body>
 
 </html>

@@ -430,11 +430,7 @@ class TablePane{
             left: 5 	
         });
 
-        let oldW = parseInt($("table#" + tableID)[0].style.width);
-        let newW = parseInt($("div#collapsable-div-" + tableB64)[0].style["max-width"]);
-        if(Math.abs(oldW-newW)<10){
-            $("table#" + tableID)[0].style.width = (newW -1) + "px";
-        }
+        $("table#" + tableID)[0].style.width = "fit-content";
         
         $("#"+tableID+"_wrapper").css("overflow", "hidden");
         this.logger.hide();

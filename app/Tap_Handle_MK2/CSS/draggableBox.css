@@ -1,0 +1,21 @@
+.draggable-box {
+    position: absolute;
+    z-index: 9;
+    background-color: #dddddd;
+    text-align: center;
+    border-radius: .5em;
+}
+  
+.draggable-header {
+    border-radius: .5em;
+    padding: .2em;
+    cursor: move;
+    z-index: 10;
+    background-color: #ffffff;
+}
+
+.draggable-boddy {
+    z-index: 10;
+    margin: .2em;
+    border-radius: .5em;
+}

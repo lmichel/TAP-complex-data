@@ -42,4 +42,5 @@ $(document).ready(()=>{
     $("input:radio[name=radio]:checked").prop('checked', false);
     setupApp(logger);
     logger.hide();
+    let dragg = new DraggableBox();
 });

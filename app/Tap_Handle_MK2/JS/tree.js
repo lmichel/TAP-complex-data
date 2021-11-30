@@ -415,7 +415,7 @@ var TapTreeList = function(){
             '<div style="display:flex;flex-flow: column;flex-grow: 1;"><div style="display:flex">'+
             // 3.5 = 2 (logger width) + 0.5 (input left margin) + 0.5 (logger left margin) + 0.5(logger right margin)
             '<input id="searchBar" type="text" autocomplete="off" style="width: calc(100% - 3.5em);margin: .5em;margin-right: 0;" >'+ 
-            '<div id="logger" style="width:2em;height:2em;margin: .5em;"></div></div><div id="tree"></div></div>');
+            '<div id="logger" style="width:2em;height:2em;margin: .5em;"></div></div><div style="overflow:auto;"> <div id="tree"></div></div></div>');
         $("input",this.holder).prop( "disabled", true );
         this.logger = new TreeSBLogger($("#logger",this.holder));
         this.treeHolder = $("#tree",holder);
