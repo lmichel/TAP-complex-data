@@ -12,9 +12,11 @@ function ComplexQueryEditor(api,holder){
  */
 ComplexQueryEditor.prototype.updateQuery = function(type, data){
     let asyncProm =(async ()=>{})();
+    console.log("updating query");
     switch(type.toLowerCase()){
         case "constraint": 
         {
+            console.log("type constraint");
             let constraints = data.editors;
             this.api.resetAllTableConstraint();
             let constraint;
@@ -25,15 +27,18 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
                     constraint + " " + ((constraint.length>0)? constraints[c].getAndOr():"") + constraints[c].fireGetADQL() + this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand())
                 );
             }
-        } break;
+            break;
+        } 
         case "columns":{
+            console.log("type column");
             let columns = data.editors;
             let table = this.api.getConnector().connector.service.table;
             this.api.unselectAllFields(table);
             for (let c in columns){
-                    this.api.selectField(columns[c].fireGetADQL(),table,false);
+                this.api.selectField(columns[c].fireGetADQL(),table,false);
             }
-        }break;
+            break;
+        }
     }
 
     //weird things going on as you update the query and then run it ? don't look any further 

@@ -92,18 +92,18 @@ function ComplexFieldList_mVcExtends(){
                 row += "</tr>";
                 $('#' + this.fieldTableId).append(row);
                 if( this.orderByHandler != null ) {
-                    $('#' + this.fieldListId + ' input[id="order_' + id + '"]' ).click(function() {that.orderByHandler($(this).closest("tr").attr("id"));});
+                    $('#' + this.fieldListId + ' input[id="order_' + id + '"]' ).click(function() {that.orderByHandler(trId);});
                 }
                 if( this.stackHandler != null ){
                     $('#' + this.fieldListId + ' input[id="stack_' + id + '"]' ).click(function() {
-                        that.stackHandler($(this).closest("tr").attr("id"));
+                        that.stackHandler(trId);
                     });
                 }
                 if( this.raHandler != null ){
-                    $('#' + this.fieldListId + ' input[id="tora_' + id + '"]' ).click(function() {that.raHandler($(this).closest("tr").attr("id"));});
+                    $('#' + this.fieldListId + ' input[id="tora_' + id + '"]' ).click(function() {that.raHandler(trId);});
                 }
                 if( this.decHandler != null ){
-                    $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler($(this).closest("tr").attr("id"));});
+                    $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler(trId);});
                 }
                 
                 $('#' + this.fieldTableId + " tr#" + trId + " span").tooltip( {
@@ -137,7 +137,7 @@ function ComplexFieldList_mVcExtends(){
                             var ahm = cache.hamap;
                             for( var k=0 ; k<ahm.length ; k++) {
                                 var ah = ahm[k];
-                                that.attributesHandlers[`${ah.table_name}`.replace(".","_") +"_"+ ah.nameattr] = ah;				
+                                that.attributesHandlers[vizierToID(ah.table_name) +"_"+ ah.nameattr] = ah;				
                                 that.displayField(ah);
                             }
                             that.lookForAlphaKeyword();
