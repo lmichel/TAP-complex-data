@@ -22,16 +22,22 @@ function setupApp(logger){
 
     tree = new TapTreeList($("#tree"));
 
-    let control = new ControlPane();
+    let control ;
     let tablePane = new TablePane($("#tablePane"),logger);
 
     $(document).on("new_root_table.tree",(event, args)=>{
+        if(control === undefined){
+            control = new ControlPane();
+        }
         tablePane.setApi(args.api);
         control.setApi(args.api);
     });
     $(document).on("error.application",(...args)=>{
         console.log("error event recieved");
         console.log(args);
+    });
+    $(document).on("run_query.control",()=>{
+        tablePane.refresh();
     });
 }
 

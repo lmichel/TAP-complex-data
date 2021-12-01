@@ -13,14 +13,25 @@ class ControlPane{
     }
 
     reset(){
-        $(this.box.body).html('<div style="justify-content: center;display: flex;" id="controlPane"><div id="multiTabDiv" style="width: 100%;">' +
+        $(this.box.body).html('<div style="justify-content: center;display: flex;flex-flow:column" id="controlPane"><div id="multiTabDiv" style="width: 100%;">' +
             '<ul><li><a href="#what">Select what</a></li><li><a href="#where">Where</a></li><li><a href="#query">Adql Query</a></li></ul>' +
             '<div id="what" style="justify-content: center;display: flex;"><div id="tapColSelector" style="display: flex;padding: .2em;"></div></div>' +
             '<div id="where" style="justify-content: center;display: flex;"><div id="tapColEditor" style="display: flex;padding: .2em;"></div></div>' +
-            '<div id="query" style="text-align: left;"></div></div><div style="display :none" id="adql_query_div"></div></div>'
+            '<div id="query" style="text-align: left;"></div></div><div style="display :none" id="adql_query_div"></div><button class="btn btn-primary" style="margin-top: 7px;width: 100%;" id="btnRunQuery">Run the Query</button></div>'
         );
         
         $("#multiTabDiv",this.box.body).tabs();
+        $("#btnRunQuery",this.box.body).click(()=>{
+            $(document).trigger("run_query.control",{});
+        });
+        $("li",this.box.body).click(()=>{
+            console.log("click LI");
+            this.box.snap();
+        });
+        $("a",this.box.body).click(()=>{
+            this.box.snap();
+        });
+
     }
 
     async buildEditors(){

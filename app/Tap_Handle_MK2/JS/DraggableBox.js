@@ -4,7 +4,9 @@ class DraggableBox{
             id = "drglBx_" + DraggableBox.ID++;
         }
         this.id = id;
-        $("body").append("<div id = '"+this.id+"' class='draggable-box'><div class= 'draggable-header'></div><div class='draggable-body'></div></div>");
+        $("body").append("<div id = '"+this.id+"' class='draggable-box'><div class= 'draggable-header' style='display :flex'>" +
+            "<div id='reduce' style= 'margin:auto;margin-right:.5em;cursor: pointer;height:100%;display: flex;'><div style = 'background-color:black;margin:auto;margin-left:.5em;width:1em;height:.2em'></div></div></div>" +
+            "<div class='draggable-body'></div></div>");
         this.box = $("#" + this.id)[0];
         this.header = $(".draggable-header",this.box)[0];
         this.body = $(".draggable-body",this.box)[0];
@@ -15,12 +17,39 @@ class DraggableBox{
         this.offsetY =0;
         this.x=0;
         this.y=0;
+        this.oldx=undefined;
+        this.oldy=undefined;
+        $("#reduce",this.header).click(()=>{
+            this.reduce();
+        });
         this.scrollX=window.scrollX;
         this.scrollY=window.scrollY;
 
         this.box.style.left = this.x;
         this.box.style.top = this.y;
 
+    }
+
+    reduce(){
+        if(this.oldx === undefined){
+            this.oldx = window.innerWidth;
+        }
+        if(this.oldy === undefined){
+            this.oldy = 0;
+        }
+        let swp;
+
+        swp=this.x;
+        this.x=this.oldx;
+        this.oldx = swp;
+
+        swp=this.y;
+        this.y=this.oldy;
+        this.oldy = swp;
+
+        $(this.body).toggle();
+
+        this.snap();
     }
 
     startDragging(e){
@@ -42,10 +71,6 @@ class DraggableBox{
         this.x = e.clientX - this.offsetX;
 
         this.snap();
-
-        // the layout is updated each time one of those is changed it's ligter to only do this once 
-        this.box.style.left = this.x;
-        this.box.style.top = this.y;
     }
 
     snap(){
@@ -71,6 +96,10 @@ class DraggableBox{
 
         this.x = this.x <window.scrollX?window.scrollX:this.x;
         this.y = this.y <window.scrollY?window.scrollY:this.y;
+
+        // the layout is updated each time one of those is changed it's ligter to only do this once 
+        this.box.style.left = this.x;
+        this.box.style.top = this.y;
     }
 
     stopDragging(){

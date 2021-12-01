@@ -29,7 +29,7 @@ jw.KnowledgeTank = (function(){
             "description": ["meta.note;instr.filter"]
         };
 
-        this.utypeKeyword = ["description","name","coordinates"];
+        this.utypeKeyword = ["description","name","coordinates","standardid","referenceurl","accessurl"];
 
         this.serviceDescriptors = { 
             "Simbad" : {
