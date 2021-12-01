@@ -1,6 +1,10 @@
 var ComplexFieldList_mVc;
 var ComplexFullFieldList_mVc;
 
+function vizierToID(schema){
+    return btoa(schema).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
+}
+
 function ComplexFieldList_mVcExtends(){
     ComplexFieldList = function(parentDivId, formName, handlers){
         TapColList_mVc.call(this, parentDivId, formName, handlers);
@@ -57,7 +61,7 @@ function ComplexFieldList_mVcExtends(){
         displayField:{
             value:function(ah){
                 var that = this;
-                let trId = `${ah.table_name}`.replace(".","_") +"_"+ah.nameattr;
+                let trId = vizierToID(ah.table_name) +"_"+ah.nameattr;
                 var id = this.formName + "_" +trId;
                 var title = this.getAttributeTitle(ah).toHtmlSafe();
                 var row ="<tr class=attlist id=" + trId + ">" +
