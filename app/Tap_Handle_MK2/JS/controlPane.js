@@ -36,18 +36,16 @@ class ControlPane{
 
     async buildEditors(){
 
-        let object_map = this.api.getObjectMap();
-        if(object_map.status){
-            object_map=object_map.object_map;
+        let tables = this.api.getJoinedTables(undefined,Number.MAX_SAFE_INTEGER);
+        if(tables.status){
+            tables = Object.keys(tables.joined_tables);
         }else{
             $(document).trigger("error.application",{
-                error : object_map.error,
+                error : tables.error,
                 origin : this,
             });
             return;
         }
-        
-        let tables = Object.keys(object_map.tables);
 
         let connect = this.api.getConnector();
         if(connect.status){
@@ -59,6 +57,8 @@ class ControlPane{
             });
             return;
         }
+
+        tables.push(connect.table);
 
         let t =await this.api.getTablesAttributeHandlers(tables);
         if(!t.status){

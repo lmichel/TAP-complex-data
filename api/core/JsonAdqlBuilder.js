@@ -237,16 +237,22 @@
      * @param {String} table Table from which joined table are searched 
      */
 
-    jw.core.JsonAdqlBuilder.prototype.getLowerJoints =function(table){
+    jw.core.JsonAdqlBuilder.prototype.getLowerJoints =function(table,degree=1){
         if (table == undefined){
             table = this.adqlJsonMap.rootTable;
         }
         let joints = {};
-        for (let key in this.adqlJsonMap.joints){
-            if (this.adqlJsonMap.joints[key].parentNode === table){
-                joints[key] = JSON.parse(JSON.stringify(this.adqlJsonMap.joints[key]));
-            }
+        let tables = this.getSubTables(table,degree);
+        if(tables.status){
+            tables = tables.subTables;
+        }else{
+            return tables;
         }
+
+        for (let i=0;i<tables.length;i++){
+            joints[tables[i]] = JSON.parse(JSON.stringify(this.adqlJsonMap.joints[tables[i]]));
+        }
+
         return {"status":true,"joints":joints};
     };
 
