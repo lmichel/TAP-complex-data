@@ -35,10 +35,16 @@ function setupApp(logger){
     });
 }
 
-$(document).ready(()=>{
+$(document).ready(async ()=>{
     let logger = new GlobalLogger();
     logger.info("Setting up everything");
-
+    resourceLoader.setCss([]);
+    resourceLoader.setScripts([]);
+    await resourceLoader.loadAll().then((result) => {
+        // applying IIFE overrides right after jsResources ended his loading
+        overrides();
+        extend();
+    });
     buildButtonSelector("#mainButtonHolder");
     // ensure no radio button is check by default
     $("input:radio[name=radio]:checked").prop('checked', false);

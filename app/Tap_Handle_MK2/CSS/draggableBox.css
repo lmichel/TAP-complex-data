@@ -12,14 +12,15 @@
     padding: .2em;
     cursor: move;
     z-index: 10;
-    height: 1em;
-    background-color: #dddddd;
+    height: 1.5em;
+    background-color: darkgray;
 }
 
 .draggable-body {
-    background-color: #dddddd;
+    background-color: darkgray;
     z-index: 10;
     padding: .5em;
+    padding-top: 0;
     border-radius: .5em;
     border-top-left-radius: 0;
     border-top-right-radius: 0;

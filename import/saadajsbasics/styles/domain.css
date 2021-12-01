@@ -372,10 +372,6 @@ span.kwconstraint{
 	position: inherit !important;
 }
 
-table.display {
-	width: 100% !important;
-}
-
 .paginate_enabled_next, .paginate_disabled_next, .paginate_enabled_previous, .paginate_disabled_previous {
 	padding-left: 0px !important;
 	padding-right: 0px !important;
