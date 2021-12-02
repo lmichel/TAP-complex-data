@@ -585,7 +585,7 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
             let includeTest = Object.keys(conditions).every((kw)=>{
                 return  (this.protected.cache.conditions[kw] === undefined ? true : 
                         this.protected.cache.conditions[kw].condition.includes(conditions[kw].condition)) &&
-                    (defaults[kw] !== undefined && defaults[kw].condition !== undefined ? defaults[kw].condition.includes(conditions[kw].condition) : true);
+                    (defaults[kw] !== undefined && defaults[kw].condition !== undefined ? false /*defaults[kw].condition.includes(conditions[kw].condition)*/ : true);
             });
             if(includeTest){
                 // checking how much the conditions changed

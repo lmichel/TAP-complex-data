@@ -15,7 +15,7 @@
 
     jw.core.ServiceConnector.prototype.testService = async function (){
         let result = await this.query("SELECT tap_schema.schemas.schema_name, tap_schema.schemas.description from tap_schema.schemas");
-        if(result){
+        if(result.status){
             this.connector.service.schemas = {};
             for (let i =0;i<result.field_values.length;i++){
                 this.connector.service.schemas[result.field_values[i][0].quotedTableName().qualifiedName] = {

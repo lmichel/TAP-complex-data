@@ -14,7 +14,7 @@ class CollapsableDiv{
 
         this.buildHeader(elems);
 
-        this.holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' ></div>");
+        this.holder.append("<div class='collapsable-div' id = 'collapsable-div-" + name + "' style = 'max-width:" + this.header[0].offsetWidth + "' ></div>");
     
         this.div = $("#collapsable-div-" + name,this.holder );
         if(collapsed){
@@ -162,14 +162,24 @@ class CollapsableDiv{
 class TablePane{
     constructor(div,logger = new utils.DisabledLogger()){
         this.api = undefined;
-        this.holder = div;
-        this.holder.html("");
+        div.html("<div id='TP-header' style='text-align:center'></div><div id='TP-holder' style='display: flex;flex-direction: column;'>");
+        this.header = $("#TP-header",div) ;
+        this.holder = $("#TP-holder",div);
         this.logger = logger;
         if(logger.hide == undefined){
             logger.hide = ()=>{};
         }
     }
+    quoteIfString(str){
+
+        if(isNaN(str) || isNaN(parseInt(str)) || isNaN(+str) ){
+            return "'" + str+ "'";
+        }
+    
+        return  str ;
+    }
     setApi(api){
+        this.logger.info("Setting up tables");
         let object_map = api.getObjectMap();
         if(object_map.status){
             object_map=object_map.object_map;
@@ -182,15 +192,28 @@ class TablePane{
         }
         this.holder.html("");
         this.api = api;
-        let table = api.getConnector().connector.service.table;
+        let connector = api.getConnector().connector.service;
+        this.header.html("<h3> " +
+            connector.shortName + ": " +
+            connector.schema + "." + connector.table+
+            " </h3> </h4>" + connector.schemas[connector.schema].description +
+            "</h4>");
+        let table = connector.table;
         let tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,""); // btoa use the B64 charset containing / and + not good for ids
+
+        this.logger.info("building internal structure");
         this.struct = {
             div:new CollapsableDiv(this.holder,tableB64,false,undefined,
                 [
                     {txt:table,type:"title",pos:"center"},
                     {pos:"left",txt:object_map.tables[table].description,type:"desc",weight:2,monoline:true},
                     {
-                        toDom:"<div style='font-size: small;'><label for='" + tableB64 + 
+                        toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
+                            "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
+                        pos:"right"
+                    },
+                    {
+                        toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                             "_limit'>Queryied entries :</label><select id='" +
                             tableB64 + "_limit'> <option value='10'>10</option>" +
                             "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
@@ -211,6 +234,8 @@ class TablePane{
     }
 
     refresh(){
+
+        this.logger.info("refrashing table content");
         this.struct.childs = [];
         this.struct.div.div.html("");
         this.makeTable(this.struct);
@@ -220,6 +245,8 @@ class TablePane{
      * @param {CollapsableDiv} colDiv 
      */
     async makeTable(struct,keyvals){
+
+        this.logger.info("Gathering meta data 1");
         let colDiv = struct.div;
         let tableB64 = colDiv.name;
         let tableName = atob(tableB64.replace(/_/g,"/").replace(/-/g,"+"));
@@ -249,8 +276,8 @@ class TablePane{
             return;
         }
 
+        this.logger.info("updating fields selection");
         if(object_map.tables[tableName].columns.length == 0){
-            console.log("selecting fields");
             let t = await this.api.getSelectedFields(tableName);
             
             if(t.status){ // out object map is a copy so I need to update it by hand
@@ -295,7 +322,7 @@ class TablePane{
             kMap = {};
             fieldsData.field_values[l] = fieldsData.field_values[l].filter((val,index)=>{
                 if(keys.includes(fieldsData.field_names[index])){
-                    kMap[fieldsData.field_names[index]] = val;
+                    kMap[fieldsData.field_names[index]] = this.quoteIfString(val);
                 }
                 return selected.has(fieldsData.field_names[index]);
             });
@@ -306,6 +333,8 @@ class TablePane{
         // and for the Hmap to work
         
         fieldsData.field_names = fieldsData.field_names.filter((v)=>selected.has(v)); 
+
+        this.logger.info("Gathering meta data 2");
 
         let ahs = await this.api.getTableAttributeHandlers(tableName);
         if(!ahs.status){
@@ -384,6 +413,7 @@ class TablePane{
             }
         ];
 
+        this.logger.info("Formating table");
         let tableID = "datatable_" + tableB64;
         colDiv.div.append("<table id=\"" + tableID + "\" class=\"display\"></table>");
         
@@ -399,8 +429,11 @@ class TablePane{
             top: -15, 
             left: 5 	
         });
+
+        $("table#" + tableID)[0].style.width = "fit-content";
         
         $("#"+tableID+"_wrapper").css("overflow", "hidden");
+        this.logger.hide();
     }
 
     removeChilds(struct){
@@ -409,6 +442,7 @@ class TablePane{
             delete struct.childs[i].div;
             this.removeChilds(struct.childs[i]);
         }
+        struct.childs = [];
     }
 
     makeSubdivsFactory(struct,Hmap){
@@ -442,8 +476,7 @@ class TablePane{
         return (nRow,data)=>{
             $(nRow).click(()=>{
 
-                // TODO : remove existing divs re-open divs
-                // TODO : bind the table making functions
+                that.logger.info("Gathering meta data 3");
 
                 let h = $(".rHighlight",$(nRow).parent());
                 if(h.get(0)==nRow){
@@ -452,9 +485,16 @@ class TablePane{
                 h.removeClass("rHighlight");
                 $(nRow).addClass("rHighlight");
 
+                let open = struct.childs.filter(s=>s.div.div.is(":visible"));
+                open = open.map(s=> s.div.name);
+                open = new Set(open);
+
                 that.removeChilds(struct);
+
                 let gKMap = Hmap[data.join("")];
                 let joints = that.api.getJoinedTables(tableName).joined_tables;
+
+                that.logger.info("Building tables");
                 for(let table in subtables){
                     tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
                     let nb = Object.keys(that.api.getJoinedTables(table).joined_tables).length;
@@ -482,7 +522,7 @@ class TablePane{
                                 pos:"right"
                             },
                             {
-                                toDom:"<div style='font-size: small;'><label for='" + tableB64 + 
+                                toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                                     "_limit'>Queryied entries :</label><select id='" +
                                     tableB64 + "_limit'> <option value='10'>10</option>" +
                                     "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
@@ -498,9 +538,13 @@ class TablePane{
                         "title",
                         !struct.div.parity,
                     );
+                    if(open.has(tableB64)){
+                        $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
+                    }
 
                     struct.childs.push(s);
                 }
+                that.logger.hide();
             });
             
         };

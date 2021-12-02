@@ -23,7 +23,7 @@ async function setupEventHandlers(){
         "_int":{
             table:"interface",
             column:"url_use",
-            condition: new jw.widget.SearchBar.ConstraintsHolder(["vs:paramhttp"],"(rr.interface.intf_type = 'vs:paramhttp' AND rr.interface.url_use ='base')")
+            condition: new jw.widget.SearchBar.ConstraintsHolder(["vs:paramhttp"],"(rr.interface.intf_type = 'vs:paramhttp')")
         },
         "name":{
             table:"resource",

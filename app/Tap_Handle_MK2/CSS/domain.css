@@ -18,7 +18,6 @@ input[type="radio"] {
 }
 
 .fielddiv {
-	width: 350px;
 	margin: 0;
 	position: relative;
 	float: left;
@@ -28,14 +27,21 @@ input[type="radio"] {
 	padding-top: 10px;
 }
 
+.fieldlist .table > :not(caption) > * > *,
+.fielddiv .table > :not(caption) > * > * {
+    padding: .5rem .5rem;
+    background-color: inherit;
+    border-bottom-width: 0px;
+    box-shadow:none;
+}
+
 .fieldlist {
 	overflow-y: auto;
 	overflow-x: auto;
 	border-style: solid;
 	border-width: 1px;
 	border-color: #b7b5b5;
-	width: 345px;
-	height: 128px;
+	width: 30em;
 }
 
 .fieldlist tr {
@@ -140,11 +146,10 @@ td.attlistcmd {
 	background-color: white;
 	color: transparent;
 	margin: auto;
-	/* height: 12px; */
-	width: 13px;
+	height: 1.5em;
+	width: 1.5em;
 	padding: 0px;
 	border-width: 0px;
-	/* background: url(../icons/orderBy.png) no-repeat; */
 	background: url(../icons/sort.png) no-repeat;
 }
 
@@ -204,7 +209,6 @@ input:hover.decconstbutton {
 }
 
 .closekw {
-	display: inline-block;
 	float: left;
 	height: 16px;
 	width: 16px;
@@ -338,7 +342,6 @@ div.editorrightpart {
 .kwConstraint{
 	background: #f2f2f2;
 	border: none;
-	width: 98%;
 	padding: 1px;
 }
 
@@ -392,11 +395,6 @@ a.accept {
 
 .select-job {
 	margin-left: 6px;
-}
-
-.ui-tabs .ui-tabs-panel {
-	padding: 0px;
-	min-height: 250px;
 }
 
 .dataTables_wrapper {
@@ -585,9 +583,6 @@ tr.odd td.sorting_1 {
 	float: left; 
 	display: inline;
 }
-.patternContainerRight  {
-	"width: 450px; 
-	height: 100%; 
-	float: right;
-	display: inline;
+.fieldlist tr{
+	border-top: 0px !important;
 }

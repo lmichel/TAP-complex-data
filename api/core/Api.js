@@ -147,11 +147,11 @@
      * 
      * @param {String} baseTable Table from which joined table are searched 
      */
-    jw.Api.prototype.getJoinedTables = function (baseTable) {
+    jw.Api.prototype.getJoinedTables = function (baseTable,degree) {
         let jsonContaintJoinTable = {};
         if (this.connectLevel==3) {
             
-            jsonContaintJoinTable.joined_tables = this.jsonAdqlBuilder.getLowerJoints(baseTable).joints;
+            jsonContaintJoinTable.joined_tables = this.jsonAdqlBuilder.getLowerJoints(baseTable,degree).joints;
             jsonContaintJoinTable.status = true;
             jsonContaintJoinTable.base_table = baseTable;
             

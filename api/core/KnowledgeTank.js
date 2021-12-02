@@ -29,7 +29,7 @@ jw.KnowledgeTank = (function(){
             "description": ["meta.note;instr.filter"]
         };
 
-        this.utypeKeyword = ["description","name","coordinates"];
+        this.utypeKeyword = ["description","name","coordinates","standardid","referenceurl","accessurl"];
 
         this.serviceDescriptors = { 
             "Simbad" : {
@@ -62,7 +62,7 @@ jw.KnowledgeTank = (function(){
             },
             
             "Vizier" : {
-                "tapService" : "//tapvizier.u-strasbg.fr/TAPVizieR/tap/sync",
+                "tapService" : "//tapvizier.cds.unistra.fr/TAPVizieR/tap/sync",
                 "schema" : "metaviz",
                 "table" : "METAcat"
             },
