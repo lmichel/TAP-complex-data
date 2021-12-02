@@ -127,6 +127,11 @@ class CollapsableDiv{
                 while(getNBLines(e,h)>1){
                     e.innerText = text.substr(0,c-4) + "...";
                 }
+                e.title = text;
+                $(e).tooltip({ 
+                    template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
+                    html:true,
+                });
             }
         });
     }
@@ -418,18 +423,20 @@ class TablePane{
         colDiv.div.append("<table id=\"" + tableID + "\" class=\"display\"></table>");
         
         CustomDataTable.create(tableID, options, positions);
-    
-        $("#"+tableID+" span").tooltip( { 
-            track: true, 
-            delay: 0, 
-            showURL: false, 
-            opacity: 1, 
-            fixPNG: true, 
-            showBody: " - ", 
-            top: -15, 
-            left: 5 	
+        
+        let arr;
+        $("#"+tableID+" span").each((i,e)=>{
+            arr = e.title.split(" - ");
+            arr[0] ="<h3>" + arr[0].trim() + "</h3>";
+            // replace only replace the first occurence
+            e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
         });
 
+        $("#"+tableID+" span").tooltip({ 
+            template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
+            html:true,
+        });
+        
         $("table#" + tableID)[0].style.width = "fit-content";
         
         $("#"+tableID+"_wrapper").css("overflow", "hidden");

@@ -693,3 +693,7 @@ input[disabled] {
 	color: grey;
 	font-style: italic;
 }
+
+.tooltip-inner{
+	max-width: none;
+}

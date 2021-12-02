@@ -105,16 +105,18 @@ function ComplexFieldList_mVcExtends(){
                 if( this.decHandler != null ){
                     $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler(trId);});
                 }
-                
-                $('#' + this.fieldTableId + " tr#" + trId + " span").tooltip( {
-                    track: true,
-                    delay: 0,
-                    showURL: false,
-                    opacity: 1,
-                    fixPNG: true,
-                    showBody: " - ",
-                    top: -15,
-                    left: 5
+
+                let arr;
+                $('#' + this.fieldTableId + " tr#" + trId + " span").each((i,e)=>{
+                    arr = e.title.split(" - ");
+                    arr[0] ="<h3>" + arr[0].trim() + "</h3>";
+                    // replace only replace the first occurence
+                    e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
+                });
+
+                $('#' + this.fieldTableId + " tr#" + trId + " span").tooltip({ 
+                    template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
+                    html:true,
                 });
             }
         },
