@@ -131,6 +131,7 @@ class CollapsableDiv{
                 $(e).tooltip({ 
                     template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
                     html:true,
+                    customClass :"ressource-tooltip",
                 });
             }
         });
@@ -152,11 +153,14 @@ class CollapsableDiv{
         if(expendOn !== undefined){
             let elem =  $(".collapsable-"+expendOn,this.header);
             if(elem.length>0){
+                elem.each((i,e)=>{e.classList.add("clickable");});
                 elem.click(handler);
             }else{
+                this.header.each((i,e)=>{e.classList.add("clickable");});
                 this.header.click(handler);
             }
         }else{
+            this.header.each((i,e)=>{e.classList.add("clickable");});
             this.header.click(handler);
         }
     }
@@ -435,6 +439,7 @@ class TablePane{
         $("#"+tableID+" span").tooltip({ 
             template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
             html:true,
+            customClass :"ressource-tooltip",
         });
         
         $("table#" + tableID)[0].style.width = "fit-content";
@@ -468,7 +473,20 @@ class TablePane{
             });
             return;
         }
-
+        if(Object.keys(subtables).length == 0){
+            return (nRow,data)=>{
+                nRow.classList.add("clickable");
+                let fun = ()=>{
+                    let h = $(".rHighlight",$(nRow).parent());
+                    if(h.get(0)==nRow){
+                        return;
+                    }
+                    h.removeClass("rHighlight");
+                    $(nRow).addClass("rHighlight");
+                };
+                $(nRow).click(fun);
+            };// no need to check for data in related tables if there is no related tables
+        }
         let object_map = this.api.getObjectMap();
         if(object_map.status){
             object_map=object_map.object_map;
@@ -481,12 +499,14 @@ class TablePane{
         }
 
         return (nRow,data)=>{
-            $(nRow).click(()=>{
+            nRow.classList.add("clickable");
+            let fun = ()=>{
 
-                that.logger.info("Gathering meta data 3");
+                that.logger.info("Gathering meta data");
 
                 let h = $(".rHighlight",$(nRow).parent());
                 if(h.get(0)==nRow){
+                    that.logger.hide();
                     return;
                 }
                 h.removeClass("rHighlight");
@@ -497,6 +517,10 @@ class TablePane{
                 open = new Set(open);
 
                 that.removeChilds(struct);
+                if($("h5",struct.div.div).length == 0){
+                    $(struct.div.div).append("<h5>The following entries tables joined with "+tableName+
+                        " click on the table's name to show data related to the selected line</h5>");
+                }
 
                 let gKMap = Hmap[data.join("")];
                 let joints = that.api.getJoinedTables(tableName).joined_tables;
@@ -545,6 +569,9 @@ class TablePane{
                         "title",
                         !struct.div.parity,
                     );
+                    $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
+                        "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";
+                    $(".collapsable-title",s.div.header).tooltip({html:true});
                     if(open.has(tableB64)){
                         $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
                     }
@@ -552,8 +579,8 @@ class TablePane{
                     struct.childs.push(s);
                 }
                 that.logger.hide();
-            });
-            
+            };
+            $(nRow).click(fun);
         };
         
     }

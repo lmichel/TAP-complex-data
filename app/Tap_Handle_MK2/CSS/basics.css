@@ -697,3 +697,16 @@ input[disabled] {
 .tooltip-inner{
 	max-width: none;
 }
+
+.clickable{
+	cursor:pointer;
+}
+
+body div h3 {
+	line-height: 1.2em;
+}
+
+.modal-body pre {
+	max-width: 100%;
+	white-space: break-spaces;
+}

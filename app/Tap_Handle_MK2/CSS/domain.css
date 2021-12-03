@@ -257,7 +257,7 @@ a.sesame-small {
 	font-family: Arial, Helvetica, sans-serif;
 }
 
-.tooltip {
+.ressource-tooltip {
 	position: absolute;
 	z-index: 3000;
 	border: 1px solid #111;
@@ -267,14 +267,15 @@ a.sesame-small {
 	max-width: 50%;
 }
 
-.tooltip-inner{
+
+.ressource-tooltip .tooltip-inner{
 	border: none;
 	background: inherit;
 	color: black;
 	text-align: left;
 }
 
-.tooltip h3,.tooltip div {
+.ressource-tooltip h3,.ressource-tooltip div {
 	margin: 0;
 }
 

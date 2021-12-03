@@ -28,6 +28,10 @@ function setupApp(logger){
     $(document).on("new_root_table.tree",(event, args)=>{
         if(control === undefined){
             control = new ControlPane();
+            setTimeout(()=>{
+                control.box.reduce();
+            },500);
+            
         }
         tablePane.setApi(args.api);
         control.setApi(args.api);

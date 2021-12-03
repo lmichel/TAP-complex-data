@@ -45,7 +45,68 @@ function ComplexFieldList_mVcExtends(){
                 ((ah.range)?(" - Range: " +  JSON.stringify( ah.range).replace(/'/g,"&#39;")): "");
             }
         },
-        
+        displayField:  {
+            value:function(ah){
+                var that = this;
+                var id = this.formName + "_" + vizierToID(ah.nameattr);
+                var title = this.getAttributeTitle(ah);
+                var row ="<tr class=attlist id=" + vizierToID(ah.nameattr) + ">" 
+                +"<td class=attlist><span title='" + title + "'>"+ ah.nameorg+"</span></td>"
+                +"<td class='attlist help'>" + ah.type +"</td>"
+                +"<td class='attlist help'>" + ((ah.unit != undefined)? ah.unit:"") +"</td>"
+                ;
+
+                if( this.orderByHandler != null ) {
+                    row += "<td class='attlist attlistcmd'>"+
+                        "<input id=order_" + id + " title=\"Click to order the query result by this field\" class=\"orderbybutton\" type=\"button\" ></input>"+
+                        "</td>";
+                }
+                if( this.stackHandler != null ) {
+                    row += "<td class='attlist attlistcmd'>"+
+                        "<input id=stack_" + id + " title=\"" + this.stackTooltip  + "\"  class=\"stackconstbutton\" type=\"button\"></input>"+
+                        "</td>";
+                }
+                if( this.raHandler != null ) {
+                    row += "<td class='attlist attlistcmd'>"+
+                        "<input id=tora_" + id + " title=\"Click to use this field as RA coordinate\"  class=\"raconstbutton\" type=\"button\"></input>"+
+                        "</td>";
+                }
+                if( this.decHandler != null ) {
+                    row += "<td class='attlist attlistcmd'>"+
+                        "<input id=todec_" + id + " title=\"Click to use this field as DEC coordinate\"  class=\"decconstbutton\" type=\"button\"></input>"+
+                        "</td>";
+                }
+                row += "</tr>";
+                $('#' + this.fieldTableId).append(row);
+                var id = this.formName + "_" + vizierToID(ah.nameattr);
+                if( this.orderByHandler != null ) {
+                    $('#' + this.fieldListId + ' input[id="order_' + id + '"]' ).click(function() {that.orderByHandler($(this).closest("tr").attr("id"));});
+                }
+                if( this.stackHandler != null ){
+                    $('#' + this.fieldListId + ' input[id="stack_' + id + '"]' ).click(function() {
+                        that.stackHandler($(this).closest("tr").attr("id"));});
+                }
+                if( this.raHandler != null ){
+                    $('#' + this.fieldListId + ' input[id="tora_' + id + '"]' ).click(function() {that.raHandler($(this).closest("tr").attr("id"));});
+                }
+                if( this.decHandler != null ){
+                    $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler($(this).closest("tr").attr("id"));});
+                }
+                let arr;
+                $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").each((i,e)=>{
+                    arr = e.title.split(" - ");
+                    arr[0] ="<h3>" + arr[0].trim() + "</h3>";
+                    // replace only replace the first occurence
+                    e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
+                });
+
+                $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").tooltip({ 
+                    template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
+                    html:true,
+                    customClass :"ressource-tooltip",
+                });
+            }
+		},
     });
 
     ComplexFullFieldList_mVc = function(parentDivId, formName, handlers,tables){
@@ -61,7 +122,7 @@ function ComplexFieldList_mVcExtends(){
         displayField:{
             value:function(ah){
                 var that = this;
-                let trId = vizierToID(ah.table_name) +"_"+ah.nameattr;
+                let trId = vizierToID(ah.table_name) +"_"+vizierToID(ah.nameattr);
                 var id = this.formName + "_" +trId;
                 var title = this.getAttributeTitle(ah).toHtmlSafe();
                 var row ="<tr class=attlist id=" + trId + ">" +
@@ -117,6 +178,7 @@ function ComplexFieldList_mVcExtends(){
                 $('#' + this.fieldTableId + " tr#" + trId + " span").tooltip({ 
                     template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
                     html:true,
+                    customClass :"ressource-tooltip",
                 });
             }
         },
@@ -139,7 +201,7 @@ function ComplexFieldList_mVcExtends(){
                             var ahm = cache.hamap;
                             for( var k=0 ; k<ahm.length ; k++) {
                                 var ah = ahm[k];
-                                that.attributesHandlers[vizierToID(ah.table_name) +"_"+ ah.nameattr] = ah;				
+                                that.attributesHandlers[vizierToID(ah.table_name) +"_"+ vizierToID(ah.nameattr)] = ah;				
                                 that.displayField(ah);
                             }
                             that.lookForAlphaKeyword();
