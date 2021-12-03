@@ -15,8 +15,8 @@ class DraggableBox{
         this.boundaries = this.box.getBoundingClientRect();
         this.offsetX =0;
         this.offsetY =0;
-        this.x=0;
-        this.y=0;
+        this.x=window.innerWidth/2;
+        this.y=window.innerHeight/2;
         this.oldx=undefined;
         this.oldy=undefined;
         $("#reduce",this.header).click(()=>{
@@ -46,10 +46,18 @@ class DraggableBox{
         swp=this.y;
         this.y=this.oldy;
         this.oldy = swp;
-
-        $(this.body).toggle();
-
-        this.snap();
+        if($(this.body).is(":visible")){
+            $(this.body).animate({width:"toggle",height:"toggle"},500,"swing",()=>{
+                    this.snap(false);
+                    $(this.box).animate({top:this.y,left:this.x},1000);
+            });
+        }else {
+            $(this.box).animate({top:this.y,left:this.x},1000,"swing",()=>{
+                $(this.body).animate({width:"toggle",height:"toggle"},500,"swing",()=>{
+                    this.snap();
+                });
+            });
+        }
     }
 
     startDragging(e){
@@ -73,7 +81,7 @@ class DraggableBox{
         this.snap();
     }
 
-    snap(){
+    snap(apply=true){
         /*/ avoid the floating box to go outside of the screen /*/
 
         // setting the scrollHeight and width  
@@ -98,8 +106,10 @@ class DraggableBox{
         this.y = this.y <window.scrollY?window.scrollY:this.y;
 
         // the layout is updated each time one of those is changed it's ligter to only do this once 
-        this.box.style.left = this.x;
-        this.box.style.top = this.y;
+        if(apply){
+            this.box.style.left = this.x;
+            this.box.style.top = this.y;
+        }
     }
 
     stopDragging(){

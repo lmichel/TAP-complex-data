@@ -12,11 +12,9 @@ function ComplexQueryEditor(api,holder){
  */
 ComplexQueryEditor.prototype.updateQuery = function(type, data){
     let asyncProm =(async ()=>{})();
-    console.log("updating query");
     switch(type.toLowerCase()){
         case "constraint": 
         {
-            console.log("type constraint");
             let constraints = data.editors;
             this.api.resetAllTableConstraint();
             let constraint;
@@ -30,7 +28,6 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
             break;
         } 
         case "columns":{
-            console.log("type column");
             let columns = data.editors;
             let table = this.api.getConnector().connector.service.table;
             this.api.unselectAllFields(table);

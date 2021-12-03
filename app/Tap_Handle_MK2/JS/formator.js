@@ -21,7 +21,7 @@ ValueFormator = function() {
 	var formatValue = function(columnName, values, tdNode, columnMap,dataTreePat) {
 		dataTreePath = dataTreePat;
 		if( columnMap.currentColumn == undefined )  {
-			Modalinfo.error("formatValue: Missing column number in " + JSON.stringify(columnMap));
+			ModalInfo.error("formatValue: Missing column number in " + JSON.stringify(columnMap));
 			return;
 		}
 		var value = "" + values[columnMap.currentColumn];
@@ -149,8 +149,9 @@ ValueFormator = function() {
 			 * Array annotation removed from server because of CSIRO for which all data are typed as arra
 			 */
 		} else if(/* value.startsWith("Array")*/ value.length > 24 ) {
+			value = value.replace(/'/g,"&#146;");
 			//tdNode.html("<a title='Data array(click to expand)' class='dl_dataarray' href='#'  onclick='Modalinfo.info(\"" + value + "\", \"Data Array\");'></a>");
-			tdNode.html("<span title=' - " + value + "' style =' cursor: pointer;' onclick='Modalinfo.info(\"" + value + "\", \"Full Value\");'>" + value.substring(0, 23) + " ... </span>");
+			tdNode.html("<span title=' - " + value + "' style =' cursor: pointer;' onclick='ModalInfo.info(\"" + value + "\", \"Full Value\");'>" + value.substring(0, 23) + " ... </span>");
 		    
 			//tdNode.html("<span title='" + value + "' style =' cursor: pointer;' onclick='alixapi.drawCircle(\"" + value + "\");'>" + value.substring(0, 23) + " ... </span>");	
 		} else if( decimaleRegexp.test(value)){
@@ -183,7 +184,7 @@ ValueFormator = function() {
 	};	
 	var addPreviewControl = function(columnName, tdNode, url, fileName){
 		var title = ((fileName != undefined)?fileName: "") + " preview";
-		var x = "<a class='dl_download' title='Data preview' href='javascript:void(0);' onclick='Modalinfo.openIframePanel(\"" + url + "\", \"" + title + "\");'></a>";
+		var x = "<a class='dl_download' title='Data preview' href='javascript:void(0);' onclick='ModalInfo.openIframePanel(\"" + url + "\", \"" + title + "\");'></a>";
 		tdNode.append(x);
 		
 	};	

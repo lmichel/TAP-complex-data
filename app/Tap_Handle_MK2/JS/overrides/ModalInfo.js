@@ -24,7 +24,7 @@ function ModalInfoOverride(){
 
         ModalInfo.prototype.buildHeader = function(iconHtml,title){
             return '<div class="modal-header">' + this.undefSafe(iconHtml) + 
-                (title === undefined ? "" : '<h5 class="modal-title">' + title + '</h5>') +
+                (title === undefined ? "" : '<h5 class="modal-title">' + title.replace(/\n/g,"<br>") + '</h5>') +
                 '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>';
         };
 
@@ -37,6 +37,7 @@ function ModalInfoOverride(){
         };
 
         ModalInfo.prototype.formatMessage = function(message) {
+            message = message.replace(/\n/g,"<br>");
             var retour = "<pre>" + message + "</pre>";
             return retour;
         };
@@ -50,6 +51,7 @@ function ModalInfoOverride(){
             );
             $("body").append(modalHtml);
             let modal = new bootstrap.Modal($("#" + id)[0]);
+            modal.show();
             return modal;
         };
 
