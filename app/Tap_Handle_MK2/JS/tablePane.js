@@ -270,6 +270,8 @@ class TablePane{
                 error : object_map.error,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
 
@@ -282,6 +284,8 @@ class TablePane{
                 error : keys.error,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
 
@@ -296,6 +300,8 @@ class TablePane{
                     error : t.error,
                     origin : that,
                 });
+                this.logger.hide();
+                ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
                 return;
             }
         }
@@ -317,6 +323,8 @@ class TablePane{
                 error : fieldsData,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
         
@@ -351,6 +359,8 @@ class TablePane{
                 error : ahs,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
         ahs = ahs.attribute_handlers;
@@ -506,7 +516,7 @@ class TablePane{
 
                 let h = $(".rHighlight",$(nRow).parent());
                 if(h.get(0)==nRow){
-                    that.logger.hide();
+                    this.logger.hide();
                     return;
                 }
                 h.removeClass("rHighlight");

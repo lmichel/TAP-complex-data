@@ -5,6 +5,7 @@ function ComplexQEditor_MvcExtends(){
 		tapQEditor_Mvc.call(this);
 		this.complexEditor = complexEditor;
 		this.colSelector = colSelector;
+		this.complexEditor.registerConstraintsHolder(this);
 	};
 	/**
 	 * Tap Complex custom model extends the tapQEditor_Mvc class

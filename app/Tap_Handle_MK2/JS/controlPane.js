@@ -14,9 +14,11 @@ class ControlPane{
 
     reset(){
         $(this.box.body).html('<div style="justify-content: center;display: flex;flex-flow:column" id="controlPane"><div id="multiTabDiv" style="width: 100%;">' +
-            '<ul><li><a href="#what">Select what</a></li><li><a href="#where">Where</a></li><li><a href="#query">Adql Query</a></li></ul>' +
+            '<ul><li><a href="#what">Select what</a></li><li><a href="#where">Where</a></li><li><a href="#query">Adql Query</a></li>'+ 
+            '<li><a href="#pos">Pos</a></li></ul>' +
             '<div id="what" style="justify-content: center;display: flex;"><div id="tapColSelector" style="display: flex;padding: .2em;"></div></div>' +
             '<div id="where" style="justify-content: center;display: flex;"><div id="tapColEditor" style="display: flex;padding: .2em;"></div></div>' +
+            '<div id="pos" style="justify-content: center;display: flex;"><div id="tapConeEditor" style="display: flex;padding: .2em;"></div></div>' +
             '<div id="query" style="text-align: left;"></div></div><div style="display :none" id="adql_query_div"></div><button class="btn btn-primary" style="margin-top: 7px;width: 100%;" id="btnRunQuery">Run the Query</button></div>'
         );
         
@@ -93,10 +95,21 @@ class ControlPane{
             colSelector:this.what,
         });
 
+        this.pos = QueryConstraintEditor.ComplexPosConstraintEditor({
+            parentDivId:'tapConeEditor',
+            formName: 'tapFormConeName',
+            sesameUrl:"schnaps",
+            upload: {url: "uploadposlist", postHandler: function(retour){alert("postHandler " + retour);}} ,
+            queryView: this.compat,
+            complexEditor: this.queryEditor,
+            colSelector:this.what,
+        });
+
         let dt = {"nodekey":connect.shortName, "schema": connect.schema, "table": connect.table, "tableorg": connect.table};
 
         this.where.fireSetTreepath(new DataTreePath(dt));
         this.what.fireSetTreepath(new DataTreePath(dt));
+        this.pos.fireSetTreepath(new DataTreePath(dt));
 
         let fields = await this.api.getSelectedFields(connect.table);
         fields=fields.fields;

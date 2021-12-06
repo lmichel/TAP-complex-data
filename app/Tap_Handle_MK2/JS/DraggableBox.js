@@ -47,13 +47,13 @@ class DraggableBox{
         this.y=this.oldy;
         this.oldy = swp;
         if($(this.body).is(":visible")){
-            $(this.body).animate({width:"toggle",height:"toggle"},500,"swing",()=>{
+            $(this.body).animate({width:"toggle",height:"toggle"},400,"swing",()=>{
                     this.snap(false);
-                    $(this.box).animate({top:this.y,left:this.x},1000);
+                    $(this.box).animate({top:this.y,left:this.x},500);
             });
         }else {
-            $(this.box).animate({top:this.y,left:this.x},1000,"swing",()=>{
-                $(this.body).animate({width:"toggle",height:"toggle"},500,"swing",()=>{
+            $(this.box).animate({top:this.y,left:this.x},500,"swing",()=>{
+                $(this.body).animate({width:"toggle",height:"toggle"},400,"swing",()=>{
                     this.snap();
                 });
             });
