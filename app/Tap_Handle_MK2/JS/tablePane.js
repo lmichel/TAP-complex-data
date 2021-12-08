@@ -67,21 +67,21 @@ class CollapsableDiv{
             }
 
             if(l.length>0){
-                header += '<div class="txt-left col-'+Math.floor(lWeight/totWeight*12)+'">';
+                header += '<div class="txt-left col-'+Math.round(lWeight/totWeight*12)+'">';
                     l.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(c.length>0){
-                header += '<div class="txt-center col-'+Math.floor(cWeight/totWeight*12)+'">';
+                header += '<div class="txt-center col-'+Math.round(cWeight/totWeight*12)+'">';
                     c.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(r.length>0){
-                header += '<div class="txt-right col-'+Math.floor(rWeight/totWeight*12)+'">';
+                header += '<div class="txt-right col-'+Math.round(rWeight/totWeight*12)+'">';
                     r.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
@@ -255,7 +255,7 @@ class TablePane{
             div:new CollapsableDiv(this.holder,tableB64,false,undefined,
                 [
                     {txt:table,type:"title",pos:"center"},
-                    {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true},
+                    {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
                     /*{
                         toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
                             "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
@@ -279,6 +279,11 @@ class TablePane{
                             "' style='margin:.4em'>Column Selection</button>",
                         pos:"right"
                     },
+                    {
+                        toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
+                            "' style='margin:.4em'>cone search in this table</button>",
+                        pos:"right"
+                    },
                 ],
                 "title"
             ),
@@ -287,6 +292,9 @@ class TablePane{
         };
         $("#" +tableB64+"_columns", this.struct.div.header).click(()=>{
             MetaDataShower(this.api,table);
+        });
+        $("#" +tableB64+"_cone", this.struct.div.header).click(()=>{
+            $(document).trigger("cone_search_update_table.control",{table:table});
         });
         this.refresh();
     }
@@ -607,12 +615,7 @@ class TablePane{
                         that.makeTable.bind(that,s,kMap),
                         [
                             {txt:table + (nb>0?" " + nb +"+":""),type:"title",pos:"center"},
-                            {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true},
-                            /*{
-                                toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
-                                    "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
-                                pos:"right"
-                            },*/
+                            {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
                             /*{
                                 toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                                     "_limit'>Queryied entries :</label><select id='" +
@@ -621,14 +624,14 @@ class TablePane{
                                     "<option value='0'>unlimited</option> </select></div>",
                                 pos:"right"
                             },*/
-                            /*{
-                                toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + tableB64 + "_fullTables'" +
-                                    " style='margin:.4em' checked><label for='" + tableB64 + "_fullTables'>Selected tables only</label></div>",
-                                pos:"right"
-                            }*/
                             {
                                 toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
                                     "' style='margin:.4em'>Column Selection</button>",
+                                pos:"right"
+                            },
+                            {
+                                toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
+                                    "' style='margin:.4em'>cone search in this table</button>",
                                 pos:"right"
                             },
                         ],
@@ -637,6 +640,9 @@ class TablePane{
                     );
                     $("#" +tableB64+"_columns", s.div.header).click(()=>{
                         MetaDataShower(that.api,table);
+                    });
+                    $("#" +tableB64+"_cone", s.div.header).click(()=>{
+                        $(document).trigger("cone_search_update_table.control",{table:table});
                     });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";

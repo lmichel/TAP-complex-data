@@ -23,7 +23,7 @@
                         + ' </div>';
                     }
                     this.parentDiv.html('<div class=fielddiv>'
-                            + ' <div class="fieldlist" id="' + this.fieldListId +  '" style="height: 245px"></div>'
+                            + ' <div class="fieldlist" id="' + this.fieldListId +  '" style="height: 250px"></div>'
                             + ' <div class="form-group" style="margin-bottom:8px; margin-top: 8px;"><div class="input-group"><div class="input-group-addon input-sm"><span class="glyphicon glyphicon-search"></span></div>'
                             + ' <input id="' + this.fieldFilterId +  '" class="form-control input-sm" type="text" placeholder="Search"/></div></div>'
                             + radec
