@@ -58,7 +58,6 @@ function ModalInfoOverride(){
 
         ModalInfo.prototype.error = function(content, title) {
             let id = this.getNextID();
-
             let modalHtml = this.buildModal(
                 id,
                 this.buildHeader(this.iconToHTML(this.icons.error),"Error : " +title),

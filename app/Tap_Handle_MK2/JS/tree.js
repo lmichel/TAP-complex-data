@@ -72,19 +72,23 @@ var TapTree = function(){
         rootHolder.on("select_node.jstree",(event,object)=>{
             if(object.node.parents.length>2){
                 if(object.node.parents[object.node.parents.length-2]==this.treeID){
-                    api.setRootTable(object.node.text).then(val=>{
-                        if(val.status){
-                            $(document).trigger("new_root_table.tree",{
-                                api:api,
-                                tree:that,
-                            });
-                        } else {
-                            $(document).trigger("error.application",{
-                                error : val.error,
-                                origin : that,
-                            });
-                        }
+                    let schem =  atob(object.node.parents[0].substr(this.treeID.length+1).replace(/_/g,"/").replace(/-/g,"+"));
+                    api.selectSchema(schem).then(()=>{
+                        api.setRootTable(object.node.text).then(val=>{
+                            if(val.status){
+                                $(document).trigger("new_root_table.tree",{
+                                    api:api,
+                                    tree:that,
+                                });
+                            } else {
+                                $(document).trigger("error.application",{
+                                    error : val.error,
+                                    origin : that,
+                                });
+                            }
+                        });
                     });
+                    
                 }
             }
         });
@@ -139,14 +143,14 @@ var TapTree = function(){
             $("#" + id + "_meta").click(this.serviceMetaDataShowerFactory());
 
 
-            let span = '<span style="font-style: normal; font-size: x-small ; background-color:';
+            let span = '<span style="font-size: .8em ; background-color:';
             $("#" + id + "_anchor").after("<span id='" + id + "_info'></span>");
             let infoSpan = $("#" + id + "_info");
 
             infoSpan.append(span + 'lightgreen;" title="Support synchronous queries">S</span>');
             infoSpan.append(span + 'lightgreen;" title="Support ADQL joins">J</span>'); // TODO test if it's not a lie ...
-            infoSpan.append(span + 'grey; color:white" title="The application does not support asynchronous queries">A</span>');
-            infoSpan.append(span + 'grey; color:white" title="The application does not support table upload">U</span>');
+            infoSpan.append(span + '#6f6f6f; color:white" title="The application does not support asynchronous queries">A</span>');
+            infoSpan.append(span + '#6f6f6f; color:white" title="The application does not support table upload">U</span>');
         });
     }
 
@@ -187,8 +191,8 @@ var TapTree = function(){
                             this.tree.open_node(wasOpen[i],undefined,false);
                         }
 
-                        ExtraDrawer.drawExtra(this.rootHolder,nodeID,this.reDrawerFactory(safeSchem,tables),["before_open.jstree","after_open.jstree"]);
-                        ExtraDrawer.drawExtra(this.rootHolder,this.treeID,this.reDrawerFactory(safeSchem,tables),["before_open.jstree"]);
+                        ExtraDrawer.drawExtra(this.rootHolder,nodeID,this.reDrawerFactory(safeSchem,tables,schema),["before_open.jstree","after_open.jstree"]);
+                        ExtraDrawer.drawExtra(this.rootHolder,this.treeID,this.reDrawerFactory(safeSchem,tables,schema),["before_open.jstree"]);
                         if(partial){
                             this.rootHolder.on("before_open.jstree",fun);
                         }
@@ -260,7 +264,7 @@ var TapTree = function(){
     };
 
 
-    TapTree.prototype.reDrawerFactory = function(safeSchem,tables){
+    TapTree.prototype.reDrawerFactory = function(safeSchem,tables,schema){
         let that = this;
         return (id)=>{
             let tableSafe;
@@ -269,10 +273,11 @@ var TapTree = function(){
                 if($("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_meta").length == 0){
                     $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
                         "_meta' class='metadata' src='./images/info.png' title='Show metadata (Does not work with Vizier)'/>");
+
+                    that.bindMetaDataShower($("#" + that.treeID + "_" + safeSchem + "_" + tableSafe +"_meta" ),table,schema);
                     if(tables[table].type === "view"){
                         $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
                             "_view' src='./images/viewer_23.png' title='this table is defined as a view, query may be slower than usual ...'/>");
-                        $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe +"_view" ).click(that.tableMetaDataShowerFactory(table));
                     }
                 }
             }
@@ -291,8 +296,24 @@ var TapTree = function(){
         };
     };
 
-    TapTree.prototype.tableMetaDataShowerFactory = function(table){
-        return () => {};
+    TapTree.prototype.bindMetaDataShower = function(obj,table,schema){
+        let that = this;
+        let fun =() => {
+            obj.off({"click":fun});
+            let conn = this.api.getConnector().connector.service;
+            if(conn.schema == schema){
+                if(conn.table === undefined){
+                    this.api.setRootTable(table);
+                }
+            }
+            let src = obj.attr("src");
+            obj.attr("src","http://i.stack.imgur.com/FhHRx.gif");
+            MetaDataShower(that.api,table,conn.schema == schema,schema).then(()=>{
+                obj.attr("src",src);
+                obj.click(fun);
+            });
+        };
+        obj.click(fun);
     };
 
     TapTree.prototype.resetFilter = function(){

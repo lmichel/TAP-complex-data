@@ -55,6 +55,9 @@
     jw.Api.prototype.selectSchema = async function(schema){
         if(this.connectLevel>0){
             schema = schema.quotedTableName().qualifiedName.toString();
+            if(schema == this.tapServiceConnector.getConnector().service.schema){
+                return {status:true};
+            }
             if(Object.keys(this.tapServiceConnector.getConnector().service.schemas).includes(schema)){
                 let test = await this.tapServiceConnector.selectSchema(schema);
                 if (test.status){
@@ -353,11 +356,14 @@
      * @param {*} table : String the name of table you want get handlerAttribut associeted with
      * @return {*} : Json the json containing all handler Attribut of the table as an array stored in the `attribute_handlers` field
      * */
-    jw.Api.prototype.getTableAttributeHandlers = function (table) {
+    jw.Api.prototype.getTableAttributeHandlers = function (table,schema) {
         
         if(this.connectLevel>1){
             let connector = this.getConnector();
-            return this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table, connector.connector.service.schema);
+            if(schema === undefined){
+                schema = connector.connector.service.schema ;
+            }
+            return this.tapServiceConnector.attributsHandler.getTableAttributeHandler(table, schema);
         } else {
             return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table}} };
         }
@@ -384,6 +390,9 @@
      * note that other types of errors can still be returned
      */
     jw.Api.prototype.selectField = function(fieldName,table,checkNames){
+        if(this.connectLevel<3){
+            return {"status" : false , "error":{"logs" :"No active TAP connection", "params":{"table":table,"fieldName":fieldName}} };
+        }
         if(checkNames === undefined){
             checkNames = true;
         }
@@ -399,7 +408,7 @@
             }
             return {"status":true};
         }
-        let obj = this.getObjectMap();
+        let obj = this.tapServiceConnector.objectMap;
         let has_field = async function(table,fieldName,api){
             let handler = await api.getTableAttributeHandlers(table);
             if(handler.status){
@@ -409,78 +418,71 @@
             }
             return false;
         };
-        if(obj.status){
-            obj = obj.object_map;
-            /*this parts handle async code in a way that keep the method sync if checkNames is set to false
-            * async methods just wrap the whole function in a promise thus you can use .then to handle them
-            * in addition the .then method of a promise return another promise allowing us to return the result of 
-            * the .then method
-            * this way of handling async adds a little overhead due to the user who may await the function while the function not returning a promise
-            * another source of overhead may comme from the fact that most of the methods work in the main loop
-            */
-            if(obj.tables[table] !== undefined ){
-                if(checkNames){
-                    return has_field(table,fieldName,this).then((val)=>{
-                        if(val){
-                            if(!obj.tables[table].columns.includes(fieldName))
-                                obj.tables[table].columns.push(fieldName);
-                            return {"status":true};
-                        } else {
-                            return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
-                        }
-                    });
-                    
-                } else{
-                    if(!obj.tables[table].columns.includes(fieldName))
-                        obj.tables[table].columns.push(fieldName);
-                    return {"status":true};
-                }
-            }
-
+        /*this parts handle async code in a way that keep the method sync if checkNames is set to false
+        * async methods just wrap the whole function in a promise thus you can use .then to handle them
+        * in addition the .then method of a promise return another promise allowing us to return the result of 
+        * the .then method
+        * this way of handling async adds a little overhead due to the user who may await the function while the function not returning a promise
+        * another source of overhead may comme from the fact that most of the methods work in the main loop
+        */
+        if(obj.tables[table] !== undefined ){
             if(checkNames){
-                return {"status" : false , "error":{"logs" :"Unkown table" + table, "params":{"table":table,"fieldName":fieldName}} };
+                return has_field(table,fieldName,this).then((val)=>{
+                    if(val){
+                        if(!obj.tables[table].columns.includes(fieldName))
+                            obj.tables[table].columns.push(fieldName);
+                        return {"status":true};
+                    } else {
+                        return {"status" : false , "error":{"logs" :"The table " + table + " has no field named " + fieldName, "params":{"table":table,"fieldName":fieldName}} };
+                    }
+                });
+                
+            } else{
+                if(!obj.tables[table].columns.includes(fieldName))
+                    obj.tables[table].columns.push(fieldName);
+                return {"status":true};
             }
-            return {"status":true};
-            
         }
-        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
-    };
+
+        if(checkNames){
+            return {"status" : false , "error":{"logs" :"Unkown table" + table, "params":{"table":table,"fieldName":fieldName}} };
+        }
+        return {"status":true};
+};
 
     /**add the wanted fields to the selection of fields to query data from
      * handle non existing fields and table
      */
     jw.Api.prototype.unselectField = function(fieldName,table){
+        if(this.connectLevel<3){
+            return {"status" : false , "error":{"logs" :"No active TAP connection"} };
+        }
         if(table === undefined){
             return {"status" : false , "error":{"logs" :"no table selected", "params":{"table":table,"fieldName":fieldName}} };
         }
         if(fieldName === undefined){
             return {"status" : false , "error":{"logs" :"no field selected", "params":{"table":table,"fieldName":fieldName}} };
         }
-        let obj = this.getObjectMap();
-        if(obj.status){
-            obj = obj.object_map;
-            if(obj.tables[table] !== undefined ){
-                obj.tables[table].columns.remove(fieldName);
-            } else if(table === obj.root_table.name){
-                obj.root_table.columns.remove(fieldName);
-            }
-            return {"status":true};
+        let obj = this.tapServiceConnector.objectMap;
+        if(obj.tables[table] !== undefined ){
+            obj.tables[table].columns.remove(fieldName);
+        } else if(table === obj.root_table.name){
+            obj.root_table.columns.remove(fieldName);
         }
-        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+        return {"status":true};
     };
 
     jw.Api.prototype.unselectAllFields = function(table){
-        let obj = this.getObjectMap();
-        if(obj.status){
-            obj = obj.object_map;
-            if(obj.tables[table] !== undefined ){
-                obj.tables[table].columns=[];
-            } else if(table === obj.root_table.name){
-                obj.root_table.columns=[];
-            }
-            return {"status":true};
+        if(this.connectLevel<3){
+            return {"status" : false , "error":{"logs" :"No active TAP connection"} };
         }
-        return {"status" : false , "error":{"logs" :"Unable to gather object map :\n" + obj.error.logs, "params":{"table":table,"fieldName":fieldName}} };
+        let obj = this.tapServiceConnector.objectMap;
+        if(obj.tables[table] !== undefined ){
+            obj.tables[table].columns=[];
+        } else if(table === obj.root_table.name){
+            obj.root_table.columns=[];
+        }
+        return {"status":true};
     };
 
     /**
@@ -492,13 +494,10 @@
         if(this.connectLevel <3){
             return {"status":false,"error":{"logs":"No Tap service conneted","params":{"table":table}}};
         }
-        let obj = this.getObjectMap();
-        if(obj.status){
-            obj = obj.object_map;
-            if(obj.tables[table] !== undefined){
-                if(obj.tables[table].columns.length>0){
-                    return obj.tables[table].columns;
-                }
+        let obj = this.tapServiceConnector.objectMap;
+        if(obj.tables[table] !== undefined){
+            if(obj.tables[table].columns.length>0){
+                return {"status":true ,"fields":obj.tables[table].columns};
             }
         }
         let fields = [];
@@ -520,10 +519,8 @@
             }
         }
         fields = Array.from(new Set(fields));
-        if(obj.status){
-            if(obj.tables[table] !== undefined){
-                obj.tables[table].columns= fields;
-            }
+        if(obj.tables[table] !== undefined){
+            obj.tables[table].columns= fields;
         }
         return {"status":true ,"fields":fields};
     };

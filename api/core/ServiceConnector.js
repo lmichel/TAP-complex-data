@@ -33,6 +33,7 @@
 
     jw.core.ServiceConnector.prototype.selectSchema = async function(schema,cache=true){
         this.connector.service.schema = schema;
+        delete this.connector.service.table;
         this.joins = undefined;
         if(this.connector.service.schemas[schema].tables !== undefined){
             this.tables = this.connector.service.schemas[schema].tables;

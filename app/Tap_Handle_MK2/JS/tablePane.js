@@ -178,7 +178,47 @@ class TablePane{
         if(logger.hide == undefined){
             logger.hide = ()=>{};
         }
+        $(document).on("column_selection_changed.meta",(e,args)=>{
+            if (args.api === this.api){
+                if(args.selected.size == 0 && args.unselected.size == 0){
+                    return;
+                }
+                let s = this.getStruct(args.table);
+                if( s === undefined){
+                    return;
+                }
+                if(s.div.div.data("clicked") || s == this.struct){
+                    this.removeChilds(s);
+                    s.div.div.html("");
+                    this.makeTable(s,s.kMap);
+                }
+            }
+        });
     }
+
+    getStruct(table,startStruct){
+        if(startStruct === undefined){
+            startStruct = this.struct;
+        }
+        if( startStruct === undefined){
+            return undefined;
+        }
+        if(startStruct.table === table){
+            return startStruct;
+        }
+        if(startStruct.childs.length == 0){
+            return undefined;
+        }else{
+            let i=0;
+            let s = this.getStruct(table,startStruct.childs[i]);
+            while (i<startStruct.childs.length && s === undefined){
+                i++;
+                s = this.getStruct(table,startStruct.childs[i]);
+            }
+            return s;//s equals undefined if no childs contains the right struct or is the right struct
+        }
+    }
+
     quoteIfString(str){
 
         if(isNaN(str) || isNaN(parseInt(str)) || isNaN(+str) ){
@@ -215,30 +255,39 @@ class TablePane{
             div:new CollapsableDiv(this.holder,tableB64,false,undefined,
                 [
                     {txt:table,type:"title",pos:"center"},
-                    {pos:"left",txt:object_map.tables[table].description,type:"desc",weight:2,monoline:true},
-                    {
+                    {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true},
+                    /*{
                         toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
                             "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
                         pos:"right"
-                    },
-                    {
+                    },*/
+                    /*{
                         toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                             "_limit'>Queryied entries :</label><select id='" +
                             tableB64 + "_limit'> <option value='10'>10</option>" +
                             "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
                             "<option value='0'>unlimited</option> </select></div>",
                         pos:"right"
-                    },
-                    {
+                    },*/
+                    /*{
                         toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + tableB64 + "_fullTables'" +
                             " style='margin:.4em' checked><label for='" + tableB64 + "_fullTables'>Selected tables only</label></div>",
                         pos:"right"
-                    }
+                    }*/
+                    {
+                        toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
+                            "' style='margin:.4em'>Column Selection</button>",
+                        pos:"right"
+                    },
                 ],
                 "title"
             ),
+            table:table,
             childs:[]
         };
+        $("#" +tableB64+"_columns", this.struct.div.header).click(()=>{
+            MetaDataShower(this.api,table);
+        });
         this.refresh();
     }
 
@@ -453,6 +502,7 @@ class TablePane{
         });
         
         $("table#" + tableID)[0].style.width = "fit-content";
+        $("#"+ tableID + "_wrapper input.filter-result",colDiv.div)[0].style = "padding: .1em;font-size: 1em;padding-left: .5em;";
         
         $("#"+tableID+"_wrapper").css("overflow", "hidden");
         this.logger.hide();
@@ -539,10 +589,6 @@ class TablePane{
                 for(let table in subtables){
                     tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
                     let nb = Object.keys(that.api.getJoinedTables(table).joined_tables).length;
-                    let s = {
-                        div : {},
-                        childs:[]
-                    };
                     let kMap = {};
                     let nkey;
                     for (let oKey in gKMap){
@@ -550,35 +596,48 @@ class TablePane{
                         if(nkey !== undefined){
                             kMap[nkey.target] = gKMap[oKey];
                         }
-                        
                     }
+                    let s = {
+                        div : {},
+                        childs:[],
+                        table:table,
+                        kMap:kMap
+                    };
                     s.div = new CollapsableDiv(struct.div.div,tableB64,true,
                         that.makeTable.bind(that,s,kMap),
                         [
                             {txt:table + (nb>0?" " + nb +"+":""),type:"title",pos:"center"},
-                            {pos:"left",txt:object_map.tables[table].description,type:"desc",weight:2,monoline:true},
-                            {
+                            {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true},
+                            /*{
                                 toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
                                     "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
                                 pos:"right"
-                            },
-                            {
+                            },*/
+                            /*{
                                 toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                                     "_limit'>Queryied entries :</label><select id='" +
                                     tableB64 + "_limit'> <option value='10'>10</option>" +
                                     "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
                                     "<option value='0'>unlimited</option> </select></div>",
                                 pos:"right"
-                            },
-                            {
+                            },*/
+                            /*{
                                 toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + tableB64 + "_fullTables'" +
                                     " style='margin:.4em' checked><label for='" + tableB64 + "_fullTables'>Selected tables only</label></div>",
                                 pos:"right"
-                            }
+                            }*/
+                            {
+                                toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
+                                    "' style='margin:.4em'>Column Selection</button>",
+                                pos:"right"
+                            },
                         ],
                         "title",
                         !struct.div.parity,
                     );
+                    $("#" +tableB64+"_columns", s.div.header).click(()=>{
+                        MetaDataShower(that.api,table);
+                    });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";
                     $(".collapsable-title",s.div.header).tooltip({html:true});

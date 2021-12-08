@@ -14,7 +14,7 @@ function ComplexPos_mVcExtends(){
                     Processing.show("Waiting on SESAME response");
                     PositionParser.resolveName(inputfield.val()).then((v)=>{
                         if(v.status){
-                            inputfield.val(v.ra + ' +'+v.de);
+                            inputfield.val(v.ra + ' '+v.de);
 							that.readAndUpdate();
                         } else {
                             Processing.jsonError(v,"Sesame failure");

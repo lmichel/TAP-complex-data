@@ -26,7 +26,7 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
             let constraint;
             const it = this.constraintsHolder.values();
             let val = it.next();
-
+            let select;
             while(!val.done){
                 constraints = val.value.editors;
                 val= it.next();
@@ -34,9 +34,15 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
                     constraint = this.api.getTableConstraint( constraints[c].treePath.table);
                     constraint = constraint.constraint;
                     this.api.setTableConstraint( constraints[c].treePath.table,
-                        constraint + " " + ((constraint.length>0)? constraints[c].getAndOr():"") + constraints[c].fireGetADQL() + 
+                        constraint + " " + ((constraint.length>0)? constraints[c].getAndOr():"") + constraints[c].fireGetADQL() +
                         (constraints[c].getOperator !== undefined && constraints[c].getOperand !== undefined?this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand()):"")
                     );
+                    if(constraints[c].getSelect){
+                        select = constraints[c].getSelect();
+                        for(let i=0;i<select.columns.length;i++){
+                            this.api.selectField(select.columns[i],select.table,false);
+                        }
+                    }
                 }
             }
             
@@ -89,5 +95,5 @@ ComplexQueryEditor.prototype.formatCondition = function(operator,operand){
         }
         operator = operator;	
     }
-    return operator+operand;
+    return " "+operator+operand;
 };
