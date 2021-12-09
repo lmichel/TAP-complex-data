@@ -494,25 +494,75 @@ class TablePane{
         colDiv.div.append("<table id=\"" + tableID + "\" class=\"display\"></table>");
         
         CustomDataTable.create(tableID, options, positions);
+
+        $("table#" + tableID)[0].style.width = "fit-content";
+        $("#"+ tableID + "_wrapper input.filter-result",colDiv.div)[0].style = "padding: .1em;font-size: 1em;padding-left: .5em;";
         
+        $("#"+tableID+"_wrapper").css("overflow", "hidden");
+
         let arr;
         $("#"+tableID+" span").each((i,e)=>{
             arr = e.title.split(" - ");
+            if(e.parentElement.nodeName == "TD"){
+                // some description have some " - " inside them making arr[1] not containing the whole text this is why I create a special var for the text
+                // for some reason clientWidth works better than offsetWidth better stick on that 
+                let oWidth = e.parentElement.clientWidth,a=27,b=arr[1].length,c,text = e.title.replace(" - ","");
+                let oDelta = oWidth - e.offsetWidth;
+                while (b-a>1){
+                    c = Math.floor((b+a)/2);
+                    e.textContent = text.substr(0,c);
+                    if(oWidth<e.parentElement.clientWidth){
+                        b=c;
+                    }else{
+                        a=c;
+                    }
+                }
+                c=b;
+
+                if(c<text.length){
+                    e.textContent = text.substr(0,c-4)+" ...";
+                }else{
+                    e.textContent = text.substr(0,c);
+                }
+                let safe = 0;
+                // this value is the minimal difference between e.offsetWidth and e.parentElement.clientWidth
+                let padmarg = parseFloat(window.getComputedStyle(e, null).getPropertyValue('margin-left')) + 
+                    parseFloat(window.getComputedStyle(e.parentElement, null).getPropertyValue('margin-right')) +
+                    parseFloat(window.getComputedStyle(e.parentElement, null).getPropertyValue('padding-left')) + 
+                    parseFloat(window.getComputedStyle(e.parentElement, null).getPropertyValue('padding-right'));
+
+                // this computation aims to ensure that the final data table will be able to shrink enought to let some space for a scroll bar 
+                // while not reducing text beyond what they where before this whole process 
+
+                // this process have a least a flaw : this can occur multiple times per row leading to more free space than what could be required 
+
+                if(oDelta> oWidth - e.offsetWidth && c>27){
+                    if(oDelta>=padmarg + DraggableBox.scrollWidth){
+                        safe = DraggableBox.scrollWidth;
+                    }
+                }
+                while(oWidth<(e.offsetWidth + padmarg +safe)){
+                    c--;
+                    e.textContent = text.substr(0,c-4)+" ...";
+                }
+
+                if(c==text.length){
+                    arr = [""];
+                    delete e.onclick;
+                }
+
+            }
             arr[0] ="<h3>" + arr[0].trim() + "</h3>";
             // replace only replace the first occurence
             e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
         });
 
-        $("#"+tableID+" span").tooltip({ 
+        $("#"+tableID+" span:not([title=''])").tooltip({ 
             template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
             html:true,
             customClass :"ressource-tooltip",
         });
-        
-        $("table#" + tableID)[0].style.width = "fit-content";
-        $("#"+ tableID + "_wrapper input.filter-result",colDiv.div)[0].style = "padding: .1em;font-size: 1em;padding-left: .5em;";
-        
-        $("#"+tableID+"_wrapper").css("overflow", "hidden");
+
         this.logger.hide();
     }
 
@@ -647,7 +697,10 @@ class TablePane{
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";
                     $(".collapsable-title",s.div.header).tooltip({html:true});
-                    if(open.has(tableB64)){
+
+                    if(subtables.length == 1){
+                        $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
+                    }else if(open.has(tableB64)){
                         $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
                     }
 

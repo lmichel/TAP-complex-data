@@ -710,3 +710,7 @@ body div h3 {
 	max-width: 100%;
 	white-space: break-spaces;
 }
+
+div h5{
+	font-size: .83em;
+}
