@@ -37,60 +37,66 @@ if (!String.lcs) {
  */
  jw.widget.SearchBar = function (input, output, parser,processor ,querier, timeout = 2000, logger = new utils.DisabledLogger()) {
 
-    let promList = [];
-    let time;
-    let lastTimeout;
-    let lastEvent = new Promise((resolve) => { resolve(); });
+    this.promList = [];
+    this.time = undefined;
+    this.lastTimeout = undefined;
+    this.lastEvent = new Promise((resolve) => { resolve(); });
+    this.logger = logger;
+    this.output = output;
+    this.parser = parser;
+    this.processor = processor;
+    this.querier = querier;
+    this.input =input;
 
-    this.processEvent = () => {
-        logger.info("Parsing search string");
-        let parsed = parser.parseString(input.val(), logger);
-        logger.log(parsed);
-
-        logger.info("processing constrains");
-        let processed = processor.processConditions(parsed);
-
-        let data;
-        logger.info("Gathering data");
-        if (promList.length > 0) {
-            data = promList[promList.length - 1].then(() => {
-                return querier.queryData(processed, logger);
-            });
-        } else {
-            data = querier.queryData(processed, logger);
-        }
-
-        if (data.then !== undefined) {
-            promList.push(data);
-            data.then((val) => {
-                output.push(val);
-                promList.remove(data);
-            });
-        } else {
-            output.push(data);
-        }
-    };
-
-    input.keyup((event) => {
-        lastEvent = lastEvent.then(() => {
-            if (time === undefined) {
-                time = Date.now();
-                lastTimeout = new utils.Timeout(this.processEvent, 0);
+    input.on('input',() => {
+        this.lastEvent = this.lastEvent.then(() => {
+            if (this.time === undefined) {
+                this.time = Date.now();
+                this.lastTimeout = new utils.Timeout(this.processEvent.bind(this), 0);
             } else {
-                if (lastTimeout !== undefined && !lastTimeout.timedOut) {
-                    lastTimeout.clear();
+                if (this.lastTimeout !== undefined && !this.lastTimeout.timedOut) {
+                    this.lastTimeout.clear();
                 }
                 logger.info("Waiting for timeout");
-                if (lastTimeout.ended) {
-                    lastTimeout = new utils.Timeout(this.processEvent, Math.max(timeout - Date.now() + time, 0));
-                    time = Date.now();
+                if (this.lastTimeout.ended) {
+                    this.lastTimeout = new utils.Timeout(this.processEvent.bind(this), Math.max(timeout - Date.now() + this.time, 0));
+                    this.time = Date.now();
                 } else {
-                    lastTimeout = new utils.Timeout(this.processEvent, timeout);
-                    time = Date.now();
+                    this.lastTimeout = new utils.Timeout(this.processEvent.bind(this), timeout);
+                    this.time = Date.now();
                 }
             }
         });
     });
+};
+
+jw.widget.SearchBar.prototype.processEvent = function(){
+    this.logger.info("Parsing search string");
+    let parsed = this.parser.parseString(this.input.val(), this.logger);
+    this.logger.log(parsed);
+
+    this.logger.info("processing constrains");
+    let processed = this.processor.processConditions(parsed);
+
+    let data;
+    this.logger.info("Gathering data");
+    if (this.promList.length > 0) {
+        data = this.promList[this.promList.length - 1].then(() => {
+            return this.querier.queryData(processed, this.logger);
+        });
+    } else {
+        data = this.querier.queryData(processed, this.logger);
+    }
+
+    if (data.then !== undefined) {
+        this.promList.push(data);
+        data.then((val) => {
+            this.output.push(val);
+            this.promList.remove(data);
+        });
+    } else {
+        this.output.push(data);
+    }
 };
 
 /**
