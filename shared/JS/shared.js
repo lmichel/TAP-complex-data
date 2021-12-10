@@ -34,7 +34,7 @@ class MyLogger extends utils.Logger {
         if(out.text.length>0){
             let writing = $("p#logger_text", this.div);
             if (writing.length < 1) {
-                this.div.html("<div class='cv-spinner'><span class='spinner'></span> <p id='logger_text'></p></div>");
+                this.div.html("<div class='cv-spinner'><span class='spinner' style='height:4em;width:4em'></span> <p id='logger_text'></p></div>");
                 writing = $("p#logger_text", this.div);
             }
             writing.html(out.text);

@@ -4,6 +4,7 @@ function ComplexKWConstraint_mVcExtends(){
     ComplexKWConstraint_mVc = function(params){
         TapKWConstraint_mVc.call(this,params);
         this.editorModel = params.editorModel;
+        this.ah = params.attributeHandler;
     };
     /**
      * Tap Complex custom view extends the TapKWConstraint_mVc class
@@ -11,7 +12,7 @@ function ComplexKWConstraint_mVcExtends(){
     ComplexKWConstraint_mVc.prototype = Object.create(TapKWConstraint_mVc.prototype, {
         initForm : {
             value: function(ah, operators ,andors,range,default_value){
-
+                this.ah = ah;
                 var that = this;
                 $('#' + this.constListId).append("<div class='kwConstraint' id=" + this.rootId + " style='float: none;'>");
                 var baseSelector  = '#' + this.constListId + ' div[id="' + this.rootId + '"]';
@@ -126,6 +127,18 @@ function ComplexKWConstraint_mVcExtends(){
         getOperand : {
             value: function(){
                 return $('#' + this.constListId    + ' input[id="' + this.rootId + '_val"]').val();
+            }
+        },
+        fireGetADQL:{
+            value : function(){
+                let name = this.getAhName(this.ah);
+                name = name.replace(/\"/g,"");
+                return name.quotedTableName().qualifiedName;
+            }
+        },
+        getSelect : {
+            value : function() {
+                return {table : this.treePath.table,columns:[this.ah.column_name]};
             }
         }
     });

@@ -3,7 +3,8 @@ function ModalInfoOverride(){
         function ModalInfo(){
             this.counter=0;
             this.icons = {
-                "info":"../images/info2.png",
+                "info":"./images/info2.png",
+                "error":"./images/red.png",
             };
         }
 
@@ -47,6 +48,19 @@ function ModalInfoOverride(){
             let modalHtml = this.buildModal(
                 id,
                 this.buildHeader(this.iconToHTML(this.icons.info),title),
+                this.buildBody(this.formatMessage(content))
+            );
+            $("body").append(modalHtml);
+            let modal = new bootstrap.Modal($("#" + id)[0]);
+            modal.show();
+            return modal;
+        };
+
+        ModalInfo.prototype.error = function(content, title) {
+            let id = this.getNextID();
+            let modalHtml = this.buildModal(
+                id,
+                this.buildHeader(this.iconToHTML(this.icons.error),"Error" + (title === undefined ? "" : " : " +title)),
                 this.buildBody(this.formatMessage(content))
             );
             $("body").append(modalHtml);
@@ -139,4 +153,5 @@ function ModalInfoOverride(){
 
         return new ModalInfo();
     }();
+    Modalinfo.error = ModalInfo.error.bind(ModalInfo);
 }

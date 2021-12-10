@@ -39,7 +39,7 @@ jw.core.AttributeHolder = function(queryAble){
             }
             
         }
-        return {"status":true,"attribute_handlers":Array.from(cache[fullName])};
+        return {"status":true,"attribute_handlers":Array.from(cache[fullName]).map(v=>$.extend({},v))};
     };
 
     Holder.getTablesAttributeHandlers = async function(tables,schema){

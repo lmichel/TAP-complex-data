@@ -4,7 +4,13 @@ function ComplexQueryEditor(api,holder){
     //@todo nicer editor
     holder.append('<pre style="max-height:16em;overflow:scroll;height:100%"><code id="queryPrettyText"></code></pre>');
     this.editor = $("#queryPrettyText",holder);
+    this.constraintsHolder = new Set();
 }
+
+ComplexQueryEditor.prototype.registerConstraintsHolder=function (constHolder){
+    this.constraintsHolder.add(constHolder);
+};
+
 /**
  * @param {String} type what is updated chose between the folowing valid options : "constraint"  "columns"
  * @param {*} data depends on `type` "constraint" : tapQEditor_Mvc "columns" tapColSelector
@@ -15,16 +21,31 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
     switch(type.toLowerCase()){
         case "constraint": 
         {
-            let constraints = data.editors;
             this.api.resetAllTableConstraint();
+            let constraints;
             let constraint;
-            for (let c in constraints){
-                constraint = this.api.getTableConstraint( constraints[c].treePath.table);
-                constraint = constraint.constraint;
-                let r = this.api.setTableConstraint( constraints[c].treePath.table,
-                    constraint + " " + ((constraint.length>0)? constraints[c].getAndOr():"") + constraints[c].fireGetADQL() + this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand())
-                );
+            const it = this.constraintsHolder.values();
+            let val = it.next();
+            let select;
+            while(!val.done){
+                constraints = val.value.editors;
+                val= it.next();
+                for (let c in constraints){
+                    constraint = this.api.getTableConstraint( constraints[c].treePath.table);
+                    constraint = constraint.constraint;
+                    this.api.setTableConstraint( constraints[c].treePath.table,
+                        constraint + " " + ((constraint.length>0)? constraints[c].getAndOr():"") + constraints[c].fireGetADQL() +
+                        (constraints[c].getOperator !== undefined && constraints[c].getOperand !== undefined?this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand()):"")
+                    );
+                    if(constraints[c].getSelect){
+                        select = constraints[c].getSelect();
+                        for(let i=0;i<select.columns.length;i++){
+                            this.api.selectField(select.columns[i],select.table,false);
+                        }
+                    }
+                }
             }
+            
             break;
         } 
         case "columns":{
@@ -74,5 +95,5 @@ ComplexQueryEditor.prototype.formatCondition = function(operator,operand){
         }
         operator = operator;	
     }
-    return operator+operand;
+    return " "+operator+operand;
 };

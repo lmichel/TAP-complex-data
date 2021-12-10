@@ -44,6 +44,7 @@
         <script type="text/javascript" src="./JS/CustomDataTable.js"></script>
         <script type="text/javascript" src="./JS/formator.js"></script>
         <script type="text/javascript" src="./JS/DraggableBox.js"></script>
+        <script type="text/javascript" src="./JS/MetaDataShower.js"></script>
 
 
         <script type="text/javascript" src="./JS/Import/jquery-ui.js"></script>
@@ -54,6 +55,7 @@
         
         <script type="text/javascript" src="./JS/loader.js"></script>
         <script type="text/javascript" src="./JS/ComplexQueryEditor.js"></script>
+        <script type="text/javascript" src="./JS/PositionParser.js"></script>
         <script type="text/javascript" src="./JS/compat.js"></script>
 
 
@@ -71,6 +73,10 @@
         <script type="text/javascript" src="./JS/overrides/ComplexQEditor_v.js"></script>
         <script type="text/javascript" src="./JS/overrides/ComplexQEditor_m.js"></script>
         <script type="text/javascript" src="./JS/overrides/ComplexKWConstraint_v.js"></script>
+        <script type="text/javascript" src="./JS/overrides/ComplexPosEditor_m.js"></script>
+        <script type="text/javascript" src="./JS/overrides/ComplexPosEditor_v.js"></script>
+        <script type="text/javascript" src="./JS/overrides/ComplexPosFieldList_v.js"></script>
+        <script type="text/javascript" src="./JS/overrides/ComplexPos_v.js"></script>
         <script type="text/javascript" src="./JS/overrides/extends.js"></script>
 
         <!-- End of Overrides Scripts -->
@@ -111,8 +117,7 @@
         <div style="height: 100%;display:flex;flex-flow:column">
             <div id = "banner" style="display: flex;width: 100%;">
                 <div id = "R_banner" class="col-2"></div>
-                <div style="flex-grow: 1; display: flex;margin-right: 1em;" id = "mainButtonHolder">
-                    <!--input id="searchBar" type="text" autocomplete="off" style="width:100%;margin:.5em;"-->
+                <div style="flex-grow: 1; display: flex;margin-right: 1em;flex-flow: column;position: relative;" id = "mainButtonHolder">
                 </div>
                 <div id = "L_banner" class="col-2"></div>
             </div>

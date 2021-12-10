@@ -67,21 +67,21 @@ class CollapsableDiv{
             }
 
             if(l.length>0){
-                header += '<div class="txt-left col-'+Math.floor(lWeight/totWeight*12)+'">';
+                header += '<div class="txt-left col-'+Math.round(lWeight/totWeight*12)+'">';
                     l.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(c.length>0){
-                header += '<div class="txt-center col-'+Math.floor(cWeight/totWeight*12)+'">';
+                header += '<div class="txt-center col-'+Math.round(cWeight/totWeight*12)+'">';
                     c.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(r.length>0){
-                header += '<div class="txt-right col-'+Math.floor(rWeight/totWeight*12)+'">';
+                header += '<div class="txt-right col-'+Math.round(rWeight/totWeight*12)+'">';
                     r.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
@@ -178,7 +178,47 @@ class TablePane{
         if(logger.hide == undefined){
             logger.hide = ()=>{};
         }
+        $(document).on("column_selection_changed.meta",(e,args)=>{
+            if (args.api === this.api){
+                if(args.selected.size == 0 && args.unselected.size == 0){
+                    return;
+                }
+                let s = this.getStruct(args.table);
+                if( s === undefined){
+                    return;
+                }
+                if(s.div.div.data("clicked") || s == this.struct){
+                    this.removeChilds(s);
+                    s.div.div.html("");
+                    this.makeTable(s,s.kMap);
+                }
+            }
+        });
     }
+
+    getStruct(table,startStruct){
+        if(startStruct === undefined){
+            startStruct = this.struct;
+        }
+        if( startStruct === undefined){
+            return undefined;
+        }
+        if(startStruct.table === table){
+            return startStruct;
+        }
+        if(startStruct.childs.length == 0){
+            return undefined;
+        }else{
+            let i=0;
+            let s = this.getStruct(table,startStruct.childs[i]);
+            while (i<startStruct.childs.length && s === undefined){
+                i++;
+                s = this.getStruct(table,startStruct.childs[i]);
+            }
+            return s;//s equals undefined if no childs contains the right struct or is the right struct
+        }
+    }
+
     quoteIfString(str){
 
         if(isNaN(str) || isNaN(parseInt(str)) || isNaN(+str) ){
@@ -215,30 +255,47 @@ class TablePane{
             div:new CollapsableDiv(this.holder,tableB64,false,undefined,
                 [
                     {txt:table,type:"title",pos:"center"},
-                    {pos:"left",txt:object_map.tables[table].description,type:"desc",weight:2,monoline:true},
-                    {
+                    {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
+                    /*{
                         toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
                             "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
                         pos:"right"
-                    },
-                    {
+                    },*/
+                    /*{
                         toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                             "_limit'>Queryied entries :</label><select id='" +
                             tableB64 + "_limit'> <option value='10'>10</option>" +
                             "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
                             "<option value='0'>unlimited</option> </select></div>",
                         pos:"right"
-                    },
-                    {
+                    },*/
+                    /*{
                         toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + tableB64 + "_fullTables'" +
                             " style='margin:.4em' checked><label for='" + tableB64 + "_fullTables'>Selected tables only</label></div>",
                         pos:"right"
-                    }
+                    }*/
+                    {
+                        toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
+                            "' style='margin:.4em'>Column Selection</button>",
+                        pos:"right"
+                    },
+                    {
+                        toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
+                            "' style='margin:.4em'>cone search in this table</button>",
+                        pos:"right"
+                    },
                 ],
                 "title"
             ),
+            table:table,
             childs:[]
         };
+        $("#" +tableB64+"_columns", this.struct.div.header).click(()=>{
+            MetaDataShower(this.api,table);
+        });
+        $("#" +tableB64+"_cone", this.struct.div.header).click(()=>{
+            $(document).trigger("cone_search_update_table.control",{table:table});
+        });
         this.refresh();
     }
 
@@ -270,6 +327,8 @@ class TablePane{
                 error : object_map.error,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
 
@@ -282,6 +341,8 @@ class TablePane{
                 error : keys.error,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
 
@@ -296,6 +357,8 @@ class TablePane{
                     error : t.error,
                     origin : that,
                 });
+                this.logger.hide();
+                ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
                 return;
             }
         }
@@ -317,6 +380,8 @@ class TablePane{
                 error : fieldsData,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
         
@@ -351,6 +416,8 @@ class TablePane{
                 error : ahs,
                 origin : that,
             });
+            this.logger.hide();
+            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
         ahs = ahs.attribute_handlers;
@@ -427,24 +494,75 @@ class TablePane{
         colDiv.div.append("<table id=\"" + tableID + "\" class=\"display\"></table>");
         
         CustomDataTable.create(tableID, options, positions);
+
+        $("table#" + tableID)[0].style.width = "fit-content";
+        $("#"+ tableID + "_wrapper input.filter-result",colDiv.div)[0].style = "padding: .1em;font-size: 1em;padding-left: .5em;";
         
+        $("#"+tableID+"_wrapper").css("overflow", "hidden");
+
         let arr;
         $("#"+tableID+" span").each((i,e)=>{
             arr = e.title.split(" - ");
+            if(e.parentElement.nodeName == "TD"){
+                // some description have some " - " inside them making arr[1] not containing the whole text this is why I create a special var for the text
+                // for some reason clientWidth works better than offsetWidth better stick on that 
+                let oWidth = e.parentElement.clientWidth,a=27,b=arr[1].length,c,text = e.title.replace(" - ","");
+                let oDelta = oWidth - e.offsetWidth;
+                while (b-a>1){
+                    c = Math.floor((b+a)/2);
+                    e.textContent = text.substr(0,c);
+                    if(oWidth<e.parentElement.clientWidth){
+                        b=c;
+                    }else{
+                        a=c;
+                    }
+                }
+                c=b;
+
+                if(c<text.length){
+                    e.textContent = text.substr(0,c-4)+" ...";
+                }else{
+                    e.textContent = text.substr(0,c);
+                }
+                let safe = 0;
+                // this value is the minimal difference between e.offsetWidth and e.parentElement.clientWidth
+                let padmarg = parseFloat(window.getComputedStyle(e, null).getPropertyValue('margin-left')) + 
+                    parseFloat(window.getComputedStyle(e.parentElement, null).getPropertyValue('margin-right')) +
+                    parseFloat(window.getComputedStyle(e.parentElement, null).getPropertyValue('padding-left')) + 
+                    parseFloat(window.getComputedStyle(e.parentElement, null).getPropertyValue('padding-right'));
+
+                // this computation aims to ensure that the final data table will be able to shrink enought to let some space for a scroll bar 
+                // while not reducing text beyond what they where before this whole process 
+
+                // this process have a least a flaw : this can occur multiple times per row leading to more free space than what could be required 
+
+                if(oDelta> oWidth - e.offsetWidth && c>27){
+                    if(oDelta>=padmarg + DraggableBox.scrollWidth){
+                        safe = DraggableBox.scrollWidth;
+                    }
+                }
+                while(oWidth<(e.offsetWidth + padmarg +safe)){
+                    c--;
+                    e.textContent = text.substr(0,c-4)+" ...";
+                }
+
+                if(c==text.length){
+                    arr = [""];
+                    delete e.onclick;
+                }
+
+            }
             arr[0] ="<h3>" + arr[0].trim() + "</h3>";
             // replace only replace the first occurence
             e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
         });
 
-        $("#"+tableID+" span").tooltip({ 
+        $("#"+tableID+" span:not([title=''])").tooltip({ 
             template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
             html:true,
             customClass :"ressource-tooltip",
         });
-        
-        $("table#" + tableID)[0].style.width = "fit-content";
-        
-        $("#"+tableID+"_wrapper").css("overflow", "hidden");
+
         this.logger.hide();
     }
 
@@ -506,7 +624,7 @@ class TablePane{
 
                 let h = $(".rHighlight",$(nRow).parent());
                 if(h.get(0)==nRow){
-                    that.logger.hide();
+                    this.logger.hide();
                     return;
                 }
                 h.removeClass("rHighlight");
@@ -529,10 +647,6 @@ class TablePane{
                 for(let table in subtables){
                     tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
                     let nb = Object.keys(that.api.getJoinedTables(table).joined_tables).length;
-                    let s = {
-                        div : {},
-                        childs:[]
-                    };
                     let kMap = {};
                     let nkey;
                     for (let oKey in gKMap){
@@ -540,39 +654,53 @@ class TablePane{
                         if(nkey !== undefined){
                             kMap[nkey.target] = gKMap[oKey];
                         }
-                        
                     }
+                    let s = {
+                        div : {},
+                        childs:[],
+                        table:table,
+                        kMap:kMap
+                    };
                     s.div = new CollapsableDiv(struct.div.div,tableB64,true,
                         that.makeTable.bind(that,s,kMap),
                         [
                             {txt:table + (nb>0?" " + nb +"+":""),type:"title",pos:"center"},
-                            {pos:"left",txt:object_map.tables[table].description,type:"desc",weight:2,monoline:true},
-                            {
-                                toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
-                                    "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
-                                pos:"right"
-                            },
-                            {
+                            {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
+                            /*{
                                 toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
                                     "_limit'>Queryied entries :</label><select id='" +
                                     tableB64 + "_limit'> <option value='10'>10</option>" +
                                     "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
                                     "<option value='0'>unlimited</option> </select></div>",
                                 pos:"right"
+                            },*/
+                            {
+                                toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
+                                    "' style='margin:.4em'>Column Selection</button>",
+                                pos:"right"
                             },
                             {
-                                toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + tableB64 + "_fullTables'" +
-                                    " style='margin:.4em' checked><label for='" + tableB64 + "_fullTables'>Selected tables only</label></div>",
+                                toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
+                                    "' style='margin:.4em'>cone search in this table</button>",
                                 pos:"right"
-                            }
+                            },
                         ],
                         "title",
                         !struct.div.parity,
                     );
+                    $("#" +tableB64+"_columns", s.div.header).click(()=>{
+                        MetaDataShower(that.api,table);
+                    });
+                    $("#" +tableB64+"_cone", s.div.header).click(()=>{
+                        $(document).trigger("cone_search_update_table.control",{table:table});
+                    });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";
                     $(".collapsable-title",s.div.header).tooltip({html:true});
-                    if(open.has(tableB64)){
+
+                    if(subtables.length == 1){
+                        $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
+                    }else if(open.has(tableB64)){
                         $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
                     }
 

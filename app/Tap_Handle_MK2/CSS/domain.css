@@ -179,11 +179,10 @@ input:hover.stackconstbutton {
 	background-color: white;
 	color: transparent;
 	margin: auto;
-	/* height: 12px; */
+	height: 12px;
 	width: 16px;
 	padding: 0px;
 	border-width: 0px;
-	/* background: url(../icons/raConst.png) no-repeat; */
 	background: url(../icons/raConst2.png) no-repeat;
 }
 
@@ -196,7 +195,7 @@ input:hover.raconstbutton {
 	background-color: white;
 	color: transparent;
 	margin: auto;
-	/* height: 12px; */
+	height: 12px;
 	width: 16px;
 	padding: 0px;
 	border-width: 0px;
