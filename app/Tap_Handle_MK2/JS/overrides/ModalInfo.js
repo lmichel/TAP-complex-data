@@ -60,7 +60,7 @@ function ModalInfoOverride(){
             let id = this.getNextID();
             let modalHtml = this.buildModal(
                 id,
-                this.buildHeader(this.iconToHTML(this.icons.error),"Error : " +title),
+                this.buildHeader(this.iconToHTML(this.icons.error),"Error" + (title === undefined ? "" : " : " +title)),
                 this.buildBody(this.formatMessage(content))
             );
             $("body").append(modalHtml);

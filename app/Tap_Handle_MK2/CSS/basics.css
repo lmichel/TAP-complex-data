@@ -714,3 +714,14 @@ body div h3 {
 div h5{
 	font-size: .83em;
 }
+
+.jstree-default a.jstree-hovered{
+	opacity: 1;
+	box-shadow: none;
+	border: black .2em inset;
+}
+
+div .jstree-default .jstree-anchor{
+	height: auto;
+	line-height: 1.85em;
+}
