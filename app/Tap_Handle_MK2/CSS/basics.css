@@ -725,3 +725,18 @@ div .jstree-default .jstree-anchor{
 	height: auto;
 	line-height: 1.85em;
 }
+
+#mainSB_out{
+	max-height:350px;
+	overflow:auto;
+	z-index:999;
+	position:absolute;
+	width:100%;
+	left:0;
+	padding:.5em;
+	border: 1px black solid;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-top: unset;
+	background-color: white;
+}

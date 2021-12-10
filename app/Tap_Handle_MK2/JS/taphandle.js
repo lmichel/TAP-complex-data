@@ -76,7 +76,7 @@ specSB.prototype = Object.create(jw.widget.SearchBar.prototype,{
 
 async function setupSB(ologger){
     $("#mainButtonHolder").html("<div id='fieldNameBar' style='display:flex;justify-content: space-between;'></div><input id='mainSB' style='width:100%'></input>"+
-        "<div id='mainSB_out' style='max-height:350px;overflow:auto;z-index:999;position:absolute;width:100%;left:0;padding:.5em'></div>");
+        "<div id='mainSB_out' style=''></div>");
     
     let api = new jw.Api();
     
@@ -169,6 +169,8 @@ async function setupSB(ologger){
                     tree.append(api,dat);
                 }else{
                     event.currentTarget.style.background = 'red';
+                    Modalinfo.error("can't connect to the select service");
+                    console.error(connect.error);
                 }
                 ologger.hide();
             });
@@ -179,8 +181,7 @@ async function setupSB(ologger){
         push: function (dataList){
             let dat;
             let li;
-            let list = "<ul class = '' role='listbox' style='text-align: center; border-radius: 4px;" +
-            "border: 1px solid #aaaaaa;padding:0;margin: 0.5em'>";
+            let list = "<ul class = '' role='listbox' style='text-align: center;padding:0;margin: 0'>";
             for(let i=0;i<dataList.length;i++){
                 dat = $.extend({},dataList[i]);
                 li= "<li tabindex='-1' class='clickable' id='list_elem_" + i + "' style='border-radius: 4px; margin: 0.5em;" +

@@ -36,9 +36,9 @@
         }
         if(!tapService.endsWith("sync") && !tapService.endsWith("sync/")){
             if(tapService.endsWith("/")){
-                tapService += "sync/";
+                tapService += "sync";
             }else {
-                tapService += "/sync/";
+                tapService += "/sync";
             }
         }
         this.tapServiceConnector = new jw.core.ServiceConnector(tapService, shortName,this);
