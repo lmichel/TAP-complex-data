@@ -301,7 +301,7 @@ class TreeTableSearch extends abstractTreeSearchElem{
                     });
                     
                     let checkSchem = $("input",colaps.header);
-                    let checkTable = $("input",colaps.div);
+                    let checkTable = $("input[type=checkbox]",colaps.div);
 
                     checkSchem.click(()=>{
                         if(checkSchem.is(":checked")){
@@ -314,12 +314,16 @@ class TreeTableSearch extends abstractTreeSearchElem{
                             });
                         }
                     });
+                    checkTable.each((i,e)=>{
+                        e.checked = true;
+                    });
                     checkTable.change(()=>{
                         let allchecked = true;
                         let allunchecked = true;
                         checkTable.each((i,e)=>{
                             allchecked &= e.checked;
                             allunchecked &= !e.checked;
+                            return allchecked || allunchecked;
                         });
                         if(allchecked){
                             checkSchem.prop("checked",true);
@@ -389,7 +393,7 @@ class TreeSearch{
             }
         });
         $("#btnReset").click(()=>{
-            $("#" + this.id + " table input:visible").prop("checked",true);
+            $("#" + this.id + " input:visible").prop("checked",true).prop("indeterminate",false);
             this.tree.resetFilter();
         });
     }
