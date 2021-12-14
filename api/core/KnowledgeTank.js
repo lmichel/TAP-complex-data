@@ -112,7 +112,7 @@ jw.KnowledgeTank = (function(){
             },
             {
                 from: { table: "keys", column: "key_id" },
-                target: { table: "key_column", column: "key_id" }
+                target: { table: "key_columns", column: "key_id" }
             },
             {
                 from: { table: "tables", column: "table_name" },

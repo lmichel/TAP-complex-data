@@ -545,7 +545,7 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                 select += jw.Api.safeQualifier([this.schema, defaults[kw].table, defaults[kw].column]).qualified + " AS " + jw.Api.safeQualifier([kw]).qualified + ", ";
             }
         }
-        return select.substr(0, select.length - 2) + " ";
+        return select.substring(0, select.length - 2) + " ";
     };
 
     this.protected.arraysToMaps = function (arrays,keywords) {

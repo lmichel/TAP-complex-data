@@ -168,9 +168,16 @@ async function setupSB(ologger){
                 if(connect.status){
                     tree.append(api,dat);
                 }else{
-                    event.currentTarget.style.background = 'red';
-                    Modalinfo.error("can't connect to the select service");
-                    console.error(connect.error);
+                    //proxy for cors errors
+                    api.connectService("//saada.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
+                        if(connect.status){
+                            tree.append(api,dat);
+                        }else{
+                            event.currentTarget.style.background = 'red';
+                            Modalinfo.error("can't connect to the select service");
+                            console.error(connect.error);
+                        }
+                    });
                 }
                 ologger.hide();
             });

@@ -51,8 +51,9 @@ var TapTree = function(){
      * 
      * @param {jw.Api} api 
      */
-    function TapTree(api,tree,rootHolder,logger,meta={}){
+    function TapTree(api,tree,rootHolder,logger,SB,meta={}){
         this.api = api;
+        this.SB = SB;
         this.tree = tree;
         this.rootHolder = rootHolder;
         this.meta = meta;
@@ -68,8 +69,20 @@ var TapTree = function(){
             },
         });
 
+        this.time = Date.now();
         let that = this;
         rootHolder.on("select_node.jstree",(event,object)=>{
+            if(object.node.id ==this.treeID){
+                // JStree keep changing the doms element so we need to recreate the double click event
+                // TODO make this timing configurable
+                if(Date.now() - this.time<200){
+                    this.SB.setFilteringData(this.api.getConnector().connector.service,this).then(()=>{
+                        this.SB.show();
+                    });
+                }else{
+                    that.time = Date.now();
+                }
+            }
             if(object.node.parents.length>2){
                 if(object.node.parents[object.node.parents.length-2]==this.treeID){
                     let schem =  atob(object.node.parents[0].substr(this.treeID.length+1).replace(/_/g,"/").replace(/-/g,"+"));
@@ -465,7 +478,8 @@ var TapTreeList = function(){
                 },
                 pusher:()=>{},
                 reset : ()=>{}
-            }
+            },
+            sbTest : new TreeSearch(),
         };
 
         this.treeHolder.jstree({
@@ -577,7 +591,7 @@ var TapTreeList = function(){
     TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
         if(connector.status && !this.contains(tap)){
-            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.logger,meta),"api":tap};
+            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.logger,this.protected.sbTest,meta),"api":tap};
         }
         return connector.status;
     };

@@ -125,8 +125,10 @@ class CollapsableDiv{
                 e.innerText = text.substr(0,c-3) + "...";
                 //final adjustement sometimes usefull
                 while(getNBLines(e,h)>1){
-                    e.innerText = text.substr(0,c-4) + "...";
+                    c--;
+                    e.innerText = text.substr(0,c-3) + "...";
                 }
+                e.innerText = text.substr(0,c-6) + "...";
                 e.title = text;
                 $(e).tooltip({ 
                     template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
