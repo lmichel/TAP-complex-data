@@ -61,7 +61,18 @@ specSB.prototype = Object.create(jw.widget.SearchBar.prototype,{
             if (data.then !== undefined) {
                 this.promList.push(
                     data.then((val) => {
-                        this.output.push(val);
+                        if(val.length<1){
+                            url = url.substring(url.indexOf("//"));
+                            let name = url.substring(url.indexOf("//")+2);
+                            name = name.substring(0,name.indexOf("/"));
+                            name = name.substring(0,name.lastIndexOf("."));
+                            
+                            name = name.replace(/[\.\_]/g," ");
+
+                            this.output.push([{url:url,name:name}]);
+                        }else{
+                            this.output.push(val);
+                        }
                         this.promList.remove(data);
                     })
                 );
@@ -163,7 +174,7 @@ async function setupSB(ologger){
                 dat.url = dat.url.substring(dat.url.indexOf(":")+1);
             }
 
-            if(dat.url.match(/\/\/[a-zA-Z\.\-]+\:80\//)){ // ex : //simbad.u-strasbg.fr:80/
+            if(dat.url.match(/\/\/[a-zA-Z\.\-\_]+\:80\//)){ // ex : //simbad.u-strasbg.fr:80/
                 dat.url = dat.url.replace(":80","");
             }
 
