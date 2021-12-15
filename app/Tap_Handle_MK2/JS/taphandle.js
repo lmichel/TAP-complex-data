@@ -163,6 +163,10 @@ async function setupSB(ologger){
                 dat.url = dat.url.substring(dat.url.indexOf(":")+1);
             }
 
+            if(dat.url.match(/\/\/[a-zA-Z\.\-]+\:80\//)){ // ex : //simbad.u-strasbg.fr:80/
+                dat.url = dat.url.replace(":80","");
+            }
+
             let api = new jw.Api();
             api.connectService(dat.url,dat.name).then((connect)=>{
                 if(connect.status){
