@@ -10,6 +10,8 @@ class abstractTreeSearchElem{
         this.holder = holder;
         this.buildFrame();
         this.SB = this.createSB();
+        this.id = "SW_" + abstractTreeSearchElem.ID++;
+        console.log(this.id);
     }
 
     buildFrame(){
@@ -68,7 +70,7 @@ class abstractTreeSearchElem{
             let old = this.querier.protected.getSelect.bind(this.querier.protected);
             this.querier.protected.getSelect = (...args)=>{
                 let val = old(...args);
-                val =  val.replace("SELECT ","SELECT TOP 1000 ");
+                val =  val.replace("SELECT ","SELECT TOP 500 ");
                 return val;
             };
         }
@@ -101,10 +103,12 @@ class abstractTreeSearchElem{
     }
 
     reset(){
-        $("#output").html("<p>Showing up to 1000 tables</p>");
+        $("#output",this.holder).html("<p>Showing up to 500 tables</p>");
         this.getInput().val("");
     }
 }
+
+abstractTreeSearchElem.ID = 0;
 
 class TreeTableSearch extends abstractTreeSearchElem{
     constructor(...args){
@@ -164,7 +168,7 @@ class TreeTableSearch extends abstractTreeSearchElem{
                     "' style='margin:.4em' checked>",dat.tableName,dat.tableDesc]);
                 }
 
-                $("#output").html("<p>Showing up to 1000 tables</p>");
+                $("#output",that.holder).html("<p>Showing up to 500 tables</p>");
 
                 let options = {
                     "aaData":[],
@@ -172,11 +176,11 @@ class TreeTableSearch extends abstractTreeSearchElem{
                         return {
                             "sTitle":e};
                         }),
-                    "pagingType" : "simple",
+                    "bPaginate": false,
                     "aaSorting" : [],
                     "bSort" : false,
                     "bFilter" : true,
-                    "aLengthMenu": [],
+                    /*"aLengthMenu": [],*/
                     "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
                         if(aData[2].length > 24 ) {
                             let value = aData[2].replace(/'/g,"&#146;");
@@ -187,12 +191,6 @@ class TreeTableSearch extends abstractTreeSearchElem{
                 };
 
                 let positions = [
-                    { "name": "information",
-                        "pos" : "top-left"
-                    },
-                    { "name": "pagination",
-                        "pos": "top-center"
-                    },
                     { "name": 'filter',
                         "pos" : "top-right"
                     }
@@ -202,7 +200,7 @@ class TreeTableSearch extends abstractTreeSearchElem{
                 let colaps;
                 let tableID;
                 for (let schema in map){
-                    colaps = new CollapsableDiv($("#output"),vizierToID(schema),false,undefined,
+                    colaps = new CollapsableDiv($("#output",that.holder),vizierToID(schema),false,undefined,
                         [
                             {pos:"right",txt:map[schema].desc,type:"desc",monoline:true,weight:4},
                             {
@@ -217,35 +215,61 @@ class TreeTableSearch extends abstractTreeSearchElem{
                     );
                     options.aaData = map[schema].tables;
 
-                    tableID = "modal_datatable_" + vizierToID(schema);
+                    tableID = that.id + "modal_datatable_" + vizierToID(schema);
                     colaps.div.append("<table id=\"" + tableID + "\" class=\"display\"></table>");
                     
                     CustomDataTable.create(tableID, options, positions);
             
-                    $("table#" + tableID)[0].style.width = "fit-content";
+                    $("table#" + tableID,that.holder)[0].style.width = "fit-content";
                     $("#"+ tableID + "_wrapper input.filter-result",colaps.div)[0].style = "padding: .1em;font-size: 1em;padding-left: .5em;";
 
-                    $("#"+tableID+" th").each((i,e)=>{
+                    $("#"+tableID+" th",colaps.div).each((i,e)=>{
                         e.style.width = "unset";
                     });
                     
-                    $("#"+tableID+" tr").each((i,e)=>{
+                    $("#"+tableID+" tr",colaps.div).each((i,e)=>{
                         e.id = vizierToID(schema);
                     });
                     // auto margin makes magin left and right being equals
-                    let width = parseFloat(window.getComputedStyle($("#"+tableID+" th:eq(2)")[0], null).getPropertyValue('width')) + 
-                        parseFloat(window.getComputedStyle($("#"+tableID)[0], null).getPropertyValue('margin-left'))*2;
+                    let width = parseFloat(window.getComputedStyle($("#"+tableID+" th:eq(2)",colaps.div)[0], null).getPropertyValue('width')) + 
+                        parseFloat(window.getComputedStyle($("#"+tableID,colaps.div)[0], null).getPropertyValue('margin-left'))*2;
                     
-                    $("#"+tableID+" th:eq(2)")[0].style.width = width;
+                    $("#"+tableID+" th:eq(2)",colaps.div)[0].style.width = width;
 
-                    $("#"+tableID+" span").each((i,e)=>{
+                    let oWidth,a,b,c,text, i;
+                    let oDelta;
+                    let spans = $("#"+tableID+" span",colaps.div);
+                    let limit = spans.length > 50;
+                    let max = spans.length > 200 ? 0:(spans.length >100 ? 2 : 5);
+                    spans.each((i,e)=>{
                         arr = e.title.split(" - ");
                         if(e.parentElement.nodeName == "TD"){
                             // some description have some " - " inside them making arr[1] not containing the whole text this is why I create a special var for the text
                             // for some reason clientWidth works better than offsetWidth better stick on that 
-                            let oWidth = e.parentElement.clientWidth,a=27,b=arr[1].length,c,text = e.title.replace(" - ","");
-                            let oDelta = oWidth - e.offsetWidth;
-                            while (b-a>1){
+                            oWidth = e.parentElement.clientWidth;
+                            text = e.title.replace(" - ","");
+                            oDelta = oWidth - e.offsetWidth;
+
+                            // small optimisation loop by re-using values computed with the last cell (probably close to what we are looking for)
+                            if(c!==undefined){
+                                e.textContent = text.substr(0,c);
+                                if(oWidth<e.parentElement.clientWidth){
+                                    b=c;
+                                    a=27;
+                                }else{
+                                    a=c;
+                                    b=arr[1].length;
+                                    if(a>b){
+                                        a=b;
+                                    }
+                                }
+                            }else{
+                                a=27;
+                                b=arr[1].length;
+                            }
+                            i = 0;
+                            while (b-a>1 && (!limit || i<max)){
+                                i++;
                                 c = Math.floor((b+a)/2);
                                 e.textContent = text.substr(0,c);
                                 if(oWidth<e.parentElement.clientWidth){
@@ -254,7 +278,7 @@ class TreeTableSearch extends abstractTreeSearchElem{
                                     a=c;
                                 }
                             }
-                            c=b;
+                            c=limit ? a:b;
 
                             if(c<text.length){
                                 e.textContent = text.substr(0,c-4)+" ...";
@@ -294,7 +318,7 @@ class TreeTableSearch extends abstractTreeSearchElem{
                         e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
                     });
 
-                    $("#"+tableID+" span:not([title=''])").tooltip({ 
+                    $("#"+tableID+" span:not([title=''])",colaps.div).tooltip({ 
                         template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
                         html:true,
                         customClass :"ressource-tooltip",
@@ -341,6 +365,25 @@ class TreeTableSearch extends abstractTreeSearchElem{
                 that.getLogger().status("Results are up to date",TreeSBLogger.STATUS_OK);
             }
         };
+    }
+}
+
+class TreeSchemaSearch extends TreeTableSearch{
+    getConstraintMap(){
+        if( this.constraintMap === undefined){
+            this.constraintMap = {
+                _default : {
+                    schema : "", // place holder the true selected schema is updated later
+                },
+                noField : {
+                    table : "tables",
+                    column : "schema_name",
+                    merger : jw.widget.SearchBar.mergers.likeMerger(),
+                    formator : jw.widget.SearchBar.formators.fuzzyStringFormator
+                }
+            };
+        }
+        return this.constraintMap;
     }
 }
 /**
@@ -405,7 +448,7 @@ class TreeSearch{
         this.tree = tree;
         let current = this.api.getConnector().connector;
         if(current === undefined || current.service.tapService != connector.tapService){
-            this.last = this.last.then(()=>{this.connect(connector);});
+            this.last = this.last.then(()=>{return this.connect(connector);});
         }
         return this.last;
     }
@@ -417,21 +460,34 @@ class TreeSearch{
         
         await this.api.selectSchema(schema);
 
-        if( this.TreeTableSearch == undefined){
+        if( this.tableSearch == undefined){
             this.tableSearch = new TreeTableSearch($("#" + this.id + " #table"),this.api);
+        }else{
+            this.tableSearch.reset();
         }
+
+        if( this.schemaSearch == undefined){
+            this.schemaSearch = new TreeSchemaSearch($("#" + this.id + " #schema"),this.api);
+        }else{
+            this.schemaSearch.reset();
+        }
+
         this.tableSearch.getConstraintMap()._default.schema = schema;
+        this.schemaSearch.getConstraintMap()._default.schema = schema;
 
         //this.logger.info("checking case insensitive function");
         let val = await this.api.query('SELECT UPPER(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables');
         if(val.status){
             this.tableSearch.getConstraintMap().noField.merger = jw.widget.SearchBar.mergers.likeMerger("UPPER");
+            this.schemaSearch.getConstraintMap().noField.merger = jw.widget.SearchBar.mergers.likeMerger("UPPER");
         }else {
             val = await this.api.query('SELECT uppercase(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables');
             if(val.status){
                 this.tableSearch.getConstraintMap().noField.merger = jw.widget.SearchBar.mergers.likeMerger("uppercase");
+                this.schemaSearch.getConstraintMap().noField.merger = jw.widget.SearchBar.mergers.likeMerger("uppercase");
             }else {
                 this.tableSearch.getConstraintMap().noField.merger = jw.widget.SearchBar.mergers.likeMerger("");
+                this.schemaSearch.getConstraintMap().noField.merger = jw.widget.SearchBar.mergers.likeMerger("");
                 upper = false;
             }
         }

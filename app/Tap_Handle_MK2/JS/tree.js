@@ -51,13 +51,12 @@ var TapTree = function(){
      * 
      * @param {jw.Api} api 
      */
-    function TapTree(api,tree,rootHolder,logger,SB,meta={}){
+    function TapTree(api,tree,rootHolder,SB,meta={}){
         this.api = api;
         this.SB = SB;
         this.tree = tree;
         this.rootHolder = rootHolder;
         this.meta = meta;
-        this.logger = logger;
         this.partial = {}; // store state of partially loaded schemas
 
         this.short_name = api.getConnector().connector.service.shortName;
@@ -76,8 +75,10 @@ var TapTree = function(){
                 // JStree keep changing the doms element so we need to recreate the double click event
                 // TODO make this timing configurable
                 if(Date.now() - this.time<200){
+                    $("#" + this.treeID + "_meta").prop("src","http://i.stack.imgur.com/FhHRx.gif");
                     this.SB.setFilteringData(this.api.getConnector().connector.service,this).then(()=>{
                         this.SB.show();
+                        $("#" + this.treeID + "_meta").prop("src","./images/info.png");
                     });
                 }else{
                     that.time = Date.now();
@@ -152,7 +153,7 @@ var TapTree = function(){
         }
         /*/ Auto redraw of schemas and service info  /*/
         ExtraDrawer.drawExtra(rootHolder,this.treeID,(id)=>{
-            $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='./images/info.png' title='Show metadata (Does not work with Vizier)'/>");
+            $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='./images/info.png' title='Show metadata'/>");
             $("#" + id + "_meta").click(this.serviceMetaDataShowerFactory());
 
 
@@ -343,14 +344,12 @@ var TapTree = function(){
                 this.tree.open_node(schemNode);
             }
         }
-        this.logger.status("No filter applied, results are up to date",TreeSBLogger.STATUS_OK);
     };
 
     TapTree.prototype.applyFilter = function(){
         if(!this.filtered){
             return;
         }
-        this.logger.info("Showing search results ...");
 
         // tables of each schema are cached there if a table isn't cached we can't have a node for it
         let schemas = this.api.getSchemas();
@@ -410,8 +409,6 @@ var TapTree = function(){
         for(let i=0;i<wasOpen.length;i++){
             this.tree.open_node(wasOpen[i],undefined,false);
         }
-        
-        this.logger.status("Results are up to date",TreeSBLogger.STATUS_OK);
     };
 
     TapTree.prototype.filter = function(filter){
@@ -448,7 +445,6 @@ var TapTreeList = function(){
         this.holder.html(
             '<div style="display:flex;flex-flow: column;flex-grow: 1;"><div style="overflow:auto;"><div id="tree"></div></div></div>');
         $("input",this.holder).prop( "disabled", true );
-        this.logger = new TreeSBLogger($("#logger",this.holder));
         this.treeHolder = $("#tree",holder);
         this.treeMap={};
 
@@ -463,7 +459,6 @@ var TapTreeList = function(){
         });
         this.tree = this.treeHolder.jstree(true);
         registerProtected(this);
-        this.logger.status("the tree is initialized, please add a service to start using the tree, select one to enable the search Bar",TreeSBLogger.STATUS_INFO);
     }
 
     /**
@@ -488,7 +483,7 @@ var TapTreeList = function(){
     TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
         if(connector.status && !this.contains(tap)){
-            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.logger,this.protected.sb,meta),"api":tap};
+            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.protected.sb,meta),"api":tap};
         }
         return connector.status;
     };

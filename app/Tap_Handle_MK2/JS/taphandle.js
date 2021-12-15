@@ -169,7 +169,7 @@ async function setupSB(ologger){
                     tree.append(api,dat);
                 }else{
                     //proxy for cors errors
-                    api.connectService("//saada.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
+                    api.connectService("//taphandle.astro.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
                         if(connect.status){
                             tree.append(api,dat);
                         }else{
