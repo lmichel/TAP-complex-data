@@ -726,7 +726,7 @@ div .jstree-default .jstree-anchor{
 	line-height: 1.85em;
 }
 
-#mainSB_out{
+.sbOut{
 	max-height:350px;
 	overflow:auto;
 	z-index:999;
