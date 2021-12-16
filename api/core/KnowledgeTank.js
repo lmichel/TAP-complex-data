@@ -69,7 +69,17 @@ jw.KnowledgeTank = (function(){
         };
 
         this.presetValues = {
-
+            "otypes.otype_txt" : [
+                "LM?","HII","LXB","PN","GiG","Pec?","ev","BD*","bub","CV*","BY*","WD?","?","vid","As?","Ae?","ULX","El*","TT*","reg","err","Bz?","a2*","mm",
+                "Em*","WR*","LM*","AB*","XB?","RC?","RV*","sg?","HX?","HH","..?","**?","Le?","Ce*","WD*","Cl*","LX?","*","N*","gLe","GlC","FIR","BiC","LP*",
+                "cC*","AB?","Ir*","cor","BS?","dS*","s?y","C?G","BH?","blu","Y*O","GrG","Lev","Be*","gam","OH*","Ce?","BS*","Pe*","grv","XB*","s?r","Pl","Ae*",
+                "sg*","N*?","CGb","Pu*","St*","Sy?","V*","X","RR?","SNR","C*?","ClG","LeI","BL?","GWE","SC?","GiP","SX*","PoC","bC*","C?*","GNe","RC*","SCG",
+                "HV*","Gr?","s*y","sh","s*b","HXB","gB","PaG","Or*","Be?","glb","As*","SyG","RS*","Gl?","pA?","EmG","LS?","G?","HS?","pA*","Er*","mul","IR",
+                "DNe","CGG","HI","EB*","CV?","C*","ISM","H2G","OH?","Sy1","No*","mR","LeG","LSB","LI?","RR*","UV","AGN","PM*","OVV","HB*","su*","MoC","OpC",
+                "No?","UX?","Cld","SBG","TT?","LeQ","S*","Psr","SB*","HS*","MIR","PN?","**","SN?","Mi?","BLL","s?b","WV*","of?","RB?","WV?","SN*","LP?","GiC",
+                "EB?","smm","LIN","Sy2","cm","Bla","S*?","IG","Ro*","HB?","V*?","Y*?","QSO","Q?","HVC","SFR","bCG","Pl?","EmO","MGr","s*r","AG?","Mi*","Mas",
+                "PoG","gLS","SR?","Sy*","WR?","G","RNe","NIR","rG","BD?","rB","gD*","out","Rad","RG*"
+            ]
         };
 
         this.tapSchemaTables = {
