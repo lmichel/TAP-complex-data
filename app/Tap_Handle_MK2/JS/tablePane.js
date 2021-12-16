@@ -267,27 +267,13 @@ class TablePane{
                 [
                     {txt:table,type:"title",pos:"center"},
                     {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
-                    /*{
-                        toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
-                            "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
-                        pos:"right"
-                    },*/
-                    /*{
-                        toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
-                            "_limit'>Queryied entries :</label><select id='" +
-                            tableB64 + "_limit'> <option value='10'>10</option>" +
-                            "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
-                            "<option value='0'>unlimited</option> </select></div>",
-                        pos:"right"
-                    },*/
-                    /*{
-                        toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + tableB64 + "_fullTables'" +
-                            " style='margin:.4em' checked><label for='" + tableB64 + "_fullTables'>Selected tables only</label></div>",
-                        pos:"right"
-                    }*/
                     {
                         toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
                             "' style='margin:.4em' class='btn btn-simple'>Column Selection</button>",
+                        pos:"right"
+                    },
+                    {
+                        toDom:"<a id='"+tableB64+"_dll' style='background: transparent url(./icons/download_23.png) center left no-repeat;' class='bannerbtn'></a>",
                         pos:"right"
                     },
                     {
@@ -373,6 +359,11 @@ class TablePane{
                 return;
             }
         }
+        $("#" + tableB64+"_dll").prop("href",
+            this.api.getConnector().connector.service.tapService + 
+            "?format=votable&request=doQuery&lang=ADQL&query=" + 
+            encodeURIComponent((await this.api.getTableQuery(tableName,keyvals)).query)
+        );
 
         let toSelect = keys.filter((k)=>object_map.tables[tableName].columns.includes(k));
 
@@ -688,6 +679,10 @@ class TablePane{
                             {
                                 toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
                                     "' style='margin:.4em' class='btn btn-simple'>Column Selection</button>",
+                                pos:"right"
+                            },
+                            {
+                                toDom:"<a id='"+tableB64+"_dll' style='background: transparent url(./icons/download_23.png) center left no-repeat;' class='bannerbtn'></a>",
                                 pos:"right"
                             },
                             {
