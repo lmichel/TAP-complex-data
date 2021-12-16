@@ -67,21 +67,21 @@ class CollapsableDiv{
             }
 
             if(l.length>0){
-                header += '<div class="txt-left col-'+Math.round(lWeight/totWeight*12)+'">';
+                header += '<div style="align-items: center;display: flex;" class="txt-left col-'+Math.round(lWeight/totWeight*12)+'">';
                     l.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(c.length>0){
-                header += '<div class="txt-center col-'+Math.round(cWeight/totWeight*12)+'">';
+                header += '<div style="align-items: center;display: flex;justify-content: center;" class="txt-center col-'+Math.round(cWeight/totWeight*12)+'">';
                     c.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(r.length>0){
-                header += '<div class="txt-right col-'+Math.round(rWeight/totWeight*12)+'">';
+                header += '<div style="align-items: center;display: flex;flex-direction: row-reverse;" class="txt-right col-'+Math.round(rWeight/totWeight*12)+'">';
                     r.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
@@ -177,6 +177,15 @@ class TablePane{
         this.header = $("#TP-header",div) ;
         this.holder = $("#TP-holder",div);
         this.logger = logger;
+        let that = this;
+        $("").click(()=>{
+            if(that.api !== undefined){
+                ModalInfo.info("Bookmark the following URL\nhttps://saada.unistra.fr/tapcomplex/app/Tap_Handle_MK2/taphandle.html?url=" +
+                    that.api.getConnector().connector.service.tapService +
+                    "\nto connect TapHandle on the current node at starting time."
+                );
+            }
+        });
         if(logger.hide == undefined){
             logger.hide = ()=>{};
         }
@@ -278,12 +287,12 @@ class TablePane{
                     }*/
                     {
                         toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
-                            "' style='margin:.4em'>Column Selection</button>",
+                            "' style='margin:.4em' class='btn btn-simple'>Column Selection</button>",
                         pos:"right"
                     },
                     {
                         toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
-                            "' style='margin:.4em'>cone search in this table</button>",
+                            "' style='margin:.4em' class='btn btn-simple'>cone search in this table</button>",
                         pos:"right"
                     },
                 ],
@@ -678,12 +687,12 @@ class TablePane{
                             },*/
                             {
                                 toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
-                                    "' style='margin:.4em'>Column Selection</button>",
+                                    "' style='margin:.4em' class='btn btn-simple'>Column Selection</button>",
                                 pos:"right"
                             },
                             {
                                 toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
-                                    "' style='margin:.4em'>cone search in this table</button>",
+                                    "' style='margin:.4em' class='btn btn-simple'>cone search in this table</button>",
                                 pos:"right"
                             },
                         ],

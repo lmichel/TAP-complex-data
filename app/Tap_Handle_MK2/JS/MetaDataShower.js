@@ -6,7 +6,7 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
         '<button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button></div>';
     }
     function buildBody(id){
-        return '<div class="modal-body"> <table id="table_' + id + '"></table><button id="dewit" type="button">Apply</button></div>';
+        return '<div class="modal-body"> <table id="table_' + id + '"></table><button class="btn btn-primary" style = "width:100%;" id="dewit" type="button">Apply</button></div>';
     }
 
     let id = ModalInfo.getNextID();

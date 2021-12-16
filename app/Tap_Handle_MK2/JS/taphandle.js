@@ -360,13 +360,13 @@ function setupFav(logger){
         },
     ];
 
-    $("#favbutton").html("<button id='welp' style='width:100%;margin: auto;'>click to show most \"popular\" tap services</button>"+
+    $("#favbutton").html("<button id='welp' style='width:100%' class='btn btn-simple'>click to show most \"popular\" tap services</button>"+
     "<div id='favOut' style='' class='sbOut'></div>");
 
     outBuilder($("#favOut"),logger).push(favDict);
 
     let bound = document.getElementById('welp').getBoundingClientRect();
-    document.getElementById('favOut').style.top = bound.bottom;
+    document.getElementById('favOut').style.top = bound.height;
     $("#favOut ul").css("text-align","left");
     $("#favOut ul").css("list-style-type","none");
     $("#favOut li").css("padding-left",".5em");
