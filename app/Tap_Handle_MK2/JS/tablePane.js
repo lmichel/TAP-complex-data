@@ -277,8 +277,8 @@ class TablePane{
                         pos:"right"
                     },
                     {
-                        toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
-                            "' style='margin:.4em' class='btn btn-simple'>cone search in this table</button>",
+                        toDom:"<a id='"+tableB64+"_cone' name='"+tableB64+
+                        "'style='background: transparent url(./icons/stackConst2.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
                         pos:"right"
                     },
                 ],
