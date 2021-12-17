@@ -268,17 +268,17 @@ class TablePane{
                     {txt:table,type:"title",pos:"center"},
                     {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
                     {
-                        toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
-                            "' style='margin:.4em' class='btn btn-simple'>Column Selection</button>",
-                        pos:"right"
-                    },
-                    {
-                        toDom:"<a id='"+tableB64+"_dll' style='background: transparent url(./icons/download_23.png) center left no-repeat;' class='bannerbtn'></a>",
+                        toDom:"<a id='"+tableB64+"_columns' name='"+tableB64+
+                        "' style='padding-left: 25;background: transparent url(./icons/header_23.png) center left no-repeat;' class='bannerbtn' title='select columns to query'></a>",
                         pos:"right"
                     },
                     {
                         toDom:"<a id='"+tableB64+"_cone' name='"+tableB64+
-                        "'style='background: transparent url(./icons/stackConst2.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
+                        "'style='padding-left: 25;background: transparent url(./icons/source_detail_23.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
+                        pos:"right"
+                    },
+                    {
+                        toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                         pos:"right"
                     },
                 ],
@@ -677,17 +677,17 @@ class TablePane{
                                 pos:"right"
                             },*/
                             {
-                                toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
-                                    "' style='margin:.4em' class='btn btn-simple'>Column Selection</button>",
+                                toDom:"<a id='"+tableB64+"_columns' name='"+tableB64+
+                                "' style='padding-left: 25;background: transparent url(./icons/header_23.png) center left no-repeat;' class='bannerbtn' title='select columns to query'></a>",
                                 pos:"right"
                             },
                             {
-                                toDom:"<a id='"+tableB64+"_dll' style='background: transparent url(./icons/download_23.png) center left no-repeat;' class='bannerbtn'></a>",
+                                toDom:"<a id='"+tableB64+"_cone' name='"+tableB64+
+                                "'style='padding-left: 25;background: transparent url(./icons/source_detail_23.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
                                 pos:"right"
                             },
                             {
-                                toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
-                                    "' style='margin:.4em' class='btn btn-simple'>cone search in this table</button>",
+                                toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                                 pos:"right"
                             },
                         ],

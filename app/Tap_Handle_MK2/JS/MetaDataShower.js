@@ -6,7 +6,9 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
         '<button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button></div>';
     }
     function buildBody(id){
-        return '<div class="modal-body"> <table id="table_' + id + '"></table><button class="btn btn-primary" style = "width:100%;" id="dewit" type="button">Apply</button></div>';
+        return '<div class="modal-body"> <table id="table_' + id + '"></table>'+
+            '<div style="display:flex"><button title="hold shift to close after aplying changes" class="btn btn-primary" style = "width:100%; margin-right:.5em" id="dewit" type="button">Apply</button>'+
+            '<button class="btn btn-primary" style = "width:100%;" id="selector" type="button">(un)select all</button></div></div>';
     }
 
     let id = ModalInfo.getNextID();
@@ -44,7 +46,7 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
         "aaSorting" : [],
         "bSort" : false,
         "bFilter" : true,
-        "aLengthMenu": [],
+        "bPaginate": false,
         "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
             if(!select){
                 return nRow;
@@ -85,14 +87,33 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
     CustomDataTable.create("table_" + id, options, positions);
 
     let modal = new bootstrap.Modal($("#" + id)[0]);
-    $("#" + id +" button#dewit").click(()=>{
+    $("#" + id +" button#dewit").click((e)=>{
         $(document).trigger("column_selection_changed.meta",{
             table:table,
             api:api,
             selected:selected_set,
             unselected:unselected_set,
         });
+        if(e.shiftKey){
+            modal.hide();
+        }
     });
+    $("#" + id +" button#selector").click(()=>{
+        let sel = $("#" + id +" input:checked");
+        let unsel = $("#" + id +" input:not(:checked)");
+        if(sel.length > unsel.length){
+            sel.each((i,e)=>{
+                e.checked = false;
+            });
+        }else{
+            unsel.each((i,e)=>{
+                e.checked = true;
+            });
+        }
+    });
+    $("#table_" + id + "_wrapper").css({height: "20em",overflow: "auto"});
+    $("#table_" + id + "_wrapper .row").css({"max-width":"100%"});
+    $("#table_" + id + "_wrapper .custom-dt").css({"overflow":"unset"});
     modal.show();//.replace(/\n/g,"<br>")
     return modal;
 };

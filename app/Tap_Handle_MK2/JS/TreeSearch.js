@@ -15,7 +15,7 @@ class abstractTreeSearchElem{
     }
 
     buildFrame(){
-        this.holder.html("<div style='width: 100%;'><div id='output'  style='width: 100%;height:15em;overflow: auto;'></div>" + 
+        this.holder.html("<div style='width: 100%;'><div id='output'  style='width: 100%;height:20em;overflow: auto;'></div>" + 
             "<div style = 'display:flex;width: 100%;'><input placeholder='pouette pouette :)' style='width: calc(100% - 3.5em);margin: .5em;margin-right: 0;'></input>"+ 
             "<div id='logger' style='width:2em;height:2em;margin: .5em;'></div></div>");
         this.input = $("input",this.holder);
