@@ -45,6 +45,7 @@
         <script type="text/javascript" src="./JS/formator.js"></script>
         <script type="text/javascript" src="./JS/DraggableBox.js"></script>
         <script type="text/javascript" src="./JS/MetaDataShower.js"></script>
+        <script type="text/javascript" src="./JS/TreeSearch.js"></script>
 
 
         <script type="text/javascript" src="./JS/Import/jquery-ui.js"></script>
@@ -116,13 +117,21 @@
     <body style="overflow: hidden;">
         <div style="height: 100%;display:flex;flex-flow:column">
             <div id = "banner" style="display: flex;width: 100%;">
-                <div id = "R_banner" class="col-2"></div>
+                <div id = "R_banner" class="col-3" style="display:flex;align-items:center;flex-direction: row;">
+                    <img src="./images/tap_logo.png" alt="tap handle logo">
+                    <div style="flex-grow: 1; display: flex;flex-flow: column;position: relative;" id = "favbutton">
+                    </div>
+                    <a style="background: transparent url(./icons/contact_38.png) center left no-repeat;" class="bannerbtn" href="javascript:void(0);" title="Contact the developper" onclick='ModalInfo.info("Send an Email to \n laurent.michel@astro.unistra.fr", "Contact");'></a>
+                    <a id = "bookmark" style="background: transparent url(./icons/bookmark_38.png) center left no-repeat;" class="bannerbtn" href="javascript:void(0);" title="Bookmark the TAP node you are connected to"></a>
+                    <a id="sampIndicator" class="bannerbtn" style="background: transparent url(./icons/sampOff.png) center left no-repeat;" href="javascript:void(0);" title="SampStatus"></a>
+                </div>
                 <div style="flex-grow: 1; display: flex;margin-right: 1em;flex-flow: column;position: relative;" id = "mainButtonHolder">
                 </div>
-                <div id = "L_banner" class="col-2"></div>
+                <div id = "L_banner" class="col-3" style="display: flex">
+                </div>
             </div>
             <div style="display: flex;overflow: auto;">
-                <div class="col-2" style="flex-shrink: 1;overflow: auto;display: flex;" id="tree">
+                <div class="col-2" style="flex-shrink: 1;overflow: auto;display: flex;width: 12%;" id="tree">
 
                 </div>
                 <div style="flex-grow: 1;display: flex;flex-direction: column; margin-right: 1em;">

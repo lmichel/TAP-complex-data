@@ -31,6 +31,13 @@ class DraggableBox{
     }
 
     reduce(){
+        if(!this.interup){
+            this.interup = true;
+            setTimeout(()=>{
+                this.reduce();
+            },200);
+            return;
+        }
         if(this.oldx === undefined){
             this.oldx = window.innerWidth;
         }
@@ -107,14 +114,39 @@ class DraggableBox{
 
         // the layout is updated each time one of those is changed it's ligter to only do this once 
         if(apply){
+            this.vx = this.x - parseFloat(this.box.style.left);
+            this.vy = this.y - parseFloat(this.box.style.top);
             this.box.style.left = this.x;
             this.box.style.top = this.y;
         }
     }
 
-    stopDragging(){
+    stopDragging(e){
         document.onmouseup = null;
         document.onmousemove = null;
+        if(e.shiftKey){
+            console.log("shift");
+            this.interup = false;
+            this.slide();
+        }
+    }
+
+    slide(){
+        if(!this.interup){
+            this.x= parseFloat(this.box.style.left) + this.vx;
+            this.y = parseFloat(this.box.style.top) + this.vy;
+            console.log(this.vx,this.vy);
+            console.log(this.x,this.y);
+            this.snap(false);
+            console.log(this.vx,this.vy);
+            console.log(this.x,this.y);
+            if( (parseFloat(this.box.style.left) + this.vx) != this.x || (parseFloat(this.box.style.top) + this.vy) != this.y){
+                this.interup = true;
+            }
+            $(this.box).animate({left:this.x,top:this.y},100,"swing",()=>{
+                this.slide();
+            });
+        }
     }
 
     compensateScroll(e){

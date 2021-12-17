@@ -26,7 +26,7 @@ function ComplexKWConstraint_mVcExtends(){
                     for( let i=0 ; i<andors.length; i++ ) {
                         let op = andors[i];
                         select += '<option value=' + op + '>' +op + '</option>';
-                    }	
+                    }
                     select += '</select>&nbsp;';
                     rootDiv.append(select);
                 }
@@ -48,12 +48,11 @@ function ComplexKWConstraint_mVcExtends(){
                             op = '&lt;';
                         }
                         select += '<option value="' + op + '" ' + selected + '>' +op + '</option>';
-                    }	
-                    if( range != undefined && range.type == "list" ){
-                        for( let v=0 ; v<range.values.length ; v++ ) {
-                            let txt = (ah.type == "String")? "'" + range.values[v].value + "'": range.values[v].value;
-                            select += '<option value="= ' + txt + '">= ' + txt + '</option>';
-                        }
+                    }
+                    console.log(ah.available_value);
+                    for( let v=0 ; v<ah.available_value.length ; v++ ) {
+                        let txt = ah.available_value[v];
+                        select += '<option value="= ' + txt + '">= ' + txt + '</option>';
                     }
                     select += '</select>';
                     rootDiv.append(select);

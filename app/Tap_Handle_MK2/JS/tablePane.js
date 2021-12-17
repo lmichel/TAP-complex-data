@@ -67,21 +67,21 @@ class CollapsableDiv{
             }
 
             if(l.length>0){
-                header += '<div class="txt-left col-'+Math.round(lWeight/totWeight*12)+'">';
+                header += '<div style="align-items: center;display: flex;" class="txt-left col-'+Math.round(lWeight/totWeight*12)+'">';
                     l.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(c.length>0){
-                header += '<div class="txt-center col-'+Math.round(cWeight/totWeight*12)+'">';
+                header += '<div style="align-items: center;display: flex;justify-content: center;" class="txt-center col-'+Math.round(cWeight/totWeight*12)+'">';
                     c.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
                     header += "</div>";
             }
             if(r.length>0){
-                header += '<div class="txt-right col-'+Math.round(rWeight/totWeight*12)+'">';
+                header += '<div style="align-items: center;display: flex;flex-direction: row-reverse;" class="txt-right col-'+Math.round(rWeight/totWeight*12)+'">';
                     r.forEach(function(element) {
                         header += '<div class="side-div">'+ element.toDom + "</div>";
                     });
@@ -125,8 +125,10 @@ class CollapsableDiv{
                 e.innerText = text.substr(0,c-3) + "...";
                 //final adjustement sometimes usefull
                 while(getNBLines(e,h)>1){
-                    e.innerText = text.substr(0,c-4) + "...";
+                    c--;
+                    e.innerText = text.substr(0,c-3) + "...";
                 }
+                e.innerText = text.substr(0,c-6) + "...";
                 e.title = text;
                 $(e).tooltip({ 
                     template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
@@ -175,6 +177,15 @@ class TablePane{
         this.header = $("#TP-header",div) ;
         this.holder = $("#TP-holder",div);
         this.logger = logger;
+        let that = this;
+        $("").click(()=>{
+            if(that.api !== undefined){
+                ModalInfo.info("Bookmark the following URL\nhttps://saada.unistra.fr/tapcomplex/app/Tap_Handle_MK2/taphandle.html?url=" +
+                    that.api.getConnector().connector.service.tapService +
+                    "\nto connect TapHandle on the current node at starting time."
+                );
+            }
+        });
         if(logger.hide == undefined){
             logger.hide = ()=>{};
         }
@@ -256,32 +267,18 @@ class TablePane{
                 [
                     {txt:table,type:"title",pos:"center"},
                     {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
-                    /*{
-                        toDom:"<div><input type='checkbox' id='"+tableB64+"_constraint' name='"+tableB64+
-                            "' style='margin:.4em' checked><label for='"+tableB64+"'>Constraints</label></div>",
-                        pos:"right"
-                    },*/
-                    /*{
-                        toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
-                            "_limit'>Queryied entries :</label><select id='" +
-                            tableB64 + "_limit'> <option value='10'>10</option>" +
-                            "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
-                            "<option value='0'>unlimited</option> </select></div>",
-                        pos:"right"
-                    },*/
-                    /*{
-                        toDom:"<div style='padding-left:0.5em;border-left:0.1em black solid;'><input type='checkbox' id='" + tableB64 + "_fullTables'" +
-                            " style='margin:.4em' checked><label for='" + tableB64 + "_fullTables'>Selected tables only</label></div>",
-                        pos:"right"
-                    }*/
                     {
-                        toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
-                            "' style='margin:.4em'>Column Selection</button>",
+                        toDom:"<a id='"+tableB64+"_columns' name='"+tableB64+
+                        "' style='padding-left: 25;background: transparent url(./icons/header_23.png) center left no-repeat;' class='bannerbtn' title='select columns to query'></a>",
                         pos:"right"
                     },
                     {
-                        toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
-                            "' style='margin:.4em'>cone search in this table</button>",
+                        toDom:"<a id='"+tableB64+"_cone' name='"+tableB64+
+                        "'style='padding-left: 25;background: transparent url(./icons/source_detail_23.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
+                        pos:"right"
+                    },
+                    {
+                        toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                         pos:"right"
                     },
                 ],
@@ -362,6 +359,11 @@ class TablePane{
                 return;
             }
         }
+        $("#" + tableB64+"_dll").prop("href",
+            this.api.getConnector().connector.service.tapService + 
+            "?format=votable&request=doQuery&lang=ADQL&query=" + 
+            encodeURIComponent((await this.api.getTableQuery(tableName,keyvals)).query)
+        );
 
         let toSelect = keys.filter((k)=>object_map.tables[tableName].columns.includes(k));
 
@@ -675,13 +677,17 @@ class TablePane{
                                 pos:"right"
                             },*/
                             {
-                                toDom:"<button type='button' id='"+tableB64+"_columns' name='"+tableB64+
-                                    "' style='margin:.4em'>Column Selection</button>",
+                                toDom:"<a id='"+tableB64+"_columns' name='"+tableB64+
+                                "' style='padding-left: 25;background: transparent url(./icons/header_23.png) center left no-repeat;' class='bannerbtn' title='select columns to query'></a>",
                                 pos:"right"
                             },
                             {
-                                toDom:"<button type='button' id='"+tableB64+"_cone' name='"+tableB64+
-                                    "' style='margin:.4em'>cone search in this table</button>",
+                                toDom:"<a id='"+tableB64+"_cone' name='"+tableB64+
+                                "'style='padding-left: 25;background: transparent url(./icons/source_detail_23.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
+                                pos:"right"
+                            },
+                            {
+                                toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                                 pos:"right"
                             },
                         ],

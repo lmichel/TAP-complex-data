@@ -51,12 +51,12 @@ var TapTree = function(){
      * 
      * @param {jw.Api} api 
      */
-    function TapTree(api,tree,rootHolder,logger,meta={}){
+    function TapTree(api,tree,rootHolder,SB,meta={}){
         this.api = api;
+        this.SB = SB;
         this.tree = tree;
         this.rootHolder = rootHolder;
         this.meta = meta;
-        this.logger = logger;
         this.partial = {}; // store state of partially loaded schemas
 
         this.short_name = api.getConnector().connector.service.shortName;
@@ -68,8 +68,22 @@ var TapTree = function(){
             },
         });
 
+        this.time = Date.now();
         let that = this;
         rootHolder.on("select_node.jstree",(event,object)=>{
+            if(object.node.id ==this.treeID){
+                // JStree keep changing the doms element so we need to recreate the double click event
+                // TODO make this timing configurable
+                if(Date.now() - this.time<200){
+                    $("#" + this.treeID + "_meta").prop("src","http://i.stack.imgur.com/FhHRx.gif");
+                    this.SB.setFilteringData(this.api.getConnector().connector.service,this).then(()=>{
+                        this.SB.show();
+                        $("#" + this.treeID + "_meta").prop("src","./images/info.png");
+                    });
+                }else{
+                    that.time = Date.now();
+                }
+            }
             if(object.node.parents.length>2){
                 if(object.node.parents[object.node.parents.length-2]==this.treeID){
                     let schem =  atob(object.node.parents[0].substr(this.treeID.length+1).replace(/_/g,"/").replace(/-/g,"+"));
@@ -139,7 +153,7 @@ var TapTree = function(){
         }
         /*/ Auto redraw of schemas and service info  /*/
         ExtraDrawer.drawExtra(rootHolder,this.treeID,(id)=>{
-            $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='./images/info.png' title='Show metadata (Does not work with Vizier)'/>");
+            $("#" + id + "_anchor").before("<img id='" + id + "_meta' class='metadata' src='./images/info.png' title='Show metadata'/>");
             $("#" + id + "_meta").click(this.serviceMetaDataShowerFactory());
 
 
@@ -330,14 +344,12 @@ var TapTree = function(){
                 this.tree.open_node(schemNode);
             }
         }
-        this.logger.status("No filter applied, results are up to date",TreeSBLogger.STATUS_OK);
     };
 
     TapTree.prototype.applyFilter = function(){
         if(!this.filtered){
             return;
         }
-        this.logger.info("Showing search results ...");
 
         // tables of each schema are cached there if a table isn't cached we can't have a node for it
         let schemas = this.api.getSchemas();
@@ -397,8 +409,6 @@ var TapTree = function(){
         for(let i=0;i<wasOpen.length;i++){
             this.tree.open_node(wasOpen[i],undefined,false);
         }
-        
-        this.logger.status("Results are up to date",TreeSBLogger.STATUS_OK);
     };
 
     TapTree.prototype.filter = function(filter){
@@ -433,39 +443,13 @@ var TapTreeList = function(){
         this.holder = holder;
         
         this.holder.html(
-            '<div style="display:flex;flex-flow: column;flex-grow: 1;"><div style="display:flex">'+
-            // 3.5 = 2 (logger width) + 0.5 (input left margin) + 0.5 (logger left margin) + 0.5(logger right margin)
-            '<input id="searchBar" type="text" autocomplete="off" style="width: calc(100% - 3.5em);margin: .5em;margin-right: 0;" >'+ 
-            '<div id="logger" style="width:2em;height:2em;margin: .5em;"></div></div><div style="overflow:auto;"> <div id="tree"></div></div></div>');
+            '<div style="display:flex;flex-flow: column;flex-grow: 1;"><div style="overflow:auto;"><div id="tree"></div></div></div>');
         $("input",this.holder).prop( "disabled", true );
-        this.logger = new TreeSBLogger($("#logger",this.holder));
         this.treeHolder = $("#tree",holder);
         this.treeMap={};
 
         this.protected = {
-            constraintMap:{
-                _default : {
-                    schema : "", // place holder the true selected schema is updated later
-                },
-                noField : {
-                    table : "tables",
-                    column : "table_name",
-                    merger : jw.widget.SearchBar.mergers.likeMerger(),
-                    formator : jw.widget.SearchBar.formators.fuzzyStringFormator
-                }
-            },
-            barApi : new jw.Api(),
-            sBarOut : {
-                push:(data)=>{
-                    if(data.length ==0 || data[0].noField !== undefined){
-                        this.protected.sBarOut.pusher(data);
-                    }else {
-                        this.protected.sBarOut.reset();
-                    }
-                },
-                pusher:()=>{},
-                reset : ()=>{}
-            }
+            sb : new TreeSearch(),
         };
 
         this.treeHolder.jstree({
@@ -474,92 +458,14 @@ var TapTreeList = function(){
             }
         });
         this.tree = this.treeHolder.jstree(true);
-        this.treeHolder.on("activate_node.jstree",(event,node)=>{
-            node = node.node;
-            let ID = node.parents.length == 1 ? node.id : node.parents[node.parents.length-2];
-            let tree = this.treeMap[Object.keys(this.treeMap).filter(id=>this.treeMap[id].tree.getID()==ID)];
-            this.protected.connectSearchBar(tree);
-        });
         registerProtected(this);
-        this.logger.status("the tree is initialized, please add a service to start using the tree, select one to enable the search Bar",TreeSBLogger.STATUS_INFO);
     }
 
     /**
      * 
      * @param {TapTreeList} tree 
      */
-    function registerProtected(tree){
-        tree.protected.connectSearchBar = function(map){
-            let connector = map.api.getConnector().connector.service;
-            if(tree.protected.barApi.getConnector().connector !== undefined && 
-                connector.tapService == tree.protected.barApi.getConnector().connector.service.tapService){
-                return;
-            }
-
-            $("input",tree.holder).prop( "disabled", true );
-            tree.protected.barApi.connectService(connector.tapService).then(()=>{
-                tree.logger.info("connecting the search bar to the selected service");
-                let schema = Object.keys(map.tree.getSchemas()).filter(v=>v.match(/TAP_SCHEMA/i))[0];
-                let upper= true;
-                tree.protected.constraintMap._default.schema = schema;
-                tree.protected.barApi.selectSchema(schema).then(()=>{
-                    tree.protected.barApi.query('SELECT UPPER(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables').then( (val)=>{
-                        tree.logger.info("checking case insensitive function");
-                        if(val.status){
-                            tree.protected.constraintMap.noField.merger = jw.widget.SearchBar.mergers.likeMerger("UPPER");
-                        }else {
-                            return tree.protected.barApi.query('SELECT uppercase(TAP_SCHEMA.tables.table_name) FROM TAP_SCHEMA.tables').then((val)=>{
-                                if(val.status){
-                                    tree.protected.constraintMap.noField.merger = jw.widget.SearchBar.mergers.likeMerger("uppercase");
-                                }else {
-                                    tree.protected.constraintMap.noField.merger = jw.widget.SearchBar.mergers.likeMerger("");
-                                    upper = false;
-                                }
-                            });
-                        }
-                    }).then(()=>{
-                        tree.logger.info("Setting up the search bar");
-                        tree.protected.barApi.setRootTable("tables").then((val)=>{
-                            if( val.status){
-                                tree.protected.sBarOut.pusher = map.tree.filter.bind(map.tree);
-                                tree.protected.sBarOut.reset = map.tree.resetFilter.bind(map.tree);
-                                if(tree.protected.searchBar === undefined){
-                                    let querier = new jw.widget.SearchBar.Querier(tree.protected.barApi,
-                                        {
-                                            "schemaName":{
-                                                table:"tables",
-                                                column:"schema_name",
-                                            },
-                                        },
-                                        undefined,
-                                        tree.logger,
-                                        false
-                                    );
-                                    let processor = new jw.widget.SearchBar.ConstraintProcessor(tree.protected.constraintMap,tree.logger);
-                                    let parser = new jw.widget.SearchBar.StringParser(Object.keys(tree.protected.constraintMap),":");
-                                    tree.protected.searchBar = new jw.widget.SearchBar(
-                                        $("input",tree.holder),
-                                        tree.protected.sBarOut,
-                                        parser,
-                                        processor,
-                                        querier,
-                                        undefined,
-                                        tree.logger
-                                    );
-                                } else {
-                                    tree.protected.searchBar.processEvent();
-                                }
-                                $("input",tree.holder).prop( "disabled", false );
-                                tree.logger.status("The search bar has been succefully initialized and connected",TreeSBLogger.STATUS_OK);
-                            }else {
-                                tree.logger.status("Unable to connect the search bar to the select service",TreeSBLogger.STATUS_ERROR);
-                            }
-                        });
-                    });
-                });
-            });
-        };
-    }
+    function registerProtected(tree){}
 
     /**
      * @param {jw.Api} tap 
@@ -577,7 +483,7 @@ var TapTreeList = function(){
     TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
         if(connector.status && !this.contains(tap)){
-            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.logger,meta),"api":tap};
+            this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.protected.sb,meta),"api":tap};
         }
         return connector.status;
     };
