@@ -17,7 +17,7 @@ class ControlPane{
             '<ul><li><a href="#where">Where</a></li><li><a href="#pos" id="poslink">Position</a></li><li><a href="#query">Adql Query</a></li></ul>'+ 
             '<div id="where" style="justify-content: center;display: flex;"><div id="tapColEditor" style="display: flex;padding: .2em;"></div></div>' +
             '<div id="pos" style="justify-content: center;display: flex;"><div id="tapConeEditor" style="display: flex;padding: .2em;"></div></div>' +
-            '<div id="query" style="text-align: left;"></div></div><div style="display :none" id="adql_query_div"></div><button class="btn btn-primary" style="margin-top: 7px;width: 100%;" id="btnRunQuery">Run the Query</button></div>'
+            '<div id="query" style="text-align: left;display:grid;"></div></div><div style="display :none" id="adql_query_div"></div><button class="btn btn-primary" style="margin-top: 7px;width: 100%;" id="btnRunQuery">Run the Query</button></div>'
         );
         
         $("#multiTabDiv",this.box.body).tabs();

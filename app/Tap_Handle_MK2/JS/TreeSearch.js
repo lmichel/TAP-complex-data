@@ -113,6 +113,7 @@ abstractTreeSearchElem.ID = 0;
 class TreeTableSearch extends abstractTreeSearchElem{
     constructor(...args){
         super(...args);
+        this.collapsables = [];
     }
     
     getQuerrirerDefaults(){
@@ -161,6 +162,9 @@ class TreeTableSearch extends abstractTreeSearchElem{
                 let map = {};
                 for(let i=0;i<dataList.length;i++){
                     dat = dataList[i];
+                    if(dat.schemaName.match(/TAP_SCHEMA/i) ||dat.schemaName.match(/ivoa/i) ) { // never filtering IVOA and tap_schema schemas
+                        continue;
+                    }
                     if(map[dat.schemaName] === undefined){
                         map[dat.schemaName] = {desc:dat.schemDesc,tables:[]};
                     }
@@ -198,6 +202,7 @@ class TreeTableSearch extends abstractTreeSearchElem{
 
                 let arr;
                 let colaps;
+                that.collapsables = [];
                 let tableID;
                 for (let schema in map){
                     colaps = new CollapsableDiv($("#output",that.holder),vizierToID(schema),false,undefined,
@@ -213,6 +218,7 @@ class TreeTableSearch extends abstractTreeSearchElem{
                         "title",
                         false
                     );
+                    that.collapsables.push(colaps);
                     options.aaData = map[schema].tables;
 
                     tableID = that.id + "modal_datatable_" + vizierToID(schema);
@@ -386,14 +392,6 @@ class TreeSchemaSearch extends TreeTableSearch{
         return this.constraintMap;
     }
 }
-/**
- * TODO : 
- * Add Logger
- * Build the modal itself
- * validation and reset buttons 
- * make the logger update
- * 
- */
 
 class TreeSearch{
     constructor(){
@@ -427,6 +425,11 @@ class TreeSearch{
         this.modal = new bootstrap.Modal($("#" + this.id)[0]);
 
         $("#btnApply").click(()=>{
+            let closed = this.tableSearch.collapsables.concat(this.schemaSearch.collapsables).filter(s=>s.div.is(":hidden"));
+            closed.forEach(e=>{
+                $(".collapsable-title",e.holder).click();
+            });
+            
             let filter = [];
             $("#" + this.id + " table input:checked:visible").closest("tr").each((i,e)=>{
                 filter.push({schemaName:atob(e.id.replace(/_/g,"/").replace(/-/g,"+")),noField:$("td:eq(1)",e).text()});
@@ -434,6 +437,9 @@ class TreeSearch{
             if(filter.length>0){
                 this.tree.filter(filter);
             }
+            closed.forEach(e=>{
+                $(".collapsable-title",e.holder).click();
+            });
         });
         $("#btnReset").click(()=>{
             $("#" + this.id + " input:visible").prop("checked",true).prop("indeterminate",false);

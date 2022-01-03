@@ -363,6 +363,9 @@ var TapTree = function(){
         let safeTable;
 
         for(let schem in this.schemas){ // hiding or showing individual nodes takes ages so we minimise the work
+            if(schem.match(/TAP_SCHEMA/i) ||schem.match(/ivoa/i) ) { // never hiding IVOA and tap_schema schemas
+                continue;
+            }
             safeSchem = vizierToID(schem);
             if(this.filterMap[schem]=== undefined){
                 toHide.push(this.treeID + "_" + safeSchem);
