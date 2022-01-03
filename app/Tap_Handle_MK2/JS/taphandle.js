@@ -409,17 +409,17 @@ async function setupSB(ologger){
         if(field[0] == "_")
             continue;
         $("#fieldNameBar").append("<p class='clickable' tabindex='-1' id='searchable_" + field + "' style='padding-left:.5em;margin:0; "+
-        (autoComp[field] !== undefined ? "font-style:italic;" : "" ) +"'>" + field + "</p>");
+        (autoComp[field] !== undefined ? "font-style:italic;font-weight: bolder;" : "" ) +"'>" + field + "</p>");
         if(autoComp[field] === undefined){
             $("#searchable_" + field).click(()=>{
                 $("#mainSB").val($("#mainSB").val() + " " + field + ": " );
             });
         }else{
-            $("#searchable_" + field).click(()=>{
-                if( $("#dropdown_" + field).length>0){
+            $("#searchable_" + field).focus(()=>{
+                /*if( $("#dropdown_" + field).length>0){
                     $("#dropdown_" + field).remove();
                     return;
-                }
+                }*/
                 // creating dropdown with element
                 $("body").append("<div id='dropdown_" + field + "' class = 'dropdown_holder'><ul></ul></div>");
                 for(let i=0;i<autoComp[field].length;i++){
@@ -443,6 +443,9 @@ async function setupSB(ologger){
                     $("#dropdown_" + field).remove();
                     $("#mainSB").change();
                 });
+            });
+            $("#searchable_" + field).blur(()=>{
+                $("#dropdown_" + field).remove();
             });
         }
         
