@@ -69,7 +69,7 @@ specSB.prototype = Object.create(jw.widget.SearchBar.prototype,{
                             
                             name = name.replace(/[\.\_]/g," ");
 
-                            this.output.push([{url:url,name:name}]);
+                            this.output.push([{url:url,name:name,ivoid:"",title:"Unknown Tap Service"}]);
                         }else{
                             this.output.push(val);
                         }
