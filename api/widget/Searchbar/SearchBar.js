@@ -598,7 +598,7 @@ jw.widget.SearchBar.Querier = function(api,defaults = {},keyBuilder= d=>Object.v
                 let delta = 0,d;
                 Object.keys(conditions).forEach((kw)=>{
                     d = [];
-                    if(defaults[kw] !== undefined){
+                    if(defaults[kw] !== undefined && defaults[kw].condition !== undefined){
                         d.push(defaults[kw].condition.getDistance(conditions[kw].condition));
                     }
                     if(this.protected.cache.conditions[kw] !== undefined){
