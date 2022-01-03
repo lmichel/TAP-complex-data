@@ -69,7 +69,7 @@ specSB.prototype = Object.create(jw.widget.SearchBar.prototype,{
                             
                             name = name.replace(/[\.\_]/g," ");
 
-                            this.output.push([{url:url,name:name}]);
+                            this.output.push([{url:url,name:name,ivoid:"",title:"Unknown Tap Service"}]);
                         }else{
                             this.output.push(val);
                         }
@@ -406,20 +406,26 @@ async function setupSB(ologger){
     };
 
     for (let field in constraintMap){
-        if(field[0] == "_")
+        if(field[0] == "_"){
             continue;
-        $("#fieldNameBar").append("<p class='clickable' tabindex='-1' id='searchable_" + field + "' style='padding-left:.5em;margin:0; "+
-        (autoComp[field] !== undefined ? "font-style:italic;" : "" ) +"'>" + field + "</p>");
+        }
+
+        $("#fieldNameBar").append("<p class='clickable' tabindex='-1' id='searchable_" + field + 
+            "' title='Apply to "+(constraintMap[field].table === undefined ? constraintMap._default.table: constraintMap[field].table)+ "."+
+            constraintMap[field].column + "' style='padding-left:.5em;margin:0; "+
+            (autoComp[field] !== undefined ? "font-style:italic;font-weight: bolder;" : "" ) +"'>" + field + "</p>"
+        );
+
         if(autoComp[field] === undefined){
             $("#searchable_" + field).click(()=>{
                 $("#mainSB").val($("#mainSB").val() + " " + field + ": " );
             });
         }else{
-            $("#searchable_" + field).click(()=>{
-                if( $("#dropdown_" + field).length>0){
+            $("#searchable_" + field).focus(()=>{
+                /*if( $("#dropdown_" + field).length>0){
                     $("#dropdown_" + field).remove();
                     return;
-                }
+                }*/
                 // creating dropdown with element
                 $("body").append("<div id='dropdown_" + field + "' class = 'dropdown_holder'><ul></ul></div>");
                 for(let i=0;i<autoComp[field].length;i++){
@@ -443,6 +449,9 @@ async function setupSB(ologger){
                     $("#dropdown_" + field).remove();
                     $("#mainSB").change();
                 });
+            });
+            $("#searchable_" + field).blur(()=>{
+                $("#dropdown_" + field).remove();
             });
         }
         

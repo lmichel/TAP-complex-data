@@ -4,6 +4,7 @@
     text-align: center;
     border-radius: .5em;
     background-color: darkgray;
+    max-width: 100%;
 }
   
 .draggable-header {

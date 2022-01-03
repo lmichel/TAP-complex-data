@@ -291,7 +291,7 @@ var TapTree = function(){
                     that.bindMetaDataShower($("#" + that.treeID + "_" + safeSchem + "_" + tableSafe +"_meta" ),table,schema);
                     if(tables[table].type === "view"){
                         $("#" + that.treeID + "_" + safeSchem + "_" + tableSafe + "_anchor").before("<img id='" + that.treeID + "_" + safeSchem + "_" + tableSafe + 
-                            "_view' src='./images/viewer_23.png' title='this table is defined as a view, query may be slower than usual ...'/>");
+                            "_view' src='./images/viewer_23.png' title='this table is defined as a view, query may be slower than usual querying by position on this table may take a while'/>");
                     }
                 }
             }
@@ -363,6 +363,9 @@ var TapTree = function(){
         let safeTable;
 
         for(let schem in this.schemas){ // hiding or showing individual nodes takes ages so we minimise the work
+            if(schem.match(/TAP_SCHEMA/i) ||schem.match(/ivoa/i) ) { // never hiding IVOA and tap_schema schemas
+                continue;
+            }
             safeSchem = vizierToID(schem);
             if(this.filterMap[schem]=== undefined){
                 toHide.push(this.treeID + "_" + safeSchem);

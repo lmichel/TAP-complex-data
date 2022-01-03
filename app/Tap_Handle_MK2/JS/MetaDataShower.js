@@ -52,16 +52,14 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
                 return nRow;
             }
             $("td:eq(0)",nRow).html("<input type='checkbox' id='" + id + "_"+ vizierToID(table)/* you never know when a [Fe/H] will come */ + 
-                "' style='margin:.4em' "+ (aData[0] ? "checked" : "") + ">").click((e)=>{
+                "' style='margin:.4em' "+ (aData[0] ? "checked" : "") + ">").children().click((e)=>{
                     if($(e.target).is(":checked")){
-                        api.selectField(aData[1],table,false);
                         if(unselected_set.has(aData[1])){
                             unselected_set.delete(aData[1]);
                         }else{
                             selected_set.add(aData[1]);
                         }
                     }else{
-                        api.unselectField(aData[1],table);
                         if(selected_set.has(aData[1])){
                             selected_set.delete(aData[1]);
                         }else{
@@ -88,6 +86,13 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
 
     let modal = new bootstrap.Modal($("#" + id)[0]);
     $("#" + id +" button#dewit").click((e)=>{
+        unselected_set.forEach((col)=>{
+            api.unselectField(col,table);
+        });
+        selected_set.forEach((col)=>{
+            api.selectField(col,table,false);
+        });
+
         $(document).trigger("column_selection_changed.meta",{
             table:table,
             api:api,
@@ -102,13 +107,9 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
         let sel = $("#" + id +" input:checked");
         let unsel = $("#" + id +" input:not(:checked)");
         if(sel.length > unsel.length){
-            sel.each((i,e)=>{
-                e.checked = false;
-            });
+            sel.click();
         }else{
-            unsel.each((i,e)=>{
-                e.checked = true;
-            });
+            unsel.click();
         }
     });
     $("#table_" + id + "_wrapper").css({height: "20em",overflow: "auto"});

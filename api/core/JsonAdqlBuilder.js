@@ -34,12 +34,10 @@
                         if(this.adqlJsonMap.joints[key] === undefined){
 
                             /*/ nodeTreeBranches building /*/
-                            if (parent !== this.adqlJsonMap.rootTable){
-                                if (this.adqlJsonMap.nodeTreeBranches[parent] === undefined){
-                                    this.adqlJsonMap.nodeTreeBranches[parent] = [key];
-                                }else{
-                                    this.adqlJsonMap.nodeTreeBranches[parent].push(key);
-                                }
+                            if (this.adqlJsonMap.nodeTreeBranches[parent] === undefined){
+                                this.adqlJsonMap.nodeTreeBranches[parent] = [key];
+                            }else{
+                                this.adqlJsonMap.nodeTreeBranches[parent].push(key);
                             }
 
                             /*/ joints map building /*/
@@ -203,29 +201,26 @@
         }
 
         let subTables = [];
-        if (table !== this.adqlJsonMap.rootTable){
-            if(this.adqlJsonMap.joints[table] === undefined){
-                return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
-            }
-            
-            let branch = this.adqlJsonMap.nodeTreeBranches[table];
-            let nextBranch;
-            while (branch !== undefined && branch.length >0 && degree > 0){
-                subTables=subTables.concat(branch);
-                nextBranch = [];
-                for (let i =0;i<branch.length;i++){
-                    if(this.adqlJsonMap.nodeTreeBranches[branch[i]] !== undefined){
-                        nextBranch = nextBranch.concat(this.adqlJsonMap.nodeTreeBranches[branch[i]]);
-                    }
-                }
-                branch = nextBranch;
-                degree--;
-            }
-
-            subTables = Array.from(new Set(subTables));
-        } else {
-            subTables = Object.keys(this.adqlJsonMap.joints);
+        if(table !== this.adqlJsonMap.rootTable && this.adqlJsonMap.joints[table] === undefined){
+            return {"status" : false, "error":{"logs":"Unknown table " + table,"params" : {"table":table}}};
         }
+        
+        let branch = this.adqlJsonMap.nodeTreeBranches[table];
+        let nextBranch;
+        while (branch !== undefined && branch.length >0 && degree > 0){
+            subTables=subTables.concat(branch);
+            nextBranch = [];
+            for (let i =0;i<branch.length;i++){
+                if(this.adqlJsonMap.nodeTreeBranches[branch[i]] !== undefined){
+                    nextBranch = nextBranch.concat(this.adqlJsonMap.nodeTreeBranches[branch[i]]);
+                }
+            }
+            branch = nextBranch;
+            degree--;
+        }
+
+        subTables = Array.from(new Set(subTables));
+        
 
         return {"status":true,"subTables":subTables};
     };
