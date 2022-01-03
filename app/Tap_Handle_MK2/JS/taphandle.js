@@ -406,10 +406,16 @@ async function setupSB(ologger){
     };
 
     for (let field in constraintMap){
-        if(field[0] == "_")
+        if(field[0] == "_"){
             continue;
-        $("#fieldNameBar").append("<p class='clickable' tabindex='-1' id='searchable_" + field + "' style='padding-left:.5em;margin:0; "+
-        (autoComp[field] !== undefined ? "font-style:italic;font-weight: bolder;" : "" ) +"'>" + field + "</p>");
+        }
+
+        $("#fieldNameBar").append("<p class='clickable' tabindex='-1' id='searchable_" + field + 
+            "' title='Apply to "+(constraintMap[field].table === undefined ? constraintMap._default.table: constraintMap[field].table)+ "."+
+            constraintMap[field].column + "' style='padding-left:.5em;margin:0; "+
+            (autoComp[field] !== undefined ? "font-style:italic;font-weight: bolder;" : "" ) +"'>" + field + "</p>"
+        );
+
         if(autoComp[field] === undefined){
             $("#searchable_" + field).click(()=>{
                 $("#mainSB").val($("#mainSB").val() + " " + field + ": " );
