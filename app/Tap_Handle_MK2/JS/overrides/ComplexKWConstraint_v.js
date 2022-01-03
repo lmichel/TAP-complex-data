@@ -49,7 +49,6 @@ function ComplexKWConstraint_mVcExtends(){
                         }
                         select += '<option value="' + op + '" ' + selected + '>' +op + '</option>';
                     }
-                    console.log(ah.available_value);
                     for( let v=0 ; v<ah.available_value.length ; v++ ) {
                         let txt = ah.available_value[v];
                         select += '<option value="= ' + txt + '">= ' + txt + '</option>';
