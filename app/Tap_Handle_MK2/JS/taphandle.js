@@ -428,10 +428,6 @@ async function setupSB(ologger){
             });
         }else{
             $("#searchable_" + field).focus(()=>{
-                /*if( $("#dropdown_" + field).length>0){
-                    $("#dropdown_" + field).remove();
-                    return;
-                }*/
                 // creating dropdown with element
                 $("body").append("<div id='dropdown_" + field + "' class = 'dropdown_holder'><ul></ul></div>");
                 for(let i=0;i<autoComp[field].length;i++){
@@ -457,7 +453,9 @@ async function setupSB(ologger){
                 });
             });
             $("#searchable_" + field).blur(()=>{
-                $("#dropdown_" + field).remove();
+                setTimeout(()=>{
+                    $("#dropdown_" + field).remove();
+                },200);
             });
         }
         
