@@ -99,6 +99,14 @@ function outBuilder(holder,ologger){
                 dat.url = dat.url.replace(":80","");
             }
 
+            if(window.location.href.includes("?")){
+                dat["full bookmark"] = window.location.href + (window.location.href.includes(dat.url)?"" : "&url=" + dat.url);
+                dat.bookmark = window.location.href.substring(0,window.location.href.indexOf("?")) + "?url=" + dat.url;
+            }else{
+                dat["full bookmark"] = window.location.href + "?url=" + dat.url;
+            }
+            
+
             let api = new jw.Api();
             api.connectService(dat.url,dat.name).then((connect)=>{
                 if(connect.status){
@@ -667,22 +675,24 @@ $(document).ready(async ()=>{
     //buildButtonSelector("#mainButtonHolder");
     // ensure no radio button is check by default
     //$("input:radio[name=radio]:checked").prop('checked', false);
-    setupSB(logger).then((sb)=>{
+    setupSB(logger).then( async (sb)=>{
         setupApp(logger);
         setupFav(logger);
         let params = new URLSearchParams(window.location.search);
         if( params.has("url")){
             logger.info("Connecting to the service");
-            let url = params.get("url");
-            if(url.startsWith("http")){
-                url = url.substring(url.indexOf(":")+1);
-            }
-            let process = sb.processUrl("%" + url);
-            if( process !== undefined && process.then !== undefined){
-                process.then(()=>{
-                    clickOnFisrtLi(logger);
-                });
-            }else{
+            let urls = params.getAll("url");
+            let url, process;
+            for (let i =0;i<urls.length;i++){
+                url = urls[i];
+                if(url.startsWith("http")){
+                    url = url.substring(url.indexOf(":")+1);
+                }
+                process = sb.processUrl("%" + url);
+                if( process !== undefined && process.then !== undefined){
+                    await process;
+                }
+
                 clickOnFisrtLi(logger);
             }
 
