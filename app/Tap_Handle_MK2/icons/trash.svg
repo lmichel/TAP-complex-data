@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16"
+   height="16"
+   viewBox="0 0 4.2333333 4.2333334"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.1 (3bf5ae0, 2021-09-20)"
+   sodipodi:docname="trash.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     showguides="false"
+     inkscape:zoom="33.139262"
+     inkscape:cx="4.0133664"
+     inkscape:cy="9.65622"
+     inkscape:window-width="1920"
+     inkscape:window-height="1025"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <inkscape:path-effect
+       effect="mirror_symmetry"
+       start_point="-0.63144244,1.7996402"
+       end_point="-0.63144244,4.7265688"
+       center_point="-0.63144244,3.2631045"
+       id="path-effect25665"
+       is_visible="true"
+       lpeversion="1.1"
+       mode="free"
+       discard_orig_path="true"
+       fuse_paths="false"
+       oposite_fuse="false"
+       split_items="false"
+       split_open="false" />
+    <inkscape:path-effect
+       effect="mirror_symmetry"
+       start_point="-0.63144244,1.7996402"
+       end_point="-0.63144244,4.7265688"
+       center_point="-0.63144244,3.2631045"
+       id="path-effect25663"
+       is_visible="true"
+       lpeversion="1.1"
+       mode="free"
+       discard_orig_path="false"
+       fuse_paths="false"
+       oposite_fuse="false"
+       split_items="false"
+       split_open="false" />
+    <marker
+       style="overflow:visible;"
+       id="Arrow2Lend"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow2Lend"
+       inkscape:isstock="true">
+      <path
+         transform="scale(1.1) rotate(180) translate(1,0)"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         style="stroke:context-stroke;fill-rule:evenodd;fill:context-stroke;stroke-width:0.62500000;stroke-linejoin:round;"
+         id="path18164" />
+    </marker>
+    <linearGradient
+       id="linearGradient18013"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#59c1df;stop-opacity:1;"
+         offset="0"
+         id="stop18011" />
+    </linearGradient>
+  </defs>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#5ac0de;fill-opacity:0.972549;stroke:#59c1df;stroke-width:0.455815;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       id="rect61"
+       width="2.7191844"
+       height="0.073351316"
+       x="0.75707442"
+       y="0.75707424"
+       ry="0.023915891" />
+    <rect
+       style="fill:#5ac0de;fill-opacity:0.972549;stroke-width:0.13663"
+       id="rect61-6"
+       width="0.26458332"
+       height="3.175"
+       x="2.3812499"
+       y="0.79374999" />
+    <rect
+       style="fill:#5ac0de;fill-opacity:0.972549;stroke-width:0.13663"
+       id="rect61-6-7"
+       width="0.26458332"
+       height="3.175"
+       x="1.5875"
+       y="0.79374999" />
+    <rect
+       style="fill:#5ac0de;fill-opacity:0.972549;stroke-width:0.149921"
+       id="rect61-3"
+       width="1.9113405"
+       height="0.52916664"
+       x="1.1228099"
+       y="3.7041667" />
+    <path
+       style="fill:#59c1df;fill-opacity:0.996078;stroke:#59c0de;stroke-width:0.509396;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 0.78386182,1.0484463 1.1419819,3.9792141 v 0 l -0.11693,-2.9163264 z"
+       id="path19783"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#59c1df;fill-opacity:0.996078;stroke:#59c0de;stroke-width:0.509201;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m -0.27312734,1.7996402 -0.3583151,2.9269286 v 0 l 0.1169937,-2.9125061 z"
+       id="path19783-5"
+       sodipodi:nodetypes="ccccc"
+       inkscape:path-effect="#path-effect25665"
+       inkscape:original-d="m -0.98975754,1.7996402 0.3583151,2.9269286 v 0 l -0.1169937,-2.9125061 z"
+       transform="matrix(0.99951918,0,0,1.0011581,3.7193567,-0.75531598)" />
+    <rect
+       style="fill:#59c1df;fill-opacity:0.996078;stroke:#59c0de;stroke-width:0.219456;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       id="rect25769"
+       width="0.045127209"
+       height="0.57429415"
+       x="1.342379"
+       y="0.47936422"
+       ry="0.074591599"
+       transform="rotate(-15)" />
+    <rect
+       style="fill:#59c1df;fill-opacity:0.996078;stroke:#59c0de;stroke-width:0.219456;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       id="rect25769-3"
+       width="0.045127209"
+       height="0.57429415"
+       x="2.5650384"
+       y="-0.57971692"
+       ry="0.074591599"
+       transform="rotate(15)" />
+    <rect
+       style="fill:#59c1df;fill-opacity:0.996078;stroke:#59c0de;stroke-width:0.259366;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       id="rect25895"
+       width="1.1164675"
+       height="0.0052177375"
+       x="1.4525996"
+       y="-0.1349007"
+       ry="0.0026088688"
+       transform="scale(1,-1)" />
+  </g>
+</svg>

@@ -52,21 +52,11 @@ ValueFormator = function() {
 					tdNode.html("");
 					addInfoControl(columnName, tdNode, value);
 					addDatalinkControl(value,  tdNode, fovObject);
-				} else if( access_format.startsWith("image/") || access_format.startsWith("text/") ){
-					processURLInfo( columnName, value, tdNode, fovObject);
-
-				} else  {
-					/*
-					 * In case of a simple download we he to request the HTTP header anyway to get extra information (zipper, encrypted..)
-					 */
-					processURLInfo( columnName, value, tdNode, fovObject);
 				}
 				/*
 				 * No mime type specified: We need to request the HTTP header for taking into account the response type
 				 */
-			} else {
-				processURLInfo(columnName, value, tdNode, fovObject);
-			} 
+			}
 			/*
 			 * Second case: an atomic value;
 			 */
