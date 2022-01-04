@@ -108,29 +108,47 @@ function outBuilder(holder,ologger){
             
 
             let api = new jw.Api();
-            api.connectService(dat.url,dat.name).then((connect)=>{
-                if(connect.status){
-                    tree.append(api,dat);
-                }else{
-                    //proxy for cors errors
-                    api.connectService("//taphandle.astro.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
-                        if(connect.status){
-                            tree.append(api,dat);
-                        }else{
-                            api.connectService("https://taphandle.astro.unistra.fr/tapsxy" + dat.url.substring(1),dat.name).then((connect)=>{
-                                if(connect.status){
-                                    tree.append(api,dat);
-                                }else{
-                                    event.currentTarget.style.background = 'red';
-                                Modalinfo.error("can't connect to the select service");
-                                console.error(connect.error);
-                                }
-                            });
-                        }
-                    });
+            let connect = ()=>{
+                api.connectService(dat.url,dat.name).then((connect)=>{
+                    if(connect.status){
+                        tree.append(api,dat);
+                    }else{
+                        //proxy for cors errors
+                        api.connectService("//taphandle.astro.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
+                            if(connect.status){
+                                tree.append(api,dat);
+                            }else{
+                                api.connectService("https://taphandle.astro.unistra.fr/tapsxy" + dat.url.substring(1),dat.name).then((connect)=>{
+                                    if(connect.status){
+                                        tree.append(api,dat);
+                                    }else{
+                                        event.currentTarget.style.background = 'red';
+                                    Modalinfo.error("can't connect to the select service: " + connect.error.logs + ".The full error has been dumped into the console");
+                                    console.error(connect.error);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    ologger.hide();
+                });
+            };
+
+            $.ajax({
+                url: dat.url,
+                type: "GET"
+            }).then(connect,
+                error => {
+                    if(error.status == 404){
+                        Modalinfo.error("can't connect to the select service : 404 not found"); 
+                        ologger.hide();
+                    }else{
+                        connect();
+                    }
                 }
-                ologger.hide();
-            });
+            );
+
+            
         };
     };
 
@@ -660,7 +678,7 @@ async function setupSB(ologger){
         "WISE all-sky infrared","Wolf-Rayet stars","World Data Center for Astronomy","XID Result Database","Xmatched Arches Catalogue",
         "XMM-Newton","XMM SUSS","X-ray","x-ray-astronomy","X-ray astronomy","X RAY ASTRONOMY","X-ray binary stars","X RAY OBSERVATORIES",
         "X-rays","X Rays","X-Ray Satellite Astronomy","x-ray-sources","X-ray sources","XRB","Young stellar objects","Zeus"],
-        
+
     };
 
     let autoCompFuzzy = {

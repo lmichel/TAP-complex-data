@@ -25,9 +25,16 @@
             this.connector.status =true;
             return {"status":true};
         }else{
-            return {"status":false,"error":{
-                "logs":result.error.logs
-            }};
+            if(result.error.logs.includes("CORS")){
+                return {"status":false,"error":{
+                    "logs":result.error.logs
+                }};
+            }else{
+                return {"status":false,"error":{
+                    "logs":"Invalid Tap Service"
+                }};
+            }
+            
         }
     };
 

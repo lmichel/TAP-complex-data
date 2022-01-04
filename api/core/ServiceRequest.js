@@ -68,6 +68,9 @@
 
             } else {
                 console.error(output);
+                if (output.status == 0){
+                    output.statusText = "a CORS or unknown error has occured when querying";
+                }
                 return {"status":false,"error":{
                     "logs":output.statusText,
                     "params" : {"adql":adql}
