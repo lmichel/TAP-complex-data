@@ -151,7 +151,9 @@ function outBuilder(holder,ologger){
 }
 
 async function setupSB(ologger){
-    $("#mainButtonHolder").html("<div id='fieldNameBar' style='display:flex;justify-content: space-between;'></div><input placeholder='Search services' id='mainSB' style='width:100%'></input>"+
+    $("#mainButtonHolder").html("<div id='fieldNameBar' style='display:flex;justify-content: space-between;'></div>"+
+        "<div style='display:flex;width:100%'><input placeholder='Search services' id='mainSB' style='width:calc(100% - 2em) '></input>"+
+        "<img href='javascript:void(0)' src='./icons/trash.svg' alt='trash can icon' title='empty the search bar' style='width:2em;height:2em;'></div>"+
         "<div id='mainSB_out' style='' class='sbOut'></div>");
     
     let api = new jw.Api();
@@ -240,6 +242,10 @@ async function setupSB(ologger){
         undefined,
         logger
     );
+
+    $("#mainButtonHolder img").click(()=>{
+        $("#mainSB").val("");
+    });
 
     let autoComp = {
         utype : [
