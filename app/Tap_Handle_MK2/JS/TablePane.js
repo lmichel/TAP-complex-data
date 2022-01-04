@@ -510,11 +510,6 @@ class TablePane{
                                 pos:"right"
                             },
                             {
-                                toDom:"<a id='"+tableB64+"_cone' name='"+tableB64+
-                                "'style='padding-left: 25;background: transparent url(./icons/source_detail_23.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
-                                pos:"right"
-                            },
-                            {
                                 toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                                 pos:"right"
                             },
