@@ -109,9 +109,15 @@ function outBuilder(holder,ologger){
                         if(connect.status){
                             tree.append(api,dat);
                         }else{
-                            event.currentTarget.style.background = 'red';
-                            Modalinfo.error("can't connect to the select service");
-                            console.error(connect.error);
+                            api.connectService("https://taphandle.astro.unistra.fr/tapsxy" + dat.url.substring(1),dat.name).then((connect)=>{
+                                if(connect.status){
+                                    tree.append(api,dat);
+                                }else{
+                                    event.currentTarget.style.background = 'red';
+                                Modalinfo.error("can't connect to the select service");
+                                console.error(connect.error);
+                                }
+                            });
                         }
                     });
                 }
@@ -430,17 +436,60 @@ async function setupSB(ologger){
             $("#searchable_" + field).focus(()=>{
                 // creating dropdown with element
                 $("body").append("<div id='dropdown_" + field + "' class = 'dropdown_holder'><ul></ul></div>");
-                for(let i=0;i<autoComp[field].length;i++){
-                    $("#dropdown_" + field + " ul").append("<li class = 'clickable' data-fuzz='"+ (autoCompFuzzy[field] === undefined ? "false": autoCompFuzzy[field]) +
-                        "'>" + autoComp[field][i] + "</li>");
+                
+                let fillList = (elems) =>{
+                    for(let i=0;i<elems.length;i++){
+                        $("#dropdown_" + field + " ul").append("<li class = 'clickable' data-fuzz='"+ (autoCompFuzzy[field] === undefined ? "false": autoCompFuzzy[field]) +
+                            "'>" + elems[i] + "</li>");
+                    }
+                };
+                
+                let getScore = (val,toSearch)=>{
+                    if(val.length<toSearch.length){
+                        return 0;
+                    }
+                    let a=0, c = toSearch.length;
+                    let b = c;
+                    while (b - a > 1 && c !=0){
+                        if(val.includes(toSearch.substring(0,c))){
+                            a=c;
+                        }else{
+                            b=c;
+                        }
+                        c = Math.floor((a+b)/2);
+                    }
+                    return a;
+                };
+
+                if(autoComp[field].length > 20){
+                    $("#dropdown_" + field).prepend("<input style='width:100%'></input>").children("input").on("input",()=>{
+                        let val = $("#dropdown_" + field + " input").val().trim();
+                        $("#dropdown_" + field + " ul").html("");
+                        if(val.length ==0){
+                            fillList(autoComp[field]);
+                        }else{
+                            let vals = autoComp[field].map(v=>{
+                                return {val:v,score:getScore(v,val)};
+                            });
+                            vals = vals.filter(v=>v.score>0).sort((a,b)=> {
+                                if(b.score-a.score !=0){
+                                    return b.score-a.score;
+                                }else{
+                                    return a.val.length - b.val.length;
+                                }
+                            });
+                            fillList(vals.map(v=>v.val));
+                        }
+                        
+                    });
                 }
+                fillList(autoComp[field]);
 
                 // placing the dropdown
                 let bound = document.getElementById("searchable_" + field).getBoundingClientRect();
                 let drop = document.getElementById("dropdown_" + field);
                 drop.style.top = bound.height;
                 drop.style.minWidth = bound.width;
-                console.log((drop.clientWidth - bound.width)/2);
                 drop.style.left = bound.left - (drop.clientWidth - bound.width)/2;
 
                 // binding the events
@@ -452,9 +501,16 @@ async function setupSB(ologger){
                     $("#mainSB").change();
                 });
             });
-            $("#searchable_" + field).blur(()=>{
+            $("#dropdown_" + field + " input").blur(()=>{
                 setTimeout(()=>{
                     $("#dropdown_" + field).remove();
+                },200);
+            });
+            $("#searchable_" + field).blur(()=>{
+                setTimeout(()=>{
+                    if(document.activeElement !== $("#dropdown_" + field + " input")[0]){ // we don't want to close the list while searching in it
+                        $("#dropdown_" + field).remove();
+                    }
                 },200);
             });
         }
