@@ -823,6 +823,13 @@ function setupApp(logger){
         tablePane.setApi(args.api);
         control.setApi(args.api);
     });
+
+    $(document).on("remove_service.tree",(event, args)=>{
+        if(control !== undefined){
+            control.disconnect(args.api);
+        }
+    });
+
     $(document).on("error.application",(...args)=>{
         console.log("error event recieved");
         console.log(args);

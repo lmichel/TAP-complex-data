@@ -67,8 +67,15 @@ class TablePane{
         return  str ;
     }
 
-    getApi(){
-        return this.api;
+    disconnect(api){
+        if(api === undefined){
+            api = this.api;
+        }
+        if(api == this.api){
+            this.holder.html("");
+            this.api = undefined;
+            this.struct = undefined;
+        }
     }
 
     setApi(api){

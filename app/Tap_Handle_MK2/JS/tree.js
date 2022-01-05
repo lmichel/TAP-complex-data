@@ -311,6 +311,17 @@ var TapTree = function(){
         let that = this;
         return ()=>{
             ModalInfo.infoObject({"Info":this.meta},this.short_name).show();
+            $("#modal_"+ModalInfo.counter + " .modal-content").append(
+                "<div style='width: 100%; display: flex;justify-content: center;align-items: center;'>"+
+                "<button class='btn btn-primary' style='margin: 0.5em;width: 100%;' id='btnDiconnect'>Disconnect this service</button></div>"
+            );
+            $("#modal_"+ModalInfo.counter +" #btnDiconnect").click(()=>{
+                that.tree.delete_node(that.root);
+                $(document).trigger("remove_service.tree",{
+                    api:that.api,
+                    tree:that,
+                });
+            });
         };
     };
 
@@ -466,6 +477,15 @@ var TapTreeList = function(){
         });
         this.tree = this.treeHolder.jstree(true);
         registerProtected(this);
+
+        let that = this;
+
+        $(document).on("remove_service.tree",(event, args)=>{
+            let connector = args.api.getConnector();
+            if(connector.status){
+                delete that.treeMap[connector.connector.service.tapService];
+            }
+        });
     }
 
     /**
