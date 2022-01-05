@@ -66,6 +66,11 @@ class TablePane{
     
         return  str ;
     }
+
+    getApi(){
+        return this.api;
+    }
+
     setApi(api){
         this.logger.info("Setting up tables");
         let object_map = api.getObjectMap();
