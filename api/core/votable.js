@@ -851,6 +851,9 @@ function VOTableParser() {
 
     endParsingB64 = false;
     let child = selected.table.xml.getElementsByTagName(prefix + 'STREAM')[0].childNodes;
+    
+    
+
     if(child.length>0){
       dataB64 = child[0].nodeValue;
     }else {
@@ -865,14 +868,33 @@ function VOTableParser() {
     fields = thisParser.getCurrentTableFields();
     nbFields = fields.length;
 
+    // NULL flags added in voTable V 1.3 https://www.ivoa.net/documents/VOTable/20191021/REC-VOTable-1.4-20191021.pdf
+    // implementation by cyril
+    let flag = selected.table.xml.getElementsByTagName(prefix + 'BINARY2').length > 0;
+    let flagLength = Math.floor((nbFields + 7)/8);
+    let lastFlag = [];
+
     start = new Date().getTime();
 
     do {
 
+      //NULL flags handling
+      if(flag && ptrCurrentField ==0){
+        if(lastFlag.length>0){
+          for (let j = 0;j<rows[i-1].length;j++){
+            if(lastFlag[j] == 1){
+              rows[i-1][j] = null;
+            }
+          }
+        }
+
+        lastFlag = streamB64(flagLength*8);
+      }
+
       dataType = fields[ptrCurrentField].datatype;
       dataSize = dataTypeSize[dataType];
       if(dataType=='unicodeChar'){
-        dataType = 'char'
+        dataType = 'char';
       }
       arraySize = 1;
       arrayStruct = [];
@@ -1410,7 +1432,7 @@ function VOTableParser() {
         pow=pow<<1 ;
     }
     return val;
-  };
+  }
 
   /**
    * Convert binary array to int 16 bits (signed)
@@ -1428,7 +1450,7 @@ function VOTableParser() {
     dataview.setUint8(0, parseInt(binary, 2));
 
     return dataview.getUint16(0);
-  };
+  }
 
   //--------------------------------------------------------------------------------
   // Functions related to Metadata parsing
