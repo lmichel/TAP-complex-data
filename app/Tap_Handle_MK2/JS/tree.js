@@ -168,6 +168,10 @@ var TapTree = function(){
         });
     }
 
+    TapTree.prototype.close = function(){
+        this.tree.close_node(this.root);
+    };
+
     TapTree.prototype.getSchemas = function(){
         return this.schemas;
     };
@@ -486,6 +490,9 @@ var TapTreeList = function(){
     TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
         if(connector.status && !this.contains(tap)){
+            for(let tree in this.treeMap){
+                this.treeMap[tree].tree.close();
+            }
             this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.protected.sb,meta),"api":tap};
         }
         return connector.status;
