@@ -19,7 +19,7 @@ function ComplexFieldList_mVcExtends(){
                 this.parentDiv.html('<div class="fielddiv">'+
                         '<div class="fieldlist" id="' + this.fieldListId +  '" style="height: 175px"></div>'+
                         ' <div class="form-group" style="width:100%; margin-bottom:8px; margin-top:8px;"><div class="input-group"><div class="input-group-addon input-sm"><span class="glyphicon glyphicon-search"></span></div>'+
-                        ' <input id="' + this.fieldFilterId +  '" class="form-control input-sm" type="text" placeholder="Search"/></div></div>'+
+                        ' <input id="' + this.fieldFilterId +  '" class="form-control input-sm" type="text" placeholder="Search (Regex friendly)"/></div></div>'+
                         '  </div>');		
     
                 $('#' + this.fieldFilterId).keyup(function() {
@@ -212,5 +212,24 @@ function ComplexFieldList_mVcExtends(){
     
             }
         } ,
+        /**
+         * Filter the displayed fields with the pattern typed by the user
+         */
+        fireFilter : {
+            value: function(){
+                $('#' + this.fieldTableId).html('');
+                for( var i in this.attributesHandlers  ) {
+                    var ah = this.attributesHandlers[i];
+                    if( (this.filterPattern.test(ah.nameorg)      || 
+                            this.filterPattern.test(ah.nameattr)  || 
+                            this.filterPattern.test(ah.ucd)       || 
+                            this.filterPattern.test(ah.comment))  ||
+                            this.filterPattern.test(ah.table_name)||
+                            this.filterPattern.test(ah.table_name+"."+ah.nameattr) ) {
+                        this.displayField(ah);
+                    }
+                }
+            }
+        }
     });
 }
