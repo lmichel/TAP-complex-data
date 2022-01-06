@@ -25,7 +25,7 @@ jw.core.AttributeHolder = function(queryAble){
             console.warn("Missing argument `schema` to getTableAttributeHandler you may get an empty list depending on the TAP sevirce ");
             schema = "";
         }
-        let fullName = [schema, table].join('.').quotedTableName().qualifiedName.toLowerCase();
+        let fullName = [schema, table].join(".").toLowerCase().replace(/"/g,'');
         if(cache[fullName]=== undefined){
             let adql = Holder.getAHAdql(table,schema);
             let queryResult = await queryAble.query(adql);
@@ -61,28 +61,29 @@ jw.core.AttributeHolder = function(queryAble){
             }
         }
         let adql = Holder.getAHsAdql(fullNames);
-        let queryResult = await queryAble.query(adql);
 
         let fuzzyNames = {};
 
         for(let name in fullNames){
-            fuzzyNames[name.toLowerCase()]= fullNames[name].toLowerCase();
+            fuzzyNames[name.toLowerCase().replace(/"/g,'')]= fullNames[name].toLowerCase().replace(/"/g,'');
         }
         fullNames = fuzzyNames;
+
+        let queryResult = await queryAble.query(adql);
 
         if(queryResult.status){
             let AHList = doubleArrayToAHList(queryResult.field_values);
             for (let i=0;i<AHList.length;i++){
-                if(ahMap[AHList[i].table_name.toLowerCase()]!==undefined){
-                    ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);
-                } else if (fullNames[AHList[i].table_name.toLowerCase()] !== undefined){
-                    if(ahMap[fullNames[AHList[i].table_name.toLowerCase()].toLowerCase()]===undefined){
-                        ahMap[fullNames[AHList[i].table_name.toLowerCase()].toLowerCase()] = [];
+                if(ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')]!==undefined){
+                    ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')].push(AHList[i]);
+                } else if (fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')] !== undefined){
+                    if(ahMap[fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')].toLowerCase().replace(/"/g,'')]===undefined){
+                        ahMap[fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')].toLowerCase().replace(/"/g,'')] = [];
                     }
-                    ahMap[fullNames[AHList[i].table_name.toLowerCase()].toLowerCase()].push(AHList[i]);
-                }else if(Object.values(fullNames).includes(AHList[i].table_name.toLowerCase())){
-                    ahMap[AHList[i].table_name.toLowerCase()] = [];
-                    ahMap[AHList[i].table_name.toLowerCase()].push(AHList[i]);
+                    ahMap[fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')].toLowerCase().replace(/"/g,'')].push(AHList[i]);
+                }else if(Object.values(fullNames).includes(AHList[i].table_name.toLowerCase().replace(/"/g,''))){
+                    ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')] = [];
+                    ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')].push(AHList[i]);
                 } else {
                     console.error(AHList[i],AHList,fullNames,ahMap);
                     return {"status":false,"error":{
@@ -129,7 +130,10 @@ jw.core.AttributeHolder = function(queryAble){
         for (let name in names){
             full.push("\'" + utils.replaceAll(names[name],"\"","\\\"") + "\'");
             full.push("\'" + utils.replaceAll(name,"\"","\\\"") + "\'");
+            full.push("\'" + utils.replaceAll(names[name],"\"","") + "\'");
+            full.push("\'" + utils.replaceAll(name,"\"","") + "\'");
         }
+        full = Array.from(new Set(full));
         return Holder.getAHColAdql() +
         " WHERE TAP_SCHEMA.columns.table_name IN ( " + full.join(" , ") + " ) ";
     };
@@ -150,6 +154,11 @@ jw.core.AttributeHolder = function(queryAble){
             AH.table_name = data[i][6];
             if(jw.KnowledgeTank.presetValues[AH.table_name + "." + AH.nameattr] !== undefined){
                 AH.available_value = Array.from(jw.KnowledgeTank.presetValues[AH.table_name + "." + AH.nameattr]);
+            }
+            for (let val in AH){
+                if(AH[val]===null){
+                    AH[val] = "";
+                }
             }
             AHList.push(AH);
         }

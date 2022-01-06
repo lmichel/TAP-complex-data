@@ -57,8 +57,12 @@ class ControlPane{
             });
             return;
         }
-
-        $(this.box.header).prepend("<h3> " + connect.shortName + ": " + connect.schema + " </h3>");
+        if($("h3" , this.box.header).length == 0){
+            $(this.box.header).prepend("<h3> " + connect.shortName + ": " + connect.schema + " </h3>");
+        }else{
+            $(this.box.header).children(h3).html(connect.shortName + ": " + connect.schema);
+        }
+        
 
         tables.unshift(connect.table);
 
