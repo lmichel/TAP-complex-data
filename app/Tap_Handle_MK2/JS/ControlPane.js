@@ -58,6 +58,8 @@ class ControlPane{
             return;
         }
 
+        $(this.box.header).prepend("<h3> " + connect.shortName + ": " + connect.schema + " </h3>");
+
         tables.unshift(connect.table);
 
         let t =await this.api.getTablesAttributeHandlers(tables);
@@ -119,6 +121,15 @@ class ControlPane{
             cp.tableorg = $("select#table_choice").val();
             cp.table = cp.tableorg;
             this.pos.fireSetTreepath(new DataTreePath(cp));
+            $(this.box.header).children("h3").html( connect.shortName + ": " + connect.schema + " (" + cp.table + ")");
+        });
+
+        $("#poslink").click(()=>{
+            $(this.box.header).children("h3").html( connect.shortName + ": " + connect.schema + " (" + $("select#table_choice").val() + ")");
+        });
+
+        $("a:not([id=poslink])",this.box.body).click(()=>{
+            $(this.box.header).children("h3").html( connect.shortName + ": " + connect.schema);
         });
         
         this.where.fireSetTreepath(new DataTreePath(dt));

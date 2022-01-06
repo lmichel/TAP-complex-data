@@ -811,6 +811,7 @@ function VOTableParser() {
    * @return {Array}
    */
   function parseB64CurrentTableData() {
+    
     var fields = [],
         rows = [],
         columns = [],
@@ -859,7 +860,6 @@ function VOTableParser() {
     }else {
       dataB64 = "";
     }
-    
     
     // We must clean the B64 data from all the spaces and tabs it could contains
     dataB64 = dataB64.replace(/[ \t\r\n]+/g, '');
