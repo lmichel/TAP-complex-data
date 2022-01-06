@@ -66,6 +66,18 @@ class TablePane{
     
         return  str ;
     }
+
+    disconnect(api){
+        if(api === undefined){
+            api = this.api;
+        }
+        if(api == this.api){
+            this.holder.html("");
+            this.api = undefined;
+            this.struct = undefined;
+        }
+    }
+
     setApi(api){
         this.logger.info("Setting up tables");
         let object_map = api.getObjectMap();

@@ -823,6 +823,13 @@ function setupApp(logger){
         tablePane.setApi(args.api);
         control.setApi(args.api);
     });
+
+    $(document).on("remove_service.tree",(event, args)=>{
+        if(control !== undefined){
+            control.disconnect(args.api);
+        }
+    });
+
     $(document).on("error.application",(...args)=>{
         console.log("error event recieved");
         console.log(args);
@@ -897,7 +904,7 @@ function setupFav(logger){
     ];
 
     $("#favbutton").html("<button id='welp' style='width:100%' class='btn btn-simple'>some popular tap services</button>"+
-    "<div id='favOut' style='' class='sbOut'></div>");
+    "<div id='favOut' style='' class='sbOut favDropdown'></div>");
 
     outBuilder($("#favOut"),logger).push(favDict);
 

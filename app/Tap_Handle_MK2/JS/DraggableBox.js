@@ -4,8 +4,8 @@ class DraggableBox{
             id = "drglBx_" + DraggableBox.ID++;
         }
         this.id = id;
-        $("body").append("<div id = '"+this.id+"' class='draggable-box'><div class= 'draggable-header' style='display :flex'>" +
-            "<div id='reduce' style= 'margin:auto;margin-right:.5em;cursor: pointer;height:100%;display: flex;'><div style = 'background-color:black;margin:auto;margin-left:.5em;width:1em;height:.2em'></div></div></div>" +
+        $("body").append("<div id = '"+this.id+"' class='draggable-box'><div class= 'draggable-header' style='display :flex;position:relative;'>" +
+            "<div id='widthHolding'></div><img id='reduce' style = 'padding-left:.5em;padding-right:.5em;cursor: pointer;height:100%;position:absolute;right:0;top:0' src='./icons/barre.svg'></div>" +
             "<div class='draggable-body'></div></div>");
         this.box = $("#" + this.id)[0];
         this.header = $(".draggable-header",this.box)[0];
@@ -38,6 +38,7 @@ class DraggableBox{
             },200);
             return;
         }
+        $("#widthHolding",this.box).css({"width":$("#reduce",this.box)[0].offsetWidth});
         if(this.oldx === undefined){
             this.oldx = window.innerWidth;
         }

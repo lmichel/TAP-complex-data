@@ -33,6 +33,8 @@ var utils = {
     unqualifyName : function (table,schema){
         if(table.indexOf(schema)!=-1){
             return table.substring(table.indexOf(".",table.indexOf(schema))+1,table.length);
+        }else if(schema.indexOf('"') !== -1){
+            return utils.unqualifyName(table,schema.replace(/"/g,""));
         }
         return table;
     },

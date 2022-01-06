@@ -12,7 +12,7 @@
     padding: .2em;
     cursor: move;
     z-index: 10;
-    height: 1.5em;
+    min-height: 1.5em;
     min-width: 3em;
 }
 

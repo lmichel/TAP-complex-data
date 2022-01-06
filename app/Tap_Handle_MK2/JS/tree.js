@@ -168,6 +168,10 @@ var TapTree = function(){
         });
     }
 
+    TapTree.prototype.close = function(){
+        this.tree.close_node(this.root);
+    };
+
     TapTree.prototype.getSchemas = function(){
         return this.schemas;
     };
@@ -307,6 +311,17 @@ var TapTree = function(){
         let that = this;
         return ()=>{
             ModalInfo.infoObject({"Info":this.meta},this.short_name).show();
+            $("#modal_"+ModalInfo.counter + " .modal-content").append(
+                "<div style='width: 100%; display: flex;justify-content: center;align-items: center;'>"+
+                "<button class='btn btn-primary' style='margin: 0.5em;width: 100%;' id='btnDiconnect'>Disconnect this service</button></div>"
+            );
+            $("#modal_"+ModalInfo.counter +" #btnDiconnect").click(()=>{
+                that.tree.delete_node(that.root);
+                $(document).trigger("remove_service.tree",{
+                    api:that.api,
+                    tree:that,
+                });
+            });
         };
     };
 
@@ -462,6 +477,15 @@ var TapTreeList = function(){
         });
         this.tree = this.treeHolder.jstree(true);
         registerProtected(this);
+
+        let that = this;
+
+        $(document).on("remove_service.tree",(event, args)=>{
+            let connector = args.api.getConnector();
+            if(connector.status){
+                delete that.treeMap[connector.connector.service.tapService];
+            }
+        });
     }
 
     /**
@@ -486,6 +510,9 @@ var TapTreeList = function(){
     TapTreeList.prototype.append = function(tap,meta){
         let connector = tap.getConnector();
         if(connector.status && !this.contains(tap)){
+            for(let tree in this.treeMap){
+                this.treeMap[tree].tree.close();
+            }
             this.treeMap[connector.connector.service.tapService]= {"tree": new TapTree(tap,this.tree,this.treeHolder,this.protected.sb,meta),"api":tap};
         }
         return connector.status;

@@ -737,6 +737,10 @@ div .jstree-default .jstree-anchor{
 	background-color: white;
 }
 
+.favDropdown {
+	min-width: 250px;
+}
+
 .bannerbtn {
 	margin-top: auto;
 	margin-bottom: auto;
