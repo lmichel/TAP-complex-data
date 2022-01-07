@@ -187,8 +187,14 @@ class TablePane{
         if(object_map.tables[tableName].columns.length == 0){
             let t = await this.api.getSelectedFields(tableName);
             
-            if(t.status){ // out object map is a copy so I need to update it by hand
+            if(t.status){ // our object map is a copy so I need to update it by hand
                 object_map.tables[tableName].columns = t.fields;
+                if(t.fields.length == 0){
+
+                    colDiv.div.append("<p>No columns founds for this table<p>");
+                    this.logger.hide();
+                    return;
+                }
             }else{
                 $(document).trigger("error.application",{
                     error : t.error,
@@ -221,9 +227,9 @@ class TablePane{
             $(document).trigger("error.application",{
                 error : fieldsData,
                 origin : that,
+                verbose : true
             });
             this.logger.hide();
-            ModalInfo.error("An unexpected error has occured please retry. If the error persist check the logs for more info");
             return;
         }
         

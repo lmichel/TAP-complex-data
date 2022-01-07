@@ -50,41 +50,31 @@ jw.core.AttributeHolder = function(queryAble){
         let fullNames = {};
         let nameMap = {};
         let ahMap = {};
-        let fName;
+        let fName,fNameLow;
         for (let i =0 ;i<tables.length;i++){
             fName = [schema, tables[i]].join('.').quotedTableName().qualifiedName;
-            if(cache[fName]!== undefined){
-                ahMap[tables[i].toLowerCase()]=Array.from(cache[fName]);
-                nameMap[tables[i].toLowerCase()]=fName.toLowerCase();
+            fNameLow = fName.toLowerCase().replace(/"/g,"");
+            if(cache[fNameLow]!== undefined){
+                ahMap[fNameLow]=Array.from(cache[fNameLow]);
             }else {
                 fullNames[tables[i]]=fName;
             }
+            nameMap[tables[i]]=fNameLow;
         }
         let adql = Holder.getAHsAdql(fullNames);
-
-        let fuzzyNames = {};
-
-        for(let name in fullNames){
-            fuzzyNames[name.toLowerCase().replace(/"/g,'')]= fullNames[name].toLowerCase().replace(/"/g,'');
-        }
-        fullNames = fuzzyNames;
 
         let queryResult = await queryAble.query(adql);
 
         if(queryResult.status){
             let AHList = doubleArrayToAHList(queryResult.field_values);
             for (let i=0;i<AHList.length;i++){
-                if(ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')]!==undefined){
-                    ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')].push(AHList[i]);
-                } else if (fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')] !== undefined){
-                    if(ahMap[fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')].toLowerCase().replace(/"/g,'')]===undefined){
-                        ahMap[fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')].toLowerCase().replace(/"/g,'')] = [];
-                    }
-                    ahMap[fullNames[AHList[i].table_name.toLowerCase().replace(/"/g,'')].toLowerCase().replace(/"/g,'')].push(AHList[i]);
-                }else if(Object.values(fullNames).includes(AHList[i].table_name.toLowerCase().replace(/"/g,''))){
-                    ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')] = [];
-                    ahMap[AHList[i].table_name.toLowerCase().replace(/"/g,'')].push(AHList[i]);
-                } else {
+                fNameLow = getMatchingFullName(AHList[i].table_name,schema);
+                if(ahMap[fNameLow] !== undefined){
+                    ahMap[fNameLow].push(AHList[i]);
+                } else if (Object.values(nameMap).includes(fNameLow)) {
+                    ahMap[fNameLow] = [];
+                    ahMap[fNameLow].push(AHList[i]);
+                }else {
                     console.error(AHList[i],AHList,fullNames,ahMap);
                     return {"status":false,"error":{
                         "logs":"Parsing error unexpected table name " + AHList[i].table_name,
@@ -97,7 +87,7 @@ jw.core.AttributeHolder = function(queryAble){
                     cache[name] = Array.from(ahMap[name]);
                 }
             }
-            return {"status":true,"attribute_handlers":ahMap,"name_map":$.extend(nameMap, fullNames)};
+            return {"status":true,"attribute_handlers":ahMap,"name_map":nameMap};
 
         } else {
             return {"status":false,"error":{
@@ -122,7 +112,8 @@ jw.core.AttributeHolder = function(queryAble){
     Holder.getAHAdql = function(table,schema){
         return Holder.getAHColAdql() +
         " WHERE TAP_SCHEMA.columns.table_name = " + "\'" + utils.replaceAll(table,"\"","\\\"") + "\'" + 
-        " OR TAP_SCHEMA.columns.table_name = " + "\'" + utils.replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","\\\"") + "\'";
+        " OR TAP_SCHEMA.columns.table_name = " + "\'" + utils.replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","\\\"") + "\'"+ 
+        " OR TAP_SCHEMA.columns.table_name = " + "\'" + utils.replaceAll( [schema, table].join('.').quotedTableName().qualifiedName ,"\"","") + "\'"  ;
     };
 
     Holder.getAHsAdql = function(names){
@@ -165,11 +156,19 @@ jw.core.AttributeHolder = function(queryAble){
         return AHList;
     }
 
+    function getMatchingFullName(dbName,schema){
+        dbName = dbName.toLowerCase();
+        schema = schema.toLowerCase().replace(/"/g,"");
+        let table = utils.unqualifyName(dbName,schema);
+        return [schema,table].join(".");
+    }
+
     /*/ protected methods and vars can be used when extending the AttributeHolder object /*/
     Holder.protected = {
         "cache":cache,
         "AHTemplate":AHTemplate,
-        "doubleArrayToAHList":doubleArrayToAHList
+        "doubleArrayToAHList":doubleArrayToAHList,
+        "getMatchingFullName":getMatchingFullName,
     };
 
     return Holder;

@@ -223,6 +223,13 @@
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
             let allField = this.formatColNames(table,(await this.getSelectedFields(table)).fields);
+            if(allField.status){
+                allField = allField.allField;
+            }else{
+                allField.error.params.joinKeyVal = joinKeyVal;
+                delete allField.error.params.columns;
+                return allField;
+            }
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -284,6 +291,13 @@
             }
 
             let allField = this.formatColNames(table,(await this.getAllTableFields(table)).fields);
+            if(allField.status){
+                allField = allField.allField;
+            }else{
+                allField.error.params.joinKeyVal = joinKeyVal;
+                delete allField.error.params.columns;
+                return allField;
+            }
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -316,12 +330,19 @@
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
 
-            let data = await this.query((await this.getTableFieldsQuery(table,joinKeyVal)).query);
+            let query = await this.getTableFieldsQuery(table,joinKeyVal);
+            if(!query.status){
+                return query;
+            }
+
+            query = query.query;
+
+            let data = await this.query(query);
             if (data.status) {
 
                 return data;
             } else {
-                return {"status" :false , "error":{"logs" :data.error.logs }};
+                return {"status" :false , "error":{"logs" :data.error.logs,params:{table:table,joinKeyVal:joinKeyVal} }};
             }
             
         } else {
@@ -566,6 +587,9 @@
      * @returns {string}
      */
     jw.Api.prototype.formatColNames = function(table,columns){
+        if(columns.length < 1){
+            return {status:false, error:{params:{table:table,columns:columns},logs:"No columns provided for " + table}};
+        }
         let allField ="";
         let schema;
         schema = this.getConnector().connector.service.schema;
@@ -594,7 +618,7 @@
 
         allField = allField.substring(0,allField.length - 3);
 
-        return allField;
+        return {status:true, allField:allField};
     };
 
     /**
