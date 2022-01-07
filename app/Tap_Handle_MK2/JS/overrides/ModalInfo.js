@@ -38,6 +38,9 @@ function ModalInfoOverride(){
         };
 
         ModalInfo.prototype.formatMessage = function(message) {
+            if (message === undefined){
+                message = "";
+            }
             message = message.replace(/\n/g,"<br>");
             var retour = "<pre>" + message + "</pre>";
             return retour;

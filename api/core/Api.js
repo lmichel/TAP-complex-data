@@ -6,6 +6,7 @@
         this.jsonAdqlBuilder = undefined;
         this.connectLevel = 0;
         this.limit = 10;
+        this.capabilities = {};
     };
 
     /** Internal function do not use.
@@ -45,6 +46,7 @@
         let test = await this.tapServiceConnector.testService();
         if(test.status){
             this.connectLevel = 1;
+            await this.testService();
         }else {
             this.connectLevel = 0;
             test.error.params = {"tapService":tapService,"shortName":shortName};
@@ -223,6 +225,13 @@
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
             let allField = this.formatColNames(table,(await this.getSelectedFields(table)).fields);
+            if(allField.status){
+                allField = allField.allField;
+            }else{
+                allField.error.params.joinKeyVal = joinKeyVal;
+                delete allField.error.params.columns;
+                return allField;
+            }
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -284,6 +293,13 @@
             }
 
             let allField = this.formatColNames(table,(await this.getAllTableFields(table)).fields);
+            if(allField.status){
+                allField = allField.allField;
+            }else{
+                allField.error.params.joinKeyVal = joinKeyVal;
+                delete allField.error.params.columns;
+                return allField;
+            }
             let adql ="";
 
             let schema = this.tapServiceConnector.connector.service.schema;
@@ -316,12 +332,19 @@
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
 
-            let data = await this.query((await this.getTableFieldsQuery(table,joinKeyVal)).query);
+            let query = await this.getTableFieldsQuery(table,joinKeyVal);
+            if(!query.status){
+                return query;
+            }
+
+            query = query.query;
+
+            let data = await this.query(query);
             if (data.status) {
 
                 return data;
             } else {
-                return {"status" :false , "error":{"logs" :data.error.logs }};
+                return {"status" :false , "error":{"logs" :data.error.logs,params:{table:table,joinKeyVal:joinKeyVal} }};
             }
             
         } else {
@@ -466,8 +489,6 @@
         let obj = this.tapServiceConnector.objectMap;
         if(obj.tables[table] !== undefined ){
             obj.tables[table].columns.remove(fieldName);
-        } else if(table === obj.root_table.name){
-            obj.root_table.columns.remove(fieldName);
         }
         return {"status":true};
     };
@@ -479,8 +500,6 @@
         let obj = this.tapServiceConnector.objectMap;
         if(obj.tables[table] !== undefined ){
             obj.tables[table].columns=[];
-        } else if(table === obj.root_table.name){
-            obj.root_table.columns=[];
         }
         return {"status":true};
     };
@@ -566,6 +585,9 @@
      * @returns {string}
      */
     jw.Api.prototype.formatColNames = function(table,columns){
+        if(columns.length < 1){
+            return {status:false, error:{params:{table:table,columns:columns},logs:"No columns provided for " + table}};
+        }
         let allField ="";
         let schema;
         schema = this.getConnector().connector.service.schema;
@@ -594,7 +616,7 @@
 
         allField = allField.substring(0,allField.length - 3);
 
-        return allField;
+        return {status:true, allField:allField};
     };
 
     /**
@@ -676,6 +698,32 @@
         return {"status":false,"error": {"logs":"No active TAP connection"}};
     };
 
+    jw.Api.prototype.testService = async function(){
+        console.log("testing");
+        if(this.connectLevel>0){
+            let query;
+            for (let capa in jw.Api.tests){
+                query = await this.query(jw.Api.tests[capa]);
+                this.capabilities[capa] = query.status;
+            }
+            console.log(this.capabilities);
+            return {status:true};
+        }
+        return {"status":false,"error": {"logs":"No active TAP connection"}};
+    };
+
+    jw.Api.prototype.getCapabilitie = function(key){
+        return {"status":true,"capabilitie": this.capabilities[key]};
+    };
+
+    jw.Api.prototype.setCapabilitie = function(key,val){
+        if(jw.Api.tests[key] === undefined){
+            this.capabilities[key] = val;
+            return {"status":true};
+        }
+        return {"status":false,error:{logs:"You can't override defaults capabilities",params:{key:key,val:val}}};
+    };
+
     /**This function take a list of string and then join them with `.` ensuring each componnent is quoted if necessery
      * this method is designed to ease qualifying table names and column names
      * 
@@ -685,4 +733,10 @@
     jw.Api.safeQualifier = function(list){
         return jw.core.JsonAdqlBuilder.safeQualifier(list);
     };
+
+    jw.Api.tests = {
+        "joins":"SELECT TOP 1 tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id",
+        "multi-joins":"SELECT TOP 1 tap_schema.key_columns.target_column  FROM tap_schema.tables JOIN tap_schema.keys ON  tap_schema.keys.from_table = tap_schema.tables.table_name JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id"
+    };
+
 })();

@@ -833,7 +833,11 @@ function setupApp(logger){
     $(document).on("error.application",(...args)=>{
         console.log("error event recieved");
         console.log(args);
+        if(args[1].verbose){
+            ModalInfo.error(args[1].error.logs);
+        }
     });
+
     $(document).on("run_query.control",()=>{
         tablePane.refresh();
     });

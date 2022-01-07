@@ -121,16 +121,51 @@
     };
 
     jw.core.ServiceConnector.prototype.getAllJoins = async function(){
+        if(!this.api.getCapabilitie("join").capabilitie){
+            return {"status":true,"all_joins":[]};
+        }
         try {
-            let schema  = this.connector.service.schema;
-            let request = 'SELECT tap_schema.keys.from_table, tap_schema.keys.target_table,tap_schema.keys.key_id' +
-                ' , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column \nFROM tap_schema.keys\n' +
-                ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id\n' +
+            let schema  = this.connector.service.schema,request,query;
+            if(this.api.getCapabilitie("multi-join").capabilitie){
+                request = 'SELECT tap_schema.keys.from_table, tap_schema.keys.target_table,tap_schema.keys.key_id' +
+                    ' , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column \nFROM tap_schema.keys\n' +
+                    ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id\n' +
+                    'JOIN tap_schema.tables ON  tap_schema.keys.from_table = tap_schema.tables.table_name\n' +
+                    'WHERE  tap_schema.tables.schema_name = \'' + schema + '\' OR  tap_schema.tables.schema_name = \'' + 
+                    utils.replaceAll(schema,'"',"") + '\'';
+                    
+                query =await this.query(request);
+            } else{
+                
+                query = await this.query('SELECT tap_schema.keys.from_table, tap_schema.keys.target_table, tap_schema.keys.key_id' +
+                ' FROM tap_schema.keys\n' +
                 'JOIN tap_schema.tables ON  tap_schema.keys.from_table = tap_schema.tables.table_name\n' +
                 'WHERE  tap_schema.tables.schema_name = \'' + schema + '\' OR  tap_schema.tables.schema_name = \'' + 
-                utils.replaceAll(schema,'"',"") + '\'';
+                utils.replaceAll(schema,'"',"") + '\'');
                 
-            let query =await this.query(request);
+                if(!query.status){
+                    return {"status":false,"error":{
+                        "logs":query.error.logs
+                    }};
+                }
+
+                request = await this.query('SELECT tap_schema.key_columns.key_id, tap_schema.key_columns.from_column, tap_schema.key_columns.target_column \n'+
+                'FROM tap_schema.key_columns');
+                
+                if(!request.status){
+                    return {"status":false,"error":{
+                        "logs":request.error.logs
+                    }};
+                }
+
+                for(let i=0;i<request.field_values.length;i++){
+                    let arr = query.field_values.filter((v)=>v[2] == request.field_values[i][0])[0];
+                    arr.push(request.field_values[i][1]);
+                    arr.push(request.field_values[i][2]);
+                }
+                
+            }
+            
             
             if(query.status){
                 let joins = [];

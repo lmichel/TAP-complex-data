@@ -60,7 +60,7 @@ class ControlPane{
         if($("h3" , this.box.header).length == 0){
             $(this.box.header).prepend("<h3> " + connect.shortName + ": " + connect.schema + " </h3>");
         }else{
-            $(this.box.header).children(h3).html(connect.shortName + ": " + connect.schema);
+            $(this.box.header).children("h3").html(connect.shortName + ": " + connect.schema);
         }
         
 
@@ -68,7 +68,17 @@ class ControlPane{
 
         let t =await this.api.getTablesAttributeHandlers(tables);
         if(!t.status){
-            console.log(t.error.logs);
+            t.error.logs = "The application has run into an internal error."+
+                " This error could only affect the current schema or table. Consider reporting this error if it appear again.\n application logs :" + t.error.logs + 
+                "\n\n More information is available in the logs";
+            let stack = (new Error()).stack;
+            $(document).trigger("error.application",{
+                error : t.error,
+                origin : this,
+                verbose : true,
+                stack : stack
+            });
+            return;
         }
 
         let treepath = {"nodekey":connect.shortName, "schema": connect.schema};
