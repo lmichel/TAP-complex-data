@@ -487,8 +487,6 @@
         let obj = this.tapServiceConnector.objectMap;
         if(obj.tables[table] !== undefined ){
             obj.tables[table].columns.remove(fieldName);
-        } else if(table === obj.root_table.name){
-            obj.root_table.columns.remove(fieldName);
         }
         return {"status":true};
     };
@@ -500,8 +498,6 @@
         let obj = this.tapServiceConnector.objectMap;
         if(obj.tables[table] !== undefined ){
             obj.tables[table].columns=[];
-        } else if(table === obj.root_table.name){
-            obj.root_table.columns=[];
         }
         return {"status":true};
     };

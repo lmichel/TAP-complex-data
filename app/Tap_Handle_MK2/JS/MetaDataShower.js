@@ -8,6 +8,7 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
     function buildBody(id){
         return '<div class="modal-body"> <table id="table_' + id + '"></table>'+
             '<div style="display:flex"><button title="hold shift to close after aplying changes" class="btn btn-primary" style = "width:100%; margin-right:.5em" id="dewit" type="button">Apply</button>'+
+            '<button class="btn btn-primary" style = "width:100%;margin-right:.5em" id="reset" type="button">Restore defaults</button>'+
             '<button class="btn btn-primary" style = "width:100%;" id="selector" type="button">(un)select all</button></div></div>';
     }
 
@@ -38,6 +39,7 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
             (select ? {select:selected.includes(val.column_name)}:{})
         );
     }));
+    let orderedNames = ahs.map((val)=>val.column_name);
 
     let options = {
         "aaData":ahs.map(t=>Object.values(t)),
@@ -51,8 +53,9 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
             if(!select){
                 return nRow;
             }
-            $("td:eq(0)",nRow).html("<input type='checkbox' id='" + id + "_"+ vizierToID(table)/* you never know when a [Fe/H] will come */ + 
+            $("td:eq(0)",nRow).html("<input type='checkbox' value='"+aData[1]+"' id='" + id + "_"+ vizierToID(table)/* you never know when a [Fe/H] will come */ + 
                 "' style='margin:.4em' "+ (aData[0] ? "checked" : "") + ">").children().click((e)=>{
+                    console.log("click");
                     if($(e.target).is(":checked")){
                         if(unselected_set.has(aData[1])){
                             unselected_set.delete(aData[1]);
@@ -86,10 +89,19 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
 
     let modal = new bootstrap.Modal($("#" + id)[0]);
     $("#" + id +" button#dewit").click((e)=>{
-        unselected_set.forEach((col)=>{
-            api.unselectField(col,table);
+        api.unselectAllFields(table);
+        
+        selected.forEach((t)=>{
+            selected_set.add(t);
         });
-        selected_set.forEach((col)=>{
+
+        selected = Array.from(selected_set);
+        unselected_set.forEach((col)=>{
+            selected.remove(col);
+        });
+
+        selected.sort((v1,v2)=> orderedNames.indexOf(v1) - orderedNames.indexOf(v2));
+        selected.forEach((col)=>{
             api.selectField(col,table,false);
         });
 
@@ -99,6 +111,8 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
             selected:selected_set,
             unselected:unselected_set,
         });
+        selected_set.clear();
+        unselected_set.clear();
         if(e.shiftKey){
             modal.hide();
         }
@@ -111,6 +125,19 @@ var MetaDataShower = async function(api,table,select=true,schema = undefined){
         }else{
             unsel.click();
         }
+    });
+    $("#" + id +" button#reset").click(async ()=>{
+        console.log(selected_set);
+        console.log(unselected_set);
+
+        $("#" + id +" input:checked").click();
+        api.unselectAllFields(table);
+        let def = (await api.getSelectedFields(table)).fields;
+        for (let i=0;i<def.length;i++){
+            $("#" + id + "_"+ vizierToID(table)+"[value="+def[i]+"]").click();
+        }
+        console.log(selected_set);
+        console.log(unselected_set);
     });
     $("#table_" + id + "_wrapper").css({height: "20em",overflow: "auto"});
     $("#table_" + id + "_wrapper .row").css({"max-width":"100%"});
