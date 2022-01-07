@@ -225,7 +225,7 @@ class TablePane{
         
         if(!fieldsData.status){
             $(document).trigger("error.application",{
-                error : fieldsData,
+                error : fieldsData.error,
                 origin : that,
                 verbose : true
             });

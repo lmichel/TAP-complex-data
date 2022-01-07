@@ -61,40 +61,44 @@ jw.core.AttributeHolder = function(queryAble){
             }
             nameMap[tables[i]]=fNameLow;
         }
-        let adql = Holder.getAHsAdql(fullNames);
 
-        let queryResult = await queryAble.query(adql);
+        if(Object.keys(fullNames).length > 0){
+            let adql = Holder.getAHsAdql(fullNames);
 
-        if(queryResult.status){
-            let AHList = doubleArrayToAHList(queryResult.field_values);
-            for (let i=0;i<AHList.length;i++){
-                fNameLow = getMatchingFullName(AHList[i].table_name,schema);
-                if(ahMap[fNameLow] !== undefined){
-                    ahMap[fNameLow].push(AHList[i]);
-                } else if (Object.values(nameMap).includes(fNameLow)) {
-                    ahMap[fNameLow] = [];
-                    ahMap[fNameLow].push(AHList[i]);
-                }else {
-                    console.error(AHList[i],AHList,fullNames,ahMap);
-                    return {"status":false,"error":{
-                        "logs":"Parsing error unexpected table name " + AHList[i].table_name,
-                        "params":{"tables":tables, "schema":schema}
-                    }};
+            let queryResult = await queryAble.query(adql);
+
+            if(queryResult.status){
+                let AHList = doubleArrayToAHList(queryResult.field_values);
+                for (let i=0;i<AHList.length;i++){
+                    fNameLow = getMatchingFullName(AHList[i].table_name,schema);
+                    if(ahMap[fNameLow] !== undefined){
+                        ahMap[fNameLow].push(AHList[i]);
+                    } else if (Object.values(nameMap).includes(fNameLow)) {
+                        ahMap[fNameLow] = [];
+                        ahMap[fNameLow].push(AHList[i]);
+                    }else {
+                        console.error(AHList[i],AHList,fullNames,ahMap);
+                        return {"status":false,"error":{
+                            "logs":"Parsing error unexpected table name " + AHList[i].table_name,
+                            "params":{"tables":tables, "schema":schema}
+                        }};
+                    }
                 }
-            }
-            for(let name in ahMap){
-                if(cache[name] === undefined){
-                    cache[name] = Array.from(ahMap[name]);
+                for(let name in ahMap){
+                    if(cache[name] === undefined){
+                        cache[name] = Array.from(ahMap[name]);
+                    }
                 }
+            } else {
+                return {"status":false,"error":{
+                    "logs":"Query failed:\n " + queryResult.error.logs,
+                    "params":{"tables":tables, "schema":schema}
+                }};
             }
-            return {"status":true,"attribute_handlers":ahMap,"name_map":nameMap};
-
-        } else {
-            return {"status":false,"error":{
-                "logs":"Query failed:\n " + queryResult.error.logs,
-                "params":{"tables":tables, "schema":schema}
-            }};
         }
+
+        return {"status":true,"attribute_handlers":ahMap,"name_map":nameMap};
+        
     };
 
     Holder.getAHColAdql = function(){
