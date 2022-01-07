@@ -6,6 +6,7 @@
         this.jsonAdqlBuilder = undefined;
         this.connectLevel = 0;
         this.limit = 10;
+        this.capabilities = {};
     };
 
     /** Internal function do not use.
@@ -45,6 +46,7 @@
         let test = await this.tapServiceConnector.testService();
         if(test.status){
             this.connectLevel = 1;
+            await this.testService();
         }else {
             this.connectLevel = 0;
             test.error.params = {"tapService":tapService,"shortName":shortName};
@@ -696,6 +698,32 @@
         return {"status":false,"error": {"logs":"No active TAP connection"}};
     };
 
+    jw.Api.prototype.testService = async function(){
+        console.log("testing");
+        if(this.connectLevel>0){
+            let query;
+            for (let capa in jw.Api.tests){
+                query = await this.query(jw.Api.tests[capa]);
+                this.capabilities[capa] = query.status;
+            }
+            console.log(this.capabilities);
+            return {status:true};
+        }
+        return {"status":false,"error": {"logs":"No active TAP connection"}};
+    };
+
+    jw.Api.prototype.getCapabilitie = function(key){
+        return {"status":true,"capabilitie": this.capabilities[key]};
+    };
+
+    jw.Api.prototype.setCapabilitie = function(key,val){
+        if(jw.Api.tests[key] === undefined){
+            this.capabilities[key] = val;
+            return {"status":true};
+        }
+        return {"status":false,error:{logs:"You can't override defaults capabilities",params:{key:key,val:val}}};
+    };
+
     /**This function take a list of string and then join them with `.` ensuring each componnent is quoted if necessery
      * this method is designed to ease qualifying table names and column names
      * 
@@ -705,4 +733,10 @@
     jw.Api.safeQualifier = function(list){
         return jw.core.JsonAdqlBuilder.safeQualifier(list);
     };
+
+    jw.Api.tests = {
+        "joins":"SELECT TOP 1 tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id",
+        "multi-joins":"SELECT TOP 1 tap_schema.key_columns.target_column  FROM tap_schema.tables JOIN tap_schema.keys ON  tap_schema.keys.from_table = tap_schema.tables.table_name JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id"
+    };
+
 })();

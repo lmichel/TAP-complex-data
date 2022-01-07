@@ -103,7 +103,7 @@ jw.core.AttributeHolder = function(queryAble){
         ",TAP_SCHEMA.columns.unit" +
         ",TAP_SCHEMA.columns.ucd" +
         ",TAP_SCHEMA.columns.utype" +
-        ",TAP_SCHEMA.columns.dataType" +
+        ",TAP_SCHEMA.columns.datatype" +
         ",TAP_SCHEMA.columns.description" +
         ",TAP_SCHEMA.columns.table_name" +
         " FROM TAP_SCHEMA.columns";
