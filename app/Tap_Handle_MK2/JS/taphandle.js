@@ -95,6 +95,7 @@ function outBuilder(holder,ologger){
             let connect = ()=>{
                 api.connectService(dat.url,dat.name).then((connect)=>{
                     if(connect.status){
+                        dat.capabilities = $.extend({},api.capabilities);
                         tree.append(api,dat);
                         ologger.hide();
                     }else{
@@ -102,12 +103,14 @@ function outBuilder(holder,ologger){
                         //proxy for cors errors
                         api.connectService("//taphandle.astro.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
                             if(connect.status){
+                                dat.capabilities = $.extend({},api.capabilities);
                                 tree.append(api,dat);
                                 ologger.hide();
                             }else{
                                 ologger.info("Proxy failed trying to use another proxy");
                                 api.connectService("https://taphandle.astro.unistra.fr/tapsxy" + dat.url.substring(1),dat.name).then((connect)=>{
                                     if(connect.status){
+                                        dat.capabilities = $.extend({},api.capabilities);
                                         tree.append(api,dat);
                                         ologger.hide();
                                     }else{
