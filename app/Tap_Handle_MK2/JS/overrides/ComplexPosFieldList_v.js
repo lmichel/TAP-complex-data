@@ -79,29 +79,30 @@
                     $('#' + this.fieldTableId).append(row);
                     var id = this.formName + "_" + vizierToID(ah.nameattr);
                     if( this.orderByHandler != null ) {
-                        $('#' + this.fieldListId + ' input[id="order_' + id + '"]' ).click(function() {that.orderByHandler($(this).closest("tr").attr("id"));});
+                        $('#' + this.fieldListId + ' input[id="order_' + id + '"]' ).click(function() {that.orderByHandler(ah.nameattr);});
                     }
                     if( this.stackHandler != null ){
                         $('#' + this.fieldListId + ' input[id="stack_' + id + '"]' ).click(function() {
-                            that.stackHandler($(this).closest("tr").attr("id"));});
+                            that.stackHandler(ah.nameattr);});
                     }
                     if( this.raHandler != null ){
-                        $('#' + this.fieldListId + ' input[id="tora_' + id + '"]' ).click(function() {that.raHandler($(this).closest("tr").attr("id"));});
+                        $('#' + this.fieldListId + ' input[id="tora_' + id + '"]' ).click(function() {that.raHandler(ah.nameattr);});
                     }
                     if( this.decHandler != null ){
-                        $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler($(this).closest("tr").attr("id"));});
+                        $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler(ah.nameattr);});
                     }
-                    $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").tooltip( {
-                    //$('#' + this.fieldTableId + ' tr[id="'+ vizierToID(ah.nameattr) + '"]span').tooltip( {
-                        track: true,
-                        delay: 0,
-                        showURL: false,
-                        opacity: 1,
-                        fixPNG: true,
-                        showBody: " - ",
-                        // extraClass: "pretty fancy",
-                        top: -15,
-                        left: 5
+                    let arr;
+                    $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").each((i,e)=>{
+                        arr = e.title.split(" - ");
+                        arr[0] ="<h3>" + arr[0].trim() + "</h3>";
+                        // replace only replace the first occurence
+                        e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
+                    });
+    
+                    $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").tooltip({ 
+                        template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
+                        html:true,
+                        customClass :"ressource-tooltip",
                     });
                 },
             },

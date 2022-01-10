@@ -112,15 +112,20 @@ function outBuilder(holder,ologger){
                 api.connectService(dat.url,dat.name).then((connect)=>{
                     if(connect.status){
                         tree.append(api,dat);
+                        ologger.hide();
                     }else{
+                        ologger.info("Connection failed trying to use proxy");
                         //proxy for cors errors
                         api.connectService("//taphandle.astro.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
                             if(connect.status){
                                 tree.append(api,dat);
+                                ologger.hide();
                             }else{
+                                ologger.info("Proxy failed trying to use another proxy");
                                 api.connectService("https://taphandle.astro.unistra.fr/tapsxy" + dat.url.substring(1),dat.name).then((connect)=>{
                                     if(connect.status){
                                         tree.append(api,dat);
+                                        ologger.hide();
                                     }else{
                                         event.currentTarget.style.background = 'red';
                                     Modalinfo.error("can't connect to the select service: " + connect.error.logs + ".The full error has been dumped into the console");
@@ -130,7 +135,6 @@ function outBuilder(holder,ologger){
                             }
                         });
                     }
-                    ologger.hide();
                 });
             };
 

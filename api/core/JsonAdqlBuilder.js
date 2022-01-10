@@ -2,7 +2,7 @@
 
 (function(){
 
-    jw.core.JsonAdqlBuilder = function(objectMap,rootTable,schema){
+    jw.core.JsonAdqlBuilder = function(objectMap,rootTable,schema,quotes){
         this.adqlJsonMap = {
             "rootTable" :rootTable,
             "scheme" : schema, 
@@ -11,6 +11,8 @@
             "conditions":{}, 
             "activeJoints" : [] 
         };
+
+        this.quotes = quotes;
 
         /*/ Building adqlJsonMap from objectMap /*/
 
@@ -276,6 +278,9 @@
             adqlJoints = adqlJoints.substring(0,adqlJoints.length-5);
             adqlJoints += " ) \n";
         }
+        if(!this.quotes){
+            adqlJoints = adqlJoints.replace(/\"([A-Za-z_-])\"\./g,"$1.");
+        }
 
         return {"status":true,"adqlJoints":adqlJoints};
 
@@ -338,6 +343,11 @@
             }
         } else{
             adqlConstraints=adqlConstraints.substring(0,adqlConstraints.length - 7); // remove trailing AND
+        }
+
+        if(!this.quotes){
+            adqlConstraints = adqlConstraints.replace(/\"([A-Za-z_\-0-9]*)\"\./g,"$1.");
+            adqlConstraints = adqlConstraints.replace(/\.\"([A-Za-z_\-0-9]*)\"/g,".$1");
         }
 
         if(adqlConstraints.length > 0){

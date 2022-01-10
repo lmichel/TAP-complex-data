@@ -89,7 +89,10 @@
                 let test = await this.tapServiceConnector.selectRootTable(table);
                 if(test.status){
                     this.connectLevel = 3;
-                    this.jsonAdqlBuilder = new jw.core.JsonAdqlBuilder(this.tapServiceConnector.getObjectMap().object_map,table,this.getConnector().connector.service.schema);
+                    this.jsonAdqlBuilder = new jw.core.JsonAdqlBuilder(
+                        this.tapServiceConnector.getObjectMap().object_map,table,
+                        this.getConnector().connector.service.schema,
+                        this.capabilities.quotes || this.capabilities["quotes-bis"]);
                 } else {
                     this.connectLevel = 2;
                 }
@@ -238,6 +241,9 @@
             schema = schema.quotedTableName().qualifiedName;
 
             let formatTableName = jw.Api.safeQualifier([schema ,table]).qualified;
+            if(!(this.getCapabilitie("quotes").capabilitie || this.getCapabilitie("quotes-bis").capabilitie) ){
+                formatTableName = formatTableName.replace(/"/g,"");
+            }
 
             adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit + " ":"") + allField;
             adql += '\n' + " FROM  " + formatTableName + "\n";
@@ -306,7 +312,10 @@
             schema = schema.quotedTableName().qualifiedName;
 
             let formatTableName = jw.Api.safeQualifier([schema ,table]).qualified;
-
+            if(!(this.getCapabilitie("quotes").capabilitie || this.getCapabilitie("quotes-bis").capabilitie) ){
+                formatTableName = formatTableName.replace(/"/g,"");
+            }
+            
             adql = "SELECT " + ((this.limit>0)?"TOP " + this.limit + " ":"") + allField;
             adql += '\n' + " FROM  " + formatTableName + "\n";
 
@@ -615,6 +624,11 @@
         }
 
         allField = allField.substring(0,allField.length - 3);
+        if(!(this.getCapabilitie("quotes").capabilitie || this.getCapabilitie("quotes-bis").capabilitie) ){
+            allField = allField.replace(/\"([A-Za-z_\-0-9]*)\"\./g,"$1.");
+            allField = allField.replace(/\.\"([A-Za-z_\-0-9]*)\"/g,".$1");
+        }
+        
 
         return {status:true, allField:allField};
     };
@@ -736,7 +750,9 @@
 
     jw.Api.tests = {
         "joins":"SELECT TOP 1 tap_schema.key_columns.target_column FROM tap_schema.keys JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id",
-        "multi-joins":"SELECT TOP 1 tap_schema.key_columns.target_column  FROM tap_schema.tables JOIN tap_schema.keys ON  tap_schema.keys.from_table = tap_schema.tables.table_name JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id"
+        "multi-joins":"SELECT TOP 1 tap_schema.key_columns.target_column  FROM tap_schema.tables JOIN tap_schema.keys ON  tap_schema.keys.from_table = tap_schema.tables.table_name JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id",
+        "quotes":"SELECT TOP 1 * FROM \"tap_schema\".keys",
+        "quotes-bis":"SELECT TOP 1 * FROM \"TAP_SCHEMA\".keys"
     };
 
 })();
