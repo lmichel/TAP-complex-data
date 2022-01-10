@@ -1,22 +1,6 @@
 
 let tree; // temporary export
-
-async function OnRadioChange(radio){
-    if(isEnable("label_" + radio.value)){
-        disableButton("label_" + radio.value);
-        let api = new jw.Api();
-        let params = jw.KnowledgeTank.getDescriptors().descriptors[radio.value];
-        let connect = await api.connectService(params.tapService,radio.value);
-        if(connect.status){
-            tree.append(api,params);
-
-            successButton("label_" + radio.value);
-            return;
-        }
-        console.error(connect);
-        errorButton("label_" + radio.value);
-    }
-}
+let Converter = new showdown.Converter();
 
 function specSB(...args){
     jw.widget.SearchBar.call(this,...args);
@@ -974,6 +958,7 @@ $(document).ready(async ()=>{
         }else{
             logger.hide();
         }
+        $("#tablePane").html(converter.makeHtml(await $.get("./doc/welcome.MD")));
     });
     
 });

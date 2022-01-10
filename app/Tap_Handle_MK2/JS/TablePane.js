@@ -81,10 +81,10 @@ class TablePane{
     setApi(api){
         this.logger.info("Setting up tables");
         let object_map = api.getObjectMap();
+        let that = this;
         if(object_map.status){
             object_map=object_map.object_map;
         }else{
-            let that = this;
             $(document).trigger("error.application",{
                 error : object_map.error,
                 origin : that,
@@ -133,6 +133,14 @@ class TablePane{
         $("#" +tableB64+"_cone", this.struct.div.header).click(()=>{
             $(document).trigger("cone_search_update_table.control",{table:table});
         });
+        this.api.getTableQuery(table).then((val)=>{
+            $("#" + tableB64+"_dll").prop("href",
+                that.api.getConnector().connector.service.tapService + 
+                "?format=votable&request=doQuery&lang=ADQL&query=" + 
+                encodeURIComponent(val.query)
+            );
+        });
+        
         this.refresh();
     }
 
@@ -205,11 +213,6 @@ class TablePane{
                 return;
             }
         }
-        $("#" + tableB64+"_dll").prop("href",
-            this.api.getConnector().connector.service.tapService + 
-            "?format=votable&request=doQuery&lang=ADQL&query=" + 
-            encodeURIComponent((await this.api.getTableQuery(tableName,keyvals)).query)
-        );
 
         let toSelect = keys.filter((k)=>object_map.tables[tableName].columns.includes(k));
 
@@ -493,7 +496,7 @@ class TablePane{
 
                 that.logger.info("Building tables");
                 for(let table in subtables){
-                    tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
+                    let tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
                     let nb = Object.keys(that.api.getJoinedTables(table).joined_tables).length;
                     let kMap = {};
                     let nkey;
@@ -540,6 +543,13 @@ class TablePane{
                     });
                     $("#" +tableB64+"_cone", s.div.header).click(()=>{
                         $(document).trigger("cone_search_update_table.control",{table:table});
+                    });
+                    this.api.getTableQuery(table,kMap).then((val)=>{
+                        $("#" + tableB64+"_dll").prop("href",
+                            that.api.getConnector().connector.service.tapService + 
+                            "?format=votable&request=doQuery&lang=ADQL&query=" + 
+                            encodeURIComponent(val.query)
+                        );
                     });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";

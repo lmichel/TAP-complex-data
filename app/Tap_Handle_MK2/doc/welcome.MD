@@ -1,0 +1,1 @@
+Connect to a service using the Searchbar then select the table you wantin the left pannel ! 

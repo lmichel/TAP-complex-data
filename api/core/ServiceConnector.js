@@ -121,12 +121,12 @@
     };
 
     jw.core.ServiceConnector.prototype.getAllJoins = async function(){
-        if(!this.api.getCapabilitie("join").capabilitie){
+        if(!this.api.getCapabilitie("joins").capabilitie){
             return {"status":true,"all_joins":[]};
         }
         try {
             let schema  = this.connector.service.schema,request,query;
-            if(this.api.getCapabilitie("multi-join").capabilitie){
+            if(this.api.getCapabilitie("multi-joins").capabilitie){
                 request = 'SELECT tap_schema.keys.from_table, tap_schema.keys.target_table,tap_schema.keys.key_id' +
                     ' , tap_schema.key_columns.from_column, tap_schema.key_columns.target_column \nFROM tap_schema.keys\n' +
                     ' JOIN tap_schema.key_columns ON tap_schema.keys.key_id = tap_schema.key_columns.key_id\n' +
