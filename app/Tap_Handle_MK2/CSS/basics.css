@@ -132,22 +132,14 @@ img:hover.clickableicon{
 	}
 	
 a.sampOn {	
-	display: inline-block;
-	width: 0px;
-	overflow: visible;
-	padding: 16px 0px 16px 38px;
-	background: transparent url(../icons/sampOn.png) center left no-repeat;
+	background: transparent url(./icons/sampOn.png) center left no-repeat;
 }
 a:hover.sampOn {	
 	filter: alpha(opacity = 50);
 	opacity: 0.5;
 }
 a.sampOff {	
-	display: inline-block;
-	width: 0px;
-	overflow: visible;
-	padding: 16px 0px 16px 38px;
-	background: transparent url(../icons/sampOff.png) center left no-repeat;
+	background: transparent url(./icons/sampOff.png) center left no-repeat;
 }
 a:hover.sampOff {	
 	filter: alpha(opacity = 50);

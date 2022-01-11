@@ -961,7 +961,7 @@ $(document).ready(async ()=>{
         }else{
             logger.hide();
         }
-        $("#tablePane").html(converter.makeHtml(await $.get("./doc/welcome.MD")));
+        $("#TP-header").html(Converter.makeHtml(await $.get("./doc/welcome.MD")));
     });
     
 });
