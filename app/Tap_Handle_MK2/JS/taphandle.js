@@ -1,22 +1,6 @@
 
 let tree; // temporary export
-
-async function OnRadioChange(radio){
-    if(isEnable("label_" + radio.value)){
-        disableButton("label_" + radio.value);
-        let api = new jw.Api();
-        let params = jw.KnowledgeTank.getDescriptors().descriptors[radio.value];
-        let connect = await api.connectService(params.tapService,radio.value);
-        if(connect.status){
-            tree.append(api,params);
-
-            successButton("label_" + radio.value);
-            return;
-        }
-        console.error(connect);
-        errorButton("label_" + radio.value);
-    }
-}
+let Converter = new showdown.Converter();
 
 function specSB(...args){
     jw.widget.SearchBar.call(this,...args);
@@ -111,16 +95,24 @@ function outBuilder(holder,ologger){
             let connect = ()=>{
                 api.connectService(dat.url,dat.name).then((connect)=>{
                     if(connect.status){
+                        dat.capabilities = $.extend({},api.capabilities);
                         tree.append(api,dat);
+                        ologger.hide();
                     }else{
+                        ologger.info("Connection failed trying to use proxy");
                         //proxy for cors errors
                         api.connectService("//taphandle.astro.unistra.fr/tapxy" + dat.url.substring(1),dat.name).then((connect)=>{
                             if(connect.status){
+                                dat.capabilities = $.extend({},api.capabilities);
                                 tree.append(api,dat);
+                                ologger.hide();
                             }else{
+                                ologger.info("Proxy failed trying to use another proxy");
                                 api.connectService("https://taphandle.astro.unistra.fr/tapsxy" + dat.url.substring(1),dat.name).then((connect)=>{
                                     if(connect.status){
+                                        dat.capabilities = $.extend({},api.capabilities);
                                         tree.append(api,dat);
+                                        ologger.hide();
                                     }else{
                                         event.currentTarget.style.background = 'red';
                                     Modalinfo.error("can't connect to the select service: " + connect.error.logs + ".The full error has been dumped into the console");
@@ -130,7 +122,6 @@ function outBuilder(holder,ologger){
                             }
                         });
                     }
-                    ologger.hide();
                 });
             };
 
@@ -933,6 +924,20 @@ function setupFav(logger){
     });
 }
 
+function setupSamp(){
+    let samp_v = new SAMPView($("#sampIndicator"));
+    let l = window.location.href.lastIndexOf("?");
+    l = l === -1 ? window.location.href.length : l;
+    l = window.location.href.lastIndexOf("/",l);
+    let samp_m = WebSamp_Mvc("TapHandle", window.location.href.substring(0,l) + "images/tap_logo.png","Tap Handle web app");
+    let samp_c = WebSamp_mvC(samp_v,samp_m);
+    
+    $(document).on("samp.sendurl",(event, args)=>{
+        samp_v.sendVoTableUrlToClient(args.url,args.id,args.name);
+    });
+}
+
+
 $(document).ready(async ()=>{
     let logger = new GlobalLogger();
     logger.info("Setting up everything");
@@ -949,6 +954,7 @@ $(document).ready(async ()=>{
     setupSB(logger).then( async (sb)=>{
         setupApp(logger);
         setupFav(logger);
+        setupSamp();
         let params = new URLSearchParams(window.location.search);
         if( params.has("url")){
             logger.info("Connecting to the service");
@@ -970,6 +976,7 @@ $(document).ready(async ()=>{
         }else{
             logger.hide();
         }
+        $("#TP-header").html(Converter.makeHtml(await $.get("./doc/welcome.MD")));
     });
     
 });

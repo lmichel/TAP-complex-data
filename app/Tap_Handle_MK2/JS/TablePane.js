@@ -33,6 +33,33 @@ class TablePane{
                 }
             }
         });
+        $(document).on("samp.connect",()=>{
+            this.sampOn();
+        });
+        $(document).on("samp.disconnect",()=>{
+            this.sampOff();
+        });
+        this.sampClass = {
+            off: "no-samp",
+            on : "samp"
+        };
+        this.isSampOn = false;
+    }
+
+    sampOff(){
+        this.isSampOn = false;
+        let samps = $("." + this.sampClass.on,this.div );
+        samps.removeClass(this.sampClass.on);
+        samps.addClass(this.sampClass.off);
+        samps.prop("title","No samp service connected connect to samp first");
+    }
+
+    sampOn(){
+        this.isSampOn = true;
+        let samps = $("." + this.sampClass.off,this.div );
+        samps.removeClass(this.sampClass.off);
+        samps.addClass(this.sampClass.on);
+        samps.prop("title","send table to SAMP service");
     }
 
     getStruct(table,startStruct){
@@ -81,10 +108,10 @@ class TablePane{
     setApi(api){
         this.logger.info("Setting up tables");
         let object_map = api.getObjectMap();
+        let that = this;
         if(object_map.status){
             object_map=object_map.object_map;
         }else{
-            let that = this;
             $(document).trigger("error.application",{
                 error : object_map.error,
                 origin : that,
@@ -121,6 +148,12 @@ class TablePane{
                         toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                         pos:"right"
                     },
+                    {
+                        toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
+                            (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
+                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                        pos:"right"
+                    },
                 ],
                 "title"
             ),
@@ -133,6 +166,23 @@ class TablePane{
         $("#" +tableB64+"_cone", this.struct.div.header).click(()=>{
             $(document).trigger("cone_search_update_table.control",{table:table});
         });
+        this.api.getTableQuery(table).then((val)=>{
+            let url = that.api.getConnector().connector.service.tapService + 
+                "?format=votable&request=doQuery&lang=ADQL&query=" + 
+                encodeURIComponent(val.query);
+            if(url.startsWith("/")){
+                url = "http:" + url;
+            }
+
+            $("#" + tableB64+"_dll").prop("href",url);
+
+            $("#" + tableB64+"_samp").click(()=>{
+                if(that.isSampOn){
+                    $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
+                }
+            });
+        });
+        
         this.refresh();
     }
 
@@ -205,11 +255,6 @@ class TablePane{
                 return;
             }
         }
-        $("#" + tableB64+"_dll").prop("href",
-            this.api.getConnector().connector.service.tapService + 
-            "?format=votable&request=doQuery&lang=ADQL&query=" + 
-            encodeURIComponent((await this.api.getTableQuery(tableName,keyvals)).query)
-        );
 
         let toSelect = keys.filter((k)=>object_map.tables[tableName].columns.includes(k));
 
@@ -493,7 +538,7 @@ class TablePane{
 
                 that.logger.info("Building tables");
                 for(let table in subtables){
-                    tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
+                    let tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
                     let nb = Object.keys(that.api.getJoinedTables(table).joined_tables).length;
                     let kMap = {};
                     let nkey;
@@ -531,6 +576,12 @@ class TablePane{
                                 toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                                 pos:"right"
                             },
+                            {
+                                toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
+                                    (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
+                                    " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                                pos:"right"
+                            },
                         ],
                         "title",
                         !struct.div.parity,
@@ -540,6 +591,22 @@ class TablePane{
                     });
                     $("#" +tableB64+"_cone", s.div.header).click(()=>{
                         $(document).trigger("cone_search_update_table.control",{table:table});
+                    });
+                    this.api.getTableQuery(table,kMap).then((val)=>{
+                        let url = that.api.getConnector().connector.service.tapService + 
+                            "?format=votable&request=doQuery&lang=ADQL&query=" + 
+                            encodeURIComponent(val.query);
+                        if(url.startsWith("/")){
+                            url = "http:" + url;
+                        }
+
+                        $("#" + tableB64+"_dll").prop("href",url);
+
+                        $("#" + tableB64+"_samp").click(()=>{
+                            if(that.isSampOn){
+                                $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
+                            }
+                        });
                     });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";

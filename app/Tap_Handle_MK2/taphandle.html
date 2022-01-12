@@ -8,6 +8,7 @@
         <script src="//cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
 
         <!-- Tap Complex API imports -->
         <script type="text/javascript" src="../../utils/util.js"></script>
@@ -48,6 +49,7 @@
         <script type="text/javascript" src="./JS/ControlPane.js"></script>
         <script type="text/javascript" src="./JS/TablePane.js"></script>
         <script type="text/javascript" src="./JS/CollapsableDiv.js"></script>
+        <script type="text/javascript" src="./JS/SAMPView.js"></script>
 
 
         <script type="text/javascript" src="./JS/Import/jquery-ui.js"></script>
@@ -120,11 +122,11 @@
         <div style="height: 100%;display:flex;flex-flow:column">
             <div id = "banner" style="display: flex;width: 100%;">
                 <div id = "R_banner" class="col-3" style="display:flex;align-items:center;flex-direction: row;">
-                    <img src="./images/tap_logo.png" alt="tap handle logo">
+                    <a href="./credits.html"><img src="./images/tap_logo.png" alt="tap handle logo"></a>
                     <div style="flex-grow: 1; display: flex;flex-flow: column;position: relative;" id = "favbutton">
                     </div>
                     <a style="background: transparent url(./icons/contact_38.png) center left no-repeat;" class="bannerbtn" href="javascript:void(0);" title="Contact the developper" onclick='ModalInfo.info("Send an Email to \n laurent.michel@astro.unistra.fr", "Contact");'></a>
-                    <a id="sampIndicator" class="bannerbtn" style="background: transparent url(./icons/sampOff.png) center left no-repeat;" href="javascript:void(0);" title="SampStatus"></a>
+                    <a id="sampIndicator" class="bannerbtn sampOff" href="javascript:void(0);" title="SampStatus"></a>
                 </div>
                 <div style="flex-grow: 1; display: flex;margin-right: 1em;flex-flow: column;position: relative;" id = "mainButtonHolder">
                 </div>

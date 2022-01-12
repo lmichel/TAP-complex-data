@@ -80,17 +80,17 @@ function ComplexFieldList_mVcExtends(){
                 $('#' + this.fieldTableId).append(row);
                 var id = this.formName + "_" + vizierToID(ah.nameattr);
                 if( this.orderByHandler != null ) {
-                    $('#' + this.fieldListId + ' input[id="order_' + id + '"]' ).click(function() {that.orderByHandler($(this).closest("tr").attr("id"));});
+                    $('#' + this.fieldListId + ' input[id="order_' + id + '"]' ).click(function() {that.orderByHandler(ah.nameattr);});
                 }
                 if( this.stackHandler != null ){
                     $('#' + this.fieldListId + ' input[id="stack_' + id + '"]' ).click(function() {
-                        that.stackHandler($(this).closest("tr").attr("id"));});
+                        that.stackHandler(ah.nameattr);});
                 }
                 if( this.raHandler != null ){
-                    $('#' + this.fieldListId + ' input[id="tora_' + id + '"]' ).click(function() {that.raHandler($(this).closest("tr").attr("id"));});
+                    $('#' + this.fieldListId + ' input[id="tora_' + id + '"]' ).click(function() {that.raHandler(ah.nameattr);});
                 }
                 if( this.decHandler != null ){
-                    $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler($(this).closest("tr").attr("id"));});
+                    $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler(ah.nameattr);});
                 }
                 let arr;
                 $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").each((i,e)=>{
