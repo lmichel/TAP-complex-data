@@ -924,6 +924,15 @@ function setupFav(logger){
     });
 }
 
+function setupSamp(){
+    let samp_v = new SAMPView($("#sampIndicator"));
+    let l = window.location.href.indexOf("?");
+    l = l === -1 ? window.location.href.length : l;
+    let samp_m = WebSamp_Mvc("TapHandle", window.location.href.substring(0,l) + "/images/tap_logo.png","Tap Handle web app");
+    let samp_c = WebSamp_mvC(samp_v,samp_m);
+}
+
+
 $(document).ready(async ()=>{
     let logger = new GlobalLogger();
     logger.info("Setting up everything");
@@ -940,6 +949,7 @@ $(document).ready(async ()=>{
     setupSB(logger).then( async (sb)=>{
         setupApp(logger);
         setupFav(logger);
+        setupSamp();
         let params = new URLSearchParams(window.location.search);
         if( params.has("url")){
             logger.info("Connecting to the service");

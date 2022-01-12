@@ -46,7 +46,7 @@ function ModalInfoOverride(){
             return retour;
         };
 
-        ModalInfo.prototype.info = function(content,title){
+        ModalInfo.prototype.info = function(content,title,show = true){
             let id = this.getNextID();
             let modalHtml = this.buildModal(
                 id,
@@ -55,7 +55,9 @@ function ModalInfoOverride(){
             );
             $("body").append(modalHtml);
             let modal = new bootstrap.Modal($("#" + id)[0]);
-            modal.show();
+            if(show){
+                modal.show();
+            }
             return modal;
         };
 
