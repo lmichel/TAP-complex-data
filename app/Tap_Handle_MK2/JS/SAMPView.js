@@ -16,13 +16,73 @@ class SAMPView{
                 that.mode = SAMPView.SLEEPING;
             }
         });
-        
+        this.connected = false;
         this.modalOpen = false;
         this.modalType = "";
         this.mode = SAMPView.SLEEPING;
         this.last = undefined;
         
         sampIndicator.click(()=>{that.toggleSamp();});
+    }
+
+    sendVoTableUrlToClient(url,id,name){
+        if(!this.connected){
+            return;
+        }
+        let msg = {
+            "samp.mtype" : "table.load.votable",
+            "samp.params" : {
+                "table-id":id,
+                name:name,
+                url:url
+            }
+        };
+        if(Object.keys(this.sampClients).length>1){
+            this.showClientList(msg);
+        }else{
+            for(let id in this.sampClients){
+                this.listener.controlSendFileToClient(id, msg); 
+            }
+        }
+    }
+
+    showClientList(msg){
+        this.modalOpen = true;
+        this.modalType = "clientList";
+
+        let list = "";
+        let meta;
+        $(".modal-body",this.modalHolder).html(
+            "<h3>Available SAMP Clients</h3>" +
+            "<p>Below is the list of SAMP clients accepting data<br>" +
+            '- Click on the icon of the client you want to send data<br>' + 
+            '- Click on the broadcast icon if you want your data to be sent to all clients.<br></p>'
+        );
+
+        for (let id in this.sampClients) {
+			if (this.sampClients[id].meta && this.sampClients[id].subs) {
+				meta = this.sampClients[id].meta;
+
+				list += "<img class=clickableicon align=bottom style='height: 32px; border: 0px;' src='" +
+						meta["samp.icon.url"] + "' id='" + id + "'>" + 
+						"<span class=help> <b>" + 
+						meta["samp.name"] + 
+						"</b> " + 
+						meta["samp.description.text"] + 
+						" </span><a style='font-color: blue; font-size: small; font-style: italic;' target=_blank href='" +
+						meta["home.page"] + "'>read more...</a></br>";
+			}
+		}
+        list += "<img class=clickableicon align=bottom style='height: 32px; border: 0px;'" +
+						"src='./icons/sampOn.png' id='any'> <span class=help> <b> Broadcast</b> " + 
+						"to any client </br>";
+
+        $(".modal-body",this.modalHolder).append(list);
+        $(".modal-body img",this.modalHolder).click((arg)=>{
+            this.listener.controlSendFileToClient(arg.target.id, msg);
+        });
+        this.modal.show();
+
     }
 
     addListener(listener){
@@ -42,7 +102,7 @@ class SAMPView{
             this.showHubLauncher();
             // we plan to try to connect again only if we haven't already planned this.
             if(this.last === undefined || this.last.timedOut){
-                this.last = utils.Timeout(this.SAMPOn.bind(this),SAMPView.REGISTERDELAY);
+                this.last = new utils.Timeout(this.SAMPOn.bind(this),SAMPView.REGISTERDELAY);
             }
         }
     }
@@ -78,6 +138,8 @@ class SAMPView{
     }
 
     SAMPOff(){
+        this.connected = false;
+        $(document).trigger("samp.disconnect",{});
         this.listener.controlUnregisterToHub();
         this.sampIndicator.removeClass("sampOn");
         this.sampIndicator.addClass("sampOff");
@@ -105,6 +167,10 @@ class SAMPView{
     }
 
     showTrackerReply(id,action,data){
+        if(!this.connected){
+            this.connected = true;
+            $(document).trigger("samp.connect",{});
+        }
         // Hub is not considered as a SAMP client
 		if (!id || id.match(/hub/i)) {
 			return;
@@ -131,9 +197,6 @@ class SAMPView{
 				}
 			}
 		}
-        if (this.mode == SAMPView.SENDDATA){
-            this.updateClientList();
-        }
     }
 }
 

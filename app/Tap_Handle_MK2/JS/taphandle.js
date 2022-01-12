@@ -926,10 +926,15 @@ function setupFav(logger){
 
 function setupSamp(){
     let samp_v = new SAMPView($("#sampIndicator"));
-    let l = window.location.href.indexOf("?");
+    let l = window.location.href.lastIndexOf("?");
     l = l === -1 ? window.location.href.length : l;
-    let samp_m = WebSamp_Mvc("TapHandle", window.location.href.substring(0,l) + "/images/tap_logo.png","Tap Handle web app");
+    l = window.location.href.lastIndexOf("/",l);
+    let samp_m = WebSamp_Mvc("TapHandle", window.location.href.substring(0,l) + "images/tap_logo.png","Tap Handle web app");
     let samp_c = WebSamp_mvC(samp_v,samp_m);
+    
+    $(document).on("samp.sendurl",(event, args)=>{
+        samp_v.sendVoTableUrlToClient(args.url,args.id,args.name);
+    });
 }
 
 

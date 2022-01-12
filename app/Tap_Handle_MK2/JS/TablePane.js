@@ -33,6 +33,33 @@ class TablePane{
                 }
             }
         });
+        $(document).on("samp.connect",()=>{
+            this.sampOn();
+        });
+        $(document).on("samp.disconnect",()=>{
+            this.sampOff();
+        });
+        this.sampClass = {
+            off: "no-samp",
+            on : "samp"
+        };
+        this.isSampOn = false;
+    }
+
+    sampOff(){
+        this.isSampOn = false;
+        let samps = $("." + this.sampClass.on,this.div );
+        samps.removeClass(this.sampClass.on);
+        samps.addClass(this.sampClass.off);
+        samps.prop("title","No samp service connected connect to samp first");
+    }
+
+    sampOn(){
+        this.isSampOn = true;
+        let samps = $("." + this.sampClass.off,this.div );
+        samps.removeClass(this.sampClass.off);
+        samps.addClass(this.sampClass.on);
+        samps.prop("title","send table to SAMP service");
     }
 
     getStruct(table,startStruct){
@@ -121,6 +148,12 @@ class TablePane{
                         toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                         pos:"right"
                     },
+                    {
+                        toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
+                            (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
+                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                        pos:"right"
+                    },
                 ],
                 "title"
             ),
@@ -134,11 +167,20 @@ class TablePane{
             $(document).trigger("cone_search_update_table.control",{table:table});
         });
         this.api.getTableQuery(table).then((val)=>{
-            $("#" + tableB64+"_dll").prop("href",
-                that.api.getConnector().connector.service.tapService + 
+            let url = that.api.getConnector().connector.service.tapService + 
                 "?format=votable&request=doQuery&lang=ADQL&query=" + 
-                encodeURIComponent(val.query)
-            );
+                encodeURIComponent(val.query);
+            if(url.startsWith("/")){
+                url = "http:" + url;
+            }
+
+            $("#" + tableB64+"_dll").prop("href",url);
+
+            $("#" + tableB64+"_samp").click(()=>{
+                if(that.isSampOn){
+                    $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
+                }
+            });
         });
         
         this.refresh();
@@ -534,6 +576,12 @@ class TablePane{
                                 toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                                 pos:"right"
                             },
+                            {
+                                toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
+                                    (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
+                                    " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                                pos:"right"
+                            },
                         ],
                         "title",
                         !struct.div.parity,
@@ -545,11 +593,20 @@ class TablePane{
                         $(document).trigger("cone_search_update_table.control",{table:table});
                     });
                     this.api.getTableQuery(table,kMap).then((val)=>{
-                        $("#" + tableB64+"_dll").prop("href",
-                            that.api.getConnector().connector.service.tapService + 
+                        let url = that.api.getConnector().connector.service.tapService + 
                             "?format=votable&request=doQuery&lang=ADQL&query=" + 
-                            encodeURIComponent(val.query)
-                        );
+                            encodeURIComponent(val.query);
+                        if(url.startsWith("/")){
+                            url = "http:" + url;
+                        }
+
+                        $("#" + tableB64+"_dll").prop("href",url);
+
+                        $("#" + tableB64+"_samp").click(()=>{
+                            if(that.isSampOn){
+                                $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
+                            }
+                        });
                     });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";

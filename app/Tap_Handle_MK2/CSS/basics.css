@@ -132,15 +132,24 @@ img:hover.clickableicon{
 	}
 	
 a.sampOn {	
-	background: transparent url(./icons/sampOn.png) center left no-repeat;
+	background: transparent url(../icons/sampOn.png) center left no-repeat;
 }
 a:hover.sampOn {	
 	filter: alpha(opacity = 50);
 	opacity: 0.5;
 }
 a.sampOff {	
-	background: transparent url(./icons/sampOff.png) center left no-repeat;
+	background: transparent url(../icons/sampOff.png) center left no-repeat;
 }
+
+.samp{
+	background: transparent url(../icons/sampOff.png) center left no-repeat;
+}
+
+.no-samp{
+	background: red url(../icons/sampOff.png) center left no-repeat;
+}
+
 a:hover.sampOff {	
 	filter: alpha(opacity = 50);
 	opacity: 0.5;
