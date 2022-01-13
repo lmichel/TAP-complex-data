@@ -25,7 +25,7 @@
 
             reTable = $.ajax({
                     url: "" + site,
-                    type: "GET",
+                    type: "POST",
                     data: {query: "" + adql, format: correctFormat, lang: 'ADQL', request: 'doQuery'},
                 });
             
