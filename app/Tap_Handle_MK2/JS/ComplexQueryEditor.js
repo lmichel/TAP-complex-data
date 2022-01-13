@@ -34,7 +34,7 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
                     constraint = this.api.getTableConstraint( constraints[c].treePath.table);
                     constraint = constraint.constraint;
                     this.api.setTableConstraint( constraints[c].treePath.table,
-                        constraint + " " + ((constraint.length>0)? constraints[c].getAndOr():"") + constraints[c].fireGetADQL() +
+                        constraint + " " + ((constraint.length>0)? constraints[c].getAndOr():"") + " " + constraints[c].fireGetADQL() +
                         (constraints[c].getOperator !== undefined && constraints[c].getOperand !== undefined?this.formatCondition(constraints[c].getOperator(),constraints[c].getOperand()):"")
                     );
                     if(constraints[c].getSelect){
@@ -84,16 +84,14 @@ ComplexQueryEditor.prototype.updateQuery = function(type, data){
 
 ComplexQueryEditor.prototype.formatCondition = function(operator,operand){
     if( operator == 'IS NULL' ) {
-        operator = 'IS NULL';
-        operand = '';								
+        operand = '';
     } else if( /^\s*$/.test(operand)  ) {
         operator = 'IS NOT NULL';
-        operand = '';			
+        operand = '';
     } else { //ERROR_BUILDER : Revert condition
         if( ( isNaN(operand) || isNaN(parseInt(operand)) || isNaN(+operand) ) ) {
             operand = "'" + operand + "'";
         }
-        operator = operator;	
     }
-    return " "+operator+operand;
+    return " " + operator + " " +operand;
 };

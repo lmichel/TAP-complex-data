@@ -147,6 +147,7 @@ jw.core.AttributeHolder = function(queryAble){
             AH.type = data[i][4];
             AH.description = data[i][5];
             AH.table_name = data[i][6];
+            console.log(AH.table_name + "." + AH.nameattr);
             if(jw.KnowledgeTank.presetValues[AH.table_name + "." + AH.nameattr] !== undefined){
                 AH.available_value = Array.from(jw.KnowledgeTank.presetValues[AH.table_name + "." + AH.nameattr]);
             }

@@ -80,9 +80,11 @@ jw.KnowledgeTank = (function(){
                 "EB?","smm","LIN","Sy2","cm","Bla","S*?","IG","Ro*","HB?","V*?","Y*?","QSO","Q?","HVC","SFR","bCG","Pl?","EmO","MGr","s*r","AG?","Mi*","Mas",
                 "PoG","gLS","SR?","Sy*","WR?","G","RNe","NIR","rG","BD?","rB","gD*","out","Rad","RG*"
             ],
+            "ivoa.obscore.dataproduct_type":["image","cube","spectrum","sed","timeseries","visibility","event","measurements"],
             "obscore.dataproduct_type":["image","cube","spectrum","sed","timeseries","visibility","event","measurements"],
+            "ivoa.obscore.calib_level":[1,2,3,4],
             "obscore.calib_level":[1,2,3,4],
-            "capability.standard_id":[
+            "rr.capability.standard_id":[
                 "ivo://ivoa.net/std/tap","ivo://helio-vo.eu/std/longfullquery/soap/v1.0","ivo://ivoa.net/std/simdalsearch#views-1.0",
                 "ivo://ivoa.net/std/simdalrepository#protocols-1.0","ivo://ivoa.net/std/simdaldataaccess#datasets-1.0",
                 "ivo://ivoa.net/std/simdalrepository","ivo://ivoa.net/std/vosi#availability","ivo://ivoa.net/std/hips#hipslist-1.0",

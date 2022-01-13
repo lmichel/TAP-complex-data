@@ -176,6 +176,11 @@ class TablePane{
 
             $("#" + tableB64+"_dll").prop("href",url);
 
+            $("#" + tableB64+"_dll").click(()=>{
+                trackAction("Dowloading voTable");
+            });
+
+
             $("#" + tableB64+"_samp").click(()=>{
                 if(that.isSampOn){
                     $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
@@ -198,6 +203,11 @@ class TablePane{
      * @param {CollapsableDiv} colDiv 
      */
     async makeTable(struct,keyvals){
+        if(keyvals){
+            trackAction("opening sub table");
+        }else{
+            trackAction("opening root table");
+        }
 
         this.logger.info("Gathering meta data 1");
         let colDiv = struct.div;
@@ -520,6 +530,8 @@ class TablePane{
                     this.logger.hide();
                     return;
                 }
+
+                trackAction("clicked on table row");
                 h.removeClass("rHighlight");
                 $(nRow).addClass("rHighlight");
 
@@ -601,6 +613,10 @@ class TablePane{
                         }
 
                         $("#" + tableB64+"_dll").prop("href",url);
+                        
+                        $("#" + tableB64+"_dll").click(()=>{
+                            trackAction("Dowloading voTable");
+                        });
 
                         $("#" + tableB64+"_samp").click(()=>{
                             if(that.isSampOn){
