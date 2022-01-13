@@ -959,9 +959,7 @@ $(document).ready(async ()=>{
         overrides();
         extend();
     });
-    //buildButtonSelector("#mainButtonHolder");
-    // ensure no radio button is check by default
-    //$("input:radio[name=radio]:checked").prop('checked', false);
+    
     setupSB(logger).then( async (sb)=>{
         setupApp(logger);
         setupFav(logger);
