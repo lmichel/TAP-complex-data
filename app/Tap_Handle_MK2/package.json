@@ -1,0 +1,24 @@
+{
+  "name": "tap_handle",
+  "version": "0.1.0",
+  "scripts": {
+    "preoverrides": "babel JS/overrides -d /tmp/$npm_package_name/build/overrides;mkdir -p build/JS",
+    "overrides": "find /tmp/$npm_package_name/build/overrides/ -name \"*.js\" |xargs cat | ./node_modules/.bin/uglifyjs -c passes=2 -o build/JS/overrides.min.js",
+    "postoverrides": "rm -rf /tmp/$npm_package_name",
+    "preimport": "./packer.sh build_saada",
+    "import": "mkdir -p build;babel saada.js saada.js;cat saada.js | ./node_modules/.bin/uglifyjs -c passes=2 -o build/JS/saada.min.js",
+    "postimport": "rm saada.js",
+    "preapp": "./packer.sh build_app",
+    "app": "mkdir -p build;babel app.js app.js;cat app.js | ./node_modules/.bin/uglifyjs -c passes=2 -o build/JS/app.min.js",
+    "postapp": "rm app.js",
+    "build": "npm run overrides;npm run import;npm run app"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.15.7",
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.6",
+    "uglify-js": "^3.14.2",
+    "@babel/runtime": "^7.15.4"
+  },
+  "dependencies": {}
+}

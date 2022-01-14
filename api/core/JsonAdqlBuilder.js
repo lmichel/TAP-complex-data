@@ -327,19 +327,26 @@
 
         if (table !== undefined && table !== this.adqlJsonMap.rootTable && joinKeyVal !== undefined){
             let keys =Object.keys(joinKeyVal);
-            if(keys.length == this.adqlJsonMap.joints[table].keys.length){
-                if(this.adqlJsonMap.joints[table].keys.every((val)=>keys.includes(val.target))){
-                    adqlConstraints += "( ";
-                    for (let key in joinKeyVal){
-                        adqlConstraints += jw.core.JsonAdqlBuilder.safeQualifier([this.adqlJsonMap.scheme , table ,key]).qualified + 
-                        "=" + joinKeyVal[key] + " AND ";
-                    }
-                    adqlConstraints = adqlConstraints.substring(0,adqlConstraints.length-5) + " )";
-                } else {
-                    console.warn("specified joinKeyVal contains invalid keys, this constraint will be ignored");
+            let fullFilled = [];
+
+            // this functions helps handling case where two columns from one table is joined to two columns from another
+            let validator = (val)=>{
+                if(fullFilled.includes(val.from)){
+                    return true;
                 }
-            }else {
-                console.warn("specified joinKeyVal doesn't contains all keys, this constraint will be ignored");
+                fullFilled.push(val.from);
+                return keys.includes(val.target);
+            };
+
+            if(this.adqlJsonMap.joints[table].keys.every(validator)){
+                adqlConstraints += "( ";
+                for (let key in joinKeyVal){
+                    adqlConstraints += jw.core.JsonAdqlBuilder.safeQualifier([this.adqlJsonMap.scheme , table ,key]).qualified + 
+                    "=" + joinKeyVal[key] + " AND ";
+                }
+                adqlConstraints = adqlConstraints.substring(0,adqlConstraints.length-5) + " )";
+            } else {
+                console.warn("specified joinKeyVal contains invalid keys or doesn't contains all keys, this constraint will be ignored");
             }
         } else{
             adqlConstraints=adqlConstraints.substring(0,adqlConstraints.length - 7); // remove trailing AND

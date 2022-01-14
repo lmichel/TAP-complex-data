@@ -105,13 +105,15 @@
                 schema + '\' OR  tap_schema.tables.schema_name = \'' +  utils.replaceAll(schema,'"',"") + '\'';
 
             let query =await this.query(request);
+            if(query.status){
+                for(let i=0;i<query.field_values.length;i++){
+                    query.field_values[i][0] = utils.unqualifyName(query.field_values[i][0],schema);
+                }
 
-            for(let i=0;i<query.field_values.length;i++){
-                query.field_values[i][0] = utils.unqualifyName(query.field_values[i][0],schema);
+                return {"status":true,"all_tables":query.field_values};
+            }else{
+                return {"status":false,"error": query.error};
             }
-
-            return {"status":true,"all_tables":query.field_values};
-
         }catch(error){
             console.error(error);
             return {"status":false,"error":{
@@ -160,8 +162,10 @@
 
                 for(let i=0;i<request.field_values.length;i++){
                     let arr = query.field_values.filter((v)=>v[2] == request.field_values[i][0])[0];
-                    arr.push(request.field_values[i][1]);
-                    arr.push(request.field_values[i][2]);
+                    if(arr !== undefined){
+                        arr.push(request.field_values[i][1]);
+                        arr.push(request.field_values[i][2]);
+                    }
                 }
                 
             }

@@ -147,7 +147,9 @@ a.sampOff {
 }
 
 .no-samp{
-	background: red url(../icons/sampOff.png) center left no-repeat;
+	background: transparent url(../icons/sampOff.png) center left no-repeat;
+	filter: alpha(opacity = 50);
+	opacity: 0.5;
 }
 
 a:hover.sampOff {	

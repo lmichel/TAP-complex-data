@@ -90,6 +90,7 @@ function outBuilder(holder,ologger){
                 dat["full bookmark"] = window.location.href + "?url=" + dat.url;
             }
             
+            trackAction("Connecting service");
 
             let api = new jw.Api();
             let connect = ()=>{
@@ -817,6 +818,7 @@ function setupApp(logger){
 
     $(document).on("remove_service.tree",(event, args)=>{
         if(control !== undefined){
+            trackAction("Disconnecting service");
             control.disconnect(args.api);
         }
     });
@@ -825,11 +827,13 @@ function setupApp(logger){
         console.log("error event recieved");
         console.log(args);
         if(args[1].verbose){
+            trackAction("Error raised");
             ModalInfo.error(args[1].error.logs);
         }
     });
 
     $(document).on("run_query.control",()=>{
+        trackAction("Query runned by form");
         tablePane.refresh();
     });
 }
@@ -933,30 +937,41 @@ function setupSamp(){
     let samp_c = WebSamp_mvC(samp_v,samp_m);
     
     $(document).on("samp.sendurl",(event, args)=>{
+        trackAction("sending voTable to SAMP");
         samp_v.sendVoTableUrlToClient(args.url,args.id,args.name);
     });
 }
 
+function trackAction (message) {
+    if (!window.location.href.match(/localhost/)) {
+             _paq.push(['trackPageView', message]);
+    }
+}
 
 $(document).ready(async ()=>{
+    trackAction("Application starting");
     let logger = new GlobalLogger();
     logger.info("Setting up everything");
-    resourceLoader.setCss([]);
-    resourceLoader.setScripts([]);
-    await resourceLoader.loadAll().then((result) => {
-        // applying IIFE overrides right after jsResources ended his loading
+    if(typeof resourceLoader !== "undefined"){
+        resourceLoader.setCss([]);
+        resourceLoader.setScripts([]);
+        await resourceLoader.loadAll().then((result) => {
+            // applying IIFE overrides right after jsResources ended his loading
+            overrides();
+            extend();
+        });
+    }else{
         overrides();
         extend();
-    });
-    //buildButtonSelector("#mainButtonHolder");
-    // ensure no radio button is check by default
-    //$("input:radio[name=radio]:checked").prop('checked', false);
+    }
+    
     setupSB(logger).then( async (sb)=>{
         setupApp(logger);
         setupFav(logger);
         setupSamp();
         let params = new URLSearchParams(window.location.search);
         if( params.has("url")){
+            trackAction("url parameters used");
             logger.info("Connecting to the service");
             let urls = params.getAll("url");
             let url, process;

@@ -87,20 +87,31 @@ var TapTree = function(){
             if(object.node.parents.length>2){
                 if(object.node.parents[object.node.parents.length-2]==this.treeID){
                     let schem =  atob(object.node.parents[0].substr(this.treeID.length+1).replace(/_/g,"/").replace(/-/g,"+"));
-                    api.selectSchema(schem).then(()=>{
-                        api.setRootTable(object.node.text).then(val=>{
-                            if(val.status){
-                                $(document).trigger("new_root_table.tree",{
-                                    api:api,
-                                    tree:that,
-                                });
-                            } else {
-                                $(document).trigger("error.application",{
-                                    error : val.error,
-                                    origin : that,
-                                });
-                            }
-                        });
+                    if(object.node.text == "Unexpected Error"){
+                        return;
+                    }
+                    api.selectSchema(schem).then((value)=>{
+                        if( value.status){
+                            api.setRootTable(object.node.text).then(val=>{
+                                if(val.status){
+                                    $(document).trigger("new_root_table.tree",{
+                                        api:api,
+                                        tree:that,
+                                    });
+                                } else {
+                                    $(document).trigger("error.application",{
+                                        error : val.error,
+                                        origin : that,
+                                    });
+                                }
+                            });
+                        }else{
+                            $(document).trigger("error.application",{
+                                error : value.error,
+                                origin : that,
+                            });
+                        }
+                        
                     });
                     
                 }
@@ -143,7 +154,7 @@ var TapTree = function(){
                 tree.create_node(tree.get_node("#" + this.treeID + "_" + safeSchem),{
                     "id":this.treeID + "_" + safeSchem + "_dummy",
                     "text": "loading...",
-                    "icon": "http://i.stack.imgur.com/FhHRx.gif",
+                    "icon": "//i.stack.imgur.com/FhHRx.gif",
                 });
 
                 rootHolder.on("before_open.jstree",this.schemaHandlerFactory(schema,safeSchem));
@@ -215,10 +226,22 @@ var TapTree = function(){
                             this.rootHolder.on("before_open.jstree",fun);
                         }
                     }else {
-                        alert(tables.error.logs);
+                        $(document).trigger("error.application",{
+                            error : tables.error,
+                            origin : this,
+                        });
                     }
                 }else {
-                    alert(schem);
+                    this.tree.delete_node(this.tree.get_node(nodeID+ "_dummy"));
+                    this.tree.create_node(this.tree.get_node("#" + this.treeID + "_" + safeSchem),{
+                        "id":this.treeID + "_" + safeSchem + "_error",
+                        "text": "Unexpected Error",
+                        "icon": "./images/red.png",
+                    });
+                    $(document).trigger("error.application",{
+                        error : schem.error,
+                        origin : this,
+                    });
                 }
             }
         };
@@ -336,7 +359,7 @@ var TapTree = function(){
                 }
             }
             let src = obj.attr("src");
-            obj.attr("src","http://i.stack.imgur.com/FhHRx.gif");
+            obj.attr("src","//i.stack.imgur.com/FhHRx.gif");
             MetaDataShower(that.api,table,conn.schema == schema,schema).then(()=>{
                 obj.attr("src",src);
                 obj.click(fun);

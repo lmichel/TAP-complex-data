@@ -176,6 +176,11 @@ class TablePane{
 
             $("#" + tableB64+"_dll").prop("href",url);
 
+            $("#" + tableB64+"_dll").click(()=>{
+                trackAction("Dowloading voTable");
+            });
+
+
             $("#" + tableB64+"_samp").click(()=>{
                 if(that.isSampOn){
                     $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
@@ -198,6 +203,11 @@ class TablePane{
      * @param {CollapsableDiv} colDiv 
      */
     async makeTable(struct,keyvals){
+        if(keyvals!== undefined){
+            trackAction("opening sub table");
+        }else{
+            trackAction("opening root table");
+        }
 
         this.logger.info("Gathering meta data 1");
         let colDiv = struct.div;
@@ -488,12 +498,12 @@ class TablePane{
             return (nRow,data)=>{
                 nRow.classList.add("clickable");
                 let fun = ()=>{
-                    let h = $(".rHighlight",$(nRow).parent());
+                    let h = $(".eHighlight",$(nRow).parent());
                     if(h.get(0)==nRow){
                         return;
                     }
-                    h.removeClass("rHighlight");
-                    $(nRow).addClass("rHighlight");
+                    h.removeClass("eHighlight");
+                    $(nRow).addClass("eHighlight");
                 };
                 $(nRow).click(fun);
             };// no need to check for data in related tables if there is no related tables
@@ -520,6 +530,8 @@ class TablePane{
                     this.logger.hide();
                     return;
                 }
+
+                trackAction("clicked on table row");
                 h.removeClass("rHighlight");
                 $(nRow).addClass("rHighlight");
 
@@ -601,6 +613,10 @@ class TablePane{
                         }
 
                         $("#" + tableB64+"_dll").prop("href",url);
+                        
+                        $("#" + tableB64+"_dll").click(()=>{
+                            trackAction("Dowloading voTable");
+                        });
 
                         $("#" + tableB64+"_samp").click(()=>{
                             if(that.isSampOn){
