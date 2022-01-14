@@ -203,7 +203,7 @@ class TablePane{
      * @param {CollapsableDiv} colDiv 
      */
     async makeTable(struct,keyvals){
-        if(keyvals){
+        if(keyvals!== undefined){
             trackAction("opening sub table");
         }else{
             trackAction("opening root table");
@@ -498,12 +498,12 @@ class TablePane{
             return (nRow,data)=>{
                 nRow.classList.add("clickable");
                 let fun = ()=>{
-                    let h = $(".rHighlight",$(nRow).parent());
+                    let h = $(".eHighlight",$(nRow).parent());
                     if(h.get(0)==nRow){
                         return;
                     }
-                    h.removeClass("rHighlight");
-                    $(nRow).addClass("rHighlight");
+                    h.removeClass("eHighlight");
+                    $(nRow).addClass("eHighlight");
                 };
                 $(nRow).click(fun);
             };// no need to check for data in related tables if there is no related tables

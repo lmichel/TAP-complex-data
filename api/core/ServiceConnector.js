@@ -162,8 +162,10 @@
 
                 for(let i=0;i<request.field_values.length;i++){
                     let arr = query.field_values.filter((v)=>v[2] == request.field_values[i][0])[0];
-                    arr.push(request.field_values[i][1]);
-                    arr.push(request.field_values[i][2]);
+                    if(arr !== undefined){
+                        arr.push(request.field_values[i][1]);
+                        arr.push(request.field_values[i][2]);
+                    }
                 }
                 
             }

@@ -42,7 +42,11 @@ tr.even.rHighlight,
 .rHighlight {
   background-color: #e7e700 !important;
 }
-
+tr.odd.eHighlight,
+tr.even.eHighlight,
+.eHighlight {
+  background-color: #c4c4c4 !important;
+}
 .txt-right {
     text-align: right;
 }

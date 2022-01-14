@@ -952,13 +952,18 @@ $(document).ready(async ()=>{
     trackAction("Application starting");
     let logger = new GlobalLogger();
     logger.info("Setting up everything");
-    resourceLoader.setCss([]);
-    resourceLoader.setScripts([]);
-    await resourceLoader.loadAll().then((result) => {
-        // applying IIFE overrides right after jsResources ended his loading
+    if(typeof resourceLoader !== "undefined"){
+        resourceLoader.setCss([]);
+        resourceLoader.setScripts([]);
+        await resourceLoader.loadAll().then((result) => {
+            // applying IIFE overrides right after jsResources ended his loading
+            overrides();
+            extend();
+        });
+    }else{
         overrides();
         extend();
-    });
+    }
     
     setupSB(logger).then( async (sb)=>{
         setupApp(logger);

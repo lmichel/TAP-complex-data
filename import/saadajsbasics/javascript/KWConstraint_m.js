@@ -217,7 +217,7 @@ KWConstraint_Mvc.prototype  = Object.create(KWSimpleConstraint_Mvc.prototype, {
 			} else if( op == 'between' ) {
 				var words = opd.split(' ') ;
 				if( words.length != 3 || !/and/i.test(words[1]) ||
-						words[0].length == 00 || words[2].length == 00 ||
+						words[0].length == 0 || words[2].length == 0 ||
 						isNaN(words[0]) || isNaN(words[2]) ) {
 					this.notifyTypoMsg(1, 'Operator "' + op + '" requires an operand of form "num1 and num2"');
 					return 0 ;
