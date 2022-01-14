@@ -1,6 +1,8 @@
 .idea/*
 .jshintrc
 node_modules/*
+**/node_modules/*
 build/*
+**/build/*
 import/webpack/**
-
+package-lock.json
