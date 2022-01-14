@@ -4,20 +4,13 @@
   "scripts": {
     "preoverrides": "babel JS/overrides -d /tmp/$npm_package_name/build/overrides;mkdir -p build/JS",
     "overrides": "find /tmp/$npm_package_name/build/overrides/ -name \"*.js\" |xargs cat | ./node_modules/.bin/uglifyjs -c passes=2 -o build/JS/overrides.min.js",
-    "postoverrides" : "rm -rf /tmp/$npm_package_name",
-
+    "postoverrides": "rm -rf /tmp/$npm_package_name",
     "preimport": "./packer.sh build_saada",
     "import": "mkdir -p build;babel saada.js saada.js;cat saada.js | ./node_modules/.bin/uglifyjs -c passes=2 -o build/JS/saada.min.js",
     "postimport": "rm saada.js",
-    
-    "preapp":"./packer.sh build_app",
-    "app":"mkdir -p build;babel app.js app.js;cat app.js | ./node_modules/.bin/uglifyjs -c passes=2 -o build/JS/app.min.js",
-    "postapp":"rm app.js",
-
-    "preobuild": "babel api -d /tmp/$npm_package_name/build/api;mkdir -p build",
-    "obuild": "find /tmp/tap_complex/build/ -name \"*.js\" |xargs cat | ./node_modules/.bin/uglifyjs -c passes=2 -o build/$npm_package_name-$npm_package_version.min.js",
-    "postobuild": "tar -Jcf build/$npm_package_name-$npm_package_version-source.tar.xz api/;tar -Jcf build/$npm_package_name-$npm_package_version-es2015.tar.xz -C /tmp/$npm_package_name/build/ api/;rm -rf /tmp/$npm_package_name",
-    "null": "sed -e '/<\\!--- Replacement balise -->/{r textToPut.txt' -e  'd}' originalFile.txt",
+    "preapp": "./packer.sh build_app",
+    "app": "mkdir -p build;babel app.js app.js;cat app.js | ./node_modules/.bin/uglifyjs -c passes=2 -o build/JS/app.min.js",
+    "postapp": "rm app.js",
     "build": "npm run overrides;npm run import;npm run app"
   },
   "devDependencies": {

@@ -145,6 +145,7 @@ function import_overrides {
     done
 
 }
+
 function deploy_dev {
     >dev.html
 
@@ -165,6 +166,35 @@ function deploy_dev {
     sed -e '/<\!--- Script --->/{r dev.html' -e  'd}' taphandle_base.html >taphandev.html
 
     rm dev.html
+}
+
+function deploy_min {
+    #TODO CSS minification
+
+    rm -rf build
+    npm install
+    npm run build
+    
+    cp -r icons build/ 
+    cp -r images build/ 
+    cp -r CSS build/ 
+    cp -r doc build/ 
+
+    SAADA_CSS = (
+        "themes/base/jquery.ui.all.css"
+        "layout-default-latest.css"
+        "datatable.css"
+        "simplemodal.css"
+        "aladin.min.css"
+        "foundationicon/foundation-icons.css"
+    )
+
+
+    for f in ${SAADA[@]}
+    do 
+        cp ../../import/saadajsbasics/styleimports/$f
+    done
+
 }
 
 "$@"
