@@ -569,7 +569,7 @@ iframe {
 }
 
 .side-div {
-	display: inline-block;
+	display: flex;
 	margin-right: 5px;
 	vertical-align: middle;
 }
@@ -776,4 +776,9 @@ div .jstree-default .jstree-anchor{
 }
 .dropdown_holder li {
 	border-bottom: 1px darkgray solid;
+}
+.tips{
+	font-weight: bold;
+	font-style: italic;
+	font-size: 80%;
 }

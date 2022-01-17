@@ -541,7 +541,7 @@ class TablePane{
 
                 that.removeChilds(struct);
                 if($("h5",struct.div.div).length == 0){
-                    $(struct.div.div).append("<h5>The following entries tables joined with "+tableName+
+                    $(struct.div.div).append("<h5 class='tips'>The following entries tables joined with "+tableName+
                         " click on the table's name to show data related to the selected line</h5>");
                 }
 
@@ -569,7 +569,7 @@ class TablePane{
                     s.div = new CollapsableDiv(struct.div.div,tableB64,true,
                         that.makeTable.bind(that,s,kMap),
                         [
-                            {txt:table + (nb>0?" " + nb +"+":""),type:"title",pos:"center"},
+                            {txt:table + (nb>0?"<div style='margin-left:.5em' class ='stackconstbutton'></div>":""),type:"title",pos:"center"},
                             {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
                             /*{
                                 toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
