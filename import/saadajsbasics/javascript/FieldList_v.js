@@ -469,7 +469,7 @@ CatalogueList_mVc.prototype = Object.create(FieldList_mVc.prototype, {
 });
 
 
-function TapColList_mVc(parentDivId, formName, handlers, sessionID){
+function TapColList_mVc(parentDivId, formName, handlers){
 	FieldList_mVc.call(this, parentDivId, formName, handlers);
 	this.tableselectid = parentDivId + "_tableSelect";
 	this.joinedTableLoaded = false;
@@ -622,8 +622,8 @@ TapColList_mVc.prototype = Object.create(FieldList_mVc.prototype, {
  * @param getTableAttUrl $.getJSON("gettableatt", {jsessionid: sessionID, node: nodekey, table:newTable }
  * @tables {node: nodekey, table:newTable}
  */
-function TapFieldList_mVc(parentDivId, formName, handlers, getTableAttUrl, sessionID){
-	TapColList_mVc.call(this, parentDivId, formName, handlers, getTableAttUrl, sessionID);
+function TapFieldList_mVc(parentDivId, formName, handlers, getTableAttUrl){
+	TapColList_mVc.call(this, parentDivId, formName, handlers, getTableAttUrl);
 	this.raFieldId = parentDivId + "_rafield";
 	this.decFieldId = parentDivId + "_decfield";
 	this.alphakw = null;
