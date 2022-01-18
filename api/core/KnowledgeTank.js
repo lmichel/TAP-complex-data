@@ -6,7 +6,7 @@ if (typeof jw === "undefined") {
 }
 
 jw.KnowledgeTank = (function(){
-    KnowledgeTank = function(){
+    let KnowledgeTank = function(){
         /**
          * Support [*] and [[0-9]+] operator at the end of both ucd and field name
          * if applied to field to field name then it describe how many ucds are allowed at most.
