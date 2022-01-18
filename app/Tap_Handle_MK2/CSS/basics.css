@@ -782,3 +782,6 @@ div .jstree-default .jstree-anchor{
 	font-style: italic;
 	font-size: 80%;
 }
+.controlHeader{
+	font-size: 1.2em;
+}
