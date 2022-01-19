@@ -53,6 +53,18 @@ SAADA_IMP=(
     "aladin.unminified.js"
 )
 
+
+SAADA_CSS=(
+    "themes/base/jquery.ui.all.css"
+    "layout-default-latest.css"
+    "datatable.css"
+    "simplemodal.css"
+    "aladin.min.css"
+    "foundationicon/foundation-icons.css"
+)
+
+
+
 function build_saada {
     >saada.js
     for f in ${SAADA[@]}
@@ -183,15 +195,6 @@ function deploy_min {
     cp -r doc build/ 
     cp -r JS/Import build/JS/
 
-    SAADA_CSS=(
-        "themes/base/jquery.ui.base.css"
-        "themes/base/jquery.ui.theme.css"
-        "layout-default-latest.css"
-        "datatable.css"
-        "simplemodal.css"
-        "aladin.min.css"
-        "foundationicon/foundation-icons.css"
-    )
 
     mkdir -p build/CSS/saada
     for f in ${SAADA_CSS[@]}
