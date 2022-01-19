@@ -268,7 +268,7 @@ class TablePane{
 
         let toSelect = keys.filter((k)=>object_map.tables[tableName].columns.includes(k));
 
-        let selected = new Set(object_map.tables[tableName].columns);
+        let selected = new Set(object_map.tables[tableName].columns.map(t=>t.toLowerCase()));
         
         for (let i=0;i<toSelect.length;i++){
             this.api.selectField(toSelect[i],tableName,false);
@@ -301,7 +301,7 @@ class TablePane{
                 if(keys.includes(fieldsData.field_names[index])){
                     kMap[fieldsData.field_names[index]] = this.quoteIfString(val);
                 }
-                return selected.has(fieldsData.field_names[index]);
+                return selected.has(fieldsData.field_names[index].toLowerCase());
             });
             Hmap[fieldsData.field_values[l].join("")] = kMap;
         }
@@ -309,7 +309,7 @@ class TablePane{
         // because of the order of the fields which we want to keep in order for the data to still be relevant
         // and for the Hmap to work
         
-        fieldsData.field_names = fieldsData.field_names.filter((v)=>selected.has(v)); 
+        fieldsData.field_names = fieldsData.field_names.filter((v)=>selected.has(v.toLowerCase())); 
 
         this.logger.info("Gathering meta data 2");
 
@@ -541,7 +541,7 @@ class TablePane{
 
                 that.removeChilds(struct);
                 if($("h5",struct.div.div).length == 0){
-                    $(struct.div.div).append("<h5>The following entries tables joined with "+tableName+
+                    $(struct.div.div).append("<h5 class='tips'>The following entries tables joined with "+tableName+
                         " click on the table's name to show data related to the selected line</h5>");
                 }
 
@@ -569,7 +569,7 @@ class TablePane{
                     s.div = new CollapsableDiv(struct.div.div,tableB64,true,
                         that.makeTable.bind(that,s,kMap),
                         [
-                            {txt:table + (nb>0?" " + nb +"+":""),type:"title",pos:"center"},
+                            {txt:table + (nb>0?"<div style='margin-left:.5em' class ='stackconstbutton'></div>":""),type:"title",pos:"center"},
                             {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
                             /*{
                                 toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 

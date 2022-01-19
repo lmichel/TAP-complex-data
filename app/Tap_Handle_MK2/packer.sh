@@ -53,6 +53,18 @@ SAADA_IMP=(
     "aladin.unminified.js"
 )
 
+
+SAADA_CSS=(
+    "themes/base/jquery.ui.all.css"
+    "layout-default-latest.css"
+    "datatable.css"
+    "simplemodal.css"
+    "aladin.min.css"
+    "foundationicon/foundation-icons.css"
+)
+
+
+
 function build_saada {
     >saada.js
     for f in ${SAADA[@]}
@@ -170,31 +182,70 @@ function deploy_dev {
 
 function deploy_min {
     #TODO CSS minification
-
+    
+    # Building the app
     rm -rf build
     npm install
     npm run build
     
+    # mooving app ressources
     cp -r icons build/ 
     cp -r images build/ 
     cp -r CSS build/ 
     cp -r doc build/ 
-
-    SAADA_CSS = (
-        "themes/base/jquery.ui.all.css"
-        "layout-default-latest.css"
-        "datatable.css"
-        "simplemodal.css"
-        "aladin.min.css"
-        "foundationicon/foundation-icons.css"
-    )
+    cp -r JS/Import build/JS/
 
 
-    for f in ${SAADA[@]}
+    mkdir -p build/CSS/saada
+    for f in ${SAADA_CSS[@]}
     do 
-        cp ../../import/saadajsbasics/styleimports/$f
+        cp ../../import/saadajsbasics/styleimports/$f build/CSS/saada/
     done
 
+    cd build
+    >import.html
+    for f in ./CSS/saada/*
+    do
+        echo "        <link rel='stylesheet' href='$f' />" >>import.html
+    done
+    cd ../
+
+    # building Tap_complex API
+    cd ../../
+    rm -rf build
+    chmod +x packer.sh
+    npm install
+    npm run build 
+
+    cd app/Tap_Handle_MK2/
+
+    cp ../../build/*.js ./build/JS/tap_complex.min.js
+
+    cd build
+
+    import_external
+
+    cat "external.html" >>import.html
+
+    rm external.html
+
+    JS=(
+        "tap_complex.min.js"
+        "app.min.js"
+        "saada.min.js"
+        "overrides.min.js"
+    )
+
+    for f in ${JS[@]}
+    do
+        echo "        <script type='text/javascript' src='./JS/$f' ></script>" >> import.html
+    done
+
+
+
+    sed -e '/<\!--- Script --->/{r import.html' -e  'd}' ../taphandle_base.html >taphandle.html
+
+    rm import.html
 }
 
 "$@"

@@ -116,8 +116,9 @@ function outBuilder(holder,ologger){
                                         ologger.hide();
                                     }else{
                                         event.currentTarget.style.background = 'red';
-                                    Modalinfo.error("can't connect to the select service: " + connect.error.logs + ".The full error has been dumped into the console");
-                                    console.error(connect.error);
+                                        Modalinfo.error("can't connect to the select service: " + connect.error.logs + ".The full error has been dumped into the console");
+                                        console.error(connect.error);
+                                        ologger.hide();
                                     }
                                 });
                             }
@@ -944,7 +945,8 @@ function setupSamp(){
 
 function trackAction (message) {
     if (!window.location.href.match(/localhost/)) {
-             _paq.push(['trackPageView', message]);
+        message = message.replace(/ /g,"+");
+        _paq.push(['trackPageView', message]);
     }
 }
 

@@ -788,7 +788,7 @@ LinkProcessor = function() {
 	var fireGetProductInfo = function(url) {
 		Processing.show("Waiting on product info");
 
-		$.getJSON("getproductinfo", {jsessionid: "", url: url}, function(jsdata) {
+		$.getJSON("getproductinfo", {url: url}, function(jsdata) {
 			Processing.hide();
 			if( Processing.jsonError(jsdata, "Cannot get product info") ) {
 				return;

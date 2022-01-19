@@ -682,10 +682,7 @@ TapSimplePos_mVc.prototype = Object.create(
 									}, [ {
 										name : 'radius',
 										value : radius
-										},{
-										name : 'jsessionid',
-										value : sessionID
-									} ]
+										}]
 									,preloadedFiles);
 						}
 					}
