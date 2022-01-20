@@ -29,9 +29,9 @@ class TablePane{
                 if(s.div.div.data("clicked") || s == this.struct){
                     this.removeChilds(s);
                     s.div.div.html("");
-                    this.setupButtonHandler(args.table,s).then(()=>{
-                        this.makeTable(s,s.kMap);
-                    });
+                    this.setupButtonHandler(args.table,s);
+                    this.makeTable(s,s.kMap);
+                    
                 }
             }
         });
@@ -50,18 +50,10 @@ class TablePane{
 
     sampOff(){
         this.isSampOn = false;
-        let samps = $("." + this.sampClass.on,this.div );
-        samps.removeClass(this.sampClass.on);
-        samps.addClass(this.sampClass.off);
-        samps.prop("title","No samp service connected connect to samp first");
     }
 
     sampOn(){
         this.isSampOn = true;
-        let samps = $("." + this.sampClass.off,this.div );
-        samps.removeClass(this.sampClass.off);
-        samps.addClass(this.sampClass.on);
-        samps.prop("title","send table to SAMP service");
     }
 
     getStruct(table,startStruct){
@@ -147,13 +139,18 @@ class TablePane{
                         pos:"right"
                     },
                     {
-                        toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
+                        toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
+                            (this.isSampOn ? 'send table to SAMP service or dowload it' : 'No samp service connected only dowload will be available') + "'" +
+                            " class='bannerbtn " + this.sampClass.on + "'></a>",
                         pos:"right"
                     },
                     {
-                        toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
-                            (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
-                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                        toDom:"<div style='font-size: small; padding-left:0.5em;'><label for='" + tableB64 + 
+                            "_limit'>Query </label><select id='" +
+                            tableB64 + "_limit'> <option value='10'>10</option>" +
+                            "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
+                            "<option value='0'>unlimited</option> </select><label for='" + tableB64 + 
+                            "_limit'>entries </label></div>",
                         pos:"right"
                     },
                 ],
@@ -176,38 +173,89 @@ class TablePane{
         $("#" +tableB64+"_columns", struct.div.header).click(()=>{
             MetaDataShower(this.api,table);
         });
-        let that = this;
+        $("#" + tableB64+"_samp", struct.div.header).click(()=>{
+            this.sampAndDDLModal(table,tableB64);
+        });
 
-        return this.api.getTableQuery(table).then((val)=>{
-            let url = that.api.getConnector().connector.service.tapService + 
-                "?format=votable&request=doQuery&lang=ADQL&query=" + 
-                encodeURIComponent(val.query);
-            if(url.startsWith("/")){
-                url = "http:" + url;
-            }
-
-            $("#" + tableB64+"_dll").prop("href",url);
-
-            $("#" + tableB64+"_dll").click(()=>{
-                trackAction("Dowloading voTable");
-            });
-
-
-            $("#" + tableB64+"_samp").click(()=>{
-                if(that.isSampOn){
-                    $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
-                }
+        $("#" + tableB64 + "_limit",struct.div.header).on('change',()=>{
+            let val=$("option:selected",struct.div.header).val();
+            this.api.setLimit(val);
+            struct.div.div.html("");
+            this.makeTable(struct,struct.kMap).then(()=>{
+                this.api.setLimit(10);
             });
         });
+    }
+
+    sampAndDDLModal(table,tableB64){
+        let header = '<div class="modal-header"><h5 class="modal-title">Samp and Download</h5>' +
+        '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>';
+
+        let body = '<div class="modal-body" style="width: 100%;">' +
+            "<div style='font-size: small;'><label for='" + tableB64 + 
+            "_limit'>Number of entries to download or SAMP :</label><select id='" +
+            tableB64 + "_limit'><option value='0'>unlimited</option><option value='100'>100</option>" +
+            "<option value='50'>50</option><option value='20'>20</option><option value='10'>10</option>" +
+            "</select></div>" + "<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>" +
+            "<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
+                            (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
+                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>" +
+            '</div>';
+
+        let id = ModalInfo.getNextID();
+        let modal = ModalInfo.buildModal(
+            id,
+            header,
+            body
+        );
+
+        $("body").append(modal);
+        let modalElem = $("#" + id);
+        let that = this;
+        let handler = ()=>{
+
+            let val=$("option:selected",modalElem).val();
+            this.api.setLimit(val);
+
+            this.api.getTableQuery(table).then((val)=>{
+                let url = that.api.getConnector().connector.service.tapService + 
+                    "?format=votable&request=doQuery&lang=ADQL&query=" + 
+                    encodeURIComponent(val.query);
+                if(url.startsWith("/")){
+                    url = "http:" + url;
+                }
+
+                $("#" + tableB64+"_dll",modalElem).prop("href",url);
+
+                $("#" + tableB64+"_dll",modalElem).click(()=>{
+                    trackAction("Dowloading voTable");
+                });
+
+
+                $("#" + tableB64+"_samp",modalElem).click(()=>{
+                    if(that.isSampOn){
+                        $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
+                    }
+                });
+
+                that.api.setLimit(10);
+            });
+        };
+        
+        $("#" + tableB64 + "_limit",modalElem).on('change',handler);
+
+        handler();
+
+        modal = new bootstrap.Modal(modalElem[0]);
+        modal.show();
     }
 
     refresh(){
         this.logger.info("refreshing table content");
         this.struct.childs = [];
         this.struct.div.div.html("");
-        this.setupButtonHandler(this.struct.table,this.struct).then(()=>{
-            this.makeTable(this.struct);
-        });
+        this.setupButtonHandler(this.struct.table,this.struct);
+        this.makeTable(this.struct);
     }
     /**
      * 
@@ -219,6 +267,7 @@ class TablePane{
         }else{
             trackAction("opening root table");
         }
+        console.log(keyvals);
 
         this.logger.info("Gathering meta data 1");
         let colDiv = struct.div;
@@ -277,7 +326,7 @@ class TablePane{
             }
         }
 
-        let toSelect = keys.filter((k)=>object_map.tables[tableName].columns.includes(k));
+        let toSelect = keys.filter((k)=>!object_map.tables[tableName].columns.includes(k));
 
         let selected = new Set(object_map.tables[tableName].columns.map(t=>t.toLowerCase()));
         
@@ -586,14 +635,6 @@ class TablePane{
                         [
                             {txt:table + (nb>0?"<div style='margin-left:.5em' class ='stackconstbutton'></div>":""),type:"title",pos:"center"},
                             {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
-                            /*{
-                                toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
-                                    "_limit'>Queryied entries :</label><select id='" +
-                                    tableB64 + "_limit'> <option value='10'>10</option>" +
-                                    "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
-                                    "<option value='0'>unlimited</option> </select></div>",
-                                pos:"right"
-                            },*/
                             {
                                 toDom:"<a id='"+tableB64+"_columns' name='"+tableB64+
                                 "' style='padding-left: 25;background: transparent url(./icons/header_23.png) center left no-repeat;' class='bannerbtn' title='select columns to query'></a>",
@@ -607,6 +648,15 @@ class TablePane{
                                 toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
                                     (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
                                     " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                                pos:"right"
+                            },
+                            {
+                                toDom:"<div style='font-size: small; padding-left:0.5em;'><label for='" + tableB64 + 
+                                    "_limit'>Query </label><select id='" +
+                                    tableB64 + "_limit'> <option value='10'>10</option>" +
+                                    "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
+                                    "<option value='0'>unlimited</option> </select><label for='" + tableB64 + 
+                                    "_limit'>entries </label></div>",
                                 pos:"right"
                             },
                         ],
