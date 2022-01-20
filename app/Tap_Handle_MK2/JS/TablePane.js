@@ -29,7 +29,9 @@ class TablePane{
                 if(s.div.div.data("clicked") || s == this.struct){
                     this.removeChilds(s);
                     s.div.div.html("");
-                    this.makeTable(s,s.kMap);
+                    this.setupButtonHandler(args.table,s).then(()=>{
+                        this.makeTable(s,s.kMap);
+                    });
                 }
             }
         });
@@ -160,13 +162,23 @@ class TablePane{
             table:table,
             childs:[]
         };
-        $("#" +tableB64+"_columns", this.struct.div.header).click(()=>{
-            MetaDataShower(this.api,table);
-        });
         $("#" +tableB64+"_cone", this.struct.div.header).click(()=>{
             $(document).trigger("cone_search_update_table.control",{table:table});
         });
-        this.api.getTableQuery(table).then((val)=>{
+        this.refresh();
+    }
+
+    setupButtonHandler(table,struct,tableB64){
+        if(tableB64 === undefined){
+            tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
+        }
+
+        $("#" +tableB64+"_columns", struct.div.header).click(()=>{
+            MetaDataShower(this.api,table);
+        });
+        let that = this;
+
+        return this.api.getTableQuery(table).then((val)=>{
             let url = that.api.getConnector().connector.service.tapService + 
                 "?format=votable&request=doQuery&lang=ADQL&query=" + 
                 encodeURIComponent(val.query);
@@ -187,16 +199,15 @@ class TablePane{
                 }
             });
         });
-        
-        this.refresh();
     }
 
     refresh(){
-
-        this.logger.info("refrashing table content");
+        this.logger.info("refreshing table content");
         this.struct.childs = [];
         this.struct.div.div.html("");
-        this.makeTable(this.struct);
+        this.setupButtonHandler(this.struct.table,this.struct).then(()=>{
+            this.makeTable(this.struct);
+        });
     }
     /**
      * 
@@ -277,7 +288,11 @@ class TablePane{
         this.logger.info("gathering table's data");
 
         let fieldsData = await this.api.getTableSelectedField(tableName,keyvals);
-        
+
+        for (let i=0;i<toSelect.length;i++){
+            this.api.unselectField(toSelect[i],tableName);
+        }
+
         if(!fieldsData.status){
             $(document).trigger("error.application",{
                 error : fieldsData.error,
@@ -598,32 +613,9 @@ class TablePane{
                         "title",
                         !struct.div.parity,
                     );
-                    $("#" +tableB64+"_columns", s.div.header).click(()=>{
-                        MetaDataShower(that.api,table);
-                    });
-                    $("#" +tableB64+"_cone", s.div.header).click(()=>{
-                        $(document).trigger("cone_search_update_table.control",{table:table});
-                    });
-                    this.api.getTableQuery(table,kMap).then((val)=>{
-                        let url = that.api.getConnector().connector.service.tapService + 
-                            "?format=votable&request=doQuery&lang=ADQL&query=" + 
-                            encodeURIComponent(val.query);
-                        if(url.startsWith("/")){
-                            url = "http:" + url;
-                        }
 
-                        $("#" + tableB64+"_dll").prop("href",url);
-                        
-                        $("#" + tableB64+"_dll").click(()=>{
-                            trackAction("Dowloading voTable");
-                        });
+                    this.setupButtonHandler(table,s,tableB64);
 
-                        $("#" + tableB64+"_samp").click(()=>{
-                            if(that.isSampOn){
-                                $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
-                            }
-                        });
-                    });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";
                     $(".collapsable-title",s.div.header).tooltip({html:true});
