@@ -19,14 +19,17 @@ jw.KnowledgeTank = (function(){
          */
         this.ucdStorage = {
             "name":["meta.id;meta.main","meta.id;src","meta.main"],
-            "position" : ["pos;meta.main","pos"],
-            "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon"],
-            "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat"],
+            "position" : ["pos;meta.main","pos", "pos.earth"],
+            "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon", "pos.earth.lon"],
+            "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat", "pos.earth.lat"],
             "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"],
             "bibliography[*]" : ["meta.bib.author","meta.record","meta.bib.bibcode","meta.bib.journal","meta.title","meta.bib"],
             "object_class" : ["src.class[*]"],
             "unit":["meta.unit;meta.main","meta.unit"],
-            "description": ["meta.note;instr.filter"]
+            "description": ["meta.note;instr.filter"],
+            "time" : ["time", "time.duration", "time.start", "time.start;obs.exposure", "time.stop;obs.exposure"],
+            "energy":["em", "em.wl", "em.wl;stat.min", "em.wl;stat.max"],
+            "Polarizarion":["meta.code;phys.polarization"]
         };
 
         this.utypeKeyword = ["description","name","coordinates","standardid","referenceurl","accessurl"];
@@ -236,6 +239,7 @@ jw.KnowledgeTank = (function(){
             }
 
             if(selected.position === undefined || (fType != "longitude" && fType != "latitude" )){
+                selected[fType] = [];
                 while(i<ucds.length && maxField>0){
                     ucd =ucds[i];
                     curr = 0;
@@ -251,7 +255,7 @@ jw.KnowledgeTank = (function(){
 
                     for (j=0;j<AHList.length;j++){
                         if(AHList[j].ucd == ucd && curr<maxSelect){
-                            selected[fType+(""+counter)] = AHList[j];
+                            selected[fType].push(AHList[j]);
                             curr++;
                             counter++;
                         }
@@ -261,12 +265,41 @@ jw.KnowledgeTank = (function(){
                     }
                     i++;
                 }
+                if(selected[fType].length == 0){
+                    i=0;
+                    while(i<ucds.length && maxField>0){
+                        ucd =ucds[i];
+                        curr = 0;
+                        maxSelect = 1;
+                        // [*] and [[0-9]+] operator handling for the number of AH per ucd
+                        if(ucd.endsWith("[*]")){
+                            ucd = ucd.substring(0,ucd.length-3);
+                            maxSelect = Number.MAX_VALUE;
+                        }else if(ucd.match(/\[[0-9]+\]$/)){
+                            maxSelect = +ucd.substring(ucd.lastIndexOf("[")+1,ucd.length-1);
+                            ucd = ucd.substring(0,ucd.lastIndexOf("["));
+                        }
+
+                        for (j=0;j<AHList.length;j++){
+                            if(AHList[j].ucd.startsWith(ucd) && curr<maxSelect){
+                                selected[fType].push(AHList[j]);
+                                curr++;
+                                counter++;
+                            }
+                        }
+                        if(curr>0){
+                            maxField--;
+                        }
+                        i++;
+                    }
+                }
+                
             }
         }
 
         let selectedAH = [];
         for (let key in selected){
-            selectedAH.push(selected[key]);
+            selectedAH=selectedAH.concat(selected[key]);
         }
         return {"status" : true,"selected":selectedAH};
     };
