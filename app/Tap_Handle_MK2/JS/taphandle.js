@@ -90,7 +90,7 @@ function outBuilder(holder,ologger){
                 dat["full bookmark"] = window.location.href + "?url=" + dat.url;
             }
             
-            trackAction("Connecting service");
+            trackAction("Connecting service " + dat.url);
 
             let api = new jw.Api();
             let connect = ()=>{

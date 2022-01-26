@@ -264,9 +264,9 @@ class TablePane{
      */
     async makeTable(struct,keyvals){
         if(keyvals!== undefined){
-            trackAction("opening sub table");
+            trackAction("opening sub table " + struct.table);
         }else{
-            trackAction("opening root table");
+            trackAction("opening root table " + struct.table);
         }
         console.log(keyvals);
 
