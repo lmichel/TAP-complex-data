@@ -189,14 +189,18 @@ class TablePane{
         '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>';
 
         let body = '<div class="modal-body" style="width: 100%;">' +
-            "<div style='font-size: small;'><label for='" + table_id + 
-            "_limit'>Number of entries to download or SAMP :</label><select id='" +
-            table_id + "_limit'><option value='0'>unlimited</option><option value='100'>100</option>" +
-            "<option value='50'>50</option><option value='20'>20</option><option value='10'>10</option>" +
-            "</select></div>" + "<a id='"+table_id+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>" +
-            "<a id='"+table_id+"_samp' style='padding-left: 25;' title='" +
+            "<div style='font-size: small;'>"+
+            "<p><a id='"+table_id+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>" +
+            " Direct dowload</p>" +
+            "<p><a id='"+table_id+"_samp' style='padding-left: 25;' title='" +
                             (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
-                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>" +
+                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>"+
+            " Send to SAMP</p>" +
+            "<label for='" + table_id + 
+            "_limit'>Number of entries to download or SAMP :</label><select id='" +
+            table_id + "_limit'><option value='0'>unlimited</option><option selected value='100'>100</option>" +
+            "<option value='50'>50</option><option value='20'>20</option><option value='10'>10</option>" +
+            "</select></div>" +
             '</div>';
 
         let id = ModalInfo.getNextID();
