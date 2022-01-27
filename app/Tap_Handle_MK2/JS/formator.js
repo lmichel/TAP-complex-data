@@ -13,7 +13,9 @@ ValueFormator = function() {
 	};
 	var dataTreePath;
 	let decimaleRegexp = new RegExp("^[+-]?[0-9]*[.][0-9]*([eE][+-]?[0-9]+)?$","m");
-	let bibcodeRegexp = new RegExp(/^[12][089]\d{2}[A-Za-z][A-Za-z0-9&][A-Za-z0-9&.]{2}[A-Za-z0-9.][0-9.][0-9.BCRU][0-9.]{2}[A-Za-z0-9.][0-9.]{4}[A-Z:.](?:#[a-zA-Z.0-9]+)?/);
+	//								 |Y   Y    YY  |    J           JJJJ      |                VVVV            |     M     |     PPPP    |   A  |  ?????
+	let bibcodeRegexp = new RegExp(/^[12][089]\d{2}[a-zA-Z0-9][a-zA-Z0-9&.]{4}(?:[a-z.]{3}[a-z]|[0-9.]{3}[0-9])[.A-Z0-9][0-9.]{3}[0-9][A-Z:.](?:#[a-zA-Z.0-9]+)?/);
+	//let bibcodeRegexp = new RegExp(/^[12][089]\d{2}[A-Za-z][A-Za-z0-9&][A-Za-z0-9&.]{2}[A-Za-z0-9.][0-9.][0-9.BCRU][0-9.]{2}[A-Za-z0-9.][0-9.]{4}[A-Z:.](?:#[a-zA-Z.0-9]+)?/);
 	
 	/**
 	 * 
