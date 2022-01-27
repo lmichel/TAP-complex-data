@@ -219,7 +219,7 @@
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.Api.prototype.getTableQuery = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableQuery = async function(table,joinKeyVal,upperTable){
         if(this.connectLevel==3){
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -250,7 +250,7 @@
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
 
-            adql += this.jsonAdqlBuilder.getAdqlConstraints(table,joinKeyVal).adqlConstraints;
+            adql += this.jsonAdqlBuilder.getAdqlConstraints(table,joinKeyVal,upperTable).adqlConstraints;
             return {"status": true, "query": adql} ;
         }
         return {"status":false,"error" :{ "logs": "No active TAP connection","params":{"table":table,"joinKeyVal":joinKeyVal}}};
@@ -261,12 +261,12 @@
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      * @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.Api.prototype.getTableSelectedField = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableSelectedField = async function(table,joinKeyVal,upperTable){
         if (this.connectLevel==3) {
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
             }
-            let query = await this.getTableQuery(table,joinKeyVal);
+            let query = await this.getTableQuery(table,joinKeyVal,upperTable);
             if(!query.status){
                 return query;
             }
@@ -289,7 +289,7 @@
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.Api.prototype.getTableFieldsQuery = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableFieldsQuery = async function(table,joinKeyVal,upperTable){
         if(this.connectLevel==3){
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -321,7 +321,7 @@
 
             adql += this.jsonAdqlBuilder.getAdqlJoints(table).adqlJoints;
 
-            adql += this.jsonAdqlBuilder.getAdqlConstraints(table,joinKeyVal).adqlConstraints;
+            adql += this.jsonAdqlBuilder.getAdqlConstraints(table,joinKeyVal,upperTable).adqlConstraints;
             return {"status": true, "query": adql} ;
         }
         return {"status":false,"error" :{ "logs": "No active TAP connection"}};
@@ -332,7 +332,7 @@
      * @param {String} table Optional unqualified name of the node table or the root table if unspecified
      *  @param {String} joinKeyVal Optional, specific value of the key used to join table to his parentNode. This value is used to create an additional constraint and will make the call fail if specified when the table is the root table.
      */
-    jw.Api.prototype.getTableFields = async function(table,joinKeyVal){
+    jw.Api.prototype.getTableFields = async function(table,joinKeyVal,upperTable){
         if (this.connectLevel==3) {
             if(table === undefined){
                 table = this.getConnector().connector.service.table;
@@ -341,7 +341,7 @@
                 return {"status":false,"error" :{ "logs": "Automatic constraint addition on root table is not allowed","params":{"table":table,"joinKeyVal":joinKeyVal}}};
             }
 
-            let query = await this.getTableFieldsQuery(table,joinKeyVal);
+            let query = await this.getTableFieldsQuery(table,joinKeyVal,upperTable);
             if(!query.status){
                 return query;
             }

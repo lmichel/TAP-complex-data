@@ -13,7 +13,9 @@ ValueFormator = function() {
 	};
 	var dataTreePath;
 	let decimaleRegexp = new RegExp("^[+-]?[0-9]*[.][0-9]*([eE][+-]?[0-9]+)?$","m");
-	let bibcodeRegexp = new RegExp(/^[12][089]\d{2}[A-Za-z][A-Za-z0-9&][A-Za-z0-9&.]{2}[A-Za-z0-9.][0-9.][0-9.BCRU][0-9.]{2}[A-Za-z0-9.][0-9.]{4}[A-Z:.]$/);
+	//								 |Y   Y    YY  |    J           JJJJ      |                VVVV            |     M     |     PPPP    |   A  |  ?????
+	let bibcodeRegexp = new RegExp(/^[12][089]\d{2}[a-zA-Z0-9][a-zA-Z0-9&.]{4}(?:[a-z.]{3}[a-z]|[0-9.]{3}[0-9])[.A-Z0-9][0-9.]{3}[0-9][A-Z:.](?:#[a-zA-Z.0-9]+)?/);
+	//let bibcodeRegexp = new RegExp(/^[12][089]\d{2}[A-Za-z][A-Za-z0-9&][A-Za-z0-9&.]{2}[A-Za-z0-9.][0-9.][0-9.BCRU][0-9.]{2}[A-Za-z0-9.][0-9.]{4}[A-Z:.](?:#[a-zA-Z.0-9]+)?/);
 	
 	/**
 	 * 
@@ -138,6 +140,8 @@ ValueFormator = function() {
 			/*
 			 * Array annotation removed from server because of CSIRO for which all data are typed as arra
 			 */
+		} else if( bibcodeRegexp.test(value)){
+			tdNode.html("<a title=\"bibcode\" href='http://cdsads.u-strasbg.fr/cgi-bin/nph-bib_query?" + value + "' target=blank>" + value + "</a>");
 		} else if(/* value.startsWith("Array")*/ value.length > 24 ) {
 			value = value.replace(/'/g,"&#146;");
 			//tdNode.html("<a title='Data array(click to expand)' class='dl_dataarray' href='#'  onclick='Modalinfo.info(\"" + value + "\", \"Data Array\");'></a>");
@@ -146,8 +150,6 @@ ValueFormator = function() {
 			//tdNode.html("<span title='" + value + "' style =' cursor: pointer;' onclick='alixapi.drawCircle(\"" + value + "\");'>" + value.substring(0, 23) + " ... </span>");	
 		} else if( decimaleRegexp.test(value)){
 			tdNode.html(Number(value).toPrecision(8));
-		} else if( bibcodeRegexp.test(value)){
-			tdNode.html("<a title=\"bibcode\" href='http://cdsads.u-strasbg.fr/cgi-bin/nph-bib_query?" + value + "' target=blank>" + value + "</a>");
 		} else {
 			tdNode.html(value);
 		}

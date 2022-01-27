@@ -60,8 +60,9 @@ async function selectConstraints(tableName, txtInput,api){
             "</div>"
 
         ;//head
+        $("body").remove("#myModal");
         $("body").prepend(out);
-        let td = $("td");
+        let td = $("#myModal td");
         for (let i = 0; i < td.length; i++) {
             $(td[i]).click( () => {
                 let id = td[i].id;
@@ -116,15 +117,16 @@ async function createButton(api) {
     $("#loadButton").append(tapButton);
 
     for (let key in map.tables) {
+        let safe = vizierToID(key);
         bindClickAsyncEvent("bbb" + safe,async () => {
-            await selectConstraints(key, "txt" + key, api);
+            await selectConstraints(key, "txt" + safe, api);
             $('#myModal').modal({"backdrop" : "static"});
             return true;
         });
 
         bindClickAsyncEvent(safe, async () => {
             if($("#txt" + safe).val().length > 1){
-                let constraint = $("#txt" + key).val().trim();
+                let constraint = $("#txt" + safe).val().trim();
 
                 /*/ constraint cleanup /*/
                 while (constraint.startsWith("AND") || constraint.startsWith("WHERE") || constraint.startsWith("OR")){
@@ -142,7 +144,7 @@ async function createButton(api) {
                 let result = api.setTableConstraint(key, constraint);
                 if (result.status ){
                     display(result.status,"getStatus");
-                    display((await api.getRootQuery()).query,"getJsonAll");
+                    //display((await api.getRootQuery()).query,"getJsonAll");
                     return true;
                 }else{
                     display(result.status,"getStatus");

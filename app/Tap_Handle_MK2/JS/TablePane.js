@@ -29,7 +29,9 @@ class TablePane{
                 if(s.div.div.data("clicked") || s == this.struct){
                     this.removeChilds(s);
                     s.div.div.html("");
+                    this.setupButtonHandler(args.table,s);
                     this.makeTable(s,s.kMap);
+                    
                 }
             }
         });
@@ -48,18 +50,10 @@ class TablePane{
 
     sampOff(){
         this.isSampOn = false;
-        let samps = $("." + this.sampClass.on,this.div );
-        samps.removeClass(this.sampClass.on);
-        samps.addClass(this.sampClass.off);
-        samps.prop("title","No samp service connected connect to samp first");
     }
 
     sampOn(){
         this.isSampOn = true;
-        let samps = $("." + this.sampClass.off,this.div );
-        samps.removeClass(this.sampClass.off);
-        samps.addClass(this.sampClass.on);
-        samps.prop("title","send table to SAMP service");
     }
 
     getStruct(table,startStruct){
@@ -126,32 +120,37 @@ class TablePane{
             " </h3> </h4>" + connector.schemas[connector.schema].description +
             "</h4>");
         let table = connector.table;
-        let tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,""); // btoa use the B64 charset containing / and + not good for ids
+        let id = TablePane.getNextID();
 
         this.logger.info("building internal structure");
         this.struct = {
-            div:new CollapsableDiv(this.holder,tableB64,false,undefined,
+            div:new CollapsableDiv(this.holder,id,false,undefined,
                 [
                     {txt:table,type:"title",pos:"center"},
                     {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
                     {
-                        toDom:"<a id='"+tableB64+"_columns' name='"+tableB64+
+                        toDom:"<a id='"+id+"_columns' name='"+id+
                         "' style='padding-left: 25;background: transparent url(./icons/header_23.png) center left no-repeat;' class='bannerbtn' title='select columns to query'></a>",
                         pos:"right"
                     },
                     {
-                        toDom:"<a id='"+tableB64+"_cone' name='"+tableB64+
+                        toDom:"<a id='"+id+"_cone' name='"+id+
                         "'style='padding-left: 25;background: transparent url(./icons/source_detail_23.png) center left no-repeat;' class='bannerbtn' title = 'Refine Query'></a>",
                         pos:"right"
                     },
                     {
-                        toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
+                        toDom:"<a id='"+id+"_samp' style='padding-left: 25;' title='" +
+                            (this.isSampOn ? 'send table to SAMP service or dowload it' : 'No samp service connected only dowload will be available') + "'" +
+                            " class='bannerbtn " + this.sampClass.on + "'></a>",
                         pos:"right"
                     },
                     {
-                        toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
-                            (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
-                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                        toDom:"<div style='font-size: small; padding-left:0.5em;'><label for='" + id + 
+                            "_limit'>Query </label><select id='" +
+                            id + "_limit'> <option value='10'>10</option>" +
+                            "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
+                            "<option value='0'>unlimited</option> </select><label for='" + id + 
+                            "_limit'>entries </label></div>",
                         pos:"right"
                     },
                 ],
@@ -160,42 +159,103 @@ class TablePane{
             table:table,
             childs:[]
         };
-        $("#" +tableB64+"_columns", this.struct.div.header).click(()=>{
-            MetaDataShower(this.api,table);
-        });
-        $("#" +tableB64+"_cone", this.struct.div.header).click(()=>{
+        $("#" +id+"_cone", this.struct.div.header).click(()=>{
             $(document).trigger("cone_search_update_table.control",{table:table});
         });
-        this.api.getTableQuery(table).then((val)=>{
-            let url = that.api.getConnector().connector.service.tapService + 
-                "?format=votable&request=doQuery&lang=ADQL&query=" + 
-                encodeURIComponent(val.query);
-            if(url.startsWith("/")){
-                url = "http:" + url;
-            }
-
-            $("#" + tableB64+"_dll").prop("href",url);
-
-            $("#" + tableB64+"_dll").click(()=>{
-                trackAction("Dowloading voTable");
-            });
-
-
-            $("#" + tableB64+"_samp").click(()=>{
-                if(that.isSampOn){
-                    $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
-                }
-            });
-        });
-        
         this.refresh();
     }
 
-    refresh(){
+    setupButtonHandler(table,struct){
+        let id = struct.div.name;
+        $("#" +id+"_columns", struct.div.header).click(()=>{
+            MetaDataShower(this.api,table);
+        });
+        $("#" + id+"_samp", struct.div.header).click(()=>{
+            this.sampAndDDLModal(table,id);
+        });
 
-        this.logger.info("refrashing table content");
+        $("#" + id + "_limit",struct.div.header).on('change',()=>{
+            let val=$("option:selected",struct.div.header).val();
+            this.api.setLimit(val);
+            struct.div.div.html("");
+            this.makeTable(struct,struct.kMap).then(()=>{
+                this.api.setLimit(10);
+            });
+        });
+    }
+
+    sampAndDDLModal(table,table_id){
+        let header = '<div class="modal-header"><h5 class="modal-title">Samp and Download</h5>' +
+        '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>';
+
+        let body = '<div class="modal-body" style="width: 100%;">' +
+            "<div style='font-size: small;'>"+
+            "<p><a id='"+table_id+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>" +
+            " Direct dowload</p>" +
+            "<p><a id='"+table_id+"_samp' style='padding-left: 25;' title='" +
+                            (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
+                            " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>"+
+            " Send to SAMP</p>" +
+            "<label for='" + table_id + 
+            "_limit'>Number of entries to download or SAMP :</label><select id='" +
+            table_id + "_limit'><option value='0'>unlimited</option><option selected value='100'>100</option>" +
+            "<option value='50'>50</option><option value='20'>20</option><option value='10'>10</option>" +
+            "</select></div>" +
+            '</div>';
+
+        let id = ModalInfo.getNextID();
+        let modal = ModalInfo.buildModal(
+            id,
+            header,
+            body
+        );
+
+        $("body").append(modal);
+        let modalElem = $("#" + id);
+        let that = this;
+        let handler = ()=>{
+
+            let val=$("option:selected",modalElem).val();
+            this.api.setLimit(val);
+
+            this.api.getTableQuery(table).then((val)=>{
+                let url = that.api.getConnector().connector.service.tapService + 
+                    "?format=votable&request=doQuery&lang=ADQL&query=" + 
+                    encodeURIComponent(val.query);
+                if(url.startsWith("/")){
+                    url = "http:" + url;
+                }
+
+                $("#" + table_id+"_dll",modalElem).prop("href",url);
+
+                $("#" + table_id+"_dll",modalElem).click(()=>{
+                    trackAction("Dowloading voTable");
+                });
+
+
+                $("#" + table_id+"_samp",modalElem).click(()=>{
+                    if(that.isSampOn){
+                        $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
+                    }
+                });
+
+                that.api.setLimit(10);
+            });
+        };
+        
+        $("#" + table_id + "_limit",modalElem).on('change',handler);
+
+        handler();
+
+        modal = new bootstrap.Modal(modalElem[0]);
+        modal.show();
+    }
+
+    refresh(){
+        this.logger.info("refreshing table content");
         this.struct.childs = [];
         this.struct.div.div.html("");
+        this.setupButtonHandler(this.struct.table,this.struct);
         this.makeTable(this.struct);
     }
     /**
@@ -204,15 +264,16 @@ class TablePane{
      */
     async makeTable(struct,keyvals){
         if(keyvals!== undefined){
-            trackAction("opening sub table");
+            trackAction("opening sub table " + struct.table);
         }else{
-            trackAction("opening root table");
+            trackAction("opening root table " + struct.table);
         }
+        console.log(keyvals);
 
         this.logger.info("Gathering meta data 1");
         let colDiv = struct.div;
-        let tableB64 = colDiv.name;
-        let tableName = atob(tableB64.replace(/_/g,"/").replace(/-/g,"+"));
+        let tableName = struct.table;
+        let id = colDiv.name;
 
         let that = this;
         /*/ checking that all joining keys are selected and select them if needed /*/
@@ -266,7 +327,7 @@ class TablePane{
             }
         }
 
-        let toSelect = keys.filter((k)=>object_map.tables[tableName].columns.includes(k));
+        let toSelect = keys.filter((k)=>!object_map.tables[tableName].columns.includes(k));
 
         let selected = new Set(object_map.tables[tableName].columns.map(t=>t.toLowerCase()));
         
@@ -276,8 +337,12 @@ class TablePane{
 
         this.logger.info("gathering table's data");
 
-        let fieldsData = await this.api.getTableSelectedField(tableName,keyvals);
-        
+        let fieldsData = await this.api.getTableSelectedField(tableName,keyvals,struct.upper);
+
+        for (let i=0;i<toSelect.length;i++){
+            this.api.unselectField(toSelect[i],tableName);
+        }
+
         if(!fieldsData.status){
             $(document).trigger("error.application",{
                 error : fieldsData.error,
@@ -393,7 +458,7 @@ class TablePane{
         ];
 
         this.logger.info("Formating table");
-        let tableID = "datatable_" + tableB64;
+        let tableID = "datatable_" + id;
         colDiv.div.append("<table id=\"" + tableID + "\" class=\"display\"></table>");
         
         CustomDataTable.create(tableID, options, positions);
@@ -480,8 +545,8 @@ class TablePane{
 
     makeSubdivsFactory(struct,Hmap){
         let colDiv = struct.div;
-        let tableB64 = colDiv.name;
-        let tableName = atob(tableB64.replace(/_/g,"/").replace(/-/g,"+"));
+        let id = colDiv.name;
+        let tableName =struct.table;
         let that = this;
 
         let subtables = this.api.getJoinedTables(tableName);
@@ -550,12 +615,12 @@ class TablePane{
 
                 that.logger.info("Building tables");
                 for(let table in subtables){
-                    let tableB64 = btoa(table).replace(/\//g,"_").replace(/\+/g,"-").replace(/=/g,"");
+                    let id = TablePane.getNextID();
                     let nb = Object.keys(that.api.getJoinedTables(table).joined_tables).length;
                     let kMap = {};
                     let nkey;
                     for (let oKey in gKMap){
-                        nkey = joints[table].keys.filter(v=>v.from==oKey)[0];
+                        nkey = joints[table][tableName].filter(v=>v.from==oKey)[0];
                         if(nkey !== undefined){
                             kMap[nkey.target] = gKMap[oKey];
                         }
@@ -564,74 +629,53 @@ class TablePane{
                         div : {},
                         childs:[],
                         table:table,
-                        kMap:kMap
+                        kMap:kMap,
+                        upper:tableName,
                     };
-                    s.div = new CollapsableDiv(struct.div.div,tableB64,true,
+                    s.div = new CollapsableDiv(struct.div.div,id,true,
                         that.makeTable.bind(that,s,kMap),
                         [
                             {txt:table + (nb>0?"<div style='margin-left:.5em' class ='stackconstbutton'></div>":""),type:"title",pos:"center"},
                             {pos:"left",txt:object_map.tables[table].description,type:"desc",monoline:true,weight:2},
-                            /*{
-                                toDom:"<div style='font-size: small;padding-left:0.5em;border-left:0.1em black solid;'><label for='" + tableB64 + 
-                                    "_limit'>Queryied entries :</label><select id='" +
-                                    tableB64 + "_limit'> <option value='10'>10</option>" +
-                                    "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
-                                    "<option value='0'>unlimited</option> </select></div>",
-                                pos:"right"
-                            },*/
                             {
-                                toDom:"<a id='"+tableB64+"_columns' name='"+tableB64+
+                                toDom:"<a id='"+id+"_columns' name='"+id+
                                 "' style='padding-left: 25;background: transparent url(./icons/header_23.png) center left no-repeat;' class='bannerbtn' title='select columns to query'></a>",
                                 pos:"right"
                             },
                             {
-                                toDom:"<a id='"+tableB64+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
+                                toDom:"<a id='"+id+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
                                 pos:"right"
                             },
                             {
-                                toDom:"<a id='"+tableB64+"_samp' style='padding-left: 25;' title='" +
+                                toDom:"<a id='"+id+"_samp' style='padding-left: 25;' title='" +
                                     (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
                                     " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                                pos:"right"
+                            },
+                            {
+                                toDom:"<div style='font-size: small; padding-left:0.5em;'><label for='" + id + 
+                                    "_limit'>Query </label><select id='" +
+                                    id + "_limit'> <option value='10'>10</option>" +
+                                    "<option value='20'>20</option><option value='50'>50</option><option value='100'>100</option>" +
+                                    "<option value='0'>unlimited</option> </select><label for='" + id + 
+                                    "_limit'>entries </label></div>",
                                 pos:"right"
                             },
                         ],
                         "title",
                         !struct.div.parity,
                     );
-                    $("#" +tableB64+"_columns", s.div.header).click(()=>{
-                        MetaDataShower(that.api,table);
-                    });
-                    $("#" +tableB64+"_cone", s.div.header).click(()=>{
-                        $(document).trigger("cone_search_update_table.control",{table:table});
-                    });
-                    this.api.getTableQuery(table,kMap).then((val)=>{
-                        let url = that.api.getConnector().connector.service.tapService + 
-                            "?format=votable&request=doQuery&lang=ADQL&query=" + 
-                            encodeURIComponent(val.query);
-                        if(url.startsWith("/")){
-                            url = "http:" + url;
-                        }
 
-                        $("#" + tableB64+"_dll").prop("href",url);
-                        
-                        $("#" + tableB64+"_dll").click(()=>{
-                            trackAction("Dowloading voTable");
-                        });
+                    this.setupButtonHandler(table,s);
 
-                        $("#" + tableB64+"_samp").click(()=>{
-                            if(that.isSampOn){
-                                $(document).trigger("samp.sendurl",{url:url,name:table,id:table});
-                            }
-                        });
-                    });
                     $(".collapsable-title",s.div.header)[0].title = "Click here to see <strong>" + table +
                         "</strong>'s data related to the one you selected in <strong>" + tableName + "</strong>";
                     $(".collapsable-title",s.div.header).tooltip({html:true});
 
                     if(subtables.length == 1){
-                        $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
-                    }else if(open.has(tableB64)){
-                        $(".collapsable-title",$("#collapsable-header-" + tableB64,struct.div.div)).click();
+                        $(".collapsable-title",$("#collapsable-header-" + id,struct.div.div)).click();
+                    }else if(open.has(id)){
+                        $(".collapsable-title",$("#collapsable-header-" + id,struct.div.div)).click();
                     }
 
                     struct.childs.push(s);
@@ -656,3 +700,8 @@ class TablePane{
         }
     }
 }
+
+TablePane.ID = 0;
+TablePane.getNextID = function(){
+    return "tablePane_" + TablePane.ID++;
+};
