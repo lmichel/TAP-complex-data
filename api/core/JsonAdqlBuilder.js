@@ -509,7 +509,7 @@
         let merged = "";
         for (let j=0;j<list.length;j++){
             if (// is list[j] a regular name or does it contains special characters or is it a keyword
-                (!list[j].match(/^[a-zA-Z0-9][a-zA-Z0-9_]*$/) || jw.KnowledgeTank.sqlKeyWord.includes(list[j].toUpperCase()) ) &&
+                (!list[j].match(/^[a-zA-Z][a-zA-Z0-9_]*$/) || jw.KnowledgeTank.sqlKeyWord.includes(list[j].toUpperCase()) ) &&
                 // not quoting *
                 list[j] !== "*" &&
                 // checking if it is already quoted
