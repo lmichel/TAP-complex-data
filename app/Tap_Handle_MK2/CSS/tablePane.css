@@ -64,6 +64,10 @@ tr.even.eHighlight,
     font-size: small;
 }
 
+.flex{
+    display: flex;
+}
+
 label{
     font-weight: normal;
 }

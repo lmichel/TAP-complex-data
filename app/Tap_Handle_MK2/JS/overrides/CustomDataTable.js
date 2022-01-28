@@ -117,23 +117,23 @@ CustomDataTable = function () {
 		if (nb_top > 0) {
 			dom += '<"row align-items"';
 		}
-
+		
 		if (top_left.length > 0) {
-			dom += '<"txt-left col-'+Math.round(top_left.length/nb_top*12)+'"';
+			dom += '<"txt-left flex col-'+Math.round(top_left.length/nb_top*12)+'"';
 			top_left.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (top_center.length > 0) {
-			dom += '<"txt-center col-'+Math.round(top_center.length/nb_top*12)+'"';
+			dom += '<"txt-center flex col-'+Math.round(top_center.length/nb_top*12)+'"';
 			top_center.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (top_right.length > 0) {
-			dom += '<"txt-right col-'+Math.round(top_right.length/nb_top*12)+'"';
+			dom += '<"txt-right flex col-'+Math.round(top_right.length/nb_top*12)+'"';
 			top_right.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
@@ -151,21 +151,21 @@ CustomDataTable = function () {
 			}	
 
 		if (bot_left.length > 0) {
-			dom += '<"txt-left col-'+Math.floor(bot_left.length/nb_bot*12)+'"';
+			dom += '<"txt-left flexi col-'+Math.floor(bot_left.length/nb_bot*12)+'"';
 			bot_left.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (bot_center.length > 0) {
-			dom += '<"txt-center col-'+Math.floor(bot_center.length/nb_bot*12)+'"';
+			dom += '<"txt-center flexi col-'+Math.floor(bot_center.length/nb_bot*12)+'"';
 			bot_center.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
 			dom += ">";
 		}
 		if (bot_right.length > 0) {
-			dom += '<"txt-right col-'+Math.floor(bot_right.length/nb_bot*12)+'"';
+			dom += '<"txt-right flexi col-'+Math.floor(bot_right.length/nb_bot*12)+'"';
 			bot_right.forEach(function(element) {
 				dom += '<"side-div"'+element+'>';
 			});
