@@ -10,9 +10,9 @@ this need was very strong for databases like Simbad with a hierarchical schema.
  - Simbad 
    - Anais (Oberto anais.obert[at]astro.unistra.fr)
    - Gregory (Mantelet gregory.mantelet[at]astro.unistra.fr)
- - Interns
+ - Interns [UTBM](https://www.utbm.fr/)
    - 2021/22 [Cyril Obrecht](https://github.com/galyfray)
-   - 2020/21 [Serge Zomes](https://github.com/zomeserges)
+   - 2020/21 [Serges Zome](https://github.com/zomeserges)
    - 2019/20 [Haoyun Liao](https://github.com/HaoyunLIAO)
 
 ## Usefull links
