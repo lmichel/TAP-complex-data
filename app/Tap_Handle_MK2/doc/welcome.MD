@@ -35,6 +35,6 @@ The HTTP server serving `TapHandleMK2` is configured to work with `http` TAP ser
  
  ### TapHandle on Github
  
- `TapHandleMK2` is one application built over a wider project named [TapComplex](https://github.com/lmichel/TAP-complex-data) which aim is to explore TAP service a 
- little bit beyond the relational model.
+ `TapHandleMK2` is one application built over a wider project named [TapComplex](https://github.com/lmichel/TAP-complex-data) 
+ which aims at exploring TAP service a little bit beyond the relational model.
  
