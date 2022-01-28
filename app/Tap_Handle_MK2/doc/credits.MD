@@ -7,9 +7,9 @@ this need was very strong for databases like Simbad with a hierarchical schema.
 
 ## Contributors
  - Supervisor [Laurent Michel](https://github.com/lmichel) (laurent.michel[at]astro.unistra.fr))
- - Simbad 
-   - Anais (Oberto anais.obert[at]astro.unistra.fr)
-   - Gregory (Mantelet gregory.mantelet[at]astro.unistra.fr)
+ - Simbad collaborators
+   - Anais Oberto (anais.oberto[at]astro.unistra.fr)
+   - Gregory Mantelet (gregory.mantelet[at]astro.unistra.fr)
  - Interns [UTBM](https://www.utbm.fr/)
    - 2021/22 [Cyril Obrecht](https://github.com/galyfray)
    - 2020/21 [Serges Zome](https://github.com/zomeserges)
