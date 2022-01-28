@@ -59,6 +59,7 @@ ValueFormator = function() {
 				 * No mime type specified: We need to request the HTTP header for taking into account the response type
 				 */
 			}
+			formatURL(columnName, tdNode, value);
 			/*
 			 * Second case: an atomic value;
 			 */
@@ -80,6 +81,13 @@ ValueFormator = function() {
 			};
 			
 		var columnNames=[];	var i=0;
+
+	var formatURL=function(columnName, tdNode, value){
+		tdNode.html("");
+		tdNode.append("<a class='dl_info' title='See URL' href='#' onclick='ModalInfo.info(\"" + value + "\",\"URL\"); return false;'></a>");
+		tdNode.append("<a class='dl_download' target=blank title='Open url' href='" + value + "' ></a>");
+	};
+
 	var formatSimpleValue = function(columnName, value, tdNode, columnMap) {
 		/*
 		 * TODO :add SAMP message to Aladin : script.aladin.send
