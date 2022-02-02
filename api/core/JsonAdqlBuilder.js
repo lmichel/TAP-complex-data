@@ -198,7 +198,7 @@
         }
 
         if (degree === undefined){
-            degree = Number.MAX_VALUE;
+            degree = 100;//Number.MAX_VALUE;
         }
 
         let subTables = [];
@@ -216,7 +216,10 @@
                     nextBranch = nextBranch.concat(this.adqlJsonMap.nodeTreeBranches[branch[i]].filter((v)=>!subTables.includes(v)));
                 }
             }
-            branch = nextBranch;
+            // Important optimisation : if a table appear in branch 2 times or more and this table has substables who have subtable etc... 
+            // branch will end up with 58125 identical entries or even more
+            // an easy test for this issue is to connect to //saada.unistra.fr/provtap/sync set acticity as the root table and then try to get the subtables of activitydescritpion
+            branch = Array.from(new Set(nextBranch)); 
             degree--;
         }
 

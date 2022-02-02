@@ -268,7 +268,6 @@ class TablePane{
         }else{
             trackAction("opening root table " + struct.table);
         }
-        console.log(keyvals);
 
         this.logger.info("Gathering meta data 1");
         let colDiv = struct.div;
