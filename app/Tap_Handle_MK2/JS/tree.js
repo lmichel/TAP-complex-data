@@ -75,11 +75,16 @@ var TapTree = function(){
                 // JStree keep changing the doms element so we need to recreate the double click event
                 // TODO make this timing configurable
                 if(Date.now() - this.time<200){
-                    $("#" + this.treeID + "_meta").prop("src","http://i.stack.imgur.com/FhHRx.gif");
-                    this.SB.setFilteringData(this.api.getConnector().connector.service,this).then(()=>{
-                        this.SB.show();
-                        $("#" + this.treeID + "_meta").prop("src","./images/info.png");
-                    });
+                    if(this.api.getCapabilitie("joins")){
+                        $("#" + this.treeID + "_meta").prop("src","http://i.stack.imgur.com/FhHRx.gif");
+                        this.SB.setFilteringData(this.api.getConnector().connector.service,this).then(()=>{
+                            this.SB.show();
+                            $("#" + this.treeID + "_meta").prop("src","./images/info.png");
+                        });
+                    }else{
+                        ModalInfo.info("Unable to filter the tables or schemas of this service. the service does not support joins");
+                    }
+                    
                 }else{
                     that.time = Date.now();
                 }
@@ -173,7 +178,12 @@ var TapTree = function(){
             let infoSpan = $("#" + id + "_info");
 
             infoSpan.append(span + 'lightgreen;" title="Support synchronous queries">S</span>');
-            infoSpan.append(span + 'lightgreen;" title="Support ADQL joins">J</span>'); // TODO test if it's not a lie ...
+            if(this.api.getCapabilitie("joins")){
+                infoSpan.append(span + 'lightgreen;" title="Support ADQL joins">J</span>'); // TODO test if it's not a lie ...
+            }else{
+                infoSpan.append(span + '#6f6f6f; color:white;" title="does not support ADQL joins">J</span>'); // TODO test if it's not a lie ...
+            }
+            
             infoSpan.append(span + '#6f6f6f; color:white" title="The application does not support asynchronous queries">A</span>');
             infoSpan.append(span + '#6f6f6f; color:white" title="The application does not support table upload">U</span>');
         });
