@@ -642,13 +642,9 @@ class TablePane{
                                 pos:"right"
                             },
                             {
-                                toDom:"<a id='"+id+"_dll' style='padding-left: 25;background: transparent url(./icons/download_23.png) center left no-repeat;' title='dowload VO table' class='bannerbtn'></a>",
-                                pos:"right"
-                            },
-                            {
                                 toDom:"<a id='"+id+"_samp' style='padding-left: 25;' title='" +
-                                    (this.isSampOn ? 'send table to SAMP service' : 'No samp service connected connect to samp first') + "'" +
-                                    " class='bannerbtn " + (this.isSampOn ?this.sampClass.on:this.sampClass.off ) + "'></a>",
+                                    (this.isSampOn ? 'send table to SAMP service or dowload it' : 'No samp service connected only dowload will be available') + "'" +
+                                    " class='bannerbtn " + this.sampClass.on + "'></a>",
                                 pos:"right"
                             },
                             {

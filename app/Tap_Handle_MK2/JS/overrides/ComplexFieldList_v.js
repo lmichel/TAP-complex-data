@@ -93,14 +93,12 @@ function ComplexFieldList_mVcExtends(){
                     $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler(ah.nameattr);});
                 }
                 let arr;
-                $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").each((i,e)=>{
+                $("tr#" + vizierToID(ah.nameattr) + " span",this.parentDiv).each((i,e)=>{
                     arr = e.title.split(" - ");
                     arr[0] ="<h3>" + arr[0].trim() + "</h3>";
                     // replace only replace the first occurence
                     e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
-                });
-
-                $('#' + this.fieldTableId + " tr#" + vizierToID(ah.nameattr) + " span").tooltip({ 
+                }).tooltip({ 
                     template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
                     html:true,
                     customClass :"ressource-tooltip",
@@ -167,19 +165,6 @@ function ComplexFieldList_mVcExtends(){
                     $('#' + this.fieldListId + ' input[id="todec_' + id + '"]' ).click(function() {that.decHandler(trId);});
                 }
 
-                let arr;
-                $('#' + this.fieldTableId + " tr#" + trId + " span").each((i,e)=>{
-                    arr = e.title.split(" - ");
-                    arr[0] ="<h3>" + arr[0].trim() + "</h3>";
-                    // replace only replace the first occurence
-                    e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
-                });
-
-                $('#' + this.fieldTableId + " tr#" + trId + " span").tooltip({ 
-                    template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
-                    html:true,
-                    customClass :"ressource-tooltip",
-                });
             }
         },
         displayFields : {
@@ -204,6 +189,17 @@ function ComplexFieldList_mVcExtends(){
                                 that.attributesHandlers[vizierToID(ah.table_name) +"_"+ vizierToID(ah.nameattr)] = ah;				
                                 that.displayField(ah);
                             }
+                            let arr;
+                            $("tr" + " span",that.parentDiv).each((i,e)=>{
+                                arr = e.title.split(" - ");
+                                arr[0] ="<h3>" + arr[0].trim() + "</h3>";
+                                // replace only replace the first occurence
+                                e.title = arr.join("<br>").replace("<br>","").replace("<h3></h3>","");
+                            }).tooltip({ 
+                                template : '<div class="tooltip" role="tooltip"><div class="tooltip-inner"></div></div>',
+                                html:true,
+                                customClass :"ressource-tooltip",
+                            });
                             that.lookForAlphaKeyword();
                             that.lookForDeltaKeyword();
                         }
