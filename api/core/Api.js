@@ -713,14 +713,12 @@
     };
 
     jw.Api.prototype.testService = async function(){
-        console.log("testing");
         if(this.connectLevel>0){
             let query;
             for (let capa in jw.Api.tests){
                 query = await this.query(jw.Api.tests[capa]);
                 this.capabilities[capa] = query.status;
             }
-            console.log(this.capabilities);
             return {status:true};
         }
         return {"status":false,"error": {"logs":"No active TAP connection"}};

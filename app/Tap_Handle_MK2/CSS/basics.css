@@ -183,12 +183,19 @@ a.dl_download {
 	width: 0px;
 	overflow: visible;
 	padding: 9px 0px 9px 23px;
-	/* background: transparent url(../images/dl_download.png) center left
-		no-repeat; */
-	background: transparent url(../images/icons_23.png) center left
-	no-repeat;
+	background: transparent url(../icons/dl_download.png) center left no-repeat;
 	margin-right: 1px;
 }
+
+a.dl_info {
+    display: inline-block;
+    width: 0px;
+    overflow: visible;
+    padding: 9px 0px 9px 23px;
+    background: transparent url(../icons/dl_info.png) center left no-repeat;
+    margin-right: 1px;
+}
+
 
 a.simbad {
 	display: inline-block;

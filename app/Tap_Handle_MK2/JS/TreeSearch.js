@@ -429,6 +429,7 @@ class TreeSearch{
             closed.forEach(e=>{
                 $(".collapsable-title",e.holder).click();
             });
+            $("#" + this.id + " .btn-close").click();
             
             let filter = [];
             $("#" + this.id + " table input:checked:visible").closest("tr").each((i,e)=>{

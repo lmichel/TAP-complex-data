@@ -1,13 +1,14 @@
 class ControlPane{
 
     constructor(){
-        this.box = new DraggableBox();
-        this.reset();
         this.api=undefined;
     }
 
     setApi(api){
         this.api=api;
+        if(this.box == undefined){
+            this.box = new DraggableBox();
+        }
         this.reset();
         this.buildEditors();
     }
@@ -25,13 +26,20 @@ class ControlPane{
             $(document).trigger("run_query.control",{});
         });
         $("li",this.box.body).click(()=>{
-            console.log("click LI");
             this.box.snap();
         });
         $("a",this.box.body).click(()=>{
             this.box.snap();
         });
 
+    }
+
+    disconnect(api){
+        if(api == this.api){
+            this.api = undefined;
+            this.box.box.remove();
+            this.box = undefined;
+        }
     }
 
     async buildEditors(){

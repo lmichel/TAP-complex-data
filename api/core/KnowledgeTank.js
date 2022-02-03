@@ -22,13 +22,13 @@ jw.KnowledgeTank = (function(){
             "position" : ["pos;meta.main","pos", "pos.earth"],
             "longitude": ["pos.eq.ra;meta.main", "pos.gal.lon;meta.main","pos.eq.ra", "pos.gal.lon", "pos.earth.lon"],
             "latitude": ["pos.eq.dec;meta.main", "pos.gal.lat;meta.main","pos.eq.dec", "pos.gal.lat", "pos.earth.lat"],
-            "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main"],
+            "brightness" : ["phys.luminosity;meta.main","phot.mag;meta.main","phys.flux;meta.main","phot.count;meta.main","phys.luminosity","phot.mag","phys.flux","phot.count"],
             "bibliography[*]" : ["meta.bib.author","meta.record","meta.bib.bibcode","meta.bib.journal","meta.title","meta.bib"],
             "object_class" : ["src.class[*]"],
             "unit":["meta.unit;meta.main","meta.unit"],
             "description": ["meta.note;instr.filter"],
-            "time" : ["time", "time.duration", "time.start", "time.start;obs.exposure", "time.stop;obs.exposure"],
-            "energy":["em", "em.wl", "em.wl;stat.min", "em.wl;stat.max"],
+            "time[2]" : ["time", "time.duration", "time.start", "time.start;obs.exposure", "time.stop;obs.exposure"],
+            "energy[2]":["em", "em.wl", "em.wl;stat.min", "em.wl;stat.max"],
             "Polarizarion":["meta.code;phys.polarization"]
         };
 
@@ -238,7 +238,7 @@ jw.KnowledgeTank = (function(){
                 fType = fType.substring(0,fType.lastIndexOf("["));
             }
 
-            if(selected.position === undefined || (fType != "longitude" && fType != "latitude" )){
+            if(selected.position === undefined || selected.position.length == 0 || (fType != "longitude" && fType != "latitude" )){
                 selected[fType] = [];
                 while(i<ucds.length && maxField>0){
                     ucd =ucds[i];
@@ -281,7 +281,7 @@ jw.KnowledgeTank = (function(){
                         }
 
                         for (j=0;j<AHList.length;j++){
-                            if(AHList[j].ucd.startsWith(ucd) && curr<maxSelect){
+                            if(AHList[j].ucd.startsWith(ucd + ";") && curr<maxSelect){
                                 selected[fType].push(AHList[j]);
                                 curr++;
                                 counter++;
