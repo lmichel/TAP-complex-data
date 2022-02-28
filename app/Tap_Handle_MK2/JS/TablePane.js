@@ -1,7 +1,7 @@
 class TablePane{
     constructor(div,logger = new utils.DisabledLogger()){
         this.api = undefined;
-        div.html("<div id='TP-header' style='text-align:center'></div><div id='TP-holder' style='display: flex;flex-direction: column;'>");
+        div.html("<div id='TP-header' style='text-align: left;'></div><div id='TP-holder' style='display: flex;flex-direction: column;'>");
         this.header = $("#TP-header",div) ;
         this.holder = $("#TP-holder",div);
         this.logger = logger;
