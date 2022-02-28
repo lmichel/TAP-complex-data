@@ -1,17 +1,17 @@
-### TapHandle at a Glance
+### At a Glance
 
 - `TapHandleMK2` is a web application that allows you to explore any TAP service from your browser. 
 - It has been designed to be a successor of TapHandle aiming to enable everyone to easly walk 
-  throught hierarchical data stored in TAP services while keeping all thefunctionality of its predecessor.
+  throught hierarchical data stored in TAP services while keeping all the functionality of its predecessor.
 
 
 - *Find a service* with the search bar in the banner
-  - The search bar is connected to the [GAVO relation registry](https://dc.zah.uni-heidelberg.de/tap/sync) (credit: Markus Demleitner)
-  - You can type any word in the bar or choose more specific constraints by selecting fields above the bar.
-  - You can type an URL to connect one non registered service
-  - Select one the popular tap (click on some popular tap services then select the desired service). 
-    Do not misinterpret the _popular service_ concept. In our case, they are the services used to developped 
-    the library underneath the application.
+    - The search bar is connected to the [GAVO relation registry](https://dc.zah.uni-heidelberg.de/tap/sync) (credit: Markus Demleitner)
+    - You can type any word in the bar or choose more specific constraints by selecting fields above the bar.
+    - You can type an URL to connect one non registered service
+    - Select one the popular tap (click on some popular tap services then select the desired service). 
+      Do not misinterpret the _popular service_ concept. In our case, they are the services used to developped 
+      the library underneath the application.
 
   
 - *Browse a service* from the left data tree
@@ -30,7 +30,7 @@
 The HTTP server serving `TapHandleMK2` is configured to work with `http` TAP services even when
  it is launched from `https://taphandle.astro.unistra.fr`. However a few TAP services declared 
  as `https` operate redirections (code 30x) on  `http` URLs. This configuration makes `TapHandleMK2`
- falling into a `mixed content` error that can be trapped by the application (but on the console). 
+ falling into a `mixed content` error that cannot be trapped by the application (but on the console). 
  In such cases, relaunch `TapHandleMK2` from `http://taphandle.astro.unistra.fr`.
  
  ### TapHandle on Github
