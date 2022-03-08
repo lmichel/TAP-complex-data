@@ -4,10 +4,9 @@ This project has been initiated in 2018 after some discussion among people worki
 The starting point was the observation that no TAP client allowed an easy exploitation data joins while 
 this need was very strong for databases like Simbad with a hierarchical schema. 
 
-
 ## Contributors
-    - Supervisor [Laurent Michel](https://github.com/lmichel) (laurent.michel[at]astro.unistra.fr)
-    - Simbad collaborators
+    - Supervisor [Laurent Michel][https://github.com/lmichel] (laurent.michel[at]astro.unistra.fr)
+    - Simbad collaborators 
          - Anais Oberto (anais.oberto[at]astro.unistra.fr)
          - Gregory Mantelet (gregory.mantelet[at]astro.unistra.fr)
     - Interns [UTBM](https://www.utbm.fr/)
