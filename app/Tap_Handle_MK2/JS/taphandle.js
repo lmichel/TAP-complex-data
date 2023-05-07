@@ -945,8 +945,8 @@ function setupSamp(){
 
 function trackAction (message) {
     if (!window.location.href.match(/localhost/)) {
-        message = message.replace(/ /g,"+");
-        _paq.push(['trackPageView', message]);
+        //:message = message.replace(/ /g,"+");
+        //_paq.push(['trackPageView', message]);
     }
 }
 
