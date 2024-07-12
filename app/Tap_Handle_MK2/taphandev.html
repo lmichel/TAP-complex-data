@@ -1,0 +1,199 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tap Handle MK2</title>
+
+        <!-- Starts of all script imports -->
+
+        <script type='text/javascript' src='./JS/Import/jquery-3.6.0.min.js' ></script>
+        <script type='text/javascript' src='./JS/Import/jquery.dataTables.js' ></script>
+        <script type='text/javascript' src='./JS/Import/jquery-ui.js' ></script>
+        <script type='text/javascript' src='./JS/Import/jstree.min.js' ></script>
+        <script type='text/javascript' src='./JS/Import/popper.js' ></script>
+        <script type='text/javascript' src='./JS/Import/bootstrap.min.js' ></script>
+        <script type='text/javascript' src='./JS/Import/highlight.min.js' ></script>
+        <script type='text/javascript' src='./JS/Import/showdown.min.js' ></script>
+        <script type='text/javascript' src='../../utils/util.js' ></script>
+        <script type='text/javascript' src='../../api/core/_namespace.js' ></script>
+        <script type='text/javascript' src='../../api/core/JsonAdqlBuilder.js' ></script>
+        <script type='text/javascript' src='../../api/core/ServiceRequest.js' ></script>
+        <script type='text/javascript' src='../../api/core/AttributeHolder.js' ></script>
+        <script type='text/javascript' src='../../api/core/votable.js' ></script>
+        <script type='text/javascript' src='../../api/core/VOTableTools.js' ></script>
+        <script type='text/javascript' src='../../api/core/ServiceConnector.js' ></script>
+        <script type='text/javascript' src='../../api/core/KnowledgeTank.js' ></script>
+        <script type='text/javascript' src='../../api/core/Api.js' ></script>
+        <script type='text/javascript' src='../../api/widget/Searchbar/SearchBar.js' ></script>
+        <script type='text/javascript' src='../../shared/JS/shared.js' ></script>
+        <script type='text/javascript' src='./JS/CollapsableDiv.js' ></script>
+        <script type='text/javascript' src='./JS/compat.js' ></script>
+        <script type='text/javascript' src='./JS/ComplexQueryEditor.js' ></script>
+        <script type='text/javascript' src='./JS/ControlPane.js' ></script>
+        <script type='text/javascript' src='./JS/DraggableBox.js' ></script>
+        <script type='text/javascript' src='./JS/formator.js' ></script>
+        <script type='text/javascript' src='./JS/loggers.js' ></script>
+        <script type='text/javascript' src='./JS/MetaDataShower.js' ></script>
+        <script type='text/javascript' src='./JS/PositionParser.js' ></script>
+        <script type='text/javascript' src='./JS/SAMPView.js' ></script>
+        <script type='text/javascript' src='./JS/TablePane.js' ></script>
+        <script type='text/javascript' src='./JS/taphandle.js' ></script>
+        <script type='text/javascript' src='./JS/tree.js' ></script>
+        <script type='text/javascript' src='./JS/TreeSearch.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/basics.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/WebSamp_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/WebSamp_c.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/WebSamp_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/KWConstraint_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/KWConstraint_c.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/KWConstraint_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/AttachedData_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/VizierKeywords_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/OrderBy_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/ConeSearch_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/ConstList_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FieldList_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/Sorter_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/Pattern_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/DataLink_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/DataLink_c.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/DataLink_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/ConstQEditor_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/ConstQEditor_c.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/ConstQEditor_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/QueryTextEditor_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/QueryTextEditor_c.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/QueryTextEditor_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/domain.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/AstroCoo.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/Segment.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/RegionEditor_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/RegionEditor_c.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/RegionEditor_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/flotmosaic.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/NodeFilter_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitFieldList_mVc.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitQEditor_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitQEditor_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitPatternQEditor_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitPatternQEditor_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitKWConstraint_m.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitKWConstraint_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitAttachedPatterns_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitBestModelAttachedPattern_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitBetterModelAttachedPattern_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/javascript/FitOrderModelAttachedPattern_v.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/jsimports/jquery.alerts.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/jsimports/FixedHeader.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/jsimports/jquery.prints.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/jsimports/jquery.form.js' ></script>
+        <script type='text/javascript' src='../../import/saadajsbasics/jsimports/aladin.unminified.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexColSelector_m.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexColSelector_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexFieldList_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexKWConstraint_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexKWSimpleConstraint_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexPosEditor_m.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexPosEditor_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexPosFieldList_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexPos_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexQEditor_m.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ComplexQEditor_v.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/CustomDataTable.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/extends.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/MetadataSource.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/ModalInfo.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/overrides.js' ></script>
+        <script type='text/javascript' src='./JS/overrides/QueryConstraintEditor.js' ></script>
+
+        <!-- Ends of all script imports -->
+
+        <!-- Stats making Scripts -->
+
+        <script type="text/javascript">var piwikSiteId="saada";</script>
+        <script type="text/javascript" src="https://cdsannotations.u-strasbg.fr/piwikinit"></script>
+        <script type="text/javascript" src="https://cdsannotations.u-strasbg.fr/piwiktracker"></script>
+
+        <!-- End of Stats making Scripts -->
+
+        <!-- CSS imports -->
+
+        <link rel="stylesheet" href="./CSS/Import/github.min.css">
+
+        <link rel="stylesheet" href="./CSS/Import/bootstrap.min.css">
+        <link rel="stylesheet" href="./CSS/Import/font-awesome.min.css">
+        <link rel="stylesheet" href="./CSS/Import/style.min.css" />
+        
+        <!-- End of CSS imports -->
+
+        <!-- App CSS -->
+
+        <link rel="stylesheet" href="./CSS/tablePane.css" />
+        <link rel="stylesheet" href="./CSS/jquery.dataTables.css" />
+        <link rel="stylesheet" href="./CSS/domain.css" />
+        <link rel="stylesheet" href="./CSS/basics.css" />
+        <link rel="stylesheet" href="./CSS/datatable.css" />
+        <link rel="stylesheet" href="./CSS/draggableBox.css" />
+        <link rel="stylesheet" href="./CSS/jquery-ui.css" />
+        <link rel="stylesheet" href="./CSS/jquery.ui.core.css" />
+        <link rel="stylesheet" href="./CSS/jquery.ui.tabs.css" />
+
+        <!-- End of App CSS -->
+
+        <!-- Accessibility CSS -->
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/RBerger90/Accessibility-Menu/cdsa.css"/>
+
+        <!-- End of Accessibility CSS -->
+
+    </head>
+
+    <body style="overflow: hidden;">
+        <div style="height: 100%;display:flex;flex-flow:column">
+            <div id = "banner" style="display: flex;width: 100%;">
+                <div id = "R_banner" class="col-3" style="display:flex;align-items:center;flex-direction: row;">
+                    <a href="./credits.html" target="blank"><img src="./images/tap_logo.png" alt="tap handle logo"></a>
+                    <div style="flex-grow: 1; display: flex;flex-flow: column;position: relative;" id = "favbutton">
+                    </div>
+                    <a style="background: transparent url(./icons/contact_38.png) center left no-repeat;" class="bannerbtn" href="javascript:void(0);" title="Contact the developper" onclick='ModalInfo.info("Send an Email to \n laurent.michel@astro.unistra.fr", "Contact");'></a>
+                    <a id="sampIndicator" class="bannerbtn sampOff" href="javascript:void(0);" title="SampStatus"></a>
+                </div>
+                <div style="flex-grow: 1; display: flex;margin-right: 1em;flex-flow: column;position: relative;" id = "mainButtonHolder">
+                </div>
+                <div id = "L_banner" class="col-3" style="display: flex">
+                </div>
+            </div>
+            <div style="display: flex;overflow: auto;">
+                <div class="col-2" style="flex-shrink: 1;overflow: auto;display: flex;width: 12%;min-width: fit-content;" id="tree">
+
+                </div>
+                <div style="flex-grow: 1;display: flex;flex-direction: column; margin-right: 1em;">
+                    <div style="overflow: auto; flex-shrink: 1;height: 100%;" id = "tablePane">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Accessibility JS -->
+
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/RBerger90/Accessibility-Menu/cdsa.js"></script>
+
+        <!-- End of Accessibility CSS -->
+        <!-- connet matomo --> 
+        <script>
+  			var _paq = window._paq = window._paq || [];
+  			/* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  			_paq.push(['trackPageView']);
+  			_paq.push(['enableLinkTracking']);
+  			(function() {
+    			var u="https://xcatdb.unistra.fr/matomo/";
+    			_paq.push(['setTrackerUrl', u+'matomo.php']);
+    			_paq.push(['setSiteId', '2']);
+    			var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    			g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  			})();
+		</script>
+        
+    </body>
+
+</html>
